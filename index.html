@@ -3,41 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>ViewSwap Elite - Firebase Powered</title>
+    <title>ViewSwap Elite - YouTube Growth Platform</title>
     
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, arrayRemove, increment, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, arrayRemove, increment, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAupBkllyicDPD9O6CmX4mS4sF5z96mqxc",
-            authDomain: "vertexpaste.firebaseapp.com",
-            projectId: "vertexpaste",
-            storageBucket: "vertexpaste.firebasestorage.app",
-            messagingSenderId: "255275350380",
-            appId: "1:255275350380:web:7be4e8add2cb5b04045b49"
+        window.firebaseModules = {
+            initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, arrayRemove, increment, runTransaction, deleteDoc
         };
-        
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const googleProvider = new GoogleAuthProvider();
-        
-        // Make available globally
-        window.firebaseAuth = auth;
-        window.firebaseDB = db;
-        window.googleProvider = googleProvider;
-        window.signInWithPopup = signInWithPopup;
-        window.signOut = signOut;
-        window.onAuthStateChanged = onAuthStateChanged;
-        window.dbHelpers = { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, arrayRemove, increment, runTransaction };
-        
-        console.log('Firebase initialized successfully');
     </script>
+    
+    <!-- Google API for YouTube -->
+    <script src="https://apis.google.com/js/api.js"></script>
     
     <style>
         * {
@@ -51,54 +32,29 @@
             --primary: #8b5cf6;
             --primary-dark: #7c3aed;
             --primary-light: #a78bfa;
-            --primary-glow: rgba(139, 92, 246, 0.4);
             --secondary: #ec489a;
-            --secondary-dark: #db2777;
             --success: #10b981;
-            --success-dark: #059669;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --info: #3b82f6;
-            --dark: #0a0a0a;
-            --gray-900: #121212;
-            --gray-800: #1e1e1e;
-            --gray-700: #2d2d2d;
+            --youtube: #ff0000;
+            --dark: #0f0f0f;
+            --gray-800: #1f1f1f;
+            --gray-700: #2a2a2a;
             --gray-600: #3a3a3a;
-            --gray-500: #6b6b6b;
             --gray-400: #9ca3af;
-            --gray-300: #d1d5db;
-            --gray-200: #e5e7eb;
-            --gray-100: #f3f4f6;
             --white: #ffffff;
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: radial-gradient(circle at 0% 0%, #1a1a2e 0%, #16213e 50%, #0f0f1a 100%);
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
             min-height: 100vh;
-            padding-bottom: 85px;
-            position: relative;
-            color: var(--gray-100);
+            padding-bottom: 80px;
+            color: var(--white);
         }
 
         /* Animated Background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
-                repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 8px);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Floating Particles */
-        .particles {
+        .bg-particles {
             position: fixed;
             top: 0;
             left: 0;
@@ -110,9 +66,10 @@
 
         .particle {
             position: absolute;
-            background: rgba(139, 92, 246, 0.3);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             border-radius: 50%;
             animation: float linear infinite;
+            opacity: 0.3;
         }
 
         @keyframes float {
@@ -120,19 +77,15 @@
                 transform: translateY(100vh) rotate(0deg);
                 opacity: 0;
             }
-            10% {
-                opacity: 0.5;
-            }
-            90% {
-                opacity: 0.5;
-            }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
             100% {
                 transform: translateY(-100vh) rotate(360deg);
                 opacity: 0;
             }
         }
 
-        .app-container {
+        .container {
             max-width: 500px;
             margin: 0 auto;
             position: relative;
@@ -140,15 +93,40 @@
             padding: 0 16px;
         }
 
-        /* Auth Section */
-        .auth-section {
-            background: linear-gradient(135deg, rgba(30, 30, 40, 0.95) 0%, rgba(20, 20, 30, 0.95) 100%);
+        /* Header */
+        .header {
+            background: rgba(15, 15, 26, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 0 0 32px 32px;
+            padding: 20px;
+            margin: -16px -16px 20px -16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #fff, var(--primary-light), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .header p {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+            margin-top: 4px;
+        }
+
+        /* Auth Card */
+        .auth-card {
+            background: rgba(30, 30, 40, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 32px;
             padding: 32px 24px;
-            margin: 20px 0;
             text-align: center;
             border: 1px solid rgba(139, 92, 246, 0.3);
+            margin: 20px 0;
         }
 
         .user-avatar {
@@ -180,62 +158,25 @@
             border-radius: 60px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
             display: inline-flex;
             align-items: center;
             gap: 10px;
             font-size: 1rem;
+            transition: transform 0.2s;
         }
 
-        .google-btn:active {
-            transform: scale(0.96);
-        }
+        .google-btn:active { transform: scale(0.96); }
 
-        .signout-btn {
-            background: linear-gradient(135deg, var(--danger), #dc2626);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 60px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 12px;
-        }
-
-        /* Glass Header */
-        .header {
-            padding: 20px 0 16px;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            background: rgba(10, 10, 10, 0.8);
-            backdrop-filter: blur(20px);
-            border-radius: 0 0 32px 32px;
-            margin: -16px -16px 16px -16px;
-            padding: 20px 16px;
-            z-index: 100;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
-        }
-
-        .header h1 {
-            font-size: 1.8rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #fff 0%, var(--primary-light) 50%, var(--secondary) 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        /* Premium Credit Card */
+        /* Credit Card */
         .credit-card {
-            background: linear-gradient(135deg, rgba(30, 30, 40, 0.95) 0%, rgba(20, 20, 30, 0.95) 100%);
-            backdrop-filter: blur(10px);
-            border-radius: 32px;
+            background: linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(20, 20, 30, 0.95));
+            border-radius: 28px;
             padding: 24px;
             margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid rgba(139, 92, 246, 0.3);
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(139, 92, 246, 0.3);
         }
 
         .credit-card::before {
@@ -251,15 +192,14 @@
         .credit-label {
             font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             color: var(--gray-400);
-            font-weight: 600;
         }
 
         .credit-amount {
             font-size: 3.5rem;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary) 100%);
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -267,14 +207,73 @@
         }
 
         .daily-bonus {
-            background: linear-gradient(135deg, var(--warning) 0%, #ea580c 100%);
+            background: linear-gradient(135deg, var(--warning), #ea580c);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 60px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+        }
+
+        /* YouTube Card */
+        .youtube-card {
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.05));
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .youtube-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .youtube-icon {
+            font-size: 2rem;
+        }
+
+        .channel-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        .channel-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+
+        .youtube-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.6rem;
+            opacity: 0.7;
         }
 
         /* Bottom Navigation */
@@ -283,7 +282,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(18, 18, 27, 0.95);
+            background: rgba(15, 15, 26, 0.95);
             backdrop-filter: blur(20px);
             display: flex;
             justify-content: space-around;
@@ -291,7 +290,7 @@
             border-top: 1px solid rgba(139, 92, 246, 0.3);
             max-width: 500px;
             margin: 0 auto;
-            z-index: 1000;
+            z-index: 100;
         }
 
         .nav-item {
@@ -302,11 +301,11 @@
             background: none;
             border: none;
             cursor: pointer;
-            transition: all 0.3s;
             padding: 8px 12px;
             border-radius: 40px;
             flex: 1;
-            color: var(--gray-500);
+            color: var(--gray-400);
+            transition: all 0.2s;
         }
 
         .nav-item.active {
@@ -314,20 +313,14 @@
             background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
         }
 
-        .nav-icon {
-            font-size: 1.5rem;
-        }
-
-        .nav-label {
-            font-size: 0.65rem;
-            font-weight: 600;
-        }
+        .nav-icon { font-size: 1.5rem; }
+        .nav-label { font-size: 0.65rem; font-weight: 600; }
 
         /* Cards */
         .card {
-            background: rgba(25, 25, 35, 0.9);
+            background: rgba(30, 30, 40, 0.9);
             backdrop-filter: blur(10px);
-            border-radius: 28px;
+            border-radius: 24px;
             padding: 20px;
             margin-bottom: 16px;
             border: 1px solid rgba(139, 92, 246, 0.2);
@@ -335,7 +328,7 @@
 
         .card h2 {
             font-size: 1.2rem;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             border-left: 3px solid var(--primary);
             padding-left: 12px;
         }
@@ -343,7 +336,7 @@
         /* Action Grid */
         .action-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
             gap: 10px;
             margin: 16px 0;
         }
@@ -351,11 +344,11 @@
         .action-card {
             background: rgba(45, 45, 55, 0.8);
             border: 2px solid rgba(139, 92, 246, 0.2);
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 12px 8px;
-            cursor: pointer;
             text-align: center;
-            transition: all 0.3s;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         .action-card.selected {
@@ -364,34 +357,35 @@
             transform: scale(1.02);
         }
 
-        .action-emoji {
-            font-size: 1.8rem;
-        }
-
-        .action-name {
-            font-weight: 700;
-            font-size: 0.7rem;
-        }
+        .action-emoji { font-size: 1.5rem; }
+        .action-name { font-size: 0.7rem; font-weight: 600; margin-top: 4px; }
+        .action-price { font-size: 0.6rem; opacity: 0.8; }
 
         /* Campaign Items */
         .campaign-item {
             background: rgba(35, 35, 45, 0.8);
-            border-radius: 20px;
-            padding: 16px;
+            border-radius: 18px;
+            padding: 14px;
             margin-bottom: 12px;
-            border: 1px solid rgba(139, 92, 246, 0.2);
         }
 
         .campaign-title {
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
-        .action-badges {
+        .campaign-url {
+            font-size: 0.65rem;
+            color: var(--primary-light);
+            word-break: break-all;
+            margin-bottom: 10px;
+        }
+
+        .badge-group {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            margin: 12px 0;
+            margin: 10px 0;
         }
 
         .badge {
@@ -403,39 +397,20 @@
 
         .progress-bar {
             background: rgba(255,255,255,0.1);
-            border-radius: 20px;
+            border-radius: 10px;
             height: 6px;
-            margin: 10px 0;
+            margin: 8px 0;
             overflow: hidden;
         }
 
         .progress-fill {
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             height: 100%;
-            border-radius: 20px;
-            transition: width 0.5s;
+            border-radius: 10px;
+            transition: width 0.3s;
         }
 
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 60px;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, var(--success), var(--success-dark));
-            color: white;
-        }
-
+        /* Form Elements */
         input, select {
             width: 100%;
             padding: 14px;
@@ -444,6 +419,50 @@
             border: 1px solid rgba(139, 92, 246, 0.3);
             border-radius: 20px;
             color: white;
+            font-size: 0.9rem;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            padding: 14px;
+            border: none;
+            border-radius: 60px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
+        .btn-success { background: linear-gradient(135deg, var(--success), #059669); color: white; }
+        .btn-youtube { background: var(--youtube); color: white; }
+
+        .cost-display {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            margin: 16px 0;
+        }
+
+        .cost-amount { font-size: 2rem; font-weight: 800; }
+        .cost-label { font-size: 0.7rem; opacity: 0.9; }
+
+        .referral-code-box {
+            background: rgba(0,0,0,0.5);
+            padding: 14px;
+            border-radius: 16px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            text-align: center;
+            margin: 12px 0;
+            border: 2px dashed var(--primary);
+            cursor: pointer;
         }
 
         .toast {
@@ -456,6 +475,7 @@
             border-radius: 60px;
             z-index: 2000;
             animation: slideUp 0.3s ease;
+            white-space: nowrap;
         }
 
         @keyframes slideUp {
@@ -469,55 +489,100 @@
             }
         }
 
-        .hidden {
-            display: none;
-        }
+        .hidden { display: none; }
+        .empty-state { text-align: center; padding: 40px; color: var(--gray-400); }
 
-        .empty-state {
+        .slider-control {
+            margin: 12px 0;
+        }
+        
+        .slider-control label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: rgba(139, 92, 246, 0.3);
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+        
+        .slider-value {
             text-align: center;
-            padding: 40px 20px;
-            color: var(--gray-500);
+            margin-top: 8px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="particles" id="particles"></div>
+    <div class="bg-particles" id="particles"></div>
     
-    <div class="app-container">
+    <div class="container">
         <div class="header">
             <h1>⚡ ViewSwap Elite</h1>
+            <p>YouTube Growth Platform • 5% Referral Commission</p>
         </div>
 
         <!-- Auth Section -->
-        <div id="authSection" class="auth-section">
-            <div id="unauthContent">
-                <div style="font-size: 3rem; margin-bottom: 16px;">🔐</div>
+        <div id="authSection">
+            <div class="auth-card" id="unauthContent">
+                <div style="font-size: 3rem; margin-bottom: 16px;">🚀</div>
                 <h2 style="margin-bottom: 8px;">Welcome to ViewSwap</h2>
-                <p style="color: var(--gray-400); margin-bottom: 24px;">Sign in to start earning and growing</p>
+                <p style="color: var(--gray-400); margin-bottom: 24px;">Sign in to start growing your YouTube channel</p>
                 <button class="google-btn" id="googleSignInBtn">
-                    🚀 Sign in with Google
+                    🎯 Sign in with Google
                 </button>
             </div>
-            <div id="authContent" class="hidden">
+            <div class="auth-card hidden" id="authContent">
                 <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
                 <div class="user-name" id="userName"></div>
                 <div class="user-email" id="userEmail"></div>
-                <button class="signout-btn" id="signOutBtn">Sign Out</button>
+                <button class="google-btn" id="signOutBtn" style="background: linear-gradient(135deg, var(--danger), #dc2626); margin-top: 12px;">
+                    Sign Out
+                </button>
             </div>
         </div>
 
-        <!-- Main App Content (Hidden until logged in) -->
+        <!-- Main App Content -->
         <div id="appContent" class="hidden">
+            <!-- Credit Card -->
             <div class="credit-card">
                 <div class="credit-label">💰 TOTAL CREDITS</div>
                 <div class="credit-amount" id="creditBalance">0</div>
                 <button class="daily-bonus" id="dailyBonusBtn">🎁 Daily Bonus</button>
             </div>
 
+            <!-- YouTube Card -->
+            <div class="youtube-card" id="youtubeCard">
+                <div class="youtube-header">
+                    <div class="youtube-icon">🔴</div>
+                    <div>
+                        <strong>YouTube Integration</strong>
+                        <div style="font-size: 0.7rem; opacity: 0.7;">Connect to verify engagement</div>
+                    </div>
+                </div>
+                <div id="youtubeContent">
+                    <button class="btn btn-youtube" id="connectYouTubeBtn">Connect YouTube Channel</button>
+                </div>
+            </div>
+
+            <!-- Dynamic Content -->
             <div id="contentArea"></div>
         </div>
 
-        <div class="bottom-nav" id="bottomNav" style="display: none;">
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav hidden" id="bottomNav">
             <button class="nav-item active" data-page="home">
                 <div class="nav-icon">🏠</div>
                 <div class="nav-label">Home</div>
@@ -542,10 +607,12 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, increment, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        // Import Firebase
+        const { initializeApp } = window.firebaseModules;
+        const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } = window.firebaseModules;
+        const { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, increment, runTransaction } = window.firebaseModules;
         
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAupBkllyicDPD9O6CmX4mS4sF5z96mqxc",
             authDomain: "vertexpaste.firebaseapp.com",
@@ -560,7 +627,11 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
         
-        // Action types configuration
+        // Add YouTube scopes
+        provider.addScope('https://www.googleapis.com/auth/youtube.readonly');
+        provider.addScope('https://www.googleapis.com/auth/youtube.force-ssl');
+        
+        // Action Types
         const ACTION_TYPES = {
             view: { name: 'Views', emoji: '👁️', baseCost: 1, reward: 1 },
             subscriber: { name: 'Subscribers', emoji: '🔔', baseCost: 5, reward: 5 },
@@ -573,7 +644,9 @@
         let userData = null;
         let currentPage = 'home';
         let selectedActions = new Set();
-        let campaignTargets = { view: 0, subscriber: 0, like: 0, comment: 0, commentLike: 0 };
+        let campaignTargets = { view: 10, subscriber: 0, like: 0, comment: 0, commentLike: 0 };
+        let youtubeAccessToken = null;
+        let youtubeChannel = null;
         
         // Helper Functions
         function showToast(message, duration = 2500) {
@@ -581,16 +654,12 @@
             if (existing) existing.remove();
             const toast = document.createElement('div');
             toast.className = 'toast';
-            toast.style.background = 'rgba(0,0,0,0.9)';
-            toast.style.color = 'white';
-            toast.style.padding = '12px 20px';
-            toast.style.borderRadius = '60px';
             toast.textContent = message;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), duration);
         }
         
-        // Load/Save User Data to Firestore
+        // Load User Data
         async function loadUserData(uid) {
             const userRef = doc(db, 'users', uid);
             const userSnap = await getDoc(userRef);
@@ -598,7 +667,6 @@
             if (userSnap.exists()) {
                 userData = userSnap.data();
             } else {
-                // Create new user
                 userData = {
                     uid: uid,
                     email: currentUser.email,
@@ -613,11 +681,11 @@
                     lastDailyBonus: null,
                     referrals: [],
                     campaigns: [],
+                    youtubeConnected: false,
                     createdAt: new Date().toISOString()
                 };
                 await setDoc(userRef, userData);
             }
-            
             updateCreditDisplay();
             return userData;
         }
@@ -633,34 +701,31 @@
             userData.credits += amount;
             if (amount > 0) userData.totalEarned += amount;
             if (amount < 0) userData.totalSpent += Math.abs(amount);
-            
             await saveUserData();
             updateCreditDisplay();
             if (reason) showToast(reason);
             
-            // Give commission to referrer
+            // Give 5% commission to referrer
             if (amount > 0 && userData.referredBy) {
                 const referrerRef = doc(db, 'users', userData.referredBy);
                 const commission = amount * 0.05;
                 await runTransaction(db, async (transaction) => {
                     const referrerSnap = await transaction.get(referrerRef);
                     if (referrerSnap.exists()) {
-                        const referrerData = referrerSnap.data();
                         transaction.update(referrerRef, {
-                            credits: (referrerData.credits || 0) + commission,
-                            referralEarnings: (referrerData.referralEarnings || 0) + commission,
-                            totalEarned: (referrerData.totalEarned || 0) + commission
+                            credits: increment(commission),
+                            referralEarnings: increment(commission),
+                            totalEarned: increment(commission)
                         });
                     }
                 });
             }
-            
             return true;
         }
         
         function updateCreditDisplay() {
-            const balanceEl = document.getElementById('creditBalance');
-            if (balanceEl) balanceEl.textContent = Math.floor(userData?.credits || 0);
+            const el = document.getElementById('creditBalance');
+            if (el) el.textContent = Math.floor(userData?.credits || 0);
         }
         
         // Daily Bonus
@@ -669,9 +734,7 @@
             const lastBonus = userData.lastDailyBonus ? new Date(userData.lastDailyBonus) : null;
             const today = new Date();
             
-            if (lastBonus && lastBonus.getDate() === today.getDate() && 
-                lastBonus.getMonth() === today.getMonth() && 
-                lastBonus.getFullYear() === today.getFullYear()) {
+            if (lastBonus && lastBonus.toDateString() === today.toDateString()) {
                 showToast('Already claimed today! Come back tomorrow.');
                 return;
             }
@@ -681,7 +744,117 @@
             await saveUserData();
         }
         
-        // Create Campaign
+        // YouTube Integration
+        async function initYouTubeAPI(token) {
+            return new Promise((resolve) => {
+                if (window.gapi && window.gapi.client) {
+                    resolve();
+                } else {
+                    const script = document.createElement('script');
+                    script.src = 'https://apis.google.com/js/api.js';
+                    script.onload = () => {
+                        window.gapi.load('client', resolve);
+                    };
+                    document.head.appendChild(script);
+                }
+            }).then(async () => {
+                await window.gapi.client.init({
+                    apiKey: firebaseConfig.apiKey,
+                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest']
+                });
+                window.gapi.client.setToken({ access_token: token });
+            });
+        }
+        
+        async function getYouTubeChannel() {
+            try {
+                const response = await window.gapi.client.youtube.channels.list({
+                    part: ['snippet', 'statistics'],
+                    mine: true
+                });
+                
+                if (response.result.items && response.result.items.length > 0) {
+                    const channel = response.result.items[0];
+                    return {
+                        id: channel.id,
+                        title: channel.snippet.title,
+                        thumbnail: channel.snippet.thumbnails.default.url,
+                        subscriberCount: channel.statistics.subscriberCount || 0,
+                        videoCount: channel.statistics.videoCount || 0,
+                        viewCount: channel.statistics.viewCount || 0
+                    };
+                }
+                return null;
+            } catch (error) {
+                console.error('YouTube error:', error);
+                return null;
+            }
+        }
+        
+        async function connectYouTube() {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const credential = GoogleAuthProvider.credentialFromResult(result);
+                youtubeAccessToken = credential.accessToken;
+                
+                await initYouTubeAPI(youtubeAccessToken);
+                youtubeChannel = await getYouTubeChannel();
+                
+                if (youtubeChannel) {
+                    userData.youtubeConnected = true;
+                    userData.youtubeChannel = youtubeChannel;
+                    await saveUserData();
+                    
+                    document.getElementById('youtubeContent').innerHTML = `
+                        <div class="channel-info">
+                            <img src="${youtubeChannel.thumbnail}" class="channel-avatar">
+                            <div>
+                                <strong>${youtubeChannel.title}</strong>
+                                <div style="font-size: 0.7rem;">Connected ✓</div>
+                            </div>
+                        </div>
+                        <div class="youtube-stats">
+                            <div class="stat-box">
+                                <div class="stat-number">${formatNumber(youtubeChannel.subscriberCount)}</div>
+                                <div class="stat-label">Subscribers</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">${formatNumber(youtubeChannel.videoCount)}</div>
+                                <div class="stat-label">Videos</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">${formatNumber(youtubeChannel.viewCount)}</div>
+                                <div class="stat-label">Views</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-youtube" id="refreshYouTubeBtn" style="margin-top: 10px;">🔄 Refresh</button>
+                    `;
+                    
+                    document.getElementById('refreshYouTubeBtn')?.addEventListener('click', async () => {
+                        const refreshed = await getYouTubeChannel();
+                        if (refreshed) {
+                            youtubeChannel = refreshed;
+                            userData.youtubeChannel = refreshed;
+                            await saveUserData();
+                            await connectYouTube(); // Re-render
+                        }
+                    });
+                    
+                    showToast(`✅ Connected to ${youtubeChannel.title}`);
+                }
+            } catch (error) {
+                console.error('YouTube connect error:', error);
+                showToast('Failed to connect YouTube: ' + error.message);
+            }
+        }
+        
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        }
+        
+        // Campaign Functions
         async function createCampaign(title, url, targets) {
             let totalCost = 0;
             const actions = [];
@@ -724,17 +897,26 @@
         
         // Render Functions
         function renderHome() {
+            const activeCampaigns = userData?.campaigns?.filter(c => !c.completed).length || 0;
             return `
                 <div class="card">
                     <h2>📊 Dashboard</h2>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <div class="stat-card" style="background: rgba(139,92,246,0.1); padding: 16px; border-radius: 20px; text-align: center;">
-                            <div style="font-size: 1.5rem; font-weight: bold;">${userData?.campaigns?.length || 0}</div>
-                            <div style="font-size: 0.7rem;">Campaigns</div>
+                        <div style="background: rgba(139,92,246,0.1); border-radius: 20px; padding: 16px; text-align: center;">
+                            <div style="font-size: 1.8rem; font-weight: bold;">${userData?.campaigns?.length || 0}</div>
+                            <div style="font-size: 0.7rem;">Total Campaigns</div>
                         </div>
-                        <div class="stat-card" style="background: rgba(139,92,246,0.1); padding: 16px; border-radius: 20px; text-align: center;">
-                            <div style="font-size: 1.5rem; font-weight: bold;">${userData?.totalEarned || 0}</div>
+                        <div style="background: rgba(139,92,246,0.1); border-radius: 20px; padding: 16px; text-align: center;">
+                            <div style="font-size: 1.8rem; font-weight: bold;">${activeCampaigns}</div>
+                            <div style="font-size: 0.7rem;">Active</div>
+                        </div>
+                        <div style="background: rgba(139,92,246,0.1); border-radius: 20px; padding: 16px; text-align: center;">
+                            <div style="font-size: 1.8rem; font-weight: bold;">${userData?.totalEarned || 0}</div>
                             <div style="font-size: 0.7rem;">Earned</div>
+                        </div>
+                        <div style="background: rgba(139,92,246,0.1); border-radius: 20px; padding: 16px; text-align: center;">
+                            <div style="font-size: 1.8rem; font-weight: bold;">${userData?.referralEarnings?.toFixed(0) || 0}</div>
+                            <div style="font-size: 0.7rem;">Referral Income</div>
                         </div>
                     </div>
                 </div>
@@ -750,8 +932,9 @@
             return `
                 <div class="card">
                     <h2>🎯 Create Campaign</h2>
-                    <input type="text" id="campaignTitle" placeholder="Campaign title">
-                    <input type="url" id="campaignUrl" placeholder="YouTube URL">
+                    <input type="text" id="campaignTitle" placeholder="Campaign title (e.g., My Awesome Video)">
+                    <input type="url" id="campaignUrl" placeholder="YouTube Video URL">
+                    
                     <div class="action-grid" id="actionGrid">
                         ${Object.entries(ACTION_TYPES).map(([key, type]) => `
                             <div class="action-card" data-action="${key}" onclick="window.toggleAction('${key}')">
@@ -761,19 +944,24 @@
                             </div>
                         `).join('')}
                     </div>
+                    
                     <div id="targetControls"></div>
-                    <div class="cost-display" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 20px; padding: 16px; text-align: center; margin: 16px 0;">
-                        <div style="font-size: 0.8rem;">Total Cost</div>
-                        <div style="font-size: 2rem; font-weight: bold;" id="totalCost">0</div>
+                    
+                    <div class="cost-display">
+                        <div class="cost-label">Total Cost</div>
+                        <div class="cost-amount" id="totalCost">0</div>
                     </div>
+                    
                     <button class="btn btn-primary" onclick="window.submitCampaign()">Launch Campaign</button>
                 </div>
+                
                 <div class="card">
                     <h2>📊 Active Campaigns</h2>
                     ${userData?.campaigns?.filter(c => !c.completed).map(c => `
                         <div class="campaign-item">
                             <div class="campaign-title">${escapeHtml(c.title)}</div>
-                            <div class="action-badges">
+                            <div class="campaign-url">${escapeHtml(c.url)}</div>
+                            <div class="badge-group">
                                 ${c.actions.map(a => `
                                     <span class="badge">${ACTION_TYPES[a.type].emoji} ${c.progress[a.type] || 0}/${a.target}</span>
                                 `).join('')}
@@ -793,8 +981,11 @@
             return `
                 <div class="card">
                     <h2>👁️ Earn Credits</h2>
-                    <p style="margin-bottom: 16px; color: var(--gray-400);">Complete actions to earn credits. Your referrer gets 5%!</p>
-                    <div class="empty-state">Actions will appear when users create campaigns</div>
+                    <p style="margin-bottom: 16px; color: var(--gray-400);">Complete actions to earn credits. Your referrer gets 5% commission!</p>
+                    <div class="empty-state">
+                        🎬 Actions will appear when users create campaigns
+                        <div style="margin-top: 12px; font-size: 0.8rem;">Create a campaign to get started!</div>
+                    </div>
                 </div>
             `;
         }
@@ -804,17 +995,20 @@
                 <div class="card">
                     <h2>🤝 Referral Program</h2>
                     <div style="background: linear-gradient(135deg, var(--warning), #ea580c); border-radius: 20px; padding: 16px; text-align: center; margin-bottom: 16px;">
-                        <div>🎁 5% Commission on referral earnings!</div>
+                        <div>🎁 5% Commission on all referral earnings!</div>
+                        <div style="font-size: 0.7rem; margin-top: 4px;">Your referrals keep 100% • You earn 5% extra</div>
                     </div>
+                    
                     <div style="background: rgba(139,92,246,0.1); border-radius: 20px; padding: 20px; text-align: center;">
-                        <div style="font-size: 0.8rem;">Your Referral Code</div>
-                        <div style="font-size: 1.5rem; font-weight: bold; font-family: monospace; margin: 12px 0;">${userData?.referralCode || ''}</div>
+                        <div style="font-size: 0.7rem; color: var(--gray-400);">Your Referral Code</div>
+                        <div class="referral-code-box" id="referralCodeDisplay">${userData?.referralCode || ''}</div>
                         <button class="btn btn-primary" onclick="window.copyReferralCode()">📋 Copy Code</button>
                     </div>
-                    <div class="card" style="margin-top: 16px;">
-                        <h2>📊 Commission Stats</h2>
+                    
+                    <div style="background: rgba(139,92,246,0.1); border-radius: 20px; padding: 20px; text-align: center; margin-top: 12px;">
+                        <div style="font-size: 0.7rem; color: var(--gray-400);">Commission Earned</div>
                         <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${(userData?.referralEarnings || 0).toFixed(2)}</div>
-                        <div style="font-size: 0.7rem;">Credits from referrals</div>
+                        <div style="font-size: 0.7rem;">credits from referrals</div>
                     </div>
                 </div>
             `;
@@ -823,13 +1017,35 @@
         function renderHelp() {
             return `
                 <div class="card">
-                    <h2>❓ How It Works</h2>
+                    <h2>❓ How ViewSwap Works</h2>
                     <div style="line-height: 1.8;">
-                        <p><strong>1. Sign in with Google</strong> - Secure authentication</p>
-                        <p><strong>2. Earn Credits</strong> - Watch videos, get 5% for referrer</p>
-                        <p><strong>3. Create Campaigns</strong> - Spend credits on views/subs/likes/comments</p>
-                        <p><strong>4. Referral Commission</strong> - Earn 5% of all referral earnings!</p>
+                        <p><strong>1️⃣ Sign in with Google</strong> - Secure authentication</p>
+                        <p><strong>2️⃣ Connect YouTube</strong> - Verify your channel</p>
+                        <p><strong>3️⃣ Earn Credits</strong> - Complete actions from other users</p>
+                        <p><strong>4️⃣ Create Campaigns</strong> - Spend credits on views/subs/likes/comments</p>
+                        <p><strong>5️⃣ Referral Commission</strong> - Earn 5% of all referral earnings forever!</p>
                     </div>
+                </div>
+                
+                <div class="card">
+                    <h2>💰 Credit Values</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>👁️ Views: 1 credit</div>
+                        <div>🔔 Subscribers: 5 credits</div>
+                        <div>❤️ Likes: 1 credit</div>
+                        <div>💬 Comments: 3 credits</div>
+                        <div>⭐ Comment Likes: 1 credit</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>💡 Pro Tips</h2>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>Claim daily bonus every day for free credits</li>
+                        <li>Share your referral code for passive income</li>
+                        <li>Create campaigns with realistic targets</li>
+                        <li>Connect YouTube to verify engagement</li>
+                    </ul>
                 </div>
             `;
         }
@@ -850,7 +1066,7 @@
             
             switch(currentPage) {
                 case 'home': container.innerHTML = renderHome(); break;
-                case 'campaign': container.innerHTML = renderCampaign(); break;
+                case 'campaign': container.innerHTML = renderCampaign(); updateTargetControls(); break;
                 case 'earn': container.innerHTML = renderEarn(); break;
                 case 'referral': container.innerHTML = renderReferral(); break;
                 case 'help': container.innerHTML = renderHelp(); break;
@@ -862,11 +1078,12 @@
             const el = document.querySelector(`.action-card[data-action="${actionKey}"]`);
             if (selectedActions.has(actionKey)) {
                 selectedActions.delete(actionKey);
-                el.classList.remove('selected');
+                el?.classList.remove('selected');
+                campaignTargets[actionKey] = 0;
             } else {
                 selectedActions.add(actionKey);
-                el.classList.add('selected');
-                campaignTargets[actionKey] = 10;
+                el?.classList.add('selected');
+                if (campaignTargets[actionKey] === 0) campaignTargets[actionKey] = 10;
             }
             updateTargetControls();
         };
@@ -876,16 +1093,17 @@
             if (!container) return;
             
             if (selectedActions.size === 0) {
-                container.innerHTML = '<div class="empty-state">Select actions above</div>';
-                document.getElementById('totalCost').textContent = '0';
+                container.innerHTML = '<div class="empty-state">Select actions above to set targets</div>';
+                const costEl = document.getElementById('totalCost');
+                if (costEl) costEl.textContent = '0';
                 return;
             }
             
             container.innerHTML = Array.from(selectedActions).map(key => `
-                <div style="margin: 12px 0;">
-                    <label>${ACTION_TYPES[key].emoji} ${ACTION_TYPES[key].name} (${ACTION_TYPES[key].baseCost} credits)</label>
-                    <input type="range" min="0" max="100" value="${campaignTargets[key]}" onchange="window.updateTarget('${key}', this.value)">
-                    <div style="text-align: center; margin-top: 8px;">${campaignTargets[key]}</div>
+                <div class="slider-control">
+                    <label>${ACTION_TYPES[key].emoji} ${ACTION_TYPES[key].name} (${ACTION_TYPES[key].baseCost} credits each)</label>
+                    <input type="range" min="0" max="100" value="${campaignTargets[key] || 10}" onchange="window.updateTarget('${key}', this.value)">
+                    <div class="slider-value" id="value_${key}">${campaignTargets[key] || 10}</div>
                 </div>
             `).join('');
             
@@ -894,13 +1112,15 @@
         
         window.updateTarget = function(key, value) {
             campaignTargets[key] = parseInt(value);
+            const valueDiv = document.getElementById(`value_${key}`);
+            if (valueDiv) valueDiv.textContent = value;
             updateTotalCost();
         };
         
         function updateTotalCost() {
             let total = 0;
             for (const [key, target] of Object.entries(campaignTargets)) {
-                if (selectedActions.has(key)) {
+                if (selectedActions.has(key) && target > 0) {
                     total += target * ACTION_TYPES[key].baseCost;
                 }
             }
@@ -912,21 +1132,22 @@
             const title = document.getElementById('campaignTitle')?.value;
             const url = document.getElementById('campaignUrl')?.value;
             if (!title || !url) {
-                showToast('Enter title and URL');
+                showToast('Please enter title and URL');
                 return;
             }
             
             const targets = {};
             for (const action of selectedActions) {
-                targets[action] = campaignTargets[action];
+                targets[action] = campaignTargets[action] || 0;
             }
             
             await createCampaign(title, url, targets);
+            
             document.getElementById('campaignTitle').value = '';
             document.getElementById('campaignUrl').value = '';
             selectedActions.clear();
             document.querySelectorAll('.action-card').forEach(c => c.classList.remove('selected'));
-            campaignTargets = { view: 0, subscriber: 0, like: 0, comment: 0, commentLike: 0 };
+            campaignTargets = { view: 10, subscriber: 0, like: 0, comment: 0, commentLike: 0 };
             updateTargetControls();
             renderCurrentPage();
         };
@@ -937,16 +1158,16 @@
         };
         
         window.switchToCampaign = function() {
-            document.querySelector('[data-page="campaign"]').click();
+            document.querySelector('[data-page="campaign"]')?.click();
         };
         
         window.switchToEarn = function() {
-            document.querySelector('[data-page="earn"]').click();
+            document.querySelector('[data-page="earn"]')?.click();
         };
         
         // Navigation
         document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
+            btn.addEventListener('click', async () => {
                 const page = btn.dataset.page;
                 currentPage = page;
                 document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -961,7 +1182,10 @@
             await renderCurrentPage();
         });
         
-        // Auth State Handler
+        // YouTube Connect
+        document.getElementById('connectYouTubeBtn')?.addEventListener('click', connectYouTube);
+        
+        // Auth State
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -969,7 +1193,7 @@
                 
                 document.getElementById('authSection').style.display = 'none';
                 document.getElementById('appContent').classList.remove('hidden');
-                document.getElementById('bottomNav').style.display = 'flex';
+                document.getElementById('bottomNav').classList.remove('hidden');
                 
                 document.getElementById('userAvatar').src = user.photoURL || '';
                 document.getElementById('userName').textContent = user.displayName;
@@ -977,11 +1201,39 @@
                 document.getElementById('authContent').classList.remove('hidden');
                 document.getElementById('unauthContent').classList.add('hidden');
                 
+                // Restore YouTube connection if exists
+                if (userData.youtubeConnected && userData.youtubeChannel) {
+                    youtubeChannel = userData.youtubeChannel;
+                    document.getElementById('youtubeContent').innerHTML = `
+                        <div class="channel-info">
+                            <img src="${youtubeChannel.thumbnail}" class="channel-avatar">
+                            <div>
+                                <strong>${youtubeChannel.title}</strong>
+                                <div style="font-size: 0.7rem;">Connected ✓</div>
+                            </div>
+                        </div>
+                        <div class="youtube-stats">
+                            <div class="stat-box">
+                                <div class="stat-number">${formatNumber(youtubeChannel.subscriberCount)}</div>
+                                <div class="stat-label">Subscribers</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">${formatNumber(youtubeChannel.videoCount)}</div>
+                                <div class="stat-label">Videos</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">${formatNumber(youtubeChannel.viewCount)}</div>
+                                <div class="stat-label">Views</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
                 await renderCurrentPage();
             } else {
                 document.getElementById('authSection').style.display = 'block';
                 document.getElementById('appContent').classList.add('hidden');
-                document.getElementById('bottomNav').style.display = 'none';
+                document.getElementById('bottomNav').classList.add('hidden');
                 document.getElementById('authContent').classList.add('hidden');
                 document.getElementById('unauthContent').classList.remove('hidden');
                 currentUser = null;
@@ -995,7 +1247,6 @@
                 const result = await signInWithPopup(auth, provider);
                 showToast(`Welcome ${result.user.displayName}!`);
             } catch (error) {
-                console.error(error);
                 showToast('Sign in failed: ' + error.message);
             }
         });
@@ -1006,15 +1257,15 @@
             showToast('Signed out successfully');
         });
         
-        // Create particles
-        for (let i = 0; i < 30; i++) {
+        // Create Particles
+        for (let i = 0; i < 40; i++) {
             const p = document.createElement('div');
             p.className = 'particle';
-            p.style.width = Math.random() * 4 + 2 + 'px';
+            p.style.width = Math.random() * 5 + 2 + 'px';
             p.style.height = p.style.width;
             p.style.left = Math.random() * 100 + '%';
-            p.style.animationDuration = Math.random() * 10 + 5 + 's';
-            p.style.animationDelay = Math.random() * 5 + 's';
+            p.style.animationDuration = Math.random() * 15 + 8 + 's';
+            p.style.animationDelay = Math.random() * 10 + 's';
             document.getElementById('particles').appendChild(p);
         }
     </script>
