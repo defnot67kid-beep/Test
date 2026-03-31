@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>ViewSwap Elite - YouTube Growth Platform</title>
+    <title>ViewSwap Elite - Full YouTube Integration</title>
     
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, arrayRemove, increment, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, increment, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
         window.firebaseModules = {
             initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
-            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, arrayRemove, increment, runTransaction, deleteDoc
+            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, increment, runTransaction
         };
     </script>
     
-    <!-- Google API for YouTube -->
+    <!-- Google API Client Library -->
     <script src="https://apis.google.com/js/api.js"></script>
     
     <style>
@@ -218,8 +218,8 @@
 
         /* YouTube Card */
         .youtube-card {
-            background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.05));
-            border: 1px solid rgba(255, 0, 0, 0.3);
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.15), rgba(255, 0, 0, 0.05));
+            border: 2px solid rgba(255, 0, 0, 0.4);
             border-radius: 28px;
             padding: 20px;
             margin-bottom: 20px;
@@ -274,6 +274,15 @@
         .stat-label {
             font-size: 0.6rem;
             opacity: 0.7;
+        }
+
+        .permission-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 8px;
+            border-radius: 12px;
+            margin-top: 12px;
+            font-size: 0.7rem;
+            text-align: center;
         }
 
         /* Bottom Navigation */
@@ -470,12 +479,16 @@
             bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(10px);
             padding: 12px 20px;
             border-radius: 60px;
             z-index: 2000;
             animation: slideUp 0.3s ease;
-            white-space: nowrap;
+            max-width: 90%;
+            text-align: center;
+            white-space: normal;
+            word-break: break-word;
         }
 
         @keyframes slideUp {
@@ -523,6 +536,12 @@
             margin-top: 8px;
             font-weight: bold;
         }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray-400);
+        }
     </style>
 </head>
 <body>
@@ -531,17 +550,17 @@
     <div class="container">
         <div class="header">
             <h1>⚡ ViewSwap Elite</h1>
-            <p>YouTube Growth Platform • 5% Referral Commission</p>
+            <p>Full YouTube Integration • Subscribe • Like • Comment • Earn 5% Commission</p>
         </div>
 
         <!-- Auth Section -->
         <div id="authSection">
             <div class="auth-card" id="unauthContent">
-                <div style="font-size: 3rem; margin-bottom: 16px;">🚀</div>
+                <div style="font-size: 3rem; margin-bottom: 16px;">🔴</div>
                 <h2 style="margin-bottom: 8px;">Welcome to ViewSwap</h2>
-                <p style="color: var(--gray-400); margin-bottom: 24px;">Sign in to start growing your YouTube channel</p>
-                <button class="google-btn" id="googleSignInBtn">
-                    🎯 Sign in with Google
+                <p style="color: var(--gray-400); margin-bottom: 24px;">Sign in with YouTube to start growing your channel</p>
+                <button class="google-btn" id="youtubeSignInBtn">
+                    🔴 Sign in with YouTube
                 </button>
             </div>
             <div class="auth-card hidden" id="authContent">
@@ -569,11 +588,11 @@
                     <div class="youtube-icon">🔴</div>
                     <div>
                         <strong>YouTube Integration</strong>
-                        <div style="font-size: 0.7rem; opacity: 0.7;">Connect to verify engagement</div>
+                        <div style="font-size: 0.7rem; opacity: 0.7;">Full access: Subscribe, Like, Comment</div>
                     </div>
                 </div>
                 <div id="youtubeContent">
-                    <button class="btn btn-youtube" id="connectYouTubeBtn">Connect YouTube Channel</button>
+                    <div class="loading">Loading YouTube connection status...</div>
                 </div>
             </div>
 
@@ -610,7 +629,7 @@
         // Import Firebase
         const { initializeApp } = window.firebaseModules;
         const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } = window.firebaseModules;
-        const { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, increment, runTransaction } = window.firebaseModules;
+        const { getFirestore, doc, setDoc, getDoc, increment, runTransaction } = window.firebaseModules;
         
         // Firebase Config
         const firebaseConfig = {
@@ -627,17 +646,20 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
         
-        // Add YouTube scopes
-        provider.addScope('https://www.googleapis.com/auth/youtube.readonly');
-        provider.addScope('https://www.googleapis.com/auth/youtube.force-ssl');
+        // Add ALL YouTube scopes for full access
+        provider.addScope('https://www.googleapis.com/auth/youtube'); // Full YouTube access
+        provider.addScope('https://www.googleapis.com/auth/youtube.force-ssl'); // Force SSL
+        provider.addScope('https://www.googleapis.com/auth/youtube.readonly'); // Read access
+        provider.addScope('https://www.googleapis.com/auth/youtube.upload'); // Upload videos
+        provider.addScope('https://www.googleapis.com/auth/youtubepartner'); // Partner access
         
         // Action Types
         const ACTION_TYPES = {
-            view: { name: 'Views', emoji: '👁️', baseCost: 1, reward: 1 },
-            subscriber: { name: 'Subscribers', emoji: '🔔', baseCost: 5, reward: 5 },
-            like: { name: 'Likes', emoji: '❤️', baseCost: 1, reward: 1 },
-            comment: { name: 'Comments', emoji: '💬', baseCost: 3, reward: 3 },
-            commentLike: { name: 'Comment Likes', emoji: '⭐', baseCost: 1, reward: 1 }
+            view: { name: 'Views', emoji: '👁️', baseCost: 1, reward: 1, requiresAuth: false },
+            subscriber: { name: 'Subscribers', emoji: '🔔', baseCost: 5, reward: 5, requiresAuth: true, action: 'subscribe' },
+            like: { name: 'Likes', emoji: '❤️', baseCost: 1, reward: 1, requiresAuth: true, action: 'like' },
+            comment: { name: 'Comments', emoji: '💬', baseCost: 3, reward: 3, requiresAuth: true, action: 'comment' },
+            commentLike: { name: 'Comment Likes', emoji: '⭐', baseCost: 1, reward: 1, requiresAuth: true, action: 'commentLike' }
         };
         
         let currentUser = null;
@@ -647,9 +669,10 @@
         let campaignTargets = { view: 10, subscriber: 0, like: 0, comment: 0, commentLike: 0 };
         let youtubeAccessToken = null;
         let youtubeChannel = null;
+        let gapiInitialized = false;
         
         // Helper Functions
-        function showToast(message, duration = 2500) {
+        function showToast(message, duration = 3000) {
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
             const toast = document.createElement('div');
@@ -657,6 +680,167 @@
             toast.textContent = message;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), duration);
+        }
+        
+        // Initialize Google API
+        async function initGoogleAPI() {
+            return new Promise((resolve, reject) => {
+                if (gapiInitialized) {
+                    resolve();
+                    return;
+                }
+                
+                const checkGapi = () => {
+                    if (window.gapi && window.gapi.client) {
+                        resolve();
+                    } else {
+                        setTimeout(checkGapi, 100);
+                    }
+                };
+                
+                if (!window.gapi) {
+                    const script = document.createElement('script');
+                    script.src = 'https://apis.google.com/js/api.js';
+                    script.onload = () => {
+                        window.gapi.load('client', () => {
+                            gapiInitialized = true;
+                            resolve();
+                        });
+                    };
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                } else {
+                    window.gapi.load('client', () => {
+                        gapiInitialized = true;
+                        resolve();
+                    });
+                }
+            });
+        }
+        
+        // Initialize YouTube API with token
+        async function initYouTubeAPI(token) {
+            try {
+                await initGoogleAPI();
+                await window.gapi.client.init({
+                    apiKey: firebaseConfig.apiKey,
+                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest']
+                });
+                window.gapi.client.setToken({ access_token: token });
+                return true;
+            } catch (error) {
+                console.error('YouTube API init error:', error);
+                return false;
+            }
+        }
+        
+        // Get YouTube Channel Info
+        async function getYouTubeChannel() {
+            try {
+                const response = await window.gapi.client.youtube.channels.list({
+                    part: ['snippet', 'statistics'],
+                    mine: true
+                });
+                
+                if (response.result.items && response.result.items.length > 0) {
+                    const channel = response.result.items[0];
+                    return {
+                        id: channel.id,
+                        title: channel.snippet.title,
+                        thumbnail: channel.snippet.thumbnails.default.url,
+                        subscriberCount: parseInt(channel.statistics.subscriberCount) || 0,
+                        videoCount: parseInt(channel.statistics.videoCount) || 0,
+                        viewCount: parseInt(channel.statistics.viewCount) || 0
+                    };
+                }
+                return null;
+            } catch (error) {
+                console.error('Get channel error:', error);
+                return null;
+            }
+        }
+        
+        // YouTube Actions
+        async function subscribeToChannel(channelId) {
+            try {
+                const response = await window.gapi.client.youtube.subscriptions.insert({
+                    part: ['snippet'],
+                    resource: {
+                        snippet: {
+                            resourceId: {
+                                kind: 'youtube#channel',
+                                channelId: channelId
+                            }
+                        }
+                    }
+                });
+                return response.status === 200;
+            } catch (error) {
+                console.error('Subscribe error:', error);
+                return false;
+            }
+        }
+        
+        async function likeVideo(videoId) {
+            try {
+                const response = await window.gapi.client.youtube.videos.rate({
+                    id: videoId,
+                    rating: 'like'
+                });
+                return response.status === 204;
+            } catch (error) {
+                console.error('Like error:', error);
+                return false;
+            }
+        }
+        
+        async function postComment(videoId, text) {
+            try {
+                const response = await window.gapi.client.youtube.commentThreads.insert({
+                    part: ['snippet'],
+                    resource: {
+                        snippet: {
+                            videoId: videoId,
+                            topLevelComment: {
+                                snippet: {
+                                    textOriginal: text
+                                }
+                            }
+                        }
+                    }
+                });
+                return response.result;
+            } catch (error) {
+                console.error('Comment error:', error);
+                return null;
+            }
+        }
+        
+        async function likeComment(commentId) {
+            try {
+                const response = await window.gapi.client.youtube.comments.setRating({
+                    id: commentId,
+                    rating: 'like'
+                });
+                return response.status === 204;
+            } catch (error) {
+                console.error('Comment like error:', error);
+                return false;
+            }
+        }
+        
+        // Extract Video ID from URL
+        function extractVideoId(url) {
+            const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
+        }
+        
+        // Extract Channel ID from URL
+        function extractChannelId(url) {
+            const regex = /youtube\.com\/channel\/([^\/\?\&]+)/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
         }
         
         // Load User Data
@@ -709,16 +893,20 @@
             if (amount > 0 && userData.referredBy) {
                 const referrerRef = doc(db, 'users', userData.referredBy);
                 const commission = amount * 0.05;
-                await runTransaction(db, async (transaction) => {
-                    const referrerSnap = await transaction.get(referrerRef);
-                    if (referrerSnap.exists()) {
-                        transaction.update(referrerRef, {
-                            credits: increment(commission),
-                            referralEarnings: increment(commission),
-                            totalEarned: increment(commission)
-                        });
-                    }
-                });
+                try {
+                    await runTransaction(db, async (transaction) => {
+                        const referrerSnap = await transaction.get(referrerRef);
+                        if (referrerSnap.exists()) {
+                            transaction.update(referrerRef, {
+                                credits: increment(commission),
+                                referralEarnings: increment(commission),
+                                totalEarned: increment(commission)
+                            });
+                        }
+                    });
+                } catch (e) {
+                    console.error('Commission error:', e);
+                }
             }
             return true;
         }
@@ -744,60 +932,21 @@
             await saveUserData();
         }
         
-        // YouTube Integration
-        async function initYouTubeAPI(token) {
-            return new Promise((resolve) => {
-                if (window.gapi && window.gapi.client) {
-                    resolve();
-                } else {
-                    const script = document.createElement('script');
-                    script.src = 'https://apis.google.com/js/api.js';
-                    script.onload = () => {
-                        window.gapi.load('client', resolve);
-                    };
-                    document.head.appendChild(script);
-                }
-            }).then(async () => {
-                await window.gapi.client.init({
-                    apiKey: firebaseConfig.apiKey,
-                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest']
-                });
-                window.gapi.client.setToken({ access_token: token });
-            });
-        }
-        
-        async function getYouTubeChannel() {
+        // YouTube Sign In
+        async function signInWithYouTube() {
             try {
-                const response = await window.gapi.client.youtube.channels.list({
-                    part: ['snippet', 'statistics'],
-                    mine: true
-                });
-                
-                if (response.result.items && response.result.items.length > 0) {
-                    const channel = response.result.items[0];
-                    return {
-                        id: channel.id,
-                        title: channel.snippet.title,
-                        thumbnail: channel.snippet.thumbnails.default.url,
-                        subscriberCount: channel.statistics.subscriberCount || 0,
-                        videoCount: channel.statistics.videoCount || 0,
-                        viewCount: channel.statistics.viewCount || 0
-                    };
-                }
-                return null;
-            } catch (error) {
-                console.error('YouTube error:', error);
-                return null;
-            }
-        }
-        
-        async function connectYouTube() {
-            try {
+                showToast('Connecting to YouTube...');
                 const result = await signInWithPopup(auth, provider);
                 const credential = GoogleAuthProvider.credentialFromResult(result);
                 youtubeAccessToken = credential.accessToken;
                 
-                await initYouTubeAPI(youtubeAccessToken);
+                // Initialize YouTube API
+                const initSuccess = await initYouTubeAPI(youtubeAccessToken);
+                if (!initSuccess) {
+                    throw new Error('Failed to initialize YouTube API');
+                }
+                
+                // Get channel info
                 youtubeChannel = await getYouTubeChannel();
                 
                 if (youtubeChannel) {
@@ -805,47 +954,84 @@
                     userData.youtubeChannel = youtubeChannel;
                     await saveUserData();
                     
-                    document.getElementById('youtubeContent').innerHTML = `
-                        <div class="channel-info">
-                            <img src="${youtubeChannel.thumbnail}" class="channel-avatar">
-                            <div>
-                                <strong>${youtubeChannel.title}</strong>
-                                <div style="font-size: 0.7rem;">Connected ✓</div>
-                            </div>
-                        </div>
-                        <div class="youtube-stats">
-                            <div class="stat-box">
-                                <div class="stat-number">${formatNumber(youtubeChannel.subscriberCount)}</div>
-                                <div class="stat-label">Subscribers</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-number">${formatNumber(youtubeChannel.videoCount)}</div>
-                                <div class="stat-label">Videos</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-number">${formatNumber(youtubeChannel.viewCount)}</div>
-                                <div class="stat-label">Views</div>
-                            </div>
-                        </div>
-                        <button class="btn btn-youtube" id="refreshYouTubeBtn" style="margin-top: 10px;">🔄 Refresh</button>
-                    `;
-                    
-                    document.getElementById('refreshYouTubeBtn')?.addEventListener('click', async () => {
-                        const refreshed = await getYouTubeChannel();
-                        if (refreshed) {
-                            youtubeChannel = refreshed;
-                            userData.youtubeChannel = refreshed;
-                            await saveUserData();
-                            await connectYouTube(); // Re-render
-                        }
-                    });
-                    
-                    showToast(`✅ Connected to ${youtubeChannel.title}`);
+                    showToast(`✅ Successfully connected to ${youtubeChannel.title}`);
+                    await updateYouTubeDisplay();
+                } else {
+                    throw new Error('Could not fetch channel information');
                 }
+                
+                return result.user;
             } catch (error) {
-                console.error('YouTube connect error:', error);
-                showToast('Failed to connect YouTube: ' + error.message);
+                console.error('YouTube sign in error:', error);
+                let errorMessage = 'Failed to connect to YouTube. ';
+                if (error.message.includes('popup')) {
+                    errorMessage += 'Please allow popups for this site.';
+                } else if (error.message.includes('network')) {
+                    errorMessage += 'Check your internet connection.';
+                } else {
+                    errorMessage += error.message;
+                }
+                showToast(errorMessage);
+                return null;
             }
+        }
+        
+        async function updateYouTubeDisplay() {
+            const container = document.getElementById('youtubeContent');
+            if (!container) return;
+            
+            if (!youtubeChannel) {
+                container.innerHTML = `
+                    <button class="btn btn-youtube" id="connectYouTubeBtn">
+                        🔴 Connect YouTube Channel
+                    </button>
+                    <div class="permission-badge">
+                        ⚡ Full access needed: Subscribe, Like, Comment
+                    </div>
+                `;
+                document.getElementById('connectYouTubeBtn')?.addEventListener('click', signInWithYouTube);
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="channel-info">
+                    <img src="${youtubeChannel.thumbnail}" class="channel-avatar" onerror="this.src='https://via.placeholder.com/50'">
+                    <div>
+                        <strong>${escapeHtml(youtubeChannel.title)}</strong>
+                        <div style="font-size: 0.7rem; color: #4ade80;">✓ Connected & Authorized</div>
+                    </div>
+                </div>
+                <div class="youtube-stats">
+                    <div class="stat-box">
+                        <div class="stat-number">${formatNumber(youtubeChannel.subscriberCount)}</div>
+                        <div class="stat-label">Subscribers</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${formatNumber(youtubeChannel.videoCount)}</div>
+                        <div class="stat-label">Videos</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${formatNumber(youtubeChannel.viewCount)}</div>
+                        <div class="stat-label">Views</div>
+                    </div>
+                </div>
+                <div class="permission-badge">
+                    ✅ Full access granted • Can Subscribe • Like • Comment
+                </div>
+                <button class="btn btn-youtube" id="refreshYouTubeBtn" style="margin-top: 10px; background: #333;">🔄 Refresh Channel</button>
+            `;
+            
+            document.getElementById('refreshYouTubeBtn')?.addEventListener('click', async () => {
+                showToast('Refreshing channel data...');
+                const refreshed = await getYouTubeChannel();
+                if (refreshed) {
+                    youtubeChannel = refreshed;
+                    userData.youtubeChannel = refreshed;
+                    await saveUserData();
+                    await updateYouTubeDisplay();
+                    showToast('Channel data refreshed!');
+                }
+            });
         }
         
         function formatNumber(num) {
@@ -877,12 +1063,14 @@
                 return false;
             }
             
-            await updateCredits(-totalCost);
+            await updateCredits(-totalCost, `💰 Spent ${totalCost} credits on campaign`);
             
             const campaign = {
                 id: Date.now(),
                 title,
                 url,
+                videoId: extractVideoId(url),
+                channelId: extractChannelId(url),
                 actions,
                 progress: Object.fromEntries(actions.map(a => [a.type, 0])),
                 createdAt: new Date().toISOString(),
@@ -891,7 +1079,7 @@
             
             userData.campaigns.push(campaign);
             await saveUserData();
-            showToast(`Campaign created! Spent ${totalCost} credits`);
+            showToast(`✅ Campaign created! Spent ${totalCost} credits`);
             return true;
         }
         
@@ -925,6 +1113,13 @@
                     <button class="btn btn-primary" onclick="window.switchToCampaign()">Create Campaign</button>
                     <button class="btn btn-success" style="margin-top: 10px;" onclick="window.switchToEarn()">Earn Credits</button>
                 </div>
+                ${!youtubeChannel ? `
+                    <div class="card" style="border-color: var(--youtube);">
+                        <h2>🔴 YouTube Required</h2>
+                        <p style="margin-bottom: 12px;">Connect your YouTube account to start earning and growing!</p>
+                        <button class="btn btn-youtube" onclick="window.signInWithYouTube()">Connect YouTube Now</button>
+                    </div>
+                ` : ''}
             `;
         }
         
@@ -933,7 +1128,7 @@
                 <div class="card">
                     <h2>🎯 Create Campaign</h2>
                     <input type="text" id="campaignTitle" placeholder="Campaign title (e.g., My Awesome Video)">
-                    <input type="url" id="campaignUrl" placeholder="YouTube Video URL">
+                    <input type="url" id="campaignUrl" placeholder="YouTube Video or Channel URL">
                     
                     <div class="action-grid" id="actionGrid">
                         ${Object.entries(ACTION_TYPES).map(([key, type]) => `
@@ -982,10 +1177,19 @@
                 <div class="card">
                     <h2>👁️ Earn Credits</h2>
                     <p style="margin-bottom: 16px; color: var(--gray-400);">Complete actions to earn credits. Your referrer gets 5% commission!</p>
-                    <div class="empty-state">
-                        🎬 Actions will appear when users create campaigns
-                        <div style="margin-top: 12px; font-size: 0.8rem;">Create a campaign to get started!</div>
-                    </div>
+                    ${!youtubeChannel ? `
+                        <div style="background: rgba(255,0,0,0.2); border-radius: 20px; padding: 20px; text-align: center; margin-bottom: 16px;">
+                            <div style="font-size: 2rem; margin-bottom: 8px;">🔴</div>
+                            <div style="font-weight: bold;">YouTube Connection Required</div>
+                            <div style="font-size: 0.8rem; margin-top: 8px;">Connect your YouTube account to start earning credits</div>
+                            <button class="btn btn-youtube" style="margin-top: 12px;" onclick="window.signInWithYouTube()">Connect YouTube</button>
+                        </div>
+                    ` : `
+                        <div class="empty-state">
+                            🎬 Actions will appear when users create campaigns
+                            <div style="margin-top: 12px; font-size: 0.8rem;">Create a campaign to get started!</div>
+                        </div>
+                    `}
                 </div>
             `;
         }
@@ -1019,8 +1223,8 @@
                 <div class="card">
                     <h2>❓ How ViewSwap Works</h2>
                     <div style="line-height: 1.8;">
-                        <p><strong>1️⃣ Sign in with Google</strong> - Secure authentication</p>
-                        <p><strong>2️⃣ Connect YouTube</strong> - Verify your channel</p>
+                        <p><strong>1️⃣ Sign in with YouTube</strong> - Full access required for Subscribe, Like, Comment</p>
+                        <p><strong>2️⃣ Connect YouTube</strong> - Grant permissions to verify engagement</p>
                         <p><strong>3️⃣ Earn Credits</strong> - Complete actions from other users</p>
                         <p><strong>4️⃣ Create Campaigns</strong> - Spend credits on views/subs/likes/comments</p>
                         <p><strong>5️⃣ Referral Commission</strong> - Earn 5% of all referral earnings forever!</p>
@@ -1039,13 +1243,18 @@
                 </div>
                 
                 <div class="card">
-                    <h2>💡 Pro Tips</h2>
-                    <ul style="margin-left: 20px; line-height: 1.8;">
-                        <li>Claim daily bonus every day for free credits</li>
-                        <li>Share your referral code for passive income</li>
-                        <li>Create campaigns with realistic targets</li>
-                        <li>Connect YouTube to verify engagement</li>
-                    </ul>
+                    <h2>🔐 YouTube Permissions</h2>
+                    <div style="line-height: 1.8;">
+                        <p>This app requires full YouTube access to:</p>
+                        <ul style="margin-left: 20px; margin-top: 8px;">
+                            <li>✓ Subscribe to channels</li>
+                            <li>✓ Like videos</li>
+                            <li>✓ Post comments</li>
+                            <li>✓ Like comments</li>
+                            <li>✓ View channel statistics</li>
+                        </ul>
+                        <p style="margin-top: 12px; color: var(--gray-400); font-size: 0.8rem;">We never post without your permission!</p>
+                    </div>
                 </div>
             `;
         }
@@ -1066,7 +1275,7 @@
             
             switch(currentPage) {
                 case 'home': container.innerHTML = renderHome(); break;
-                case 'campaign': container.innerHTML = renderCampaign(); updateTargetControls(); break;
+                case 'campaign': container.innerHTML = renderCampaign(); setTimeout(updateTargetControls, 100); break;
                 case 'earn': container.innerHTML = renderEarn(); break;
                 case 'referral': container.innerHTML = renderReferral(); break;
                 case 'help': container.innerHTML = renderHelp(); break;
@@ -1165,6 +1374,8 @@
             document.querySelector('[data-page="earn"]')?.click();
         };
         
+        window.signInWithYouTube = signInWithYouTube;
+        
         // Navigation
         document.querySelectorAll('.nav-item').forEach(btn => {
             btn.addEventListener('click', async () => {
@@ -1182,14 +1393,36 @@
             await renderCurrentPage();
         });
         
-        // YouTube Connect
-        document.getElementById('connectYouTubeBtn')?.addEventListener('click', connectYouTube);
-        
         // Auth State
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 await loadUserData(user.uid);
+                
+                // Try to restore YouTube connection
+                if (userData.youtubeConnected && userData.youtubeChannel) {
+                    youtubeChannel = userData.youtubeChannel;
+                    // Try to refresh token
+                    try {
+                        const token = await user.getIdToken();
+                        const initSuccess = await initYouTubeAPI(token);
+                        if (initSuccess) {
+                            const refreshed = await getYouTubeChannel();
+                            if (refreshed) {
+                                youtubeChannel = refreshed;
+                                userData.youtubeChannel = refreshed;
+                                await saveUserData();
+                            }
+                        }
+                    } catch (e) {
+                        console.log('YouTube reconnection failed, will reconnect on sign in');
+                        youtubeChannel = null;
+                        userData.youtubeConnected = false;
+                        await saveUserData();
+                    }
+                }
+                
+                await updateYouTubeDisplay();
                 
                 document.getElementById('authSection').style.display = 'none';
                 document.getElementById('appContent').classList.remove('hidden');
@@ -1201,34 +1434,6 @@
                 document.getElementById('authContent').classList.remove('hidden');
                 document.getElementById('unauthContent').classList.add('hidden');
                 
-                // Restore YouTube connection if exists
-                if (userData.youtubeConnected && userData.youtubeChannel) {
-                    youtubeChannel = userData.youtubeChannel;
-                    document.getElementById('youtubeContent').innerHTML = `
-                        <div class="channel-info">
-                            <img src="${youtubeChannel.thumbnail}" class="channel-avatar">
-                            <div>
-                                <strong>${youtubeChannel.title}</strong>
-                                <div style="font-size: 0.7rem;">Connected ✓</div>
-                            </div>
-                        </div>
-                        <div class="youtube-stats">
-                            <div class="stat-box">
-                                <div class="stat-number">${formatNumber(youtubeChannel.subscriberCount)}</div>
-                                <div class="stat-label">Subscribers</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-number">${formatNumber(youtubeChannel.videoCount)}</div>
-                                <div class="stat-label">Videos</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-number">${formatNumber(youtubeChannel.viewCount)}</div>
-                                <div class="stat-label">Views</div>
-                            </div>
-                        </div>
-                    `;
-                }
-                
                 await renderCurrentPage();
             } else {
                 document.getElementById('authSection').style.display = 'block';
@@ -1238,18 +1443,12 @@
                 document.getElementById('unauthContent').classList.remove('hidden');
                 currentUser = null;
                 userData = null;
+                youtubeChannel = null;
             }
         });
         
-        // Google Sign In
-        document.getElementById('googleSignInBtn')?.addEventListener('click', async () => {
-            try {
-                const result = await signInWithPopup(auth, provider);
-                showToast(`Welcome ${result.user.displayName}!`);
-            } catch (error) {
-                showToast('Sign in failed: ' + error.message);
-            }
-        });
+        // YouTube Sign In Button
+        document.getElementById('youtubeSignInBtn')?.addEventListener('click', signInWithYouTube);
         
         // Sign Out
         document.getElementById('signOutBtn')?.addEventListener('click', async () => {
@@ -1268,6 +1467,9 @@
             p.style.animationDelay = Math.random() * 10 + 's';
             document.getElementById('particles').appendChild(p);
         }
+        
+        // Initial YouTube display
+        updateYouTubeDisplay();
     </script>
 </body>
 </html>
