@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>ViewSwap Elite - Dual Sign-In Required</title>
+    <title>ViewSwap Elite - Full YouTube Integration</title>
     
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, increment, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
         window.firebaseModules = {
             initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
-            getFirestore, doc, setDoc, getDoc, increment
+            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, increment, runTransaction
         };
     </script>
     
@@ -37,7 +37,6 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --youtube: #ff0000;
-            --google-blue: #4285f4;
             --dark: #0f0f0f;
             --gray-800: #1f1f1f;
             --gray-700: #2a2a2a;
@@ -48,14 +47,26 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0a0a0f 0%, #14141f 100%);
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
             min-height: 100vh;
+            padding-bottom: 80px;
             color: var(--white);
-            overflow-x: hidden;
         }
 
-        /* FORTRESS OVERLAY - HIDES EVERYTHING UNTIL DUAL SIGN-IN COMPLETE */
-        .fortress-overlay {
+        /* FULL PAGE HIDE UNTIL BOTH SIGN-INS COMPLETE */
+        #fullAppWrapper {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+        
+        body.fully-authenticated #fullAppWrapper {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Auth Overlay - Hides everything until dual sign-in */
+        .auth-fortress {
             position: fixed;
             top: 0;
             left: 0;
@@ -66,153 +77,137 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(10px);
-            transition: all 0.5s ease;
+            backdrop-filter: blur(8px);
+            transition: all 0.4s;
         }
         
-        body.fully-authenticated .fortress-overlay {
+        body.fully-authenticated .auth-fortress {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
         
-        #fullAppContent {
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.6s ease, visibility 0.6s;
-        }
-        
-        body.fully-authenticated #fullAppContent {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        /* Sign-in Card */
-        .signin-card {
-            background: rgba(20, 20, 35, 0.98);
+        .auth-card {
+            background: rgba(30, 30, 45, 0.98);
             backdrop-filter: blur(20px);
-            border-radius: 56px;
-            padding: 48px 36px;
+            border-radius: 48px;
+            padding: 48px 32px;
             text-align: center;
-            border: 2px solid rgba(139, 92, 246, 0.7);
-            max-width: 460px;
+            border: 2px solid rgba(139, 92, 246, 0.6);
+            max-width: 420px;
             width: 90%;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(139,92,246,0.3);
-            animation: slideUp 0.5s ease;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            animation: fadeInScale 0.5s ease;
         }
         
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
         
-        .lock-icon {
-            font-size: 4rem;
-            margin-bottom: 16px;
-        }
-        
-        .signin-card h1 {
+        .auth-card h1 {
             font-size: 2rem;
             background: linear-gradient(135deg, #fff, var(--primary-light), var(--secondary));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            margin-bottom: 8px;
+            margin: 16px 0 8px;
         }
         
-        .signin-card p {
-            color: var(--gray-400);
-            margin-bottom: 28px;
-            font-size: 0.9rem;
-        }
-        
-        .dual-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-top: 8px;
-        }
-        
-        .btn-signin {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 16px 24px;
+        .google-btn {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+            border: none;
+            padding: 14px 28px;
             border-radius: 60px;
             font-weight: 700;
-            font-size: 1rem;
             cursor: pointer;
-            transition: all 0.2s;
-            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1rem;
+            transition: transform 0.2s;
             width: 100%;
         }
         
-        .btn-google {
-            background: linear-gradient(135deg, #4285f4, #34a853);
-            color: white;
-            box-shadow: 0 4px 15px rgba(66,133,244,0.3);
-        }
-        
-        .btn-youtube-main {
+        .youtube-auth-btn {
             background: linear-gradient(135deg, #ff0000, #cc0000);
-            color: white;
-            box-shadow: 0 4px 15px rgba(255,0,0,0.3);
         }
         
-        .btn-signin:active { transform: scale(0.97); }
-        .btn-signin.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
+        .google-btn:active { transform: scale(0.97); }
+        .google-btn.disabled { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
         
         .status-steps {
             margin-top: 28px;
             background: rgba(255,255,255,0.05);
-            border-radius: 32px;
+            border-radius: 28px;
             padding: 16px;
             text-align: left;
         }
         
-        .step-item {
+        .step {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 8px 0;
+            padding: 10px 0;
             font-size: 0.85rem;
         }
         
         .step-check {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
         }
         
-        .step-complete {
+        .step-check.complete {
             background: #10b981;
             color: white;
         }
         
-        .step-pending {
+        .step-check.pending {
             background: rgba(255,255,255,0.2);
             color: var(--gray-400);
         }
         
-        .step-text-complete { color: #10b981; }
-        .step-text-pending { color: var(--gray-400); }
+        .step-text.complete { color: #10b981; }
+        .step-text.pending { color: var(--gray-400); }
         
-        /* Main App Styles */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            animation: float linear infinite;
+            opacity: 0.3;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+        
         .container {
             max-width: 500px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
-            padding: 0 16px 80px;
+            padding: 0 16px;
         }
         
         .header {
@@ -225,8 +220,6 @@
             border-bottom: 1px solid rgba(139, 92, 246, 0.3);
         }
         
-        .header h1 { font-size: 1.8rem; background: linear-gradient(135deg, #fff, var(--primary-light), var(--secondary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        
         .credit-card {
             background: linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(20, 20, 30, 0.95));
             border-radius: 28px;
@@ -236,18 +229,20 @@
             border: 1px solid rgba(139, 92, 246, 0.3);
         }
         
-        .credit-amount { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--primary-light), var(--secondary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .credit-amount { font-size: 3.5rem; font-weight: 800; background: linear-gradient(135deg, var(--primary-light), var(--secondary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
         
         .youtube-card {
-            background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.05));
-            border: 2px solid rgba(255, 0, 0, 0.5);
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.15), rgba(255, 0, 0, 0.05));
+            border: 2px solid rgba(255, 0, 0, 0.4);
             border-radius: 28px;
             padding: 20px;
             margin-bottom: 20px;
         }
         
-        .channel-info { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.08); border-radius: 20px; padding: 12px; margin-top: 12px; }
-        .channel-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+        .channel-info { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 12px; margin-top: 12px; }
+        .channel-avatar { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid var(--youtube); }
+        .youtube-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+        .stat-box { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px; text-align: center; }
         
         .bottom-nav {
             position: fixed;
@@ -284,92 +279,94 @@
         .card { background: rgba(30, 30, 40, 0.9); backdrop-filter: blur(10px); border-radius: 24px; padding: 20px; margin-bottom: 16px; }
         .btn { padding: 14px; border-radius: 60px; font-weight: 700; cursor: pointer; width: 100%; border: none; }
         .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
-        .btn-youtube { background: var(--youtube); color: white; }
-        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.95); padding: 12px 20px; border-radius: 60px; z-index: 2000; animation: fadeUp 0.3s; font-size: 0.85rem; white-space: nowrap; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
-        .user-bar { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.5); padding: 8px 16px; border-radius: 60px; margin-bottom: 16px; }
-        .signout-btn { background: var(--danger); padding: 6px 14px; border-radius: 30px; font-size: 0.7rem; border: none; color: white; cursor: pointer; }
+        .daily-bonus { background: linear-gradient(135deg, var(--warning), #ea580c); color: white; border: none; padding: 10px 20px; border-radius: 60px; font-weight: 600; cursor: pointer; }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 12px 20px; border-radius: 60px; z-index: 2000; animation: slideUp 0.3s ease; max-width: 90%; text-align: center; font-size: 0.85rem; }
+        @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        .hidden { display: none; }
         .empty-state { text-align: center; padding: 40px; color: var(--gray-400); }
-        .referral-code { background: rgba(0,0,0,0.5); padding: 12px; border-radius: 20px; text-align: center; font-family: monospace; letter-spacing: 1px; margin: 12px 0; cursor: pointer; }
-        .loading-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 8px; }
+        .user-bar { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 8px 16px; border-radius: 60px; margin-bottom: 16px; }
+        .signout-btn { background: var(--danger); padding: 6px 14px; border-radius: 30px; font-size: 0.7rem; border: none; color: white; cursor: pointer; }
+        .referral-code { background: rgba(0,0,0,0.5); padding: 12px; border-radius: 20px; text-align: center; font-family: monospace; font-size: 1rem; margin: 12px 0; cursor: pointer; border: 1px dashed var(--primary); }
+        .loading-spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 8px; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <!-- FORTRESS OVERLAY - COMPLETE BLOCK UNTIL BOTH SIGN-INS COMPLETE -->
-    <div class="fortress-overlay" id="fortressOverlay">
-        <div class="signin-card">
-            <div class="lock-icon">🔐🔴</div>
+    <!-- AUTH FORTRESS - HIDES EVERYTHING UNTIL BOTH SIGN-INS -->
+    <div class="auth-fortress" id="authFortress">
+        <div class="auth-card">
+            <div style="font-size: 3.5rem;">🔐🔴</div>
             <h1>ViewSwap Elite</h1>
-            <p>Double authentication required<br>Sign in with Google + YouTube to unlock</p>
+            <p style="color: var(--gray-400); margin-bottom: 24px;">Dual authentication required<br>Google + YouTube</p>
             
-            <div class="dual-buttons">
-                <button class="btn-signin btn-google" id="googleSignInBtn">
-                    <span>🟢</span> Sign in with Google
-                </button>
-                <button class="btn-signin btn-youtube-main" id="youtubeConnectBtn">
-                    <span>🔴</span> Connect YouTube (Full Access)
-                </button>
-            </div>
+            <button class="google-btn" id="googleSignInBtn">
+                🟢 Sign in with Google
+            </button>
+            <button class="google-btn youtube-auth-btn" id="youtubeAuthBtn" style="margin-top: 12px;">
+                🔴 Connect YouTube (Full Access)
+            </button>
             
-            <div class="status-steps" id="authStatusSteps">
-                <div class="step-item" id="googleStep">
-                    <span class="step-check step-pending" id="googleCheck">◻️</span>
-                    <span id="googleText">Google Account: Not signed in</span>
+            <div class="status-steps">
+                <div class="step" id="googleStep">
+                    <div class="step-check pending" id="googleCheckIcon">◻️</div>
+                    <div class="step-text pending" id="googleStepText">Google Account: Not signed in</div>
                 </div>
-                <div class="step-item" id="youtubeStep">
-                    <span class="step-check step-pending" id="youtubeCheck">◻️</span>
-                    <span id="youtubeText">YouTube Channel: Not connected</span>
+                <div class="step" id="youtubeStep">
+                    <div class="step-check pending" id="youtubeCheckIcon">◻️</div>
+                    <div class="step-text pending" id="youtubeStepText">YouTube Channel: Not connected</div>
                 </div>
             </div>
-            <p style="font-size: 0.7rem; margin-top: 20px; opacity: 0.6;">⚠️ YouTube requires permissions: Subscribe, Like, Comment</p>
+            <p style="font-size: 0.7rem; opacity: 0.6; margin-top: 16px;">⚠️ YouTube permissions required: Subscribe, Like, Comment</p>
         </div>
     </div>
 
     <!-- MAIN APP - HIDDEN UNTIL DUAL AUTH SUCCESS -->
-    <div id="fullAppContent">
+    <div id="fullAppWrapper">
+        <div class="bg-particles" id="particles"></div>
         <div class="container">
             <div class="header">
                 <h1>⚡ ViewSwap Elite</h1>
-                <p>YouTube Growth Engine • Subscribe • Like • Comment</p>
+                <p>Full YouTube Integration • Subscribe • Like • Comment • Earn 5% Commission</p>
             </div>
-            
+
             <div class="user-bar">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <img id="appUserAvatar" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--primary);" src="">
-                    <span id="appUserName"></span>
+                    <img id="userAvatarDisplay" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover;" src="">
+                    <span id="userNameDisplay"></span>
                 </div>
-                <button class="signout-btn" id="appSignOutBtn">Sign Out</button>
+                <button class="signout-btn" id="signOutBtn">Sign Out</button>
             </div>
-            
+
             <div class="credit-card">
-                <div class="credit-label">💰 CREDITS</div>
+                <div class="credit-label">💰 TOTAL CREDITS</div>
                 <div class="credit-amount" id="creditBalance">0</div>
-                <button class="btn" id="dailyBonusBtn" style="background: linear-gradient(135deg, var(--warning), #ea580c); margin-top: 12px;">🎁 Daily Bonus +75</button>
+                <button class="daily-bonus" id="dailyBonusBtn">🎁 Daily Bonus +75</button>
             </div>
-            
-            <div class="youtube-card" id="youtubeStatusCard">
-                <div style="display: flex; gap: 12px; align-items: center;">
+
+            <div class="youtube-card" id="youtubeCard">
+                <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
                     <span style="font-size: 1.8rem;">🔴</span>
-                    <div><strong>YouTube Integration</strong><div style="font-size: 0.7rem;">Active & Authorized</div></div>
+                    <div><strong>YouTube Integration</strong><div style="font-size: 0.7rem;">Full access: Subscribe, Like, Comment</div></div>
                 </div>
-                <div id="youtubeChannelInfo"></div>
+                <div id="youtubeContent">
+                    <div class="loading-spinner"></div> Loading channel...
+                </div>
             </div>
-            
-            <div id="dynamicContent"></div>
+
+            <div id="contentArea"></div>
         </div>
-        
+
         <div class="bottom-nav">
-            <button class="nav-item active" data-page="home"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
-            <button class="nav-item" data-page="campaign"><span class="nav-icon">📢</span><span class="nav-label">Campaign</span></button>
-            <button class="nav-item" data-page="earn"><span class="nav-icon">👁️</span><span class="nav-label">Earn</span></button>
-            <button class="nav-item" data-page="referral"><span class="nav-icon">🤝</span><span class="nav-label">Refer</span></button>
-            <button class="nav-item" data-page="help"><span class="nav-icon">❓</span><span class="nav-label">Help</span></button>
+            <button class="nav-item active" data-page="home"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></button>
+            <button class="nav-item" data-page="campaign"><div class="nav-icon">📢</div><div class="nav-label">Campaign</div></button>
+            <button class="nav-item" data-page="earn"><div class="nav-icon">👁️</div><div class="nav-label">Earn</div></button>
+            <button class="nav-item" data-page="referral"><div class="nav-icon">🤝</div><div class="nav-label">Refer</div></button>
+            <button class="nav-item" data-page="help"><div class="nav-icon">❓</div><div class="nav-label">Help</div></button>
         </div>
     </div>
 
     <script type="module">
-        // Firebase & YouTube Integration - FIXED PERMISSIONS
+        // Import Firebase
         const { initializeApp } = window.firebaseModules;
         const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } = window.firebaseModules;
         const { getFirestore, doc, setDoc, getDoc, increment } = window.firebaseModules;
@@ -386,30 +383,21 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
-        // CRITICAL: Configure provider with ALL YouTube scopes upfront
         const provider = new GoogleAuthProvider();
+        
+        // CRITICAL: Add ALL YouTube scopes for full access
         provider.addScope('https://www.googleapis.com/auth/youtube');
         provider.addScope('https://www.googleapis.com/auth/youtube.force-ssl');
         provider.addScope('https://www.googleapis.com/auth/youtube.readonly');
+        provider.addScope('https://www.googleapis.com/auth/youtube.upload');
         provider.addScope('https://www.googleapis.com/auth/youtubepartner');
-        provider.setCustomParameters({ prompt: 'select_account' });
         
-        // State
         let currentUser = null;
         let userData = null;
         let youtubeConnected = false;
-        let youtubeChannelData = null;
+        let youtubeChannel = null;
         let youtubeAccessToken = null;
         let currentPage = 'home';
-        
-        // DOM elements
-        const googleBtn = document.getElementById('googleSignInBtn');
-        const youtubeBtn = document.getElementById('youtubeConnectBtn');
-        const googleCheck = document.getElementById('googleCheck');
-        const googleText = document.getElementById('googleText');
-        const youtubeCheck = document.getElementById('youtubeCheck');
-        const youtubeText = document.getElementById('youtubeText');
         
         function showToast(msg, duration = 3000) {
             const existing = document.querySelector('.toast');
@@ -421,50 +409,54 @@
             setTimeout(() => toast.remove(), duration);
         }
         
-        // Update overlay status with visual checkmarks
-        function updateOverlayStatus() {
+        // Update fortress status
+        function updateFortressStatus() {
             const googleOk = !!currentUser;
-            const youtubeOk = youtubeConnected && !!youtubeChannelData;
+            const ytOk = youtubeConnected && !!youtubeChannel;
+            
+            const googleCheckIcon = document.getElementById('googleCheckIcon');
+            const googleStepText = document.getElementById('googleStepText');
+            const youtubeCheckIcon = document.getElementById('youtubeCheckIcon');
+            const youtubeStepText = document.getElementById('youtubeStepText');
             
             if (googleOk) {
-                googleCheck.innerHTML = '✅';
-                googleCheck.className = 'step-check step-complete';
-                googleText.innerHTML = 'Google Account: Signed in ✓';
-                googleText.className = 'step-text-complete';
+                googleCheckIcon.innerHTML = '✅';
+                googleCheckIcon.className = 'step-check complete';
+                googleStepText.innerHTML = 'Google Account: Signed in ✓';
+                googleStepText.className = 'step-text complete';
             } else {
-                googleCheck.innerHTML = '◻️';
-                googleCheck.className = 'step-check step-pending';
-                googleText.innerHTML = 'Google Account: Not signed in';
-                googleText.className = 'step-text-pending';
+                googleCheckIcon.innerHTML = '◻️';
+                googleCheckIcon.className = 'step-check pending';
+                googleStepText.innerHTML = 'Google Account: Not signed in';
+                googleStepText.className = 'step-text pending';
             }
             
-            if (youtubeOk) {
-                youtubeCheck.innerHTML = '✅';
-                youtubeCheck.className = 'step-check step-complete';
-                youtubeText.innerHTML = 'YouTube Channel: Connected ✓';
-                youtubeText.className = 'step-text-complete';
+            if (ytOk) {
+                youtubeCheckIcon.innerHTML = '✅';
+                youtubeCheckIcon.className = 'step-check complete';
+                youtubeStepText.innerHTML = `YouTube: ${youtubeChannel.title} ✓`;
+                youtubeStepText.className = 'step-text complete';
             } else {
-                youtubeCheck.innerHTML = '◻️';
-                youtubeCheck.className = 'step-check step-pending';
-                youtubeText.innerHTML = 'YouTube Channel: Not connected';
-                youtubeText.className = 'step-text-pending';
+                youtubeCheckIcon.innerHTML = '◻️';
+                youtubeCheckIcon.className = 'step-check pending';
+                youtubeStepText.innerHTML = 'YouTube Channel: Not connected';
+                youtubeStepText.className = 'step-text pending';
             }
             
-            // If both true, remove fortress overlay and show app
-            if (googleOk && youtubeOk) {
+            // If both complete, unlock the app
+            if (googleOk && ytOk) {
                 document.body.classList.add('fully-authenticated');
-                updateYouTubeDisplayInApp();
+                updateYouTubeDisplay();
                 renderCurrentPage();
             } else {
                 document.body.classList.remove('fully-authenticated');
             }
         }
         
-        // Initialize YouTube API and fetch channel with token
-        async function initYouTubeAndFetchChannel(token) {
+        // Initialize YouTube API and fetch channel
+        async function initYouTubeAndGetChannel(token) {
             return new Promise(async (resolve) => {
                 try {
-                    // Load GAPI if needed
                     if (!window.gapi) {
                         await new Promise((res) => {
                             const script = document.createElement('script');
@@ -501,44 +493,36 @@
                         resolve(null);
                     }
                 } catch (err) {
-                    console.error('YouTube API error:', err);
+                    console.error('YouTube init error:', err);
                     resolve(null);
                 }
             });
         }
         
-        // Connect YouTube - FIXED: Uses signInWithPopup with full scopes
+        // Connect YouTube with full permissions
         async function connectYouTube() {
             if (!currentUser) {
                 showToast('Please sign in with Google first');
                 return;
             }
             
-            // Disable button during process
-            youtubeBtn.style.opacity = '0.6';
-            youtubeBtn.style.pointerEvents = 'none';
-            const originalText = youtubeBtn.innerHTML;
-            youtubeBtn.innerHTML = '<span class="loading-spinner"></span> Connecting...';
+            const btn = document.getElementById('youtubeAuthBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loading-spinner"></span> Connecting YouTube...';
+            btn.classList.add('disabled');
             
             try {
-                // Force a new sign-in popup to get fresh YouTube permissions
-                // This will re-prompt for consent with YouTube scopes
+                // Force new sign-in popup with all YouTube scopes
                 const result = await signInWithPopup(auth, provider);
                 const credential = GoogleAuthProvider.credentialFromResult(result);
                 const accessToken = credential.accessToken;
-                
-                if (!accessToken) {
-                    throw new Error('No access token received');
-                }
-                
                 youtubeAccessToken = accessToken;
                 
-                // Fetch channel info using the token
-                const channel = await initYouTubeAndFetchChannel(accessToken);
+                const channel = await initYouTubeAndGetChannel(accessToken);
                 
                 if (channel && channel.id) {
                     youtubeConnected = true;
-                    youtubeChannelData = channel;
+                    youtubeChannel = channel;
                     
                     // Save to Firestore
                     if (userData) {
@@ -548,57 +532,48 @@
                     }
                     
                     showToast(`✅ YouTube connected: ${channel.title}`);
-                    updateOverlayStatus();
-                    updateYouTubeDisplayInApp();
+                    updateFortressStatus();
+                    updateYouTubeDisplay();
                 } else {
-                    throw new Error('Could not fetch channel details. Make sure you have a YouTube channel.');
+                    throw new Error('Could not fetch YouTube channel. Make sure you have a YouTube channel.');
                 }
             } catch (err) {
-                console.error('YouTube connection error:', err);
-                let errorMsg = 'YouTube connection failed. ';
-                if (err.message.includes('popup')) {
-                    errorMsg += 'Please allow popups for this site.';
-                } else if (err.message.includes('channel')) {
-                    errorMsg += 'Make sure you have a YouTube channel.';
-                } else {
-                    errorMsg += err.message;
-                }
-                showToast(errorMsg);
+                console.error('YouTube error:', err);
+                let msg = 'YouTube connection failed. ';
+                if (err.message.includes('popup')) msg += 'Please allow popups.';
+                else if (err.message.includes('channel')) msg += 'You need a YouTube channel.';
+                else msg += err.message;
+                showToast(msg);
                 youtubeConnected = false;
-                youtubeChannelData = null;
+                youtubeChannel = null;
             } finally {
-                youtubeBtn.innerHTML = originalText;
-                youtubeBtn.style.opacity = '1';
-                youtubeBtn.style.pointerEvents = 'auto';
-                updateOverlayStatus();
+                btn.innerHTML = originalText;
+                btn.classList.remove('disabled');
+                updateFortressStatus();
             }
         }
         
         // Google Sign-In
         async function handleGoogleSignIn() {
-            googleBtn.style.opacity = '0.6';
-            googleBtn.style.pointerEvents = 'none';
-            const originalText = googleBtn.innerHTML;
-            googleBtn.innerHTML = '<span class="loading-spinner"></span> Signing...';
+            const btn = document.getElementById('googleSignInBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loading-spinner"></span> Signing in...';
+            btn.classList.add('disabled');
             
             try {
                 const result = await signInWithPopup(auth, provider);
                 currentUser = result.user;
                 const credential = GoogleAuthProvider.credentialFromResult(result);
+                if (credential?.accessToken) youtubeAccessToken = credential.accessToken;
                 
-                // Store token for potential YouTube use
-                if (credential?.accessToken) {
-                    youtubeAccessToken = credential.accessToken;
-                }
-                
-                // Load or create user data
+                // Load user data
                 const userRef = doc(db, 'users', currentUser.uid);
                 const userSnap = await getDoc(userRef);
                 
                 if (userSnap.exists()) {
                     userData = userSnap.data();
                     youtubeConnected = userData.youtubeConnected || false;
-                    youtubeChannelData = userData.youtubeChannel || null;
+                    youtubeChannel = userData.youtubeChannel || null;
                 } else {
                     userData = {
                         uid: currentUser.uid,
@@ -619,75 +594,84 @@
                 }
                 
                 // Update app UI
-                document.getElementById('appUserAvatar').src = currentUser.photoURL || '';
-                document.getElementById('appUserName').innerText = currentUser.displayName?.split(' ')[0] || 'User';
+                document.getElementById('userAvatarDisplay').src = currentUser.photoURL || '';
+                document.getElementById('userNameDisplay').innerText = currentUser.displayName?.split(' ')[0] || 'User';
                 document.getElementById('creditBalance').innerText = Math.floor(userData.credits || 0);
                 
                 showToast(`Welcome ${currentUser.displayName}! Now connect YouTube.`);
-                updateOverlayStatus();
+                updateFortressStatus();
             } catch (err) {
-                console.error('Google sign-in error:', err);
+                console.error('Google error:', err);
                 showToast('Google sign-in failed. Please try again.');
             } finally {
-                googleBtn.innerHTML = originalText;
-                googleBtn.style.opacity = '1';
-                googleBtn.style.pointerEvents = 'auto';
+                btn.innerHTML = originalText;
+                btn.classList.remove('disabled');
             }
         }
         
-        // Update YouTube display inside main app
-        function updateYouTubeDisplayInApp() {
-            const container = document.getElementById('youtubeChannelInfo');
+        // Update YouTube display inside app (FIXED: shows proper profile picture)
+        function updateYouTubeDisplay() {
+            const container = document.getElementById('youtubeContent');
             if (!container) return;
             
-            if (!youtubeConnected || !youtubeChannelData) {
+            if (!youtubeConnected || !youtubeChannel) {
                 container.innerHTML = `
-                    <div style="background: rgba(255,0,0,0.2); border-radius: 16px; padding: 16px; text-align: center; margin-top: 12px;">
-                        ⚠️ YouTube not connected. Please reconnect.
+                    <button class="btn btn-primary" id="retryYoutubeBtn" style="background: var(--youtube);">🔴 Connect YouTube Now</button>
+                    <div class="permission-badge" style="background: rgba(255,0,0,0.2); padding: 12px; border-radius: 16px; margin-top: 12px; text-align: center;">
+                        ⚡ Full access needed: Subscribe, Like, Comment
                     </div>
                 `;
+                document.getElementById('retryYoutubeBtn')?.addEventListener('click', connectYouTube);
                 return;
             }
             
+            // FIXED: Properly display YouTube profile picture
+            const avatarUrl = youtubeChannel.thumbnail || 'https://via.placeholder.com/52';
+            
             container.innerHTML = `
                 <div class="channel-info">
-                    <img src="${youtubeChannelData.thumbnail || 'https://via.placeholder.com/48'}" class="channel-avatar" onerror="this.src='https://via.placeholder.com/48'">
+                    <img src="${avatarUrl}" class="channel-avatar" onerror="this.src='https://ui-avatars.com/api/?background=ff0000&color=fff&name=${encodeURIComponent(youtubeChannel.title.charAt(0))}'">
                     <div>
-                        <strong>${escapeHtml(youtubeChannelData.title)}</strong>
-                        <div style="font-size:0.7rem; color:#4ade80;">✓ Full access: Subscribe, Like, Comment</div>
+                        <strong>${escapeHtml(youtubeChannel.title)}</strong>
+                        <div style="font-size: 0.7rem; color: #4ade80;">✓ Connected & Fully Authorized</div>
                     </div>
                 </div>
-                <div style="display: flex; gap: 12px; margin-top: 12px;">
-                    <div style="background: rgba(0,0,0,0.3); border-radius: 16px; padding: 10px; flex:1; text-align:center;">
-                        <div style="font-weight:bold;">${formatNumber(youtubeChannelData.subscriberCount)}</div>
-                        <div style="font-size:0.6rem;">Subscribers</div>
+                <div class="youtube-stats">
+                    <div class="stat-box">
+                        <div class="stat-number">${formatNumber(youtubeChannel.subscriberCount)}</div>
+                        <div class="stat-label">Subscribers</div>
                     </div>
-                    <div style="background: rgba(0,0,0,0.3); border-radius: 16px; padding: 10px; flex:1; text-align:center;">
-                        <div style="font-weight:bold;">${formatNumber(youtubeChannelData.videoCount)}</div>
-                        <div style="font-size:0.6rem;">Videos</div>
+                    <div class="stat-box">
+                        <div class="stat-number">${formatNumber(youtubeChannel.videoCount)}</div>
+                        <div class="stat-label">Videos</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${formatNumber(youtubeChannel.viewCount)}</div>
+                        <div class="stat-label">Views</div>
                     </div>
                 </div>
-                <button id="refreshYouTubeBtn" style="background: #333; border: none; color: white; padding: 8px; border-radius: 40px; margin-top: 12px; width: 100%; cursor: pointer;">🔄 Refresh Channel</button>
+                <div class="permission-badge" style="background: rgba(74,222,128,0.2); padding: 10px; border-radius: 16px; margin-top: 12px; text-align: center; font-size: 0.7rem;">
+                    ✅ Full YouTube permissions granted • Subscribe • Like • Comment
+                </div>
             `;
-            
-            document.getElementById('refreshYouTubeBtn')?.addEventListener('click', async () => {
-                if (youtubeAccessToken) {
-                    showToast('Refreshing channel data...');
-                    const fresh = await initYouTubeAndFetchChannel(youtubeAccessToken);
-                    if (fresh) {
-                        youtubeChannelData = fresh;
-                        if (userData) {
-                            userData.youtubeChannel = fresh;
-                            await setDoc(doc(db, 'users', currentUser.uid), userData, { merge: true });
-                        }
-                        updateYouTubeDisplayInApp();
-                        showToast('Channel refreshed!');
-                    }
-                }
+        }
+        
+        function formatNumber(n) {
+            if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+            if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+            return n.toString();
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
             });
         }
         
-        // User data helpers
         async function updateCredits(amount) {
             if (!userData) return;
             userData.credits = (userData.credits || 0) + amount;
@@ -710,18 +694,17 @@
             showToast('🎁 +75 daily bonus credits!');
         }
         
-        function formatNumber(n) { if (n >= 1e6) return (n/1e6).toFixed(1)+'M'; if (n >= 1000) return (n/1000).toFixed(1)+'K'; return n; }
-        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m) { return m==='&'?'&amp;': m==='<'?'&lt;': '&gt;'; }); }
-        
-        // Page rendering
-        function renderHome() { return `<div class="card"><h2>📊 Dashboard</h2><div style="text-align:center; padding:20px;">Welcome ${currentUser?.displayName?.split(' ')[0] || ''}!<br><br>Credits: ${userData?.credits || 0}<br>Total Earned: ${userData?.totalEarned || 0}<br>Referral Income: ${userData?.referralEarnings?.toFixed(2) || 0}</div></div>`; }
-        function renderCampaign() { return `<div class="card"><h2>🎯 Create Campaign</h2><p>Spend credits to get YouTube engagement</p><div class="empty-state">Views: 1cr | Subscribers: 5cr | Likes: 1cr | Comments: 3cr</div><button class="btn btn-primary" id="demoCampaignBtn">Launch Demo Campaign</button></div>`; }
-        function renderEarn() { return `<div class="card"><h2>👁️ Earn Credits</h2><p>Complete actions from other creators. Your referrer gets 5% commission!</p><div class="empty-state">Active campaigns will appear here</div></div>`; }
-        function renderReferral() { return `<div class="card"><h2>🤝 Referral Program</h2><div class="referral-code" id="refCodeCopy">${userData?.referralCode || ''}</div><button class="btn btn-primary" id="copyRefBtn">Copy Code</button><div style="margin-top: 16px;">Commission earned: ${userData?.referralEarnings?.toFixed(2) || 0} credits</div></div>`; }
-        function renderHelp() { return `<div class="card"><h2>❓ How It Works</h2><p>✅ Sign in with Google + YouTube<br>✅ Full permissions for subscribe/like/comment<br>✅ Earn credits by completing actions<br>✅ 5% lifetime referral commission</p></div>`; }
+        // Simple page renders
+        function renderHome() {
+            return `<div class="card"><h2>📊 Dashboard</h2><div style="text-align:center; padding:20px;">Welcome ${currentUser?.displayName?.split(' ')[0] || ''}!<br><br>Credits: ${userData?.credits || 0}<br>Total Earned: ${userData?.totalEarned || 0}<br>Referral: ${userData?.referralEarnings?.toFixed(2) || 0}</div></div>`;
+        }
+        function renderCampaign() { return `<div class="card"><h2>🎯 Create Campaign</h2><div class="empty-state">Views: 1cr | Subs: 5cr | Likes: 1cr | Comments: 3cr</div><button class="btn btn-primary" id="demoBtn">Launch Demo Campaign</button></div>`; }
+        function renderEarn() { return `<div class="card"><h2>👁️ Earn Credits</h2><div class="empty-state">Complete actions from other creators</div></div>`; }
+        function renderReferral() { return `<div class="card"><h2>🤝 Referral Program</h2><div class="referral-code" id="refCode">${userData?.referralCode || ''}</div><button class="btn btn-primary" id="copyBtn">Copy Code</button><div style="margin-top:16px;">Earned: ${userData?.referralEarnings?.toFixed(2) || 0} credits</div></div>`; }
+        function renderHelp() { return `<div class="card"><h2>❓ How It Works</h2><p>✅ Sign in with Google + YouTube<br>✅ Full YouTube permissions<br>✅ Earn credits<br>✅ 5% referral commission</p></div>`; }
         
         async function renderCurrentPage() {
-            const container = document.getElementById('dynamicContent');
+            const container = document.getElementById('contentArea');
             if (!container) return;
             if (currentPage === 'home') container.innerHTML = renderHome();
             else if (currentPage === 'campaign') container.innerHTML = renderCampaign();
@@ -729,21 +712,20 @@
             else if (currentPage === 'referral') container.innerHTML = renderReferral();
             else container.innerHTML = renderHelp();
             
-            document.getElementById('demoCampaignBtn')?.addEventListener('click', () => showToast('Campaign system ready!'));
-            document.getElementById('copyRefBtn')?.addEventListener('click', () => { navigator.clipboard.writeText(userData?.referralCode || ''); showToast('Copied!'); });
-            document.getElementById('refCodeCopy')?.addEventListener('click', () => { navigator.clipboard.writeText(userData?.referralCode || ''); showToast('Copied!'); });
+            document.getElementById('demoBtn')?.addEventListener('click', () => showToast('Campaign system ready!'));
+            document.getElementById('copyBtn')?.addEventListener('click', () => { navigator.clipboard.writeText(userData?.referralCode || ''); showToast('Copied!'); });
+            document.getElementById('refCode')?.addEventListener('click', () => { navigator.clipboard.writeText(userData?.referralCode || ''); showToast('Copied!'); });
         }
         
-        // Sign out completely
         async function fullSignOut() {
             await signOut(auth);
             currentUser = null;
             userData = null;
             youtubeConnected = false;
-            youtubeChannelData = null;
+            youtubeChannel = null;
             youtubeAccessToken = null;
             document.body.classList.remove('fully-authenticated');
-            updateOverlayStatus();
+            updateFortressStatus();
             showToast('Signed out. All content locked.');
         }
         
@@ -756,22 +738,22 @@
                 if (snap.exists()) {
                     userData = snap.data();
                     youtubeConnected = userData.youtubeConnected || false;
-                    youtubeChannelData = userData.youtubeChannel || null;
+                    youtubeChannel = userData.youtubeChannel || null;
                 } else {
                     userData = { credits: 500, referralCode: 'REF' + user.uid.substring(0,6).toUpperCase(), youtubeConnected: false };
                     await setDoc(userRef, userData);
                 }
-                document.getElementById('appUserAvatar').src = user.photoURL || '';
-                document.getElementById('appUserName').innerText = user.displayName?.split(' ')[0] || 'User';
+                document.getElementById('userAvatarDisplay').src = user.photoURL || '';
+                document.getElementById('userNameDisplay').innerText = user.displayName?.split(' ')[0] || 'User';
                 document.getElementById('creditBalance').innerText = Math.floor(userData.credits || 0);
                 
-                // Try to restore token and verify YouTube connection
+                // Try to restore YouTube connection if token exists
                 try {
                     const token = await user.getIdToken(true);
-                    const channel = await initYouTubeAndFetchChannel(token);
+                    const channel = await initYouTubeAndGetChannel(token);
                     if (channel && !youtubeConnected) {
                         youtubeConnected = true;
-                        youtubeChannelData = channel;
+                        youtubeChannel = channel;
                         userData.youtubeConnected = true;
                         userData.youtubeChannel = channel;
                         await setDoc(userRef, userData, { merge: true });
@@ -782,20 +764,20 @@
                 currentUser = null;
                 userData = null;
                 youtubeConnected = false;
-                youtubeChannelData = null;
+                youtubeChannel = null;
             }
-            updateOverlayStatus();
+            updateFortressStatus();
             if (currentUser && youtubeConnected) {
-                updateYouTubeDisplayInApp();
+                updateYouTubeDisplay();
                 renderCurrentPage();
             }
         });
         
         // Event listeners
-        googleBtn.addEventListener('click', handleGoogleSignIn);
-        youtubeBtn.addEventListener('click', connectYouTube);
+        document.getElementById('googleSignInBtn').addEventListener('click', handleGoogleSignIn);
+        document.getElementById('youtubeAuthBtn').addEventListener('click', connectYouTube);
         document.getElementById('dailyBonusBtn')?.addEventListener('click', claimDailyBonus);
-        document.getElementById('appSignOutBtn')?.addEventListener('click', fullSignOut);
+        document.getElementById('signOutBtn')?.addEventListener('click', fullSignOut);
         
         // Navigation
         document.querySelectorAll('.nav-item').forEach(btn => {
@@ -808,7 +790,19 @@
             });
         });
         
-        updateOverlayStatus();
+        // Particles
+        for (let i = 0; i < 40; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.width = Math.random() * 5 + 2 + 'px';
+            p.style.height = p.style.width;
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDuration = Math.random() * 15 + 8 + 's';
+            p.style.animationDelay = Math.random() * 10 + 's';
+            document.getElementById('particles')?.appendChild(p);
+        }
+        
+        updateFortressStatus();
     </script>
 </body>
 </html>
