@@ -413,74 +413,69 @@
         
         .empty-state { text-align: center; padding: 30px; color: var(--gray-400); }
         
-        /* FULLSCREEN QR MODAL */
-        .qr-modal-fullscreen {
+        /* FULL SCREEN QR MODAL (Fixed) */
+        .qr-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: #000000;
-            z-index: 20000;
+            z-index: 10001;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
             backdrop-filter: none;
-            background: black;
+            padding: 0;
+            margin: 0;
         }
         
-        .qr-fullscreen-container {
+        .qr-container {
+            background: transparent;
             width: 100%;
             height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: #000;
-            position: relative;
+            text-align: center;
+            padding: 20px;
         }
         
-        #qr-reader-full {
-            width: 100vw;
-            height: 100vh;
+        #qr-reader {
+            width: 100%;
+            max-width: 100vw;
+            border-radius: 0;
+            overflow: hidden;
+            background: black;
+        }
+        
+        #qr-reader video {
+            width: 100%;
+            height: auto;
             object-fit: cover;
-            position: absolute;
-            top: 0;
-            left: 0;
+            min-height: 60vh;
         }
         
-        .close-qr-full {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
+        /* Ensure scanner covers full width */
+        #qr-reader__dashboard_section_csr {
+            background: #111;
             color: white;
-            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .close-qr {
+            background: var(--danger);
+            color: white;
+            border: none;
             padding: 14px 28px;
             border-radius: 60px;
-            font-weight: bold;
-            font-size: 1.1rem;
+            margin-top: 24px;
             cursor: pointer;
-            z-index: 20001;
-            width: auto;
-            min-width: 160px;
-        }
-        
-        .qr-header-full {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            color: white;
-            background: rgba(0,0,0,0.6);
-            padding: 12px;
             font-weight: bold;
-            z-index: 20001;
-            font-size: 1.2rem;
+            font-size: 1rem;
+            width: 80%;
+            max-width: 280px;
         }
         
         .qr-code-display {
@@ -493,17 +488,35 @@
         
         .warning-text {
             color: var(--warning);
-            font-size: 0.7rem;
-            margin-top: 8px;
+            font-size: 0.8rem;
+            margin-top: 16px;
+            background: rgba(0,0,0,0.6);
+            padding: 6px 12px;
+            border-radius: 40px;
         }
         
-        /* clickable qr image */
-        .qr-clickable {
-            cursor: pointer;
-            transition: transform 0.2s;
+        /* Fullscreen QR display for share */
+        .fullscreen-qr-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0f;
+            z-index: 10002;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            backdrop-filter: blur(0px);
         }
-        .qr-clickable:active {
-            transform: scale(0.98);
+        
+        .fullscreen-qr-content {
+            text-align: center;
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 48px;
+            border: 2px solid var(--primary);
         }
     </style>
 </head>
@@ -559,8 +572,8 @@
         let currentUser = null;
         let userData = null;
         let currentPage = 'home';
-        let pendingReferralCode = null;
         
+        // Balanced achievements
         const ACHIEVEMENTS = {
             streak1: { name: "🔥 1 Day Streak", desc: "Claim daily bonus", icon: "🔥", reward: 15, requirement: 1 },
             streak3: { name: "⚡ 3 Day Streak", desc: "3 days in a row", icon: "⚡", reward: 30, requirement: 3 },
@@ -592,6 +605,21 @@
         
         function generateQRCodeURL(data) {
             return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data)}`;
+        }
+        
+        // Fullscreen QR display (for showing personal QR)
+        function showFullscreenQR(qrUrl, title = "Your Referral QR") {
+            const modal = document.createElement('div');
+            modal.className = 'fullscreen-qr-modal';
+            modal.innerHTML = `
+                <div class="fullscreen-qr-content">
+                    <h3 style="margin-bottom: 20px;">${title}</h3>
+                    <img src="${qrUrl}" width="220" height="220" style="border-radius: 24px; background: white; padding: 16px;">
+                    <button class="close-qr" id="closeFullQr" style="margin-top: 30px;">Close</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('closeFullQr').onclick = () => modal.remove();
         }
         
         async function loadUserData(uid) {
@@ -635,6 +663,7 @@
             if (earnedAmount <= 0) return;
             const commission = Math.floor(earnedAmount * 0.05);
             if (commission <= 0) return;
+            
             const referrerSnap = await getDoc(doc(db, 'viewswap_users', referredUserId));
             if (referrerSnap.exists()) {
                 const referrerData = referrerSnap.data();
@@ -643,49 +672,17 @@
                     await runTransaction(db, async (transaction) => {
                         const uplineSnap = await transaction.get(uplineRef);
                         if (uplineSnap.exists()) {
+                            const newEarnings = (uplineSnap.data().referralEarnings || 0) + commission;
                             transaction.update(uplineRef, { 
-                                referralEarnings: increment(commission),
+                                referralEarnings: newEarnings,
                                 credits: increment(commission),
                                 totalEarned: increment(commission)
                             });
+                            showToast(`🎁 Referrer earned +${commission} credits commission!`);
                         }
                     });
-                    showToast(`🎁 Referrer earned ${commission} credits (5% commission!)`);
                 }
             }
-        }
-        
-        // PROCESS REFERRAL: core fix - ensures referral is saved after login
-        async function processQRReferral(referrerCode) {
-            if (!currentUser) {
-                pendingReferralCode = referrerCode;
-                sessionStorage.setItem('pendingViewSwapRef', referrerCode);
-                return false;
-            }
-            if (userData.referredBy) {
-                showToast("You already have a referrer!", true);
-                return false;
-            }
-            const usersRef = collection(db, 'viewswap_users');
-            const q = query(usersRef, where('referralCode', '==', referrerCode));
-            const snapshot = await getDocs(q);
-            if (!snapshot.empty) {
-                const referrerDoc = snapshot.docs[0];
-                const referrerId = referrerDoc.id;
-                if (referrerId !== currentUser.uid) {
-                    userData.referredBy = referrerId;
-                    await saveUserData();
-                    const referrerRef = doc(db, 'viewswap_users', referrerId);
-                    await updateDoc(referrerRef, { referrals: arrayUnion(currentUser.uid) });
-                    await updateCredits(10, 'welcome');
-                    await addReferralCommission(currentUser.uid, 10);
-                    await checkAchievements();
-                    showToast(`🎉 Referral activated! +10 welcome credits & referrer gets 5% forever!`);
-                    return true;
-                }
-            }
-            showToast("Invalid referral code", true);
-            return false;
         }
         
         async function checkAchievements() {
@@ -722,7 +719,7 @@
             if (lastClaim) {
                 if (lastClaim.toDateString() === yesterday.toDateString()) newStreak = (userData.streak.current || 0) + 1;
                 else if (lastClaim.toDateString() === today.toDateString()) { showToast('Already claimed today!'); return; }
-                else { newStreak = 1; showToast('Streak reset! Start fresh today.', true); }
+                else { newStreak = 1; showToast('Streak reset!', true); }
             }
             const bonusAmount = 25 + Math.floor(newStreak / 7) * 10;
             await updateCredits(bonusAmount, 'daily');
@@ -734,6 +731,78 @@
             renderCurrentPage();
         }
         
+        // Process referral with robust confirmation
+        async function processQRReferral(referrerCode) {
+            if (!currentUser) return false;
+            if (userData.referredBy) { showToast('You already have a referrer!', true); return false; }
+            const usersRef = collection(db, 'viewswap_users');
+            const q = query(usersRef, where('referralCode', '==', referrerCode));
+            const snapshot = await getDocs(q);
+            if (!snapshot.empty) {
+                const referrerDoc = snapshot.docs[0];
+                const referrerId = referrerDoc.id;
+                if (referrerId !== currentUser.uid) {
+                    userData.referredBy = referrerId;
+                    await saveUserData();
+                    const referrerRef = doc(db, 'viewswap_users', referrerId);
+                    await updateDoc(referrerRef, { referrals: arrayUnion(currentUser.uid) });
+                    await updateCredits(10, 'welcome');
+                    showToast(`🎉 Referral SUCCESS! +10 welcome credits!`);
+                    await addReferralCommission(currentUser.uid, 10);
+                    await checkAchievements();
+                    renderCurrentPage();
+                    return true;
+                } else { showToast("Can't refer yourself", true); return false; }
+            } else { showToast("Invalid referral code", true); return false; }
+        }
+        
+        // FULLSCREEN QR Scanner with big camera
+        let activeScanner = null;
+        function startFullscreenQRScanner(onSuccess) {
+            if (activeScanner) {
+                activeScanner.stop().catch(()=>{});
+            }
+            const modal = document.createElement('div');
+            modal.className = 'qr-modal';
+            modal.innerHTML = `
+                <div class="qr-container" style="width:100%; height:100%;">
+                    <div id="qr-reader-full" style="width:100%; height:70vh;"></div>
+                    <button class="close-qr" id="closeScannerBtn">Cancel</button>
+                    <p class="warning-text">📱 Position QR code in frame</p>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            const readerDiv = document.getElementById('qr-reader-full');
+            const scanner = new Html5Qrcode("qr-reader-full");
+            activeScanner = scanner;
+            const config = { fps: 15, qrbox: { width: 280, height: 280 } };
+            scanner.start({ facingMode: "environment" }, config, (decodedText) => {
+                scanner.stop().catch(()=>{});
+                activeScanner = null;
+                modal.remove();
+                onSuccess(decodedText);
+            }, (err) => {});
+            document.getElementById('closeScannerBtn').onclick = () => {
+                if(activeScanner) activeScanner.stop().catch(()=>{});
+                modal.remove();
+                activeScanner = null;
+            };
+        }
+        
+        function showQRScannerForReferral(onComplete) {
+            startFullscreenQRScanner(async (code) => {
+                if (code && code.startsWith('VIEWSWAP_REF:')) {
+                    const refCode = code.split(':')[1];
+                    const success = await onComplete(refCode);
+                    if (success) showToast('✅ Referral confirmed! Bonus added.');
+                    else showToast('❌ Failed to apply referral', true);
+                } else {
+                    showToast('Invalid QR code (must start with VIEWSWAP_REF:)', true);
+                }
+            });
+        }
+        
+        // --- Campaign and rendering functions (unchanged structure but fixed fullscreen)---
         async function createCampaign(title, url) {
             const videoId = extractVideoId(url);
             if (!videoId) { showToast('Invalid YouTube URL', true); return false; }
@@ -766,127 +835,30 @@
             if (userData.referredBy && reward > 0) await addReferralCommission(currentUser.uid, reward);
             const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
             await updateDoc(campaignRef, { views: increment(1), watchers: arrayUnion(currentUser.uid), watchTimeSec: increment(30) });
+            const creatorRef = doc(db, 'viewswap_users', campaign.creatorId);
+            await runTransaction(db, async (transaction) => {
+                const creatorSnap = await transaction.get(creatorRef);
+                if (creatorSnap.exists()) transaction.update(creatorRef, { credits: increment(1), totalEarned: increment(1) });
+            });
             await checkAchievements();
             renderCurrentPage();
         }
-        
         window.watchCampaign = watchCampaign;
         
-        // FULLSCREEN QR SCANNER
-        let fullscreenScanner = null;
-        function showFullscreenQRScanner(onScanCallback) {
-            const modal = document.createElement('div');
-            modal.className = 'qr-modal-fullscreen';
-            modal.innerHTML = `
-                <div class="qr-fullscreen-container">
-                    <div class="qr-header-full">🔍 Scan Referral QR Code</div>
-                    <div id="qr-reader-full" style="width:100%; height:100%;"></div>
-                    <button class="close-qr-full">✖ Close Scanner</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            const scannerDiv = document.getElementById('qr-reader-full');
-            if (fullscreenScanner && fullscreenScanner.isScanning) fullscreenScanner.stop().catch(()=>{});
-            fullscreenScanner = new Html5Qrcode("qr-reader-full");
-            const config = { fps: 12, qrbox: { width: 280, height: 280 } };
-            fullscreenScanner.start({ facingMode: "environment" }, config, (decodedText) => {
-                if (fullscreenScanner) fullscreenScanner.stop().catch(()=>{});
-                onScanCallback(decodedText);
-                modal.remove();
-                fullscreenScanner = null;
-            }, (err) => {});
-            modal.querySelector('.close-qr-full').onclick = () => {
-                if (fullscreenScanner && fullscreenScanner.isScanning) fullscreenScanner.stop().catch(()=>{});
-                modal.remove();
-                fullscreenScanner = null;
-            };
-        }
-        
-        async function handleScanAndRefer(code) {
-            if (code.startsWith('VIEWSWAP_REF:')) {
-                const refCode = code.split(':')[1];
-                const success = await processQRReferral(refCode);
-                if (success) showToast('✅ Referral applied! Welcome bonus credited.');
-                else showToast('❌ Invalid or already referred', true);
-            } else {
-                showToast('Invalid QR format (must start with VIEWSWAP_REF:)', true);
-            }
-        }
-        
-        // Render functions
+        // Rendering functions
         async function renderHome() {
             const campaignsQuery = query(collection(db, 'viewswap_campaigns'));
             const snapshot = await getDocs(campaignsQuery);
             const allCampaigns = [];
             snapshot.forEach(doc => allCampaigns.push({ ...doc.data(), docId: doc.id }));
             const available = allCampaigns.filter(c => c.creatorId !== currentUser?.uid && !userData?.watchedVideos?.includes(c.videoId));
-            return `
-                <div class="streak-card">
-                    <div>🔥 Current Streak</div>
-                    <div class="streak-number">${userData?.streak?.current || 0} days</div>
-                    <div>Highest: ${userData?.streak?.highest || 0}</div>
-                    <button class="daily-bonus-btn" id="dailyBonusBtn">🎁 Claim Daily Bonus</button>
-                </div>
-                <div class="card">
-                    <h2>🎬 Watch & Earn (3 credits each)</h2>
-                    ${available.length === 0 ? '<div class="empty-state">No videos available. Create a campaign!</div>' : 
-                        available.map(c => `
-                            <div class="campaign-item">
-                                <div style="font-weight: bold;">${escapeHtml(c.title)}</div>
-                                <div style="font-size: 0.7rem; color: gray;">${escapeHtml(c.url)}</div>
-                                <div class="badge">👁️ ${c.views || 0} views</div>
-                                <button class="btn-primary" onclick="window.watchCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')})">▶️ Watch +3 credits</button>
-                            </div>
-                        `).join('')
-                    }
-                </div>
-            `;
+            return `<div class="streak-card"><div>🔥 Current Streak</div><div class="streak-number">${userData?.streak?.current || 0} days</div><div>Highest: ${userData?.streak?.highest || 0}</div><button class="daily-bonus-btn" id="dailyBonusBtn">🎁 Claim Daily Bonus</button></div><div class="card"><h2>🎬 Watch & Earn (3 credits each)</h2>${available.length === 0 ? '<div class="empty-state">No videos available.</div>' : available.map(c => `<div class="campaign-item"><div style="font-weight: bold;">${escapeHtml(c.title)}</div><div class="badge">👁️ ${c.views || 0} views</div><button class="btn-primary" onclick="window.watchCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')})">▶️ Watch +3 credits</button></div>`).join('')}</div>`;
         }
-        
-        function renderCampaignPage() {
-            return `<div class="card"><h2>📢 Create Campaign (5 credits)</h2><input id="campaignTitle" placeholder="Campaign title"><input id="campaignUrl" placeholder="YouTube URL"><button class="btn-primary" id="createCampaignBtn">🚀 Launch</button></div><div class="card"><h2>📊 My Campaigns</h2><div id="myCampaignsList"></div></div>`;
-        }
-        
-        async function renderMyCampaigns() {
-            const container = document.getElementById('myCampaignsList');
-            if(!container) return;
-            const my = userData?.campaigns || [];
-            if(my.length===0) container.innerHTML='<div class="empty-state">No campaigns yet</div>';
-            else container.innerHTML = my.map(c => `<div class="campaign-item"><strong>${escapeHtml(c.title)}</strong><div class="badge">👁️ ${c.views||0} views</div></div>`).join('');
-        }
-        
-        function renderRewardsPage() {
-            const streak = userData?.streak?.current||0, campCount=userData?.campaigns?.length||0, watched=userData?.watchedVideos?.length||0, referralCount=userData?.referrals?.length||0;
-            return `<div class="streak-card"><div>🔥 Streak</div><div class="streak-number">${streak} days</div></div>
-            <div class="card"><h2>🏆 Achievements</h2><div class="achievement-grid">${Object.entries(ACHIEVEMENTS).map(([key,ach])=>{
-                let unlocked=false;
-                if(key.includes('streak')) unlocked=streak>=ach.requirement;
-                else if(key.includes('campaign')) unlocked=campCount>=ach.requirement;
-                else if(key.includes('watcher')) unlocked=watched>=ach.requirement;
-                else if(key.includes('refer')) unlocked=referralCount>=ach.requirement;
-                return `<div class="achievement-card ${unlocked?'unlocked':''}"><div class="achievement-icon">${ach.icon}</div><div class="achievement-name">${ach.name}</div><div class="achievement-desc">${ach.desc}</div><div class="achievement-reward">+${ach.reward}</div>${!unlocked?'<div class="locked-badge">🔒</div>':'<div class="locked-badge" style="background:var(--success);">✓</div>'}</div>`;
-            }).join('')}</div></div>
-            <div class="card"><h2>📊 Stats</h2><div class="stat-row"><span>📢 Campaigns:</span><span>${campCount}</span></div><div class="stat-row"><span>👀 Videos watched:</span><span>${watched}</span></div><div class="stat-row"><span>🤝 Referrals:</span><span>${referralCount}</span></div><div class="stat-row"><span>💰 Total Earned:</span><span>${Math.floor(userData?.totalEarned||0)}</span></div></div>`;
-        }
-        
-        function renderAccountPage() {
-            const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`);
-            return `<div class="card"><div class="account-info"><img src="${currentUser?.photoURL}" class="account-avatar"><div style="font-weight:bold;">${escapeHtml(currentUser?.displayName)}</div><div>${currentUser?.email}</div></div></div>
-            <div class="card"><h2>💰 Credits</h2><div class="stat-row"><span>💎 Balance:</span><span style="font-size:1.5rem;color:var(--primary);">${Math.floor(userData?.credits||0)}</span></div><div class="stat-row"><span>🏆 Total Earned:</span><span>${Math.floor(userData?.totalEarned||0)}</span></div><div class="stat-row"><span>🔥 Streak:</span><span>${userData?.streak?.current||0} days</span></div></div>
-            <div class="card"><h2>🔗 Your QR Code</h2><div class="qr-code-display qr-clickable" id="fullscreenQrTrigger"><img src="${qrUrl}" width="140" height="140"></div><div class="referral-code-box" id="refCode">${userData?.referralCode}</div><button class="btn-primary" id="copyRefBtn">📋 Copy Code</button></div>
-            <button class="signout-btn-lg" id="signOutBtnAccount">🚪 Sign Out</button>`;
-        }
-        
-        function renderReferPage() {
-            const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`);
-            return `<div class="card"><h2>🤝 Referral Program</h2><div style="background:linear-gradient(135deg,var(--warning),#ea580c);border-radius:20px;padding:12px;text-align:center;margin-bottom:12px;">🎁 5% commission on everything your referrals earn!</div>
-            <div class="qr-code-display qr-clickable" id="fullscreenQrTriggerRefer"><img src="${qrUrl}" width="160" height="160"></div>
-            <div class="referral-code-box" id="refLink">${userData?.referralCode}</div>
-            <button class="btn-primary" id="copyRefLink">📋 Copy Code</button>
-            <button class="btn-secondary" id="scanQrBtn">📷 Scan QR (Fullscreen)</button>
-            <div class="stat-row" style="margin-top:12px;"><span>💰 Commission Earned:</span><span style="color:gold;">${Math.floor(userData?.referralEarnings||0)} credits</span></div></div>`;
-        }
-        
+        function renderCampaignPage() { return `<div class="card"><h2>📢 Create Campaign (5 credits)</h2><input id="campaignTitle" placeholder="Campaign title"><input id="campaignUrl" placeholder="YouTube URL"><button class="btn-primary" id="createCampaignBtn">🚀 Launch</button></div><div class="card"><h2>📊 My Campaigns</h2><div id="myCampaignsList"></div></div>`; }
+        async function renderMyCampaigns() { const container = document.getElementById('myCampaignsList'); if(!container) return; const my = userData?.campaigns || []; container.innerHTML = my.length===0 ? '<div class="empty-state">No campaigns</div>' : my.map(c => `<div class="campaign-item"><strong>${escapeHtml(c.title)}</strong><div class="badge">👁️ ${c.views||0} views</div></div>`).join(''); }
+        function renderRewardsPage() { const streak = userData?.streak?.current||0, campCount=userData?.campaigns?.length||0, watched=userData?.watchedVideos?.length||0, referralCount=userData?.referrals?.length||0; return `<div class="streak-card"><div>🔥 Streak</div><div class="streak-number">${streak} days</div></div><div class="card"><h2>🏆 Achievements</h2><div class="achievement-grid">${Object.entries(ACHIEVEMENTS).map(([key,ach])=>{ let unlocked=false; if(key.includes('streak')) unlocked=streak>=ach.requirement; else if(key.includes('campaign')) unlocked=campCount>=ach.requirement; else if(key.includes('watcher')) unlocked=watched>=ach.requirement; else if(key.includes('refer')) unlocked=referralCount>=ach.requirement; return `<div class="achievement-card ${unlocked?'unlocked':''}"><div class="achievement-icon">${ach.icon}</div><div class="achievement-name">${ach.name}</div><div class="achievement-desc">${ach.desc}</div><div class="achievement-reward">+${ach.reward}</div>${!unlocked?'<div class="locked-badge">🔒</div>':'<div class="locked-badge">✓</div>'}</div>`; }).join('')}</div></div><div class="card"><h2>📊 Stats</h2><div class="stat-row"><span>📢 Campaigns:</span><span>${campCount}</span></div><div class="stat-row"><span>👀 Videos watched:</span><span>${watched}</span></div><div class="stat-row"><span>🤝 Referrals:</span><span>${referralCount}</span></div><div class="stat-row"><span>💰 Total Earned:</span><span>${Math.floor(userData?.totalEarned||0)}</span></div></div>`; }
+        function renderAccountPage() { const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`); return `<div class="card"><div class="account-info"><img src="${currentUser?.photoURL}" class="account-avatar"><div>${escapeHtml(currentUser?.displayName)}</div><div>${currentUser?.email}</div></div></div><div class="card"><h2>💰 Credits</h2><div class="stat-row"><span>💎 Balance:</span><span style="font-size:1.5rem;">${Math.floor(userData?.credits||0)}</span></div><div class="stat-row"><span>🔥 Streak:</span><span>${userData?.streak?.current||0} days</span></div></div><div class="card"><h2>🔗 Your QR Code</h2><div class="qr-code-display"><img src="${qrUrl}" width="120" height="120" style="cursor:pointer;" id="fullscreenQrTrigger"></div><div class="referral-code-box">${userData?.referralCode}</div><button class="btn-primary" id="copyRefBtnAcc">📋 Copy Code</button></div><button class="signout-btn-lg" id="signOutBtnAccount">🚪 Sign Out</button>`; }
+        function renderReferPage() { const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`); return `<div class="card"><h2>🤝 Referral Program</h2><div style="background:linear-gradient(135deg,var(--warning),#ea580c);border-radius:20px;padding:12px;text-align:center;">🎁 5% commission on everything your referrals earn!</div><div class="qr-code-display"><img src="${qrUrl}" width="150" height="150" style="cursor:pointer;" id="fullscreenQrRefer"></div><div class="referral-code-box">${userData?.referralCode}</div><button class="btn-primary" id="copyRefLinkBtn">📋 Copy Code</button><button class="btn-secondary" id="scanQrBtnRefer">📷 Scan QR to Refer Someone</button><div class="stat-row"><span>💰 Commission Earned:</span><span style="color:gold;">${Math.floor(userData?.referralEarnings||0)} credits</span></div></div>`; }
         function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
         
         async function renderCurrentPage() {
@@ -895,37 +867,18 @@
             if(currentPage==='home'){ container.innerHTML = await renderHome(); document.getElementById('dailyBonusBtn')?.addEventListener('click',claimDailyBonus); }
             else if(currentPage==='campaign'){ container.innerHTML = renderCampaignPage(); document.getElementById('createCampaignBtn')?.addEventListener('click',async()=>{ const title=document.getElementById('campaignTitle')?.value, url=document.getElementById('campaignUrl')?.value; if(title&&url) await createCampaign(title,url); else showToast('Title & URL required', true); await renderMyCampaigns(); }); await renderMyCampaigns(); }
             else if(currentPage==='rewards') container.innerHTML = renderRewardsPage();
-            else if(currentPage==='account'){ container.innerHTML = renderAccountPage(); document.getElementById('copyRefBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Copied!'); }); document.getElementById('fullscreenQrTrigger')?.addEventListener('click',()=>{ const bigQr = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`); window.open(bigQr, '_blank'); }); document.getElementById('signOutBtnAccount')?.addEventListener('click',async()=>await signOut(auth)); }
-            else if(currentPage==='refer'){ container.innerHTML = renderReferPage(); document.getElementById('copyRefLink')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Referral code copied'); }); document.getElementById('scanQrBtn')?.addEventListener('click',()=>{ showFullscreenQRScanner(async (code) => { await handleScanAndRefer(code); }); }); document.getElementById('fullscreenQrTriggerRefer')?.addEventListener('click',()=>{ const bigQr = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`); window.open(bigQr, '_blank'); }); }
+            else if(currentPage==='account'){ container.innerHTML = renderAccountPage(); const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`); document.getElementById('fullscreenQrTrigger')?.addEventListener('click',()=>showFullscreenQR(qrUrl, "Your Referral QR")); document.getElementById('copyRefBtnAcc')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Copied!'); }); document.getElementById('signOutBtnAccount')?.addEventListener('click',async()=>await signOut(auth)); }
+            else if(currentPage==='refer'){ container.innerHTML = renderReferPage(); const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`); document.getElementById('fullscreenQrRefer')?.addEventListener('click',()=>showFullscreenQR(qrUrl, "Share this QR")); document.getElementById('copyRefLinkBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Referral code copied'); }); document.getElementById('scanQrBtnRefer')?.addEventListener('click',()=>{ showQRScannerForReferral(async (code) => { return await processQRReferral(code); }); }); }
         }
         
         document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{ currentPage=btn.dataset.page; document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderCurrentPage(); }));
         
-        function initOnlineTracking() {
-            const onlineQuery = query(collection(db, 'viewswap_online'), where('isOnline','==',true));
-            onSnapshot(onlineQuery,(snap)=>{ document.getElementById('onlineCountBadge').innerHTML=`👥 ${snap.size} active`; });
-            const statusRef=doc(db,'viewswap_online',currentUser?.uid);
-            const update=async()=>{ if(currentUser) await setDoc(statusRef,{uid:currentUser.uid,isOnline:true,lastSeen:serverTimestamp()},{merge:true}); };
-            update(); setInterval(update,30000); window.addEventListener('beforeunload',()=>setDoc(statusRef,{isOnline:false},{merge:true}));
-        }
+        function initOnlineTracking() { const onlineQuery = query(collection(db, 'viewswap_online'), where('isOnline','==',true)); onSnapshot(onlineQuery,(snap)=>{ document.getElementById('onlineCountBadge').innerHTML=`👥 ${snap.size} active`; }); const statusRef=doc(db,'viewswap_online',currentUser?.uid); const update=async()=>{ if(currentUser) await setDoc(statusRef,{uid:currentUser.uid,isOnline:true,lastSeen:serverTimestamp()},{merge:true}); }; update(); setInterval(update,30000); window.addEventListener('beforeunload',()=>setDoc(statusRef,{isOnline:false},{merge:true})); }
         
-        onAuthStateChanged(auth, async(user)=>{
-            if(user){ currentUser=user; await loadUserData(user.uid); document.body.classList.add('authenticated'); initOnlineTracking(); 
-                const pending = sessionStorage.getItem('pendingViewSwapRef');
-                if(pending && !userData.referredBy) {
-                    await processQRReferral(pending);
-                    sessionStorage.removeItem('pendingViewSwapRef');
-                }
-                renderCurrentPage(); 
-            }
-            else{ document.body.classList.remove('authenticated'); currentUser=null; userData=null; }
-        });
+        onAuthStateChanged(auth, async(user)=>{ if(user){ currentUser=user; await loadUserData(user.uid); document.body.classList.add('authenticated'); initOnlineTracking(); renderCurrentPage(); const pending = sessionStorage.getItem('pendingReferral'); if(pending && !userData?.referredBy){ await processQRReferral(pending); sessionStorage.removeItem('pendingReferral'); } } else{ document.body.classList.remove('authenticated'); currentUser=null; userData=null; } });
+        
         document.getElementById('signInBtn').addEventListener('click',()=>signInWithPopup(auth,provider));
-        document.getElementById('qrSignInBtn').addEventListener('click',()=>{
-            showFullscreenQRScanner(async (code) => {
-                await handleScanAndRefer(code);
-            });
-        });
+        document.getElementById('qrSignInBtn').addEventListener('click',()=>{ showQRScannerForReferral(async (code) => { if(!currentUser){ sessionStorage.setItem('pendingReferral', code); await signInWithPopup(auth, provider); return true; } else { return await processQRReferral(code); } }); });
         
         for(let i=0;i<35;i++){ const p=document.createElement('div'); p.className='particle'; p.style.width=Math.random()*4+2+'px'; p.style.height=p.style.width; p.style.left=Math.random()*100+'%'; p.style.animationDuration=Math.random()*12+6+'s'; p.style.animationDelay=Math.random()*8+'s'; document.getElementById('particles')?.appendChild(p); }
     </script>
