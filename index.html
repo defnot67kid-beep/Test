@@ -9,11 +9,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, onSnapshot, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, onSnapshot, serverTimestamp, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
         window.firebaseModules = {
             initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
-            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, onSnapshot, serverTimestamp, where
+            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, onSnapshot, serverTimestamp, where, orderBy
         };
     </script>
     
@@ -84,10 +84,6 @@
         .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 10px 18px; border-radius: 60px; z-index: 2000; animation: slideUp 0.3s ease; max-width: 90%; text-align: center; font-size: 0.85rem; }
         @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         .badge { background: rgba(139, 92, 246, 0.2); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; display: inline-block; }
-        .premium-badge { background: linear-gradient(135deg, var(--gold), #f59e0b); color: #000; font-weight: bold; }
-        .qr-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10001; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        #qr-reader { width: 100%; max-width: 100vw; }
-        .close-qr { background: var(--danger); color: white; border: none; padding: 14px 28px; border-radius: 60px; margin-top: 24px; cursor: pointer; }
         .streak-card { background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(234, 88, 12, 0.2)); border-radius: 28px; padding: 20px; text-align: center; margin-bottom: 16px; border: 1px solid var(--warning); }
         .streak-number { font-size: 2.5rem; font-weight: 800; color: var(--warning); }
         .daily-bonus-btn { background: linear-gradient(135deg, var(--warning), #ea580c); color: white; border: none; padding: 10px 20px; border-radius: 60px; font-weight: 700; cursor: pointer; margin-top: 12px; }
@@ -96,6 +92,13 @@
         .achievement-card.unlocked { background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2)); border-color: var(--primary); }
         .referral-code-box { background: rgba(0,0,0,0.5); padding: 12px; border-radius: 16px; font-family: monospace; text-align: center; border: 2px dashed var(--primary); cursor: pointer; }
         .empty-state { text-align: center; padding: 30px; color: var(--gray-400); }
+        .campaign-item { background: rgba(35,35,45,0.8); border-radius: 18px; padding: 14px; margin-bottom: 12px; }
+        .button-group { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .button-group button { flex: 1; min-width: 70px; }
+        .time-input-group { display: flex; gap: 8px; margin-top: 8px; }
+        .time-input-group input { flex: 1; margin-bottom: 0; }
+        .time-input-group button { flex: 0 0 auto; width: auto; margin-top: 0; padding: 12px 16px; }
+        .my-campaigns-section { margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -130,7 +133,7 @@
     <script type="module">
         const { initializeApp } = window.firebaseModules;
         const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } = window.firebaseModules;
-        const { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, updateDoc, onSnapshot, serverTimestamp, where } = window.firebaseModules;
+        const { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, updateDoc, onSnapshot, serverTimestamp, where, orderBy } = window.firebaseModules;
         
         const firebaseConfig = {
             apiKey: "AIzaSyAupBkllyicDPD9O6CmX4mS4sF5z96mqxc",
@@ -149,20 +152,55 @@
         let currentUser = null;
         let userData = null;
         let currentPage = 'home';
-        let activeUsersCount = 0;
+        let activeUsersCount = 10;
+        let allCampaigns = [];
         
-        // Track active users count for dynamic limits
+        // Track active users count
         function updateActiveUsersCount() {
             const onlineQuery = query(collection(db, 'viewswap_online'), where('isOnline', '==', true));
-            onSnapshot(onlineQuery, (snap) => { activeUsersCount = snap.size; document.getElementById('onlineCountBadge').innerHTML = `👥 ${activeUsersCount} active`; });
+            onSnapshot(onlineQuery, (snap) => { 
+                activeUsersCount = Math.max(snap.size, 5);
+                document.getElementById('onlineCountBadge').innerHTML = `👥 ${activeUsersCount} active`;
+            }, (err) => { activeUsersCount = 10; });
         }
         
-        // Random event multiplier (hidden)
+        // Load all campaigns from Firestore
+        async function loadAllCampaigns() {
+            try {
+                const campaignsQuery = query(collection(db, 'viewswap_campaigns'), orderBy('createdAt', 'desc'));
+                const snapshot = await getDocs(campaignsQuery);
+                allCampaigns = [];
+                snapshot.forEach(doc => {
+                    allCampaigns.push({ ...doc.data(), firestoreId: doc.id });
+                });
+                return allCampaigns;
+            } catch (error) {
+                console.error("Error loading campaigns:", error);
+                return [];
+            }
+        }
+        
+        // Real-time listener for campaigns
+        function setupCampaignsListener() {
+            const campaignsQuery = query(collection(db, 'viewswap_campaigns'), orderBy('createdAt', 'desc'));
+            onSnapshot(campaignsQuery, (snapshot) => {
+                allCampaigns = [];
+                snapshot.forEach(doc => {
+                    allCampaigns.push({ ...doc.data(), firestoreId: doc.id });
+                });
+                if (currentPage === 'home') {
+                    renderCurrentPage();
+                }
+            }, (error) => {
+                console.error("Campaigns listener error:", error);
+            });
+        }
+        
         function getEventMultiplier() {
             const random = Math.random();
-            if (random < 0.05) return 2.5; // 5% chance super boost
-            if (random < 0.15) return 1.8; // 10% chance boost
-            if (random < 0.3) return 1.3; // 15% chance mini boost
+            if (random < 0.05) return 2.5;
+            if (random < 0.15) return 1.8;
+            if (random < 0.3) return 1.3;
             return 1.0;
         }
         
@@ -177,7 +215,6 @@
                 userData.watchedVideos = userData.watchedVideos || [];
                 userData.referrals = userData.referrals || [];
                 userData.referralEarnings = userData.referralEarnings || 0;
-                userData.isPremium = userData.isPremium || false;
             } else {
                 userData = {
                     uid, email: currentUser.email, displayName: currentUser.displayName,
@@ -186,136 +223,167 @@
                     referredBy: null, referralEarnings: 0, totalEarned: 0,
                     watchedVideos: [], campaigns: [],
                     achievements: {}, streak: { current: 0, lastClaim: null, highest: 0 },
-                    isPremium: false, createdAt: new Date().toISOString()
+                    createdAt: new Date().toISOString()
                 };
                 await setDoc(ref, userData);
             }
             return userData;
         }
         
-        async function saveUserData() { if(currentUser) await setDoc(doc(db, 'viewswap_users', currentUser.uid), userData, { merge: true }); }
-        async function updateCredits(amount) { userData.credits += amount; if(amount > 0) userData.totalEarned += amount; await saveUserData(); }
+        async function saveUserData() { 
+            if(currentUser) await setDoc(doc(db, 'viewswap_users', currentUser.uid), userData, { merge: true }); 
+        }
+        
+        async function updateCredits(amount) { 
+            userData.credits += amount; 
+            if(amount > 0) userData.totalEarned += amount; 
+            await saveUserData(); 
+        }
         
         // Advanced Campaign Creation
         async function createAdvancedCampaign(campaignData) {
             if (userData.credits < 15) { showToast('Need 15 credits to create advanced campaign', true); return false; }
             
             const multiplier = getEventMultiplier();
-            // Hidden dynamic pricing based on event multiplier
-            const actualCost = Math.floor(15 * multiplier);
+            const actualCost = Math.floor(15);
             await updateCredits(-actualCost);
+            
+            // Ensure video ID extraction works
+            const videoId = extractVideoId(campaignData.url);
             
             const campaign = {
                 id: Date.now().toString(),
                 title: campaignData.title,
                 url: campaignData.url,
                 channelUrl: campaignData.channelUrl || null,
-                videoId: extractVideoId(campaignData.url),
+                videoId: videoId,
                 creatorId: currentUser.uid,
                 creatorName: userData.displayName,
+                creatorPhoto: userData.photoURL,
                 createdAt: new Date().toISOString(),
-                // Campaign targets
-                targetViews: parseInt(campaignData.targetViews) || Math.min(activeUsersCount || 10, 100),
+                targetViews: Math.min(parseInt(campaignData.targetViews) || activeUsersCount, activeUsersCount * 2),
                 targetWatchTime: parseInt(campaignData.targetWatchTime) || 30,
                 targetLikes: parseInt(campaignData.targetLikes) || 10,
                 targetSubs: campaignData.targetSubs ? parseInt(campaignData.targetSubs) : null,
                 targetComments: campaignData.targetComments ? parseInt(campaignData.targetComments) : null,
                 customCommentText: campaignData.customCommentText || null,
-                // Stats tracking
                 currentViews: 0,
                 currentWatchTime: 0,
                 currentLikes: 0,
                 currentSubs: 0,
                 currentComments: 0,
                 watchers: [],
-                // Reward rates (hidden from UI but functional)
                 viewReward: 10,
                 watchTimeRewardPerSec: 1.9,
                 likeReward: 2.8,
                 subReward: 15,
-                commentReward: 5
+                commentReward: 5,
+                isActive: true
             };
             
+            // Save to Firestore
+            const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
+            await setDoc(campaignRef, campaign);
+            
+            // Also save to user's campaigns array
             userData.campaigns = userData.campaigns || [];
             userData.campaigns.push(campaign);
             await saveUserData();
-            const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
-            await setDoc(campaignRef, campaign);
-            showToast(`✅ Campaign "${campaignData.title}" created! (Event multiplier: ${multiplier.toFixed(1)}x)`);
+            
+            showToast(`✅ Campaign "${campaignData.title}" created! View it on Home page.`);
             return true;
         }
         
         function extractVideoId(url) {
+            if (!url) return null;
             const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([^&\n?#]+)/;
             const match = url.match(regex);
             return match ? match[1] : null;
         }
         
-        // Interaction handlers with dynamic coin calculations
+        // Interaction handlers
         async function interactWithCampaign(campaign, actionType, value = null) {
+            if (!currentUser) { showToast('Please sign in', true); return; }
+            
             const multiplier = getEventMultiplier();
             let reward = 0;
             let updated = false;
+            let updateData = {};
             
+            // Check if user already watched this campaign
             if (actionType === 'watch') {
-                if (campaign.watchers.includes(currentUser.uid)) { showToast('Already engaged with this campaign', true); return; }
+                if (campaign.watchers && campaign.watchers.includes(currentUser.uid)) { 
+                    showToast('Already watched this campaign!', true); 
+                    return; 
+                }
                 reward = campaign.viewReward * multiplier;
                 await updateCredits(reward);
-                campaign.currentViews = Math.min(campaign.currentViews + 1, campaign.targetViews);
-                campaign.watchers.push(currentUser.uid);
+                updateData = {
+                    currentViews: (campaign.currentViews || 0) + 1,
+                    watchers: arrayUnion(currentUser.uid)
+                };
                 updated = true;
-                showToast(`📺 Watched! +${reward.toFixed(1)} credits (${multiplier > 1 ? 'Event Boost!' : ''})`);
+                showToast(`📺 Watched! +${reward.toFixed(1)} credits`);
             }
             else if (actionType === 'watchTime' && value) {
-                const maxTime = Math.min(value, campaign.targetWatchTime - campaign.currentWatchTime);
+                const remaining = (campaign.targetWatchTime || 0) - (campaign.currentWatchTime || 0);
+                const maxTime = Math.min(parseInt(value), remaining);
                 if (maxTime <= 0) { showToast('Watch time target reached!', true); return; }
                 const timeReward = maxTime * campaign.watchTimeRewardPerSec * multiplier;
                 await updateCredits(timeReward);
-                campaign.currentWatchTime = Math.min(campaign.currentWatchTime + maxTime, campaign.targetWatchTime);
+                updateData = { currentWatchTime: (campaign.currentWatchTime || 0) + maxTime };
                 updated = true;
                 showToast(`⏱️ +${maxTime}s watch time! Earned ${timeReward.toFixed(1)} credits`);
             }
             else if (actionType === 'like') {
-                if (campaign.currentLikes >= campaign.targetLikes) { showToast('Like target reached!', true); return; }
+                if ((campaign.currentLikes || 0) >= (campaign.targetLikes || 0)) { 
+                    showToast('Like target reached!', true); 
+                    return; 
+                }
                 reward = campaign.likeReward * multiplier;
                 await updateCredits(reward);
-                campaign.currentLikes = Math.min(campaign.currentLikes + 1, campaign.targetLikes);
+                updateData = { currentLikes: (campaign.currentLikes || 0) + 1 };
                 updated = true;
                 showToast(`❤️ Liked! +${reward.toFixed(1)} credits`);
             }
             else if (actionType === 'subscribe' && campaign.channelUrl) {
-                if (campaign.targetSubs && campaign.currentSubs >= campaign.targetSubs) { showToast('Subscribe target reached!', true); return; }
+                if (campaign.targetSubs && (campaign.currentSubs || 0) >= campaign.targetSubs) { 
+                    showToast('Subscribe target reached!', true); 
+                    return; 
+                }
                 reward = campaign.subReward * multiplier;
                 await updateCredits(reward);
-                campaign.currentSubs = Math.min((campaign.currentSubs || 0) + 1, campaign.targetSubs || 999);
+                updateData = { currentSubs: (campaign.currentSubs || 0) + 1 };
                 updated = true;
                 showToast(`🔔 Subscribed! +${reward.toFixed(1)} credits`);
             }
             else if (actionType === 'comment' && campaign.customCommentText) {
-                if (campaign.targetComments && campaign.currentComments >= campaign.targetComments) { showToast('Comment target reached!', true); return; }
+                if (campaign.targetComments && (campaign.currentComments || 0) >= campaign.targetComments) { 
+                    showToast('Comment target reached!', true); 
+                    return; 
+                }
                 reward = campaign.commentReward * multiplier;
                 await updateCredits(reward);
-                campaign.currentComments = Math.min((campaign.currentComments || 0) + 1, campaign.targetComments || 999);
+                updateData = { currentComments: (campaign.currentComments || 0) + 1 };
                 updated = true;
-                showToast(`💬 Commented: "${campaign.customCommentText}" +${reward.toFixed(1)} credits`);
+                showToast(`💬 Commented: +${reward.toFixed(1)} credits`);
             }
             
             if (updated) {
-                const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
-                await updateDoc(campaignRef, {
-                    currentViews: campaign.currentViews,
-                    currentWatchTime: campaign.currentWatchTime,
-                    currentLikes: campaign.currentLikes,
-                    currentSubs: campaign.currentSubs,
-                    currentComments: campaign.currentComments,
-                    watchers: campaign.watchers
-                });
+                const campaignRef = doc(db, 'viewswap_campaigns', campaign.id || campaign.firestoreId);
+                await updateDoc(campaignRef, updateData);
+                
                 // Reward creator (10% of engagement)
-                const creatorRef = doc(db, 'viewswap_users', campaign.creatorId);
-                const creatorReward = Math.floor(reward * 0.1);
-                if (creatorReward > 0) await updateDoc(creatorRef, { credits: increment(creatorReward), totalEarned: increment(creatorReward) });
+                if (reward > 0 && campaign.creatorId !== currentUser.uid) {
+                    const creatorRef = doc(db, 'viewswap_users', campaign.creatorId);
+                    const creatorReward = Math.floor(reward * 0.1);
+                    if (creatorReward > 0) {
+                        await updateDoc(creatorRef, { credits: increment(creatorReward), totalEarned: increment(creatorReward) });
+                    }
+                }
+                
                 await checkAchievements();
-                renderCurrentPage();
+                await renderCurrentPage();
             }
         }
         
@@ -326,22 +394,40 @@
             const watchedCount = userData.watchedVideos?.length || 0;
             const referralCount = userData.referrals?.length || 0;
             const streak = userData.streak?.current || 0;
-            const achievements = {
-                streak1: streak >= 1, streak3: streak >= 3, streak7: streak >= 7,
-                campaign1: campaignCount >= 1, campaign5: campaignCount >= 5,
-                watcher10: watchedCount >= 10, watcher50: watchedCount >= 50,
-                refer1: referralCount >= 1, refer5: referralCount >= 5
-            };
-            for (const [key, achieved] of Object.entries(achievements)) {
-                if (achieved && !userData.achievements[key]) {
-                    userData.achievements[key] = { unlockedAt: new Date().toISOString() };
-                    const reward = { streak1:15, streak3:30, streak7:60, campaign1:20, campaign5:50, watcher10:20, watcher50:80, refer1:25, refer5:100 }[key] || 10;
-                    await updateCredits(reward);
-                    showToast(`🏆 Achievement unlocked! +${reward} credits`);
-                    if (userData.referredBy) await addReferralCommission(currentUser.uid, reward);
-                }
+            
+            let unlocked = false;
+            if (streak >= 1 && !userData.achievements.streak1) {
+                userData.achievements.streak1 = true;
+                await updateCredits(15);
+                showToast('🏆 Streak Starter! +15 credits');
+                unlocked = true;
             }
-            await saveUserData();
+            if (streak >= 3 && !userData.achievements.streak3) {
+                userData.achievements.streak3 = true;
+                await updateCredits(30);
+                showToast('🏆 3 Day Streak! +30 credits');
+                unlocked = true;
+            }
+            if (campaignCount >= 1 && !userData.achievements.campaign1) {
+                userData.achievements.campaign1 = true;
+                await updateCredits(20);
+                showToast('🏆 First Campaign! +20 credits');
+                unlocked = true;
+            }
+            if (watchedCount >= 10 && !userData.achievements.watcher10) {
+                userData.achievements.watcher10 = true;
+                await updateCredits(20);
+                showToast('🏆 Active Watcher! +20 credits');
+                unlocked = true;
+            }
+            if (referralCount >= 1 && !userData.achievements.refer1) {
+                userData.achievements.refer1 = true;
+                await updateCredits(25);
+                showToast('🏆 First Referral! +25 credits');
+                unlocked = true;
+            }
+            
+            if (unlocked) await saveUserData();
         }
         
         async function addReferralCommission(userId, amount) {
@@ -352,14 +438,14 @@
             if (userSnap.exists() && userSnap.data().referredBy) {
                 const uplineRef = doc(db, 'viewswap_users', userSnap.data().referredBy);
                 await updateDoc(uplineRef, { referralEarnings: increment(commission), credits: increment(commission), totalEarned: increment(commission) });
-                showToast(`🎁 Referrer earned ${commission} credits commission!`);
             }
         }
         
         async function claimDailyBonus() {
             const lastClaim = userData.streak?.lastClaim ? new Date(userData.streak.lastClaim) : null;
             const today = new Date();
-            const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
             let newStreak = 1;
             if (lastClaim) {
                 if (lastClaim.toDateString() === yesterday.toDateString()) newStreak = (userData.streak.current || 0) + 1;
@@ -396,81 +482,143 @@
             return false;
         }
         
-        // Rendering
+        // Rendering Home with ALL campaigns
         async function renderHome() {
-            const campaignsQuery = query(collection(db, 'viewswap_campaigns'));
-            const snapshot = await getDocs(campaignsQuery);
-            const campaigns = [];
-            snapshot.forEach(doc => campaigns.push({ ...doc.data(), id: doc.id }));
-            const available = campaigns.filter(c => c.creatorId !== currentUser?.uid);
-            return `
+            await loadAllCampaigns();
+            
+            // Filter out user's own campaigns from available list
+            const availableCampaigns = allCampaigns.filter(c => c.creatorId !== currentUser?.uid);
+            const myCampaigns = allCampaigns.filter(c => c.creatorId === currentUser?.uid);
+            
+            let html = `
                 <div class="streak-card">
                     <div>🔥 Current Streak</div>
                     <div class="streak-number">${userData?.streak?.current || 0} days</div>
+                    <div>Highest: ${userData?.streak?.highest || 0}</div>
                     <button class="daily-bonus-btn" id="dailyBonusBtn">🎁 Claim Daily Bonus</button>
                 </div>
-                <div class="card">
-                    <h2>🎬 Active Campaigns</h2>
-                    ${available.length === 0 ? '<div class="empty-state">No active campaigns</div>' : 
-                        available.map(c => `
-                            <div class="campaign-item" style="background:rgba(35,35,45,0.8);border-radius:18px;padding:14px;margin-bottom:12px;">
-                                <div style="font-weight:bold;">${escapeHtml(c.title)}</div>
-                                <div style="font-size:0.7rem;color:gray;">${c.url}</div>
-                                <div class="stat-row"><span>👁️ Views:</span><span>${c.currentViews || 0}/${c.targetViews}</span></div>
-                                <div class="stat-row"><span>⏱️ Watch Time:</span><span>${c.currentWatchTime || 0}/${c.targetWatchTime}s</span></div>
-                                <div class="stat-row"><span>❤️ Likes:</span><span>${c.currentLikes || 0}/${c.targetLikes}</span></div>
-                                ${c.targetSubs ? `<div class="stat-row"><span>🔔 Subs:</span><span>${c.currentSubs || 0}/${c.targetSubs}</span></div>` : ''}
-                                ${c.targetComments ? `<div class="stat-row"><span>💬 Comments:</span><span>${c.currentComments || 0}/${c.targetComments}</span></div>` : ''}
-                                <div class="badge">🎁 ${c.viewReward} per view | ${c.watchTimeRewardPerSec}/sec | ${c.likeReward}/like</div>
-                                <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
-                                    <button class="btn-secondary" onclick="window.open('${c.url}', '_blank'); interactWithCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')}, 'watch')">▶️ Watch</button>
-                                    <button class="btn-secondary" onclick="interactWithCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')}, 'like')">❤️ Like</button>
-                                    ${c.channelUrl ? `<button class="btn-secondary" onclick="window.open('${c.channelUrl}', '_blank'); interactWithCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')}, 'subscribe')">🔔 Subscribe</button>` : ''}
-                                    ${c.customCommentText ? `<button class="btn-secondary" onclick="interactWithCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')}, 'comment')">💬 Comment</button>` : ''}
-                                </div>
-                                ${c.targetWatchTime > 0 ? `<input type="number" id="timeInput_${c.id}" placeholder="Add watch time (sec)" style="margin-top:8px;"><button class="btn-primary" onclick="const val=document.getElementById('timeInput_${c.id}').value; if(val) interactWithCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')}, 'watchTime', parseInt(val))">⏱️ Add Watch Time</button>` : ''}
+            `;
+            
+            // Available Campaigns Section
+            html += `<div class="card">
+                <h2>🎬 Available Campaigns (Earn Credits!)</h2>`;
+            if (availableCampaigns.length === 0) {
+                html += '<div class="empty-state">No campaigns available. Create one in Campaign tab!</div>';
+            } else {
+                html += availableCampaigns.map(c => renderCampaignCard(c)).join('');
+            }
+            html += `</div>`;
+            
+            // My Campaigns Section
+            if (myCampaigns.length > 0) {
+                html += `<div class="card my-campaigns-section">
+                    <h2>📊 My Campaigns (Your Creations)</h2>`;
+                html += myCampaigns.map(c => renderCampaignCard(c, true)).join('');
+                html += `</div>`;
+            }
+            
+            return html;
+        }
+        
+        function renderCampaignCard(c, isOwner = false) {
+            return `
+                <div class="campaign-item">
+                    <div style="font-weight:bold; margin-bottom:8px;">${escapeHtml(c.title)}</div>
+                    <div style="font-size:0.7rem; color:var(--gray-400); word-break:break-all;">${escapeHtml(c.url)}</div>
+                    ${isOwner ? `<div class="badge" style="background:var(--gold);color:#000;margin:8px 0;">👑 Your Campaign</div>` : `<div class="badge" style="margin:8px 0;">by ${escapeHtml(c.creatorName)}</div>`}
+                    <div class="stat-row"><span>👁️ Views:</span><span>${c.currentViews || 0}/${c.targetViews}</span></div>
+                    <div class="stat-row"><span>⏱️ Watch Time:</span><span>${c.currentWatchTime || 0}/${c.targetWatchTime}s</span></div>
+                    <div class="stat-row"><span>❤️ Likes:</span><span>${c.currentLikes || 0}/${c.targetLikes}</span></div>
+                    ${c.targetSubs ? `<div class="stat-row"><span>🔔 Subs:</span><span>${c.currentSubs || 0}/${c.targetSubs}</span></div>` : ''}
+                    ${c.targetComments ? `<div class="stat-row"><span>💬 Comments:</span><span>${c.currentComments || 0}/${c.targetComments}</span></div>` : ''}
+                    <div class="badge">💰 ${c.viewReward}/view | ${c.watchTimeRewardPerSec}/sec | ${c.likeReward}/like</div>
+                    
+                    ${!isOwner ? `
+                        <div class="button-group">
+                            <button class="btn-secondary" onclick="window.open('${c.url}', '_blank'); interactWithCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')}, 'watch')">▶️ Watch</button>
+                            <button class="btn-secondary" onclick="interactWithCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')}, 'like')">❤️ Like</button>
+                            ${c.channelUrl ? `<button class="btn-secondary" onclick="window.open('${c.channelUrl}', '_blank'); interactWithCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')}, 'subscribe')">🔔 Sub</button>` : ''}
+                            ${c.customCommentText ? `<button class="btn-secondary" onclick="interactWithCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')}, 'comment')">💬 Comment</button>` : ''}
+                        </div>
+                        ${c.targetWatchTime > 0 ? `
+                            <div class="time-input-group">
+                                <input type="number" id="timeInput_${c.id || c.firestoreId}" placeholder="Add watch time (sec)" value="10">
+                                <button class="btn-primary" onclick="const val=document.getElementById('timeInput_${c.id || c.firestoreId}').value; if(val) interactWithCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')}, 'watchTime', parseInt(val))">⏱️ Add Time</button>
                             </div>
-                        `).join('')
-                    }
+                        ` : ''}
+                    ` : `
+                        <div class="stat-row" style="margin-top:12px;"><span>📊 Progress:</span><span>${Math.round(((c.currentViews||0)/c.targetViews)*100)}% complete</span></div>
+                    `}
                 </div>
             `;
         }
         
         function renderCampaignPage() {
             return `<div class="card">
-                <h2>🚀 Advanced Campaign Creator</h2>
-                <div class="campaign-form-group"><label>Campaign Title</label><input id="campTitle" placeholder="Epic Video Campaign"></div>
-                <div class="campaign-form-group"><label>YouTube URL (Video/Short/Live)</label><input id="campUrl" placeholder="https://youtube.com/watch?v=..."></div>
+                <h2>🚀 Create Advanced Campaign</h2>
+                <div class="campaign-form-group"><label>Campaign Title *</label><input id="campTitle" placeholder="Epic Video Campaign"></div>
+                <div class="campaign-form-group"><label>YouTube URL (Video/Short/Live) *</label><input id="campUrl" placeholder="https://youtube.com/watch?v=..."></div>
                 <div class="campaign-form-group"><label>Channel URL (for subscribe feature - optional)</label><input id="channelUrl" placeholder="https://youtube.com/@channel"></div>
-                <div class="campaign-form-group"><label>Target Views (max: ${activeUsersCount || 50})</label><input id="targetViews" type="number" placeholder="${Math.min(activeUsersCount || 10, 100)}" value="${Math.min(activeUsersCount || 10, 100)}"></div>
-                <div class="campaign-form-group"><label>Target Watch Time (seconds, max video length)</label><input id="targetWatchTime" type="number" placeholder="30" value="30"></div>
+                <div class="campaign-form-group"><label>Target Views (max: ${activeUsersCount})</label><input id="targetViews" type="number" placeholder="${activeUsersCount}" value="${activeUsersCount}"></div>
+                <div class="campaign-form-group"><label>Target Watch Time (seconds)</label><input id="targetWatchTime" type="number" placeholder="30" value="30"></div>
                 <div class="campaign-form-group"><label>Target Likes</label><input id="targetLikes" type="number" placeholder="10" value="10"></div>
                 <div class="campaign-form-group"><label>Target Subscribers (Premium - requires channel URL)</label><input id="targetSubs" type="number" placeholder="Optional"></div>
                 <div class="campaign-form-group"><label>Custom Comment Text (Premium)</label><textarea id="commentText" placeholder="Type comment here..." rows="2"></textarea></div>
                 <div class="campaign-form-group"><label>How many comments? (Premium)</label><input id="targetComments" type="number" placeholder="Optional"></div>
                 <button class="btn-primary" id="createAdvancedBtn">✨ Launch Campaign (15 credits)</button>
-                <div class="campaign-preview" id="campPreview"></div>
+            </div>
+            <div class="card">
+                <h2>📋 Your Campaign Stats</h2>
+                <div id="userCampaignsPreview">Loading...</div>
             </div>`;
+        }
+        
+        async function renderUserCampaignsPreview() {
+            const container = document.getElementById('userCampaignsPreview');
+            if (!container) return;
+            const myCampaigns = allCampaigns.filter(c => c.creatorId === currentUser?.uid);
+            if (myCampaigns.length === 0) {
+                container.innerHTML = '<div class="empty-state">No campaigns created yet. Create your first campaign above!</div>';
+            } else {
+                container.innerHTML = myCampaigns.map(c => `
+                    <div style="background:rgba(0,0,0,0.3);border-radius:16px;padding:12px;margin-bottom:10px;">
+                        <strong>${escapeHtml(c.title)}</strong>
+                        <div class="stat-row"><span>👁️ Views:</span><span>${c.currentViews || 0}/${c.targetViews}</span></div>
+                        <div class="stat-row"><span>❤️ Likes:</span><span>${c.currentLikes || 0}/${c.targetLikes}</span></div>
+                        <div class="badge">Created: ${new Date(c.createdAt).toLocaleDateString()}</div>
+                    </div>
+                `).join('');
+            }
         }
         
         function renderRewardsPage() {
             const streak = userData?.streak?.current||0, campCount=userData?.campaigns?.length||0, watched=userData?.watchedVideos?.length||0, referralCount=userData?.referrals?.length||0;
-            return `<div class="card"><h2>🏆 Achievements</h2><div class="achievement-grid">${Object.entries({streak1:'🔥 1 Day Streak',streak3:'⚡ 3 Day Streak',streak7:'🌟 7 Day Streak',campaign1:'📢 First Campaign',campaign5:'🚀 Creator',watcher10:'👁️ Watcher',watcher50:'🎥 Enthusiast',refer1:'🤝 First Referral',refer5:'👥 Leader'}).map(([k,name])=>`<div class="achievement-card ${userData?.achievements[k]?'unlocked':''}"><div class="achievement-name">${name}</div>${userData?.achievements[k]?'✓':'🔒'}</div>`).join('')}</div></div>
-            <div class="card"><h2>📊 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits||0)}</span></div><div class="stat-row"><span>📢 Campaigns:</span><span>${campCount}</span></div><div class="stat-row"><span>👀 Watched:</span><span>${watched}</span></div><div class="stat-row"><span>🤝 Referrals:</span><span>${referralCount}</span></div><div class="stat-row"><span>💎 Total Earned:</span><span>${Math.floor(userData?.totalEarned||0)}</span></div></div>`;
+            return `<div class="card"><h2>🏆 Achievements</h2><div class="achievement-grid">
+                <div class="achievement-card ${userData?.achievements?.streak1?'unlocked':''}"><div>🔥 1 Day Streak</div>${userData?.achievements?.streak1?'✓':'🔒'}</div>
+                <div class="achievement-card ${userData?.achievements?.streak3?'unlocked':''}"><div>⚡ 3 Day Streak</div>${userData?.achievements?.streak3?'✓':'🔒'}</div>
+                <div class="achievement-card ${userData?.achievements?.campaign1?'unlocked':''}"><div>📢 First Campaign</div>${userData?.achievements?.campaign1?'✓':'🔒'}</div>
+                <div class="achievement-card ${userData?.achievements?.watcher10?'unlocked':''}"><div>👁️ Active Watcher</div>${userData?.achievements?.watcher10?'✓':'🔒'}</div>
+                <div class="achievement-card ${userData?.achievements?.refer1?'unlocked':''}"><div>🤝 First Referral</div>${userData?.achievements?.refer1?'✓':'🔒'}</div>
+            </div></div>
+            <div class="card"><h2>📊 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits||0)}</span></div>
+            <div class="stat-row"><span>📢 Campaigns Created:</span><span>${campCount}</span></div>
+            <div class="stat-row"><span>👀 Videos Watched:</span><span>${watched}</span></div>
+            <div class="stat-row"><span>🤝 Referrals:</span><span>${referralCount}</span></div>
+            <div class="stat-row"><span>💎 Total Earned:</span><span>${Math.floor(userData?.totalEarned||0)}</span></div></div>`;
         }
         
         function renderAccountPage() {
-            return `<div class="card"><div class="account-info"><img src="${currentUser?.photoURL}" style="width:70px;height:70px;border-radius:50%;border:3px solid var(--primary);"><div>${escapeHtml(currentUser?.displayName)}</div><div>${currentUser?.email}</div></div></div>
+            return `<div class="card"><div class="account-info"><img src="${currentUser?.photoURL}" style="width:70px;height:70px;border-radius:50%;border:3px solid var(--primary);"><div style="margin-top:10px;font-weight:bold;">${escapeHtml(currentUser?.displayName)}</div><div style="font-size:0.8rem;">${currentUser?.email}</div></div></div>
             <div class="card"><h2>💰 Balance</h2><div style="font-size:2rem;text-align:center;">${Math.floor(userData?.credits||0)} credits</div></div>
-            <div class="card"><h2>🔗 Your Referral Code</h2><div class="referral-code-box" id="refCode">${userData?.referralCode}</div><button class="btn-primary" id="copyCodeBtn">📋 Copy</button></div>
+            <div class="card"><h2>🔗 Your Referral Code</h2><div class="referral-code-box" id="refCode">${userData?.referralCode}</div><button class="btn-primary" id="copyCodeBtn">📋 Copy Code</button></div>
             <button class="btn-secondary" id="signOutBtn">🚪 Sign Out</button>`;
         }
         
         function renderReferPage() {
-            return `<div class="card"><h2>🤝 Referral Program</h2><div style="background:linear-gradient(135deg,var(--warning),#ea580c);border-radius:20px;padding:12px;text-align:center;">🎁 5% commission on everything!</div>
-            <div class="referral-code-box">${userData?.referralCode}</div>
+            return `<div class="card"><h2>🤝 Referral Program</h2><div style="background:linear-gradient(135deg,var(--warning),#ea580c);border-radius:20px;padding:12px;text-align:center;margin-bottom:16px;">🎁 Earn 5% commission on everything your referrals earn!</div>
+            <div class="referral-code-box" id="refCodeRefer">${userData?.referralCode}</div>
             <button class="btn-primary" id="copyReferBtn">📋 Copy Code</button>
-            <div class="stat-row"><span>💰 Commission Earned:</span><span style="color:gold;">${Math.floor(userData?.referralEarnings||0)} credits</span></div></div>`;
+            <div class="stat-row" style="margin-top:16px;"><span>💰 Commission Earned:</span><span style="color:gold;">${Math.floor(userData?.referralEarnings||0)} credits</span></div></div>`;
         }
         
         function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
@@ -478,47 +626,86 @@
         async function renderCurrentPage() {
             const container = document.getElementById('pageContent');
             if(!container) return;
-            if(currentPage === 'home'){ container.innerHTML = await renderHome(); document.getElementById('dailyBonusBtn')?.addEventListener('click',claimDailyBonus); }
+            if(currentPage === 'home'){ 
+                container.innerHTML = await renderHome(); 
+                document.getElementById('dailyBonusBtn')?.addEventListener('click', claimDailyBonus);
+            }
             else if(currentPage === 'campaign'){ 
                 container.innerHTML = renderCampaignPage(); 
+                await renderUserCampaignsPreview();
                 document.getElementById('createAdvancedBtn')?.addEventListener('click', async () => {
                     const title = document.getElementById('campTitle')?.value;
                     const url = document.getElementById('campUrl')?.value;
                     if(!title || !url) { showToast('Title and URL required', true); return; }
-                    const channelUrl = document.getElementById('channelUrl')?.value;
-                    const targetViews = document.getElementById('targetViews')?.value;
-                    const targetWatchTime = document.getElementById('targetWatchTime')?.value;
-                    const targetLikes = document.getElementById('targetLikes')?.value;
-                    const targetSubs = document.getElementById('targetSubs')?.value;
-                    const commentText = document.getElementById('commentText')?.value;
-                    const targetComments = document.getElementById('targetComments')?.value;
-                    await createAdvancedCampaign({
-                        title, url, channelUrl: channelUrl || null,
-                        targetViews: targetViews || activeUsersCount || 10,
-                        targetWatchTime: targetWatchTime || 30,
-                        targetLikes: targetLikes || 10,
-                        targetSubs: targetSubs || null,
-                        customCommentText: commentText || null,
-                        targetComments: targetComments || null
-                    });
-                    renderCurrentPage();
+                    const campaignData = {
+                        title, url,
+                        channelUrl: document.getElementById('channelUrl')?.value,
+                        targetViews: document.getElementById('targetViews')?.value,
+                        targetWatchTime: document.getElementById('targetWatchTime')?.value,
+                        targetLikes: document.getElementById('targetLikes')?.value,
+                        targetSubs: document.getElementById('targetSubs')?.value,
+                        customCommentText: document.getElementById('commentText')?.value,
+                        targetComments: document.getElementById('targetComments')?.value
+                    };
+                    await createAdvancedCampaign(campaignData);
+                    await renderUserCampaignsPreview();
+                    showToast('Campaign created! Check Home page to see it');
                 });
             }
             else if(currentPage === 'rewards') container.innerHTML = renderRewardsPage();
-            else if(currentPage === 'account'){ container.innerHTML = renderAccountPage(); document.getElementById('copyCodeBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Copied!'); }); document.getElementById('signOutBtn')?.addEventListener('click',async()=>await signOut(auth)); }
-            else if(currentPage === 'refer'){ container.innerHTML = renderReferPage(); document.getElementById('copyReferBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Referral code copied'); }); }
+            else if(currentPage === 'account'){ 
+                container.innerHTML = renderAccountPage(); 
+                document.getElementById('copyCodeBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Copied!'); });
+                document.getElementById('signOutBtn')?.addEventListener('click',async()=>await signOut(auth));
+            }
+            else if(currentPage === 'refer'){ 
+                container.innerHTML = renderReferPage(); 
+                document.getElementById('copyReferBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Referral code copied'); });
+            }
         }
         
-        function showToast(msg, isErr=false) { const t=document.createElement('div'); t.className='toast'; if(isErr) t.style.background='rgba(239,68,68,0.95)'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
+        function showToast(msg, isErr=false) { 
+            const t=document.createElement('div'); 
+            t.className='toast'; 
+            if(isErr) t.style.background='rgba(239,68,68,0.95)'; 
+            t.textContent=msg; 
+            document.body.appendChild(t); 
+            setTimeout(()=>t.remove(), 3000);
+        }
         
-        document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{ currentPage=btn.dataset.page; document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderCurrentPage(); }));
+        document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{ 
+            currentPage=btn.dataset.page; 
+            document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')); 
+            btn.classList.add('active'); 
+            renderCurrentPage(); 
+        }));
         
-        function initOnlineTracking() { updateActiveUsersCount(); const statusRef=doc(db,'viewswap_online',currentUser?.uid); const update=async()=>{ if(currentUser) await setDoc(statusRef,{uid:currentUser.uid,isOnline:true,lastSeen:serverTimestamp()},{merge:true}); }; update(); setInterval(update,30000); window.addEventListener('beforeunload',()=>setDoc(statusRef,{isOnline:false},{merge:true})); }
+        function initOnlineTracking() { 
+            updateActiveUsersCount(); 
+            const statusRef=doc(db,'viewswap_online',currentUser?.uid); 
+            const update=async()=>{ if(currentUser) await setDoc(statusRef,{uid:currentUser.uid,isOnline:true,lastSeen:serverTimestamp()},{merge:true}); }; 
+            update(); 
+            setInterval(update, 30000); 
+            window.addEventListener('beforeunload',()=>setDoc(statusRef,{isOnline:false},{merge:true}));
+        }
         
-        onAuthStateChanged(auth, async(user)=>{ if(user){ currentUser=user; await loadUserData(user.uid); document.body.classList.add('authenticated'); initOnlineTracking(); renderCurrentPage(); } else{ document.body.classList.remove('authenticated'); currentUser=null; userData=null; } });
+        onAuthStateChanged(auth, async(user)=>{ 
+            if(user){ 
+                currentUser=user; 
+                await loadUserData(user.uid); 
+                document.body.classList.add('authenticated'); 
+                initOnlineTracking();
+                setupCampaignsListener();
+                renderCurrentPage(); 
+            } else { 
+                document.body.classList.remove('authenticated'); 
+                currentUser=null; 
+                userData=null; 
+            } 
+        });
         
-        document.getElementById('signInBtn').addEventListener('click',()=>signInWithPopup(auth,provider));
-        document.getElementById('qrSignInBtn').addEventListener('click',()=>{ showToast('QR Scanner ready', false); });
+        document.getElementById('signInBtn')?.addEventListener('click',()=>signInWithPopup(auth,provider));
+        document.getElementById('qrSignInBtn')?.addEventListener('click',()=>{ showToast('Use referral code from other users', false); });
     </script>
 </body>
 </html>
