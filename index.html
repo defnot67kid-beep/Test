@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>ViewSwap - Smart Campaign Limits</title>
+    <title>ViewSwap - Rewards & Account Hub</title>
     
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, increment, runTransaction, arrayUnion, deleteDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, onSnapshot, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
         window.firebaseModules = {
             initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
-            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, increment, runTransaction, arrayUnion, deleteDoc, onSnapshot, serverTimestamp
+            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, onSnapshot, serverTimestamp, where
         };
     </script>
     
@@ -40,6 +40,9 @@
             --gray-600: #3a3a3a;
             --gray-400: #9ca3af;
             --white: #ffffff;
+            --gold: #fbbf24;
+            --silver: #9ca3af;
+            --bronze: #cd7f32;
         }
 
         body {
@@ -63,7 +66,6 @@
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(8px);
-            transition: all 0.4s ease;
         }
         
         body.authenticated .signin-overlay { display: none; }
@@ -175,80 +177,6 @@
             border: 1px solid var(--success);
         }
         
-        .credit-card {
-            background: linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(20, 20, 30, 0.95));
-            border-radius: 28px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .credit-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--warning));
-        }
-        
-        .credit-amount {
-            font-size: 3rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin: 8px 0;
-        }
-        
-        .daily-bonus {
-            background: linear-gradient(135deg, var(--warning), #ea580c);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 60px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        
-        .user-card {
-            background: rgba(30, 30, 40, 0.9);
-            border-radius: 24px;
-            padding: 16px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: 2px solid var(--primary);
-        }
-        
-        .signout-btn {
-            background: var(--danger);
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            border: none;
-            color: white;
-            cursor: pointer;
-            margin-left: auto;
-        }
-        
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -258,11 +186,12 @@
             backdrop-filter: blur(20px);
             display: flex;
             justify-content: space-around;
-            padding: 8px 16px 20px;
+            padding: 8px 8px 20px;
             border-top: 1px solid rgba(139, 92, 246, 0.3);
             max-width: 500px;
             margin: 0 auto;
             z-index: 100;
+            overflow-x: auto;
         }
         
         .nav-item {
@@ -273,11 +202,12 @@
             background: none;
             border: none;
             cursor: pointer;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 40px;
             flex: 1;
             color: var(--gray-400);
             transition: all 0.2s;
+            min-width: 60px;
         }
         
         .nav-item.active {
@@ -285,8 +215,8 @@
             background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
         }
         
-        .nav-icon { font-size: 1.5rem; }
-        .nav-label { font-size: 0.65rem; font-weight: 600; }
+        .nav-icon { font-size: 1.3rem; }
+        .nav-label { font-size: 0.6rem; font-weight: 600; }
         
         .card {
             background: rgba(30, 30, 40, 0.9);
@@ -304,88 +234,114 @@
             padding-left: 12px;
         }
         
+        /* Achievement Cards */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .achievement-card {
+            background: rgba(35, 35, 45, 0.8);
+            border-radius: 20px;
+            padding: 16px 12px;
+            text-align: center;
+            transition: all 0.2s;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        .achievement-card.unlocked {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+            border-color: var(--primary);
+        }
+        
+        .achievement-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        
+        .achievement-name {
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+        
+        .achievement-desc {
+            font-size: 0.65rem;
+            color: var(--gray-400);
+        }
+        
+        .achievement-reward {
+            font-size: 0.6rem;
+            color: var(--gold);
+            margin-top: 6px;
+        }
+        
+        .locked-badge {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 0.6rem;
+            display: inline-block;
+            margin-top: 6px;
+        }
+        
+        /* Streak Display */
+        .streak-card {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(234, 88, 12, 0.2));
+            border-radius: 28px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 16px;
+            border: 1px solid var(--warning);
+        }
+        
+        .streak-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--warning);
+        }
+        
+        .daily-bonus-btn {
+            background: linear-gradient(135deg, var(--warning), #ea580c);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+        
+        /* Account Section */
+        .account-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .account-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            margin-bottom: 12px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
         .campaign-item {
             background: rgba(35, 35, 45, 0.8);
             border-radius: 18px;
             padding: 16px;
             margin-bottom: 12px;
         }
-        
-        .campaign-title {
-            font-weight: 700;
-            font-size: 1rem;
-            margin-bottom: 6px;
-        }
-        
-        .campaign-url {
-            font-size: 0.7rem;
-            color: var(--primary-light);
-            word-break: break-all;
-            margin-bottom: 10px;
-        }
-        
-        .limit-info {
-            background: rgba(139, 92, 246, 0.2);
-            border-radius: 12px;
-            padding: 8px;
-            margin: 10px 0;
-            font-size: 0.7rem;
-            text-align: center;
-        }
-        
-        .progress-bar {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            height: 8px;
-            margin: 8px 0;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.3s;
-        }
-        
-        .badge-group {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin: 10px 0;
-        }
-        
-        .badge {
-            background: rgba(139, 92, 246, 0.2);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 14px;
-            margin-bottom: 12px;
-            background: rgba(35, 35, 45, 0.9);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            border-radius: 20px;
-            color: white;
-            font-size: 0.9rem;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 60px;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-            transition: transform 0.2s;
-        }
-        
-        .btn-primary:active { transform: scale(0.97); }
         
         .toast {
             position: fixed;
@@ -413,72 +369,55 @@
             color: var(--gray-400);
         }
         
-        .slider-control {
-            margin: 15px 0;
-        }
-        
-        .slider-control label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-        }
-        
-        input[type="range"] {
-            width: 100%;
-            height: 4px;
-            -webkit-appearance: none;
-            background: rgba(139, 92, 246, 0.3);
-            border-radius: 5px;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-        }
-        
-        .slider-value {
-            text-align: center;
-            margin-top: 8px;
-            font-weight: bold;
-            color: var(--primary-light);
-        }
-        
-        .max-limit-warning {
-            color: var(--warning);
-            font-size: 0.7rem;
-            margin-top: 4px;
-        }
-        
-        .watch-btn {
-            background: linear-gradient(135deg, var(--youtube), #cc0000);
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             border: none;
-            padding: 10px 16px;
-            border-radius: 40px;
-            font-weight: 600;
+            padding: 14px;
+            border-radius: 60px;
+            font-weight: 700;
             cursor: pointer;
             width: 100%;
-            font-size: 0.85rem;
-            transition: transform 0.2s;
         }
         
-        .watch-btn:active { transform: scale(0.97); }
-        .watch-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+        .signout-btn-lg {
+            background: var(--danger);
+            padding: 12px;
+            border-radius: 60px;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 16px;
+        }
+        
+        .referral-code-box {
+            background: rgba(0,0,0,0.5);
+            padding: 12px;
+            border-radius: 16px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            text-align: center;
+            border: 2px dashed var(--primary);
+            cursor: pointer;
+        }
+        
+        .badge {
+            background: rgba(139, 92, 246, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
     </style>
 </head>
 <body>
     <div class="signin-overlay" id="signinOverlay">
         <div class="signin-card">
-            <div style="font-size: 4rem;">🎬</div>
+            <div style="font-size: 4rem;">🏆</div>
             <h2>ViewSwap</h2>
-            <p>Smart Campaign Limits • Max = Active Users</p>
+            <p>Earn Rewards • Complete Achievements • Daily Streaks</p>
             <button class="google-signin-btn" id="signInBtn">🟢 Sign in with Google</button>
-            <div class="status-badge">🔐 Campaign likes/subs limited to active users</div>
         </div>
     </div>
 
@@ -486,26 +425,9 @@
         <div class="bg-particles" id="particles"></div>
         <div class="container">
             <div class="header">
-                <h1>🎬 ViewSwap</h1>
-                <p>Smart Limits • Max Engagement = Active Users</p>
-                <div class="online-badge" id="onlineCountBadge">👥 Loading users...</div>
-            </div>
-
-            <div class="credit-card">
-                <div class="credit-label">💰 YOUR CREDITS</div>
-                <div class="credit-amount" id="creditBalance">0</div>
-                <button class="daily-bonus" id="dailyBonusBtn">🎁 Daily Bonus (+50)</button>
-            </div>
-
-            <div class="user-card">
-                <div class="user-info">
-                    <img id="userAvatar" class="user-avatar" src="">
-                    <div style="flex: 1;">
-                        <div id="userName" style="font-weight: bold;"></div>
-                        <div id="userEmail" style="font-size: 0.7rem; color: var(--gray-400);"></div>
-                    </div>
-                    <button class="signout-btn" id="signOutBtn">Sign Out</button>
-                </div>
+                <h1>🏆 ViewSwap</h1>
+                <p>Rewards • Streaks • Achievements</p>
+                <div class="online-badge" id="onlineCountBadge">👥 Loading...</div>
             </div>
 
             <div id="pageContent"></div>
@@ -514,15 +436,16 @@
         <div class="bottom-nav">
             <button class="nav-item active" data-page="home"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></button>
             <button class="nav-item" data-page="campaign"><div class="nav-icon">📢</div><div class="nav-label">Campaign</div></button>
+            <button class="nav-item" data-page="rewards"><div class="nav-icon">🎁</div><div class="nav-label">Rewards</div></button>
+            <button class="nav-item" data-page="account"><div class="nav-icon">👤</div><div class="nav-label">Account</div></button>
             <button class="nav-item" data-page="refer"><div class="nav-icon">🤝</div><div class="nav-label">Refer</div></button>
-            <button class="nav-item" data-page="help"><div class="nav-icon">💬</div><div class="nav-label">Help</div></button>
         </div>
     </div>
 
     <script type="module">
         const { initializeApp } = window.firebaseModules;
         const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } = window.firebaseModules;
-        const { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, updateDoc, onSnapshot, serverTimestamp, deleteDoc, where } = window.firebaseModules;
+        const { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, updateDoc, onSnapshot, serverTimestamp, where } = window.firebaseModules;
         
         const firebaseConfig = {
             apiKey: "AIzaSyAupBkllyicDPD9O6CmX4mS4sF5z96mqxc",
@@ -542,53 +465,21 @@
         let userData = null;
         let currentPage = 'home';
         let activeUsersCount = 0;
-        let activeUsersList = [];
         
-        // Track online users - completely separate from other sites
-        function initOnlineTracking() {
-            const userStatusRef = doc(db, 'viewswap_online', currentUser?.uid || 'temp');
-            
-            const updateOnlineStatus = async () => {
-                if (!currentUser) return;
-                await setDoc(doc(db, 'viewswap_online', currentUser.uid), {
-                    uid: currentUser.uid,
-                    displayName: userData?.displayName || currentUser.displayName,
-                    lastSeen: serverTimestamp(),
-                    isOnline: true
-                }, { merge: true });
-            };
-            
-            updateOnlineStatus();
-            const interval = setInterval(updateOnlineStatus, 30000);
-            
-            window.addEventListener('beforeunload', async () => {
-                if (currentUser) {
-                    await setDoc(doc(db, 'viewswap_online', currentUser.uid), {
-                        isOnline: false,
-                        lastSeen: serverTimestamp()
-                    }, { merge: true });
-                }
-            });
-            
-            // Listen for active users count
-            const onlineQuery = query(collection(db, 'viewswap_online'), where('isOnline', '==', true));
-            const unsubscribe = onSnapshot(onlineQuery, (snapshot) => {
-                activeUsersList = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.uid !== currentUser?.uid) {
-                        activeUsersList.push(data);
-                    }
-                });
-                activeUsersCount = snapshot.size;
-                document.getElementById('onlineCountBadge').innerHTML = `👥 ${activeUsersCount} active ${activeUsersCount === 1 ? 'user' : 'users'} online`;
-            });
-            
-            return () => {
-                clearInterval(interval);
-                unsubscribe();
-            };
-        }
+        // Achievements Definition
+        const ACHIEVEMENTS = {
+            streak1: { name: "🔥 1 Day Streak", desc: "Claim daily bonus for 1 day", icon: "🔥", reward: 50, requirement: 1 },
+            streak3: { name: "⚡ 3 Day Streak", desc: "3 days in a row!", icon: "⚡", reward: 150, requirement: 3 },
+            streak7: { name: "🌟 7 Day Streak", desc: "A full week!", icon: "🌟", reward: 350, requirement: 7 },
+            streak30: { name: "👑 30 Day Master", desc: "30 day streak champion", icon: "👑", reward: 1500, requirement: 30 },
+            campaign1: { name: "📢 First Campaign", desc: "Create your first campaign", icon: "📢", reward: 100, requirement: 1 },
+            campaign5: { name: "🚀 Campaign Creator", desc: "Create 5 campaigns", icon: "🚀", reward: 300, requirement: 5 },
+            campaign10: { name: "🎬 Master Creator", desc: "Create 10 campaigns", icon: "🎬", reward: 700, requirement: 10 },
+            watcher10: { name: "👁️ Active Watcher", desc: "Watch 10 videos", icon: "👁️", reward: 100, requirement: 10 },
+            watcher50: { name: "🎥 Video Enthusiast", desc: "Watch 50 videos", icon: "🎥", reward: 400, requirement: 50 },
+            refer1: { name: "🤝 First Referral", desc: "Get your first referral", icon: "🤝", reward: 200, requirement: 1 },
+            refer5: { name: "👥 Community Leader", desc: "Get 5 referrals", icon: "👥", reward: 800, requirement: 5 }
+        };
         
         function showToast(msg) {
             const t = document.createElement('div');
@@ -609,6 +500,11 @@
             const snap = await getDoc(ref);
             if (snap.exists()) {
                 userData = snap.data();
+                userData.achievements = userData.achievements || {};
+                userData.streak = userData.streak || { current: 0, lastClaim: null, highest: 0 };
+                userData.campaigns = userData.campaigns || [];
+                userData.watchedVideos = userData.watchedVideos || [];
+                userData.referrals = userData.referrals || [];
             } else {
                 userData = {
                     uid, email: currentUser.email, displayName: currentUser.displayName,
@@ -616,17 +512,16 @@
                     referralCode: 'REF' + uid.substring(0,6).toUpperCase(),
                     referredBy: null, referralEarnings: 0, totalEarned: 0,
                     watchedVideos: [], campaigns: [],
+                    achievements: {}, streak: { current: 0, lastClaim: null, highest: 0 },
                     lastDailyBonus: null, createdAt: new Date().toISOString()
                 };
                 await setDoc(ref, userData);
             }
-            document.getElementById('creditBalance').innerText = Math.floor(userData.credits);
             return userData;
         }
         
         async function saveUserData() {
             if(currentUser) await setDoc(doc(db, 'viewswap_users', currentUser.uid), userData, { merge: true });
-            document.getElementById('creditBalance').innerText = Math.floor(userData.credits);
         }
         
         async function updateCredits(amount) {
@@ -636,40 +531,79 @@
             return true;
         }
         
-        async function claimDailyBonus() {
-            const last = userData.lastDailyBonus ? new Date(userData.lastDailyBonus) : null;
-            const today = new Date();
-            if(last && last.toDateString() === today.toDateString()) {
-                showToast('Already claimed today!');
-                return;
+        // Check and unlock achievements
+        async function checkAchievements() {
+            let unlockedAny = false;
+            const campaignCount = userData.campaigns?.length || 0;
+            const watchedCount = userData.watchedVideos?.length || 0;
+            const referralCount = userData.referrals?.length || 0;
+            const streak = userData.streak?.current || 0;
+            
+            const checks = {
+                streak1: streak >= 1, streak3: streak >= 3, streak7: streak >= 7, streak30: streak >= 30,
+                campaign1: campaignCount >= 1, campaign5: campaignCount >= 5, campaign10: campaignCount >= 10,
+                watcher10: watchedCount >= 10, watcher50: watchedCount >= 50,
+                refer1: referralCount >= 1, refer5: referralCount >= 5
+            };
+            
+            for (const [key, achieved] of Object.entries(checks)) {
+                if (achieved && !userData.achievements[key]) {
+                    userData.achievements[key] = { unlockedAt: new Date().toISOString(), claimed: false };
+                    unlockedAny = true;
+                    showToast(`🏆 Achievement Unlocked: ${ACHIEVEMENTS[key].name}! +${ACHIEVEMENTS[key].reward} credits`);
+                    await updateCredits(ACHIEVEMENTS[key].reward);
+                }
             }
-            await updateCredits(50);
+            
+            if (unlockedAny) await saveUserData();
+        }
+        
+        // Claim daily bonus with streak
+        async function claimDailyBonus() {
+            const lastClaim = userData.streak?.lastClaim ? new Date(userData.streak.lastClaim) : null;
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            let newStreak = 1;
+            
+            if (lastClaim) {
+                const lastDate = new Date(lastClaim);
+                if (lastDate.toDateString() === yesterday.toDateString()) {
+                    newStreak = (userData.streak.current || 0) + 1;
+                } else if (lastDate.toDateString() === today.toDateString()) {
+                    showToast('Already claimed today!');
+                    return;
+                } else {
+                    newStreak = 1;
+                    showToast('Streak broken! Starting new streak today.');
+                }
+            }
+            
+            const bonusAmount = 50 + Math.floor(newStreak / 7) * 25;
+            await updateCredits(bonusAmount);
+            
+            userData.streak = {
+                current: newStreak,
+                lastClaim: today.toISOString(),
+                highest: Math.max(newStreak, userData.streak?.highest || 0)
+            };
             userData.lastDailyBonus = today.toISOString();
             await saveUserData();
-            showToast('🎁 Daily bonus +50 credits!');
+            
+            await checkAchievements();
+            showToast(`🎁 Daily Bonus: +${bonusAmount} credits! Streak: ${newStreak} days`);
             renderCurrentPage();
         }
         
-        // Create campaign with intelligent limits based on active users
-        async function createCampaign(title, url, targetLikes, targetSubs) {
+        // Create campaign
+        async function createCampaign(title, url) {
             const videoId = extractVideoId(url);
             if (!videoId) { showToast('Invalid YouTube URL'); return false; }
             
-            // Max limit = active users count (excluding self)
-            const maxPossible = Math.max(1, activeUsersCount - 1);
-            
-            if (targetLikes > maxPossible) {
-                showToast(`Max likes limited to ${maxPossible} (active users online)`);
-                return false;
-            }
-            if (targetSubs > maxPossible) {
-                showToast(`Max subscribers limited to ${maxPossible} (active users online)`);
-                return false;
-            }
-            
-            const totalCost = (targetLikes * 2) + (targetSubs * 5);
+            const totalCost = 10;
             if (userData.credits < totalCost) {
-                showToast(`Need ${totalCost} credits! You have ${userData.credits}`);
+                showToast(`Need ${totalCost} credits!`);
                 return false;
             }
             
@@ -678,15 +612,11 @@
             const campaign = {
                 id: Date.now().toString(),
                 title, url, videoId,
-                targetLikes: targetLikes,
-                targetSubs: targetSubs,
-                currentLikes: 0,
-                currentSubs: 0,
                 creatorId: currentUser.uid,
                 creatorName: userData.displayName,
                 createdAt: new Date().toISOString(),
-                watchers: [],
-                completed: false
+                views: 0,
+                watchers: []
             };
             
             userData.campaigns = userData.campaigns || [];
@@ -696,98 +626,48 @@
             const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
             await setDoc(campaignRef, campaign);
             
-            showToast(`✅ Campaign created! Cost: ${totalCost} credits | Max likes/subs: ${maxPossible}`);
+            await checkAchievements();
+            showToast(`✅ Campaign created! Cost: 10 credits`);
             renderCurrentPage();
             return true;
         }
         
-        // Watch campaign and perform like/sub actions (simulated with limit checks)
         async function watchCampaign(campaign) {
             if (userData.watchedVideos?.includes(campaign.videoId)) {
-                showToast('You already engaged with this video!');
+                showToast('You already watched this video!');
                 return;
             }
             if (campaign.creatorId === currentUser.uid) {
-                showToast("Can't engage with your own video");
+                showToast("Can't watch your own video");
                 return;
             }
             
-            // Check if campaign is already completed
-            const likesLeft = campaign.targetLikes - campaign.currentLikes;
-            const subsLeft = campaign.targetSubs - campaign.currentSubs;
-            
-            if (likesLeft <= 0 && subsLeft <= 0) {
-                showToast('This campaign has reached its limits!');
-                return;
-            }
-            
-            // Open YouTube
             window.open(campaign.url, '_blank');
+            await updateCredits(5);
+            showToast(`🎬 +5 credits for watching!`);
             
-            let rewardEarned = 0;
-            let liked = false;
-            let subscribed = false;
-            
-            // Simulate like if needed
-            if (likesLeft > 0) {
-                liked = true;
-                rewardEarned += 2;
-            }
-            
-            // Simulate subscribe if needed
-            if (subsLeft > 0) {
-                subscribed = true;
-                rewardEarned += 5;
-            }
-            
-            if (rewardEarned > 0) {
-                await updateCredits(rewardEarned);
-                showToast(`🎬 +${rewardEarned} credits! ${liked ? '👍 Liked' : ''} ${subscribed ? '🔔 Subscribed' : ''}`);
-            }
-            
-            // Mark as watched
             userData.watchedVideos = userData.watchedVideos || [];
             userData.watchedVideos.push(campaign.videoId);
             await saveUserData();
             
-            // Update campaign progress
             const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
-            const updates = {};
-            if (liked) updates.currentLikes = increment(1);
-            if (subscribed) updates.currentSubs = increment(1);
-            updates.watchers = arrayUnion(currentUser.uid);
-            await updateDoc(campaignRef, updates);
+            await updateDoc(campaignRef, { views: increment(1), watchers: arrayUnion(currentUser.uid) });
             
-            // Update local campaign data
-            if (liked) campaign.currentLikes++;
-            if (subscribed) campaign.currentSubs++;
-            
-            // Reward creator with 1 credit per engagement
             const creatorRef = doc(db, 'viewswap_users', campaign.creatorId);
             await runTransaction(db, async (transaction) => {
                 const creatorSnap = await transaction.get(creatorRef);
                 if (creatorSnap.exists()) {
-                    let creatorReward = 0;
-                    if (liked) creatorReward += 1;
-                    if (subscribed) creatorReward += 1;
-                    if (creatorReward > 0) {
-                        transaction.update(creatorRef, { credits: increment(creatorReward), totalEarned: increment(creatorReward) });
-                    }
+                    transaction.update(creatorRef, { credits: increment(2), totalEarned: increment(2) });
                 }
             });
             
-            // Update user's campaigns list
-            const userCampaignIndex = userData.campaigns?.findIndex(c => c.id === campaign.id);
-            if (userCampaignIndex !== -1) {
-                userData.campaigns[userCampaignIndex] = campaign;
-                await saveUserData();
-            }
-            
+            await checkAchievements();
             renderCurrentPage();
         }
         
         window.watchCampaign = watchCampaign;
         
+        // Render Functions
         async function renderHome() {
             const campaignsQuery = query(collection(db, 'viewswap_campaigns'));
             const snapshot = await getDocs(campaignsQuery);
@@ -796,117 +676,135 @@
             
             const availableCampaigns = allCampaigns.filter(c => 
                 c.creatorId !== currentUser?.uid && 
-                !userData?.watchedVideos?.includes(c.videoId) &&
-                (c.currentLikes < c.targetLikes || c.currentSubs < c.targetSubs)
+                !userData?.watchedVideos?.includes(c.videoId)
             );
             
-            if (availableCampaigns.length === 0) {
-                return `<div class="card"><h2>🎬 Available Campaigns</h2><div class="empty-state">No active campaigns. Create one to get started!</div></div>`;
-            }
-            
             return `
+                <div class="streak-card">
+                    <div>🔥 Current Streak</div>
+                    <div class="streak-number">${userData?.streak?.current || 0} days</div>
+                    <div>Highest: ${userData?.streak?.highest || 0} days</div>
+                    <button class="daily-bonus-btn" id="dailyBonusBtn">🎁 Claim Daily Bonus</button>
+                </div>
                 <div class="card">
-                    <h2>🎬 Engage & Earn Credits</h2>
-                    <p style="font-size: 0.7rem; margin-bottom: 12px; color: var(--gray-400);">👥 ${activeUsersCount} active users online • Max engagement per video = ${Math.max(0, activeUsersCount - 1)}</p>
-                    ${availableCampaigns.map(campaign => {
-                        const likesProgress = (campaign.currentLikes / campaign.targetLikes) * 100;
-                        const subsProgress = (campaign.currentSubs / campaign.targetSubs) * 100;
-                        const isComplete = campaign.currentLikes >= campaign.targetLikes && campaign.currentSubs >= campaign.targetSubs;
-                        
-                        return `
+                    <h2>🎬 Watch & Earn (5 credits each)</h2>
+                    ${availableCampaigns.length === 0 ? '<div class="empty-state">No videos available. Create a campaign!</div>' : 
+                        availableCampaigns.map(campaign => `
                             <div class="campaign-item">
-                                <div class="campaign-title">${escapeHtml(campaign.title)}</div>
-                                <div class="campaign-url">${escapeHtml(campaign.url)}</div>
-                                <div class="limit-info">
-                                    🎯 Limits based on active users: ${Math.max(0, activeUsersCount - 1)} max
-                                </div>
-                                <div class="badge-group">
-                                    <span class="badge">👍 Likes: ${campaign.currentLikes}/${campaign.targetLikes}</span>
-                                    <span class="badge">🔔 Subs: ${campaign.currentSubs}/${campaign.targetSubs}</span>
-                                    <span class="badge">👤 ${escapeHtml(campaign.creatorName || 'User')}</span>
-                                </div>
-                                <div class="progress-bar"><div class="progress-fill" style="width: ${likesProgress}%"></div></div>
-                                <div class="progress-bar"><div class="progress-fill" style="width: ${subsProgress}%"></div></div>
-                                ${!isComplete ? 
-                                    `<button class="watch-btn" onclick="window.watchCampaign(${JSON.stringify(campaign).replace(/"/g, '&quot;')})">
-                                        ▶️ Watch & Engage (Earn credits!)
-                                    </button>` :
-                                    `<button class="watch-btn disabled" disabled>✓ Campaign Complete</button>`
-                                }
+                                <div style="font-weight: bold;">${escapeHtml(campaign.title)}</div>
+                                <div style="font-size: 0.7rem; color: var(--gray-400);">${escapeHtml(campaign.url)}</div>
+                                <div class="badge" style="margin-top: 8px;">👁️ ${campaign.views || 0} views</div>
+                                <button class="btn-primary" style="margin-top: 12px;" onclick="window.watchCampaign(${JSON.stringify(campaign).replace(/"/g, '&quot;')})">▶️ Watch & Earn 5 credits</button>
                             </div>
-                        `;
-                    }).join('')}
+                        `).join('')
+                    }
                 </div>
             `;
         }
         
         function renderCampaignPage() {
-            const maxLimit = Math.max(0, activeUsersCount - 1);
             return `
                 <div class="card">
-                    <h2>📢 Create Smart Campaign</h2>
-                    <div class="limit-info" style="margin-bottom: 16px;">
-                        👥 ${activeUsersCount} active users online<br>
-                        ⚡ Maximum likes/subs per campaign: <strong>${maxLimit}</strong>
-                    </div>
+                    <h2>📢 Create Campaign (10 credits)</h2>
                     <input type="text" id="campaignTitle" placeholder="Campaign title">
                     <input type="url" id="campaignUrl" placeholder="YouTube video URL">
-                    
-                    <div class="slider-control">
-                        <label>👍 Likes Target <span id="likesValue">0</span> / ${maxLimit}</label>
-                        <input type="range" id="likesSlider" min="0" max="${maxLimit}" value="0" step="1">
-                        <div class="max-limit-warning">Max likes limited to active users (${maxLimit})</div>
-                    </div>
-                    
-                    <div class="slider-control">
-                        <label>🔔 Subscribers Target <span id="subsValue">0</span> / ${maxLimit}</label>
-                        <input type="range" id="subsSlider" min="0" max="${maxLimit}" value="0" step="1">
-                        <div class="max-limit-warning">Max subs limited to active users (${maxLimit})</div>
-                    </div>
-                    
-                    <div class="limit-info" id="costDisplay">
-                        💰 Estimated Cost: 0 credits
-                    </div>
-                    
-                    <button class="btn-primary" id="createCampaignBtn">🚀 Launch Smart Campaign</button>
+                    <button class="btn-primary" id="createCampaignBtn">🚀 Launch Campaign (10 credits)</button>
                 </div>
                 <div class="card">
-                    <h2>📊 My Campaigns</h2>
+                    <h2>📊 My Campaigns (${userData?.campaigns?.length || 0})</h2>
                     <div id="myCampaignsList"></div>
                 </div>
             `;
         }
         
-        async function renderMyCampaigns() {
+        function renderMyCampaigns() {
             const container = document.getElementById('myCampaignsList');
             if (!container) return;
-            
             const myCampaigns = userData?.campaigns || [];
             if (myCampaigns.length === 0) {
-                container.innerHTML = '<div class="empty-state">You haven\'t created any campaigns yet</div>';
+                container.innerHTML = '<div class="empty-state">No campaigns yet</div>';
                 return;
             }
+            container.innerHTML = myCampaigns.map(c => `
+                <div class="campaign-item">
+                    <div style="font-weight: bold;">${escapeHtml(c.title)}</div>
+                    <div style="font-size: 0.7rem;">${escapeHtml(c.url)}</div>
+                    <div class="badge">👁️ ${c.views || 0} views</div>
+                </div>
+            `).join('');
+        }
+        
+        function renderRewardsPage() {
+            const streak = userData?.streak?.current || 0;
+            const campaignCount = userData?.campaigns?.length || 0;
+            const watchedCount = userData?.watchedVideos?.length || 0;
+            const referralCount = userData?.referrals?.length || 0;
             
-            container.innerHTML = myCampaigns.map(campaign => {
-                const likesProgress = (campaign.currentLikes / campaign.targetLikes) * 100;
-                const subsProgress = (campaign.currentSubs / campaign.targetSubs) * 100;
-                return `
-                    <div class="campaign-item">
-                        <div class="campaign-title">${escapeHtml(campaign.title)}</div>
-                        <div class="campaign-url">${escapeHtml(campaign.url)}</div>
-                        <div class="badge-group">
-                            <span class="badge">👍 ${campaign.currentLikes}/${campaign.targetLikes} likes</span>
-                            <span class="badge">🔔 ${campaign.currentSubs}/${campaign.targetSubs} subs</span>
-                        </div>
-                        <div class="progress-bar"><div class="progress-fill" style="width: ${likesProgress}%"></div></div>
-                        <div class="progress-bar"><div class="progress-fill" style="width: ${subsProgress}%"></div></div>
-                        ${campaign.currentLikes >= campaign.targetLikes && campaign.currentSubs >= campaign.targetSubs ? 
-                            '<div class="badge" style="background: var(--success);">✓ Campaign Complete</div>' : 
-                            '<div class="badge">🔄 Active</div>'
-                        }
+            return `
+                <div class="streak-card">
+                    <div>🔥 Daily Streak</div>
+                    <div class="streak-number">${streak} days</div>
+                    <div>🏆 Highest Streak: ${userData?.streak?.highest || 0}</div>
+                    <div>💰 Next bonus at ${7 - (streak % 7)} days!</div>
+                </div>
+                <div class="card">
+                    <h2>🏆 Achievements</h2>
+                    <div class="achievement-grid">
+                        ${Object.entries(ACHIEVEMENTS).map(([key, ach]) => {
+                            let isUnlocked = false;
+                            if (key.includes('streak')) isUnlocked = streak >= ach.requirement;
+                            else if (key.includes('campaign')) isUnlocked = campaignCount >= ach.requirement;
+                            else if (key.includes('watcher')) isUnlocked = watchedCount >= ach.requirement;
+                            else if (key.includes('refer')) isUnlocked = referralCount >= ach.requirement;
+                            
+                            return `
+                                <div class="achievement-card ${isUnlocked ? 'unlocked' : ''}">
+                                    <div class="achievement-icon">${ach.icon}</div>
+                                    <div class="achievement-name">${ach.name}</div>
+                                    <div class="achievement-desc">${ach.desc}</div>
+                                    <div class="achievement-reward">+${ach.reward} credits</div>
+                                    ${!isUnlocked ? '<div class="locked-badge">🔒 Locked</div>' : '<div class="locked-badge" style="background:var(--success);">✓ Unlocked</div>'}
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
-                `;
-            }).join('');
+                </div>
+                <div class="card">
+                    <h2>📊 Your Stats</h2>
+                    <div class="stat-row"><span>📢 Campaigns Created:</span><span>${campaignCount}</span></div>
+                    <div class="stat-row"><span>👀 Videos Watched:</span><span>${watchedCount}</span></div>
+                    <div class="stat-row"><span>🤝 Referrals:</span><span>${referralCount}</span></div>
+                    <div class="stat-row"><span>💰 Total Earned:</span><span>${Math.floor(userData?.totalEarned || 0)}</span></div>
+                </div>
+            `;
+        }
+        
+        function renderAccountPage() {
+            return `
+                <div class="card">
+                    <h2>👤 My Account</h2>
+                    <div class="account-info">
+                        <img src="${currentUser?.photoURL || 'https://via.placeholder.com/80'}" class="account-avatar">
+                        <div style="font-size: 1.2rem; font-weight: bold;">${escapeHtml(currentUser?.displayName || 'User')}</div>
+                        <div style="font-size: 0.8rem; color: var(--gray-400);">${currentUser?.email}</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>💰 Credits & Stats</h2>
+                    <div class="stat-row"><span>💎 Available Credits:</span><span style="font-size: 1.5rem; color: var(--primary);">${Math.floor(userData?.credits || 0)}</span></div>
+                    <div class="stat-row"><span>🏆 Total Earned:</span><span>${Math.floor(userData?.totalEarned || 0)} credits</span></div>
+                    <div class="stat-row"><span>🔥 Current Streak:</span><span>${userData?.streak?.current || 0} days</span></div>
+                    <div class="stat-row"><span>📢 Campaigns:</span><span>${userData?.campaigns?.length || 0}</span></div>
+                    <div class="stat-row"><span>👀 Videos Watched:</span><span>${userData?.watchedVideos?.length || 0}</span></div>
+                    <div class="stat-row"><span>🤝 Referral Earnings:</span><span>${Math.floor(userData?.referralEarnings || 0)} credits</span></div>
+                </div>
+                <div class="card">
+                    <h2>🔗 Referral Code</h2>
+                    <div class="referral-code-box" id="refCode">${userData?.referralCode || ''}</div>
+                    <button class="btn-primary" id="copyRefBtn">📋 Copy Code</button>
+                </div>
+                <button class="signout-btn-lg" id="signOutBtnAccount">🚪 Sign Out</button>
+            `;
         }
         
         function renderReferPage() {
@@ -916,35 +814,16 @@
                     <div style="background: linear-gradient(135deg, var(--warning), #ea580c); border-radius: 20px; padding: 16px; text-align: center; margin-bottom: 16px;">
                         🎁 5% Commission on all referral earnings!
                     </div>
-                    <div style="background: rgba(139,92,246,0.1); border-radius: 20px; padding: 20px; text-align: center;">
-                        <div style="font-size: 0.7rem; color: var(--gray-400);">Your Referral Code</div>
-                        <div class="referral-code-box" id="referralCodeDisplay" style="background:rgba(0,0,0,0.5);padding:14px;border-radius:16px;margin:12px 0;border:2px dashed var(--primary);cursor:pointer;">${userData?.referralCode || ''}</div>
-                        <button class="btn-primary" id="copyReferralBtn">📋 Copy Code</button>
-                    </div>
-                    <div style="background: rgba(139,92,246,0.1); border-radius: 20px; padding: 20px; text-align: center; margin-top: 12px;">
-                        <div style="font-size: 0.7rem; color: var(--gray-400);">Commission Earned</div>
-                        <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${(userData?.referralEarnings || 0).toFixed(2)}</div>
+                    <div class="referral-code-box" id="referralCodeDisplay">${userData?.referralCode || ''}</div>
+                    <button class="btn-primary" id="copyReferralBtn">📋 Copy Code</button>
+                    <div class="stat-row" style="margin-top: 16px;">
+                        <span>💰 Commission Earned:</span>
+                        <span style="color: var(--gold);">${Math.floor(userData?.referralEarnings || 0)} credits</span>
                     </div>
                 </div>
-            `;
-        }
-        
-        function renderHelpPage() {
-            return `
                 <div class="card">
-                    <h2>❓ Smart Campaign Limits</h2>
-                    <p>Your campaign's likes and subscribers targets are LIMITED to the number of active users on the site!</p>
-                    <ul style="margin: 12px 0 0 20px; line-height: 1.6;">
-                        <li>👥 Active users = people currently online</li>
-                        <li>🎯 Max likes/subs = active users - 1 (excludes yourself)</li>
-                        <li>💰 Likes cost: 2 credits each</li>
-                        <li>💰 Subscribers cost: 5 credits each</li>
-                        <li>📈 When someone engages, YOU earn 1 credit per action</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h2>💡 How It Works</h2>
-                    <p>1️⃣ Sign in with Google<br>2️⃣ Create a campaign with limits based on active users<br>3️⃣ Other users watch your video and engage<br>4️⃣ You earn credits when they engage<br>5️⃣ They earn credits for watching!</p>
+                    <h2>📋 How It Works</h2>
+                    <p>Share your code with friends. When they sign up and earn credits, you get 5% of everything they earn forever!</p>
                 </div>
             `;
         }
@@ -960,57 +839,35 @@
             
             if (currentPage === 'home') {
                 container.innerHTML = await renderHome();
+                document.getElementById('dailyBonusBtn')?.addEventListener('click', claimDailyBonus);
             } else if (currentPage === 'campaign') {
                 container.innerHTML = renderCampaignPage();
-                
-                const maxLimit = Math.max(0, activeUsersCount - 1);
-                const likesSlider = document.getElementById('likesSlider');
-                const subsSlider = document.getElementById('subsSlider');
-                const likesValue = document.getElementById('likesValue');
-                const subsValue = document.getElementById('subsValue');
-                const costDisplay = document.getElementById('costDisplay');
-                
-                function updateCost() {
-                    const likes = parseInt(likesSlider?.value || 0);
-                    const subs = parseInt(subsSlider?.value || 0);
-                    const cost = (likes * 2) + (subs * 5);
-                    if (costDisplay) costDisplay.innerHTML = `💰 Estimated Cost: ${cost} credits`;
-                }
-                
-                if (likesSlider) {
-                    likesSlider.oninput = () => {
-                        likesValue.textContent = likesSlider.value;
-                        updateCost();
-                    };
-                }
-                if (subsSlider) {
-                    subsSlider.oninput = () => {
-                        subsValue.textContent = subsSlider.value;
-                        updateCost();
-                    };
-                }
-                updateCost();
-                
                 document.getElementById('createCampaignBtn')?.addEventListener('click', async () => {
                     const title = document.getElementById('campaignTitle')?.value;
                     const url = document.getElementById('campaignUrl')?.value;
-                    const likes = parseInt(likesSlider?.value || 0);
-                    const subs = parseInt(subsSlider?.value || 0);
-                    
                     if (!title || !url) { showToast('Enter title and URL'); return; }
-                    if (likes === 0 && subs === 0) { showToast('Set at least one target'); return; }
-                    
-                    await createCampaign(title, url, likes, subs);
+                    await createCampaign(title, url);
                     document.getElementById('campaignTitle').value = '';
                     document.getElementById('campaignUrl').value = '';
-                    if (likesSlider) likesSlider.value = 0;
-                    if (subsSlider) subsSlider.value = 0;
-                    likesValue.textContent = '0';
-                    subsValue.textContent = '0';
-                    updateCost();
                     await renderMyCampaigns();
                 });
                 await renderMyCampaigns();
+            } else if (currentPage === 'rewards') {
+                container.innerHTML = renderRewardsPage();
+            } else if (currentPage === 'account') {
+                container.innerHTML = renderAccountPage();
+                document.getElementById('copyRefBtn')?.addEventListener('click', () => {
+                    navigator.clipboard.writeText(userData?.referralCode || '');
+                    showToast('Referral code copied!');
+                });
+                document.getElementById('refCode')?.addEventListener('click', () => {
+                    navigator.clipboard.writeText(userData?.referralCode || '');
+                    showToast('Referral code copied!');
+                });
+                document.getElementById('signOutBtnAccount')?.addEventListener('click', async () => {
+                    await signOut(auth);
+                    showToast('Signed out');
+                });
             } else if (currentPage === 'refer') {
                 container.innerHTML = renderReferPage();
                 document.getElementById('copyReferralBtn')?.addEventListener('click', () => {
@@ -1021,11 +878,10 @@
                     navigator.clipboard.writeText(userData?.referralCode || '');
                     showToast('Referral code copied!');
                 });
-            } else if (currentPage === 'help') {
-                container.innerHTML = renderHelpPage();
             }
         }
         
+        // Navigation
         document.querySelectorAll('.nav-item').forEach(btn => {
             btn.addEventListener('click', () => {
                 currentPage = btn.dataset.page;
@@ -1034,6 +890,27 @@
                 renderCurrentPage();
             });
         });
+        
+        // Online users tracking
+        function initOnlineTracking() {
+            const onlineQuery = query(collection(db, 'viewswap_online'), where('isOnline', '==', true));
+            onSnapshot(onlineQuery, (snapshot) => {
+                activeUsersCount = snapshot.size;
+                document.getElementById('onlineCountBadge').innerHTML = `👥 ${activeUsersCount} active user${activeUsersCount !== 1 ? 's' : ''}`;
+            });
+            
+            const userStatusRef = doc(db, 'viewswap_online', currentUser?.uid);
+            const updateOnline = async () => {
+                if (currentUser) {
+                    await setDoc(userStatusRef, { uid: currentUser.uid, isOnline: true, lastSeen: serverTimestamp() }, { merge: true });
+                }
+            };
+            updateOnline();
+            const interval = setInterval(updateOnline, 30000);
+            window.addEventListener('beforeunload', () => {
+                setDoc(userStatusRef, { isOnline: false }, { merge: true });
+            });
+        }
         
         async function handleSignIn() {
             try {
@@ -1046,9 +923,6 @@
             if (user) {
                 currentUser = user;
                 await loadUserData(user.uid);
-                document.getElementById('userAvatar').src = user.photoURL || 'https://via.placeholder.com/50';
-                document.getElementById('userName').textContent = user.displayName || 'User';
-                document.getElementById('userEmail').textContent = user.email;
                 document.body.classList.add('authenticated');
                 initOnlineTracking();
                 renderCurrentPage();
@@ -1060,9 +934,8 @@
         });
         
         document.getElementById('signInBtn').addEventListener('click', handleSignIn);
-        document.getElementById('signOutBtn').addEventListener('click', async () => { await signOut(auth); showToast('Signed out'); });
-        document.getElementById('dailyBonusBtn').addEventListener('click', async () => { if (userData) await claimDailyBonus(); });
         
+        // Particles
         for (let i = 0; i < 40; i++) {
             const p = document.createElement('div');
             p.className = 'particle';
