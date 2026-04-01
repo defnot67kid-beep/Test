@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>ViewSwap - Watch & Earn</title>
+    <title>ViewSwap - Smart Campaign Limits</title>
     
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, increment, runTransaction, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, increment, runTransaction, arrayUnion, deleteDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
         window.firebaseModules = {
             initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
-            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, increment, runTransaction, arrayUnion, deleteDoc
+            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, increment, runTransaction, arrayUnion, deleteDoc, onSnapshot, serverTimestamp
         };
     </script>
     
@@ -51,7 +51,6 @@
             padding-bottom: 80px;
         }
 
-        /* SIGN-IN OVERLAY - HIDES EVERYTHING UNTIL SIGN-IN */
         .signin-overlay {
             position: fixed;
             top: 0;
@@ -67,9 +66,7 @@
             transition: all 0.4s ease;
         }
         
-        body.authenticated .signin-overlay {
-            display: none;
-        }
+        body.authenticated .signin-overlay { display: none; }
         
         #mainAppContent {
             opacity: 0;
@@ -116,14 +113,6 @@
         }
         
         .google-signin-btn:active { transform: scale(0.97); }
-        
-        .status-badge {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 40px;
-            font-size: 0.8rem;
-            background: rgba(255,255,255,0.1);
-        }
         
         .bg-particles {
             position: fixed;
@@ -174,6 +163,16 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+        }
+        
+        .online-badge {
+            background: rgba(16, 185, 129, 0.2);
+            padding: 6px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            display: inline-block;
+            margin-top: 8px;
+            border: 1px solid var(--success);
         }
         
         .credit-card {
@@ -250,7 +249,6 @@
             margin-left: auto;
         }
         
-        /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -290,7 +288,6 @@
         .nav-icon { font-size: 1.5rem; }
         .nav-label { font-size: 0.65rem; font-weight: 600; }
         
-        /* Cards */
         .card {
             background: rgba(30, 30, 40, 0.9);
             backdrop-filter: blur(10px);
@@ -327,34 +324,29 @@
             margin-bottom: 10px;
         }
         
-        .campaign-reward {
-            background: rgba(16, 185, 129, 0.2);
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
+        .limit-info {
+            background: rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            padding: 8px;
+            margin: 10px 0;
             font-size: 0.7rem;
-            margin-bottom: 10px;
+            text-align: center;
         }
         
-        .watch-btn {
-            background: linear-gradient(135deg, var(--youtube), #cc0000);
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            transition: transform 0.2s;
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 8px;
+            margin: 8px 0;
+            overflow: hidden;
         }
         
-        .watch-btn:active { transform: scale(0.97); }
-        .watch-btn.watched { background: var(--success); opacity: 0.7; cursor: default; }
+        .progress-fill {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
         
         .badge-group {
             display: flex;
@@ -370,22 +362,7 @@
             font-size: 0.7rem;
         }
         
-        .progress-bar {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            height: 6px;
-            margin: 8px 0;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.3s;
-        }
-        
-        input, textarea {
+        input, select {
             width: 100%;
             padding: 14px;
             margin-bottom: 12px;
@@ -409,18 +386,6 @@
         }
         
         .btn-primary:active { transform: scale(0.97); }
-        
-        .referral-code-box {
-            background: rgba(0,0,0,0.5);
-            padding: 14px;
-            border-radius: 16px;
-            font-family: monospace;
-            font-size: 1rem;
-            text-align: center;
-            margin: 12px 0;
-            border: 2px dashed var(--primary);
-            cursor: pointer;
-        }
         
         .toast {
             position: fixed;
@@ -448,132 +413,84 @@
             color: var(--gray-400);
         }
         
-        /* Chatbot Styles */
-        .chat-container {
-            background: rgba(25, 25, 35, 0.95);
-            border-radius: 24px;
-            overflow: hidden;
-            margin-top: 8px;
+        .slider-control {
+            margin: 15px 0;
         }
         
-        .chat-messages {
-            height: 320px;
-            overflow-y: auto;
-            padding: 16px;
+        .slider-control label {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
         }
         
-        .message {
-            display: flex;
-            gap: 10px;
-            max-width: 85%;
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(139, 92, 246, 0.3);
+            border-radius: 5px;
         }
         
-        .message.bot { align-self: flex-start; }
-        .message.user { align-self: flex-end; flex-direction: row-reverse; }
-        
-        .message-avatar {
-            width: 32px;
-            height: 32px;
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            flex-shrink: 0;
-        }
-        
-        .message.user .message-avatar {
-            background: var(--youtube);
-        }
-        
-        .message-bubble {
-            background: rgba(45, 45, 55, 0.9);
-            padding: 10px 14px;
-            border-radius: 18px;
-            font-size: 0.85rem;
-            line-height: 1.4;
-        }
-        
-        .message.user .message-bubble {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-        }
-        
-        .chat-input-area {
-            display: flex;
-            padding: 12px;
-            background: rgba(20, 20, 28, 0.9);
-            border-top: 1px solid rgba(139, 92, 246, 0.2);
-            gap: 10px;
-        }
-        
-        .chat-input {
-            flex: 1;
-            margin: 0;
-            padding: 12px;
-            font-size: 0.85rem;
-        }
-        
-        .chat-send-btn {
             background: var(--primary);
-            border: none;
-            border-radius: 40px;
-            padding: 0 20px;
-            color: white;
-            font-weight: bold;
             cursor: pointer;
         }
         
-        .typing-indicator {
-            display: flex;
-            gap: 4px;
-            padding: 8px 12px;
+        .slider-value {
+            text-align: center;
+            margin-top: 8px;
+            font-weight: bold;
+            color: var(--primary-light);
         }
         
-        .typing-indicator span {
-            width: 6px;
-            height: 6px;
-            background: var(--gray-400);
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
+        .max-limit-warning {
+            color: var(--warning);
+            font-size: 0.7rem;
+            margin-top: 4px;
         }
         
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-        
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-            30% { transform: translateY(-6px); opacity: 1; }
+        .watch-btn {
+            background: linear-gradient(135deg, var(--youtube), #cc0000);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.85rem;
+            transition: transform 0.2s;
         }
+        
+        .watch-btn:active { transform: scale(0.97); }
+        .watch-btn.disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
-    <!-- SIGN-IN OVERLAY -->
     <div class="signin-overlay" id="signinOverlay">
         <div class="signin-card">
             <div style="font-size: 4rem;">🎬</div>
             <h2>ViewSwap</h2>
-            <p>Watch YouTube Videos • Earn Credits • Get Real Views</p>
-            <button class="google-signin-btn" id="signInBtn">
-                🟢 Sign in with Google
-            </button>
-            <div class="status-badge">🔐 Sign in to start watching and earning</div>
+            <p>Smart Campaign Limits • Max = Active Users</p>
+            <button class="google-signin-btn" id="signInBtn">🟢 Sign in with Google</button>
+            <div class="status-badge">🔐 Campaign likes/subs limited to active users</div>
         </div>
     </div>
 
-    <!-- MAIN APP CONTENT -->
     <div id="mainAppContent">
         <div class="bg-particles" id="particles"></div>
         <div class="container">
             <div class="header">
                 <h1>🎬 ViewSwap</h1>
-                <p>Watch • Earn • Get Views</p>
+                <p>Smart Limits • Max Engagement = Active Users</p>
+                <div class="online-badge" id="onlineCountBadge">👥 Loading users...</div>
             </div>
 
-            <!-- User & Credits Bar -->
             <div class="credit-card">
                 <div class="credit-label">💰 YOUR CREDITS</div>
                 <div class="credit-amount" id="creditBalance">0</div>
@@ -591,35 +508,21 @@
                 </div>
             </div>
 
-            <!-- Dynamic Page Content -->
             <div id="pageContent"></div>
         </div>
 
-        <!-- Bottom Navigation -->
         <div class="bottom-nav">
-            <button class="nav-item active" data-page="home">
-                <div class="nav-icon">🏠</div>
-                <div class="nav-label">Home</div>
-            </button>
-            <button class="nav-item" data-page="campaign">
-                <div class="nav-icon">📢</div>
-                <div class="nav-label">Campaign</div>
-            </button>
-            <button class="nav-item" data-page="refer">
-                <div class="nav-icon">🤝</div>
-                <div class="nav-label">Refer</div>
-            </button>
-            <button class="nav-item" data-page="help">
-                <div class="nav-icon">💬</div>
-                <div class="nav-label">Help</div>
-            </button>
+            <button class="nav-item active" data-page="home"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></button>
+            <button class="nav-item" data-page="campaign"><div class="nav-icon">📢</div><div class="nav-label">Campaign</div></button>
+            <button class="nav-item" data-page="refer"><div class="nav-icon">🤝</div><div class="nav-label">Refer</div></button>
+            <button class="nav-item" data-page="help"><div class="nav-icon">💬</div><div class="nav-label">Help</div></button>
         </div>
     </div>
 
     <script type="module">
         const { initializeApp } = window.firebaseModules;
         const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } = window.firebaseModules;
-        const { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, updateDoc } = window.firebaseModules;
+        const { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, updateDoc, onSnapshot, serverTimestamp, deleteDoc, where } = window.firebaseModules;
         
         const firebaseConfig = {
             apiKey: "AIzaSyAupBkllyicDPD9O6CmX4mS4sF5z96mqxc",
@@ -638,6 +541,54 @@
         let currentUser = null;
         let userData = null;
         let currentPage = 'home';
+        let activeUsersCount = 0;
+        let activeUsersList = [];
+        
+        // Track online users - completely separate from other sites
+        function initOnlineTracking() {
+            const userStatusRef = doc(db, 'viewswap_online', currentUser?.uid || 'temp');
+            
+            const updateOnlineStatus = async () => {
+                if (!currentUser) return;
+                await setDoc(doc(db, 'viewswap_online', currentUser.uid), {
+                    uid: currentUser.uid,
+                    displayName: userData?.displayName || currentUser.displayName,
+                    lastSeen: serverTimestamp(),
+                    isOnline: true
+                }, { merge: true });
+            };
+            
+            updateOnlineStatus();
+            const interval = setInterval(updateOnlineStatus, 30000);
+            
+            window.addEventListener('beforeunload', async () => {
+                if (currentUser) {
+                    await setDoc(doc(db, 'viewswap_online', currentUser.uid), {
+                        isOnline: false,
+                        lastSeen: serverTimestamp()
+                    }, { merge: true });
+                }
+            });
+            
+            // Listen for active users count
+            const onlineQuery = query(collection(db, 'viewswap_online'), where('isOnline', '==', true));
+            const unsubscribe = onSnapshot(onlineQuery, (snapshot) => {
+                activeUsersList = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.uid !== currentUser?.uid) {
+                        activeUsersList.push(data);
+                    }
+                });
+                activeUsersCount = snapshot.size;
+                document.getElementById('onlineCountBadge').innerHTML = `👥 ${activeUsersCount} active ${activeUsersCount === 1 ? 'user' : 'users'} online`;
+            });
+            
+            return () => {
+                clearInterval(interval);
+                unsubscribe();
+            };
+        }
         
         function showToast(msg) {
             const t = document.createElement('div');
@@ -653,12 +604,8 @@
             return match ? match[1] : null;
         }
         
-        function openYouTube(url) {
-            window.open(url, '_blank');
-        }
-        
         async function loadUserData(uid) {
-            const ref = doc(db, 'users', uid);
+            const ref = doc(db, 'viewswap_users', uid);
             const snap = await getDoc(ref);
             if (snap.exists()) {
                 userData = snap.data();
@@ -678,7 +625,7 @@
         }
         
         async function saveUserData() {
-            if(currentUser) await setDoc(doc(db, 'users', currentUser.uid), userData, { merge: true });
+            if(currentUser) await setDoc(doc(db, 'viewswap_users', currentUser.uid), userData, { merge: true });
             document.getElementById('creditBalance').innerText = Math.floor(userData.credits);
         }
         
@@ -703,61 +650,138 @@
             renderCurrentPage();
         }
         
-        async function createCampaign(title, url, rewardPerView) {
+        // Create campaign with intelligent limits based on active users
+        async function createCampaign(title, url, targetLikes, targetSubs) {
             const videoId = extractVideoId(url);
             if (!videoId) { showToast('Invalid YouTube URL'); return false; }
-            if (rewardPerView < 1 || rewardPerView > 100) { showToast('Reward must be 1-100 credits'); return false; }
-            if (userData.campaigns?.some(c => c.videoId === videoId)) { showToast('Campaign exists for this video'); return false; }
+            
+            // Max limit = active users count (excluding self)
+            const maxPossible = Math.max(1, activeUsersCount - 1);
+            
+            if (targetLikes > maxPossible) {
+                showToast(`Max likes limited to ${maxPossible} (active users online)`);
+                return false;
+            }
+            if (targetSubs > maxPossible) {
+                showToast(`Max subscribers limited to ${maxPossible} (active users online)`);
+                return false;
+            }
+            
+            const totalCost = (targetLikes * 2) + (targetSubs * 5);
+            if (userData.credits < totalCost) {
+                showToast(`Need ${totalCost} credits! You have ${userData.credits}`);
+                return false;
+            }
+            
+            await updateCredits(-totalCost);
             
             const campaign = {
                 id: Date.now().toString(),
-                title, url, videoId, rewardPerView,
-                creatorId: currentUser.uid, creatorName: userData.displayName,
-                createdAt: new Date().toISOString(), views: 0, watchers: []
+                title, url, videoId,
+                targetLikes: targetLikes,
+                targetSubs: targetSubs,
+                currentLikes: 0,
+                currentSubs: 0,
+                creatorId: currentUser.uid,
+                creatorName: userData.displayName,
+                createdAt: new Date().toISOString(),
+                watchers: [],
+                completed: false
             };
             
             userData.campaigns = userData.campaigns || [];
             userData.campaigns.push(campaign);
             await saveUserData();
             
-            const campaignRef = doc(db, 'campaigns', campaign.id);
+            const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
             await setDoc(campaignRef, campaign);
             
-            showToast(`✅ Campaign created! Reward: ${rewardPerView} credits per view`);
+            showToast(`✅ Campaign created! Cost: ${totalCost} credits | Max likes/subs: ${maxPossible}`);
             renderCurrentPage();
             return true;
         }
         
+        // Watch campaign and perform like/sub actions (simulated with limit checks)
         async function watchCampaign(campaign) {
             if (userData.watchedVideos?.includes(campaign.videoId)) {
-                showToast('You already watched this video!');
+                showToast('You already engaged with this video!');
                 return;
             }
             if (campaign.creatorId === currentUser.uid) {
-                showToast("Can't watch your own video");
+                showToast("Can't engage with your own video");
                 return;
             }
             
-            openYouTube(campaign.url);
+            // Check if campaign is already completed
+            const likesLeft = campaign.targetLikes - campaign.currentLikes;
+            const subsLeft = campaign.targetSubs - campaign.currentSubs;
             
-            const reward = campaign.rewardPerView;
-            await updateCredits(reward);
-            showToast(`🎬 +${reward} credits! Video owner gets +1`);
+            if (likesLeft <= 0 && subsLeft <= 0) {
+                showToast('This campaign has reached its limits!');
+                return;
+            }
             
+            // Open YouTube
+            window.open(campaign.url, '_blank');
+            
+            let rewardEarned = 0;
+            let liked = false;
+            let subscribed = false;
+            
+            // Simulate like if needed
+            if (likesLeft > 0) {
+                liked = true;
+                rewardEarned += 2;
+            }
+            
+            // Simulate subscribe if needed
+            if (subsLeft > 0) {
+                subscribed = true;
+                rewardEarned += 5;
+            }
+            
+            if (rewardEarned > 0) {
+                await updateCredits(rewardEarned);
+                showToast(`🎬 +${rewardEarned} credits! ${liked ? '👍 Liked' : ''} ${subscribed ? '🔔 Subscribed' : ''}`);
+            }
+            
+            // Mark as watched
             userData.watchedVideos = userData.watchedVideos || [];
             userData.watchedVideos.push(campaign.videoId);
             await saveUserData();
             
-            const campaignRef = doc(db, 'campaigns', campaign.id);
-            await updateDoc(campaignRef, { views: increment(1), watchers: arrayUnion(currentUser.uid) });
+            // Update campaign progress
+            const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
+            const updates = {};
+            if (liked) updates.currentLikes = increment(1);
+            if (subscribed) updates.currentSubs = increment(1);
+            updates.watchers = arrayUnion(currentUser.uid);
+            await updateDoc(campaignRef, updates);
             
-            const creatorRef = doc(db, 'users', campaign.creatorId);
+            // Update local campaign data
+            if (liked) campaign.currentLikes++;
+            if (subscribed) campaign.currentSubs++;
+            
+            // Reward creator with 1 credit per engagement
+            const creatorRef = doc(db, 'viewswap_users', campaign.creatorId);
             await runTransaction(db, async (transaction) => {
                 const creatorSnap = await transaction.get(creatorRef);
                 if (creatorSnap.exists()) {
-                    transaction.update(creatorRef, { credits: increment(1), totalEarned: increment(1) });
+                    let creatorReward = 0;
+                    if (liked) creatorReward += 1;
+                    if (subscribed) creatorReward += 1;
+                    if (creatorReward > 0) {
+                        transaction.update(creatorRef, { credits: increment(creatorReward), totalEarned: increment(creatorReward) });
+                    }
                 }
             });
+            
+            // Update user's campaigns list
+            const userCampaignIndex = userData.campaigns?.findIndex(c => c.id === campaign.id);
+            if (userCampaignIndex !== -1) {
+                userData.campaigns[userCampaignIndex] = campaign;
+                await saveUserData();
+            }
             
             renderCurrentPage();
         }
@@ -765,50 +789,86 @@
         window.watchCampaign = watchCampaign;
         
         async function renderHome() {
-            const campaignsQuery = query(collection(db, 'campaigns'));
+            const campaignsQuery = query(collection(db, 'viewswap_campaigns'));
             const snapshot = await getDocs(campaignsQuery);
             const allCampaigns = [];
             snapshot.forEach(doc => allCampaigns.push(doc.data()));
             
             const availableCampaigns = allCampaigns.filter(c => 
                 c.creatorId !== currentUser?.uid && 
-                !userData?.watchedVideos?.includes(c.videoId)
+                !userData?.watchedVideos?.includes(c.videoId) &&
+                (c.currentLikes < c.targetLikes || c.currentSubs < c.targetSubs)
             );
             
             if (availableCampaigns.length === 0) {
-                return `<div class="card"><h2>🎬 Videos to Watch</h2><div class="empty-state">No videos available. Create a campaign to get views!</div></div>`;
+                return `<div class="card"><h2>🎬 Available Campaigns</h2><div class="empty-state">No active campaigns. Create one to get started!</div></div>`;
             }
             
             return `
                 <div class="card">
-                    <h2>🎬 Watch & Earn Credits</h2>
-                    ${availableCampaigns.map(campaign => `
-                        <div class="campaign-item">
-                            <div class="campaign-title">${escapeHtml(campaign.title)}</div>
-                            <div class="campaign-url">${escapeHtml(campaign.url)}</div>
-                            <div class="campaign-reward">💰 ${campaign.rewardPerView} credits per watch</div>
-                            <div class="badge-group">
-                                <span class="badge">👁️ ${campaign.views || 0} views</span>
-                                <span class="badge">👤 ${escapeHtml(campaign.creatorName || 'User')}</span>
+                    <h2>🎬 Engage & Earn Credits</h2>
+                    <p style="font-size: 0.7rem; margin-bottom: 12px; color: var(--gray-400);">👥 ${activeUsersCount} active users online • Max engagement per video = ${Math.max(0, activeUsersCount - 1)}</p>
+                    ${availableCampaigns.map(campaign => {
+                        const likesProgress = (campaign.currentLikes / campaign.targetLikes) * 100;
+                        const subsProgress = (campaign.currentSubs / campaign.targetSubs) * 100;
+                        const isComplete = campaign.currentLikes >= campaign.targetLikes && campaign.currentSubs >= campaign.targetSubs;
+                        
+                        return `
+                            <div class="campaign-item">
+                                <div class="campaign-title">${escapeHtml(campaign.title)}</div>
+                                <div class="campaign-url">${escapeHtml(campaign.url)}</div>
+                                <div class="limit-info">
+                                    🎯 Limits based on active users: ${Math.max(0, activeUsersCount - 1)} max
+                                </div>
+                                <div class="badge-group">
+                                    <span class="badge">👍 Likes: ${campaign.currentLikes}/${campaign.targetLikes}</span>
+                                    <span class="badge">🔔 Subs: ${campaign.currentSubs}/${campaign.targetSubs}</span>
+                                    <span class="badge">👤 ${escapeHtml(campaign.creatorName || 'User')}</span>
+                                </div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: ${likesProgress}%"></div></div>
+                                <div class="progress-bar"><div class="progress-fill" style="width: ${subsProgress}%"></div></div>
+                                ${!isComplete ? 
+                                    `<button class="watch-btn" onclick="window.watchCampaign(${JSON.stringify(campaign).replace(/"/g, '&quot;')})">
+                                        ▶️ Watch & Engage (Earn credits!)
+                                    </button>` :
+                                    `<button class="watch-btn disabled" disabled>✓ Campaign Complete</button>`
+                                }
                             </div>
-                            <button class="watch-btn" onclick="window.watchCampaign(${JSON.stringify(campaign).replace(/"/g, '&quot;')})">
-                                ▶️ Watch on YouTube
-                            </button>
-                        </div>
-                    `).join('')}
+                        `;
+                    }).join('')}
                 </div>
             `;
         }
         
         function renderCampaignPage() {
+            const maxLimit = Math.max(0, activeUsersCount - 1);
             return `
                 <div class="card">
-                    <h2>📢 Create a Campaign</h2>
-                    <p style="font-size: 0.7rem; margin-bottom: 12px; color: var(--gray-400);">Add your YouTube video to get views from other users</p>
+                    <h2>📢 Create Smart Campaign</h2>
+                    <div class="limit-info" style="margin-bottom: 16px;">
+                        👥 ${activeUsersCount} active users online<br>
+                        ⚡ Maximum likes/subs per campaign: <strong>${maxLimit}</strong>
+                    </div>
                     <input type="text" id="campaignTitle" placeholder="Campaign title">
                     <input type="url" id="campaignUrl" placeholder="YouTube video URL">
-                    <input type="number" id="rewardAmount" placeholder="Reward per view (credits)" value="5" min="1" max="100">
-                    <button class="btn-primary" id="createCampaignBtn">🚀 Launch Campaign</button>
+                    
+                    <div class="slider-control">
+                        <label>👍 Likes Target <span id="likesValue">0</span> / ${maxLimit}</label>
+                        <input type="range" id="likesSlider" min="0" max="${maxLimit}" value="0" step="1">
+                        <div class="max-limit-warning">Max likes limited to active users (${maxLimit})</div>
+                    </div>
+                    
+                    <div class="slider-control">
+                        <label>🔔 Subscribers Target <span id="subsValue">0</span> / ${maxLimit}</label>
+                        <input type="range" id="subsSlider" min="0" max="${maxLimit}" value="0" step="1">
+                        <div class="max-limit-warning">Max subs limited to active users (${maxLimit})</div>
+                    </div>
+                    
+                    <div class="limit-info" id="costDisplay">
+                        💰 Estimated Cost: 0 credits
+                    </div>
+                    
+                    <button class="btn-primary" id="createCampaignBtn">🚀 Launch Smart Campaign</button>
                 </div>
                 <div class="card">
                     <h2>📊 My Campaigns</h2>
@@ -827,18 +887,26 @@
                 return;
             }
             
-            container.innerHTML = myCampaigns.map(campaign => `
-                <div class="campaign-item">
-                    <div class="campaign-title">${escapeHtml(campaign.title)}</div>
-                    <div class="campaign-url">${escapeHtml(campaign.url)}</div>
-                    <div class="campaign-reward">💎 ${campaign.rewardPerView} credits per view</div>
-                    <div class="progress-bar"><div class="progress-fill" style="width: ${Math.min((campaign.views || 0) * 2, 100)}%"></div></div>
-                    <div class="badge-group">
-                        <span class="badge">👁️ ${campaign.views || 0} views</span>
-                        <span class="badge">👥 ${campaign.watchers?.length || 0} watchers</span>
+            container.innerHTML = myCampaigns.map(campaign => {
+                const likesProgress = (campaign.currentLikes / campaign.targetLikes) * 100;
+                const subsProgress = (campaign.currentSubs / campaign.targetSubs) * 100;
+                return `
+                    <div class="campaign-item">
+                        <div class="campaign-title">${escapeHtml(campaign.title)}</div>
+                        <div class="campaign-url">${escapeHtml(campaign.url)}</div>
+                        <div class="badge-group">
+                            <span class="badge">👍 ${campaign.currentLikes}/${campaign.targetLikes} likes</span>
+                            <span class="badge">🔔 ${campaign.currentSubs}/${campaign.targetSubs} subs</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: ${likesProgress}%"></div></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: ${subsProgress}%"></div></div>
+                        ${campaign.currentLikes >= campaign.targetLikes && campaign.currentSubs >= campaign.targetSubs ? 
+                            '<div class="badge" style="background: var(--success);">✓ Campaign Complete</div>' : 
+                            '<div class="badge">🔄 Active</div>'
+                        }
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
         
         function renderReferPage() {
@@ -850,121 +918,40 @@
                     </div>
                     <div style="background: rgba(139,92,246,0.1); border-radius: 20px; padding: 20px; text-align: center;">
                         <div style="font-size: 0.7rem; color: var(--gray-400);">Your Referral Code</div>
-                        <div class="referral-code-box" id="referralCodeDisplay">${userData?.referralCode || ''}</div>
+                        <div class="referral-code-box" id="referralCodeDisplay" style="background:rgba(0,0,0,0.5);padding:14px;border-radius:16px;margin:12px 0;border:2px dashed var(--primary);cursor:pointer;">${userData?.referralCode || ''}</div>
                         <button class="btn-primary" id="copyReferralBtn">📋 Copy Code</button>
                     </div>
                     <div style="background: rgba(139,92,246,0.1); border-radius: 20px; padding: 20px; text-align: center; margin-top: 12px;">
                         <div style="font-size: 0.7rem; color: var(--gray-400);">Commission Earned</div>
                         <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${(userData?.referralEarnings || 0).toFixed(2)}</div>
-                        <div style="font-size: 0.7rem;">credits from referrals</div>
                     </div>
-                </div>
-                <div class="card">
-                    <h2>📋 How to Refer</h2>
-                    <p style="line-height: 1.6;">Share your referral code with friends. When they sign up and earn credits, you get 5% of everything they earn! The more they earn, the more you get!</p>
                 </div>
             `;
         }
         
-        // Advanced Chatbot for Help Page
         function renderHelpPage() {
             return `
                 <div class="card">
-                    <h2>💬 ViewSwap Assistant</h2>
-                    <p style="font-size: 0.75rem; margin-bottom: 12px; color: var(--gray-400);">Ask me anything about ViewSwap!</p>
-                    <div class="chat-container">
-                        <div class="chat-messages" id="chatMessages">
-                            <div class="message bot">
-                                <div class="message-avatar">🤖</div>
-                                <div class="message-bubble">Hi! I'm your ViewSwap assistant. Ask me about:<br>• How to earn credits<br>• Creating campaigns<br>• Watching videos<br>• Referral program<br>• Daily bonuses</div>
-                            </div>
-                        </div>
-                        <div class="chat-input-area">
-                            <input type="text" class="chat-input" id="chatInput" placeholder="Type your question..." onkeypress="if(event.key==='Enter') sendChatMessage()">
-                            <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
-                        </div>
-                    </div>
+                    <h2>❓ Smart Campaign Limits</h2>
+                    <p>Your campaign's likes and subscribers targets are LIMITED to the number of active users on the site!</p>
+                    <ul style="margin: 12px 0 0 20px; line-height: 1.6;">
+                        <li>👥 Active users = people currently online</li>
+                        <li>🎯 Max likes/subs = active users - 1 (excludes yourself)</li>
+                        <li>💰 Likes cost: 2 credits each</li>
+                        <li>💰 Subscribers cost: 5 credits each</li>
+                        <li>📈 When someone engages, YOU earn 1 credit per action</li>
+                    </ul>
                 </div>
                 <div class="card">
-                    <h2>❓ Quick Answers</h2>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                        <button class="badge" style="cursor: pointer;" onclick="quickQuestion('how to earn')">💰 How to earn?</button>
-                        <button class="badge" style="cursor: pointer;" onclick="quickQuestion('create campaign')">📢 Create campaign</button>
-                        <button class="badge" style="cursor: pointer;" onclick="quickQuestion('watch videos')">👀 Watch videos</button>
-                        <button class="badge" style="cursor: pointer;" onclick="quickQuestion('referral')">🤝 Referral program</button>
-                        <button class="badge" style="cursor: pointer;" onclick="quickQuestion('daily bonus')">🎁 Daily bonus</button>
-                    </div>
+                    <h2>💡 How It Works</h2>
+                    <p>1️⃣ Sign in with Google<br>2️⃣ Create a campaign with limits based on active users<br>3️⃣ Other users watch your video and engage<br>4️⃣ You earn credits when they engage<br>5️⃣ They earn credits for watching!</p>
                 </div>
             `;
-        }
-        
-        // Chatbot intelligence
-        window.sendChatMessage = function() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            if (!message) return;
-            
-            addChatMessage(message, 'user');
-            input.value = '';
-            
-            setTimeout(() => {
-                const response = getBotResponse(message.toLowerCase());
-                addChatMessage(response, 'bot');
-            }, 500);
-        };
-        
-        window.quickQuestion = function(question) {
-            addChatMessage(question, 'user');
-            setTimeout(() => {
-                const response = getBotResponse(question.toLowerCase());
-                addChatMessage(response, 'bot');
-            }, 300);
-        };
-        
-        function getBotResponse(question) {
-            if (question.includes('earn') || question.includes('credit')) {
-                return "💰 You earn credits by watching other users' videos! Each video gives you the reward amount set by the creator. You also get a +50 credit daily bonus. Referrals give you 5% commission!";
-            }
-            if (question.includes('create') || question.includes('campaign')) {
-                return "📢 Go to the Campaign tab, enter your YouTube video URL, set a reward per view (1-100 credits), and launch! Other users will watch your video and you earn 1 credit per view plus engagement!";
-            }
-            if (question.includes('watch') || question.includes('view')) {
-                return "👀 On the Home tab, you'll see all available videos. Click 'Watch on YouTube' - it opens YouTube in a new tab. After watching, you automatically earn credits! Each video can only be watched once.";
-            }
-            if (question.includes('refer') || question.includes('referral')) {
-                return "🤝 Share your unique referral code with friends. When they sign up and earn credits, you get 5% of everything they earn forever! The more active your referrals, the more you earn!";
-            }
-            if (question.includes('daily') || question.includes('bonus')) {
-                return "🎁 Every day you can claim a free +50 credit bonus! Just click the 'Daily Bonus' button at the top of the app. Resets every 24 hours.";
-            }
-            if (question.includes('how') || question.includes('start')) {
-                return "🚀 To get started: 1) Watch videos on Home to earn credits 2) Create your own campaign in Campaign tab 3) Share your referral code to earn commissions! Simple as that!";
-            }
-            return "💡 Here are some things you can ask: 'how to earn credits', 'create campaign', 'watch videos', 'referral program', 'daily bonus'. Try one!";
-        }
-        
-        function addChatMessage(text, sender) {
-            const container = document.getElementById('chatMessages');
-            if (!container) return;
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
-            messageDiv.innerHTML = `
-                <div class="message-avatar">${sender === 'bot' ? '🤖' : '👤'}</div>
-                <div class="message-bubble">${escapeHtml(text)}</div>
-            `;
-            container.appendChild(messageDiv);
-            container.scrollTop = container.scrollHeight;
         }
         
         function escapeHtml(str) {
             if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
+            return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]);
         }
         
         async function renderCurrentPage() {
@@ -975,14 +962,52 @@
                 container.innerHTML = await renderHome();
             } else if (currentPage === 'campaign') {
                 container.innerHTML = renderCampaignPage();
+                
+                const maxLimit = Math.max(0, activeUsersCount - 1);
+                const likesSlider = document.getElementById('likesSlider');
+                const subsSlider = document.getElementById('subsSlider');
+                const likesValue = document.getElementById('likesValue');
+                const subsValue = document.getElementById('subsValue');
+                const costDisplay = document.getElementById('costDisplay');
+                
+                function updateCost() {
+                    const likes = parseInt(likesSlider?.value || 0);
+                    const subs = parseInt(subsSlider?.value || 0);
+                    const cost = (likes * 2) + (subs * 5);
+                    if (costDisplay) costDisplay.innerHTML = `💰 Estimated Cost: ${cost} credits`;
+                }
+                
+                if (likesSlider) {
+                    likesSlider.oninput = () => {
+                        likesValue.textContent = likesSlider.value;
+                        updateCost();
+                    };
+                }
+                if (subsSlider) {
+                    subsSlider.oninput = () => {
+                        subsValue.textContent = subsSlider.value;
+                        updateCost();
+                    };
+                }
+                updateCost();
+                
                 document.getElementById('createCampaignBtn')?.addEventListener('click', async () => {
                     const title = document.getElementById('campaignTitle')?.value;
                     const url = document.getElementById('campaignUrl')?.value;
-                    const reward = parseInt(document.getElementById('rewardAmount')?.value);
+                    const likes = parseInt(likesSlider?.value || 0);
+                    const subs = parseInt(subsSlider?.value || 0);
+                    
                     if (!title || !url) { showToast('Enter title and URL'); return; }
-                    await createCampaign(title, url, reward);
+                    if (likes === 0 && subs === 0) { showToast('Set at least one target'); return; }
+                    
+                    await createCampaign(title, url, likes, subs);
                     document.getElementById('campaignTitle').value = '';
                     document.getElementById('campaignUrl').value = '';
+                    if (likesSlider) likesSlider.value = 0;
+                    if (subsSlider) subsSlider.value = 0;
+                    likesValue.textContent = '0';
+                    subsValue.textContent = '0';
+                    updateCost();
                     await renderMyCampaigns();
                 });
                 await renderMyCampaigns();
@@ -1001,7 +1026,6 @@
             }
         }
         
-        // Navigation
         document.querySelectorAll('.nav-item').forEach(btn => {
             btn.addEventListener('click', () => {
                 currentPage = btn.dataset.page;
@@ -1011,7 +1035,6 @@
             });
         });
         
-        // Auth
         async function handleSignIn() {
             try {
                 const result = await signInWithPopup(auth, provider);
@@ -1027,6 +1050,7 @@
                 document.getElementById('userName').textContent = user.displayName || 'User';
                 document.getElementById('userEmail').textContent = user.email;
                 document.body.classList.add('authenticated');
+                initOnlineTracking();
                 renderCurrentPage();
             } else {
                 document.body.classList.remove('authenticated');
@@ -1039,7 +1063,6 @@
         document.getElementById('signOutBtn').addEventListener('click', async () => { await signOut(auth); showToast('Signed out'); });
         document.getElementById('dailyBonusBtn').addEventListener('click', async () => { if (userData) await claimDailyBonus(); });
         
-        // Particles
         for (let i = 0; i < 40; i++) {
             const p = document.createElement('div');
             p.className = 'particle';
