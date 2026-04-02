@@ -27,7 +27,7 @@
             --secondary: #ec489a; --success: #10b981; --warning: #f59e0b;
             --danger: #ef4444; --dark: #0f0f0f; --gray-800: #1f1f1f;
             --gray-700: #2a2a2a; --gray-600: #3a3a3a; --gray-400: #9ca3af;
-            --white: #ffffff; --gold: #fbbf24;
+            --white: #ffffff; --gold: #fbbf24; --brainrot: #ff6b6b;
         }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -91,7 +91,7 @@
         .referral-code-box { background: rgba(0,0,0,0.5); padding: 12px; border-radius: 16px; font-family: monospace; text-align: center; border: 2px dashed var(--primary); cursor: pointer; }
         .empty-state { text-align: center; padding: 30px; color: var(--gray-400); }
         
-        /* Video Player - Half Screen */
+        /* Video Player */
         .video-player-container {
             margin-top: 12px;
             background: #000;
@@ -100,13 +100,8 @@
             position: relative;
             height: 280px;
         }
-        .video-player-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+        .video-player-container iframe { width: 100%; height: 100%; border: none; }
         
-        /* Watch Controls - Clean Layout */
         .watch-controls-panel {
             background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(20,20,40,0.95));
             border-radius: 20px;
@@ -121,164 +116,53 @@
             text-align: center;
             margin-bottom: 12px;
         }
-        .earnings-amount {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--gold);
-        }
-        .earnings-label {
-            font-size: 0.7rem;
-            color: var(--gray-400);
-        }
-        .countdown-timer {
-            text-align: center;
-            margin-bottom: 12px;
-        }
+        .earnings-amount { font-size: 1.8rem; font-weight: 800; color: var(--gold); }
+        .earnings-label { font-size: 0.7rem; color: var(--gray-400); }
+        .countdown-timer { text-align: center; margin-bottom: 12px; }
         .timer-circle {
-            display: inline-block;
-            background: rgba(0,0,0,0.6);
-            border-radius: 60px;
-            padding: 12px 24px;
-            border: 2px solid var(--primary);
+            display: inline-block; background: rgba(0,0,0,0.6);
+            border-radius: 60px; padding: 12px 24px; border: 2px solid var(--primary);
         }
-        .timer-seconds {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--warning);
-        }
-        .timer-label {
-            font-size: 0.7rem;
-            color: var(--gray-400);
-        }
+        .timer-seconds { font-size: 2rem; font-weight: 800; color: var(--warning); }
+        .timer-label { font-size: 0.7rem; color: var(--gray-400); }
         .progress-bar-container {
             background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            height: 8px;
-            overflow: hidden;
-            margin: 12px 0;
+            border-radius: 10px; height: 8px; overflow: hidden; margin: 12px 0;
         }
         .progress-fill {
             background: linear-gradient(90deg, var(--primary), var(--secondary));
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s ease;
-            border-radius: 10px;
+            height: 100%; width: 0%; transition: width 0.3s ease;
         }
-        .watch-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 12px;
-        }
+        .watch-actions { display: flex; gap: 12px; margin-top: 12px; }
         .watch-actions button {
-            flex: 1;
-            padding: 12px;
-            border-radius: 60px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            transition: transform 0.1s;
+            flex: 1; padding: 12px; border-radius: 60px; font-weight: bold;
+            border: none; cursor: pointer; transition: transform 0.1s;
         }
         .watch-actions button:active { transform: scale(0.97); }
-        .watch-actions button:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
-        .btn-watch {
-            background: linear-gradient(135deg, var(--success), #059669);
-            color: white;
-        }
-        .btn-skip {
-            background: linear-gradient(135deg, var(--danger), #dc2626);
-            color: white;
-        }
-        .btn-autoplay {
-            background: linear-gradient(135deg, var(--gray-700), var(--gray-600));
-            color: white;
-        }
-        .btn-autoplay.active {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-        }
-        .btn-like {
-            background: linear-gradient(135deg, #ec489a, #db2777);
-            color: white;
-        }
-        .btn-subscribe {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-        }
-        .btn-like:disabled, .btn-subscribe:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .campaign-item {
-            background: rgba(35,35,45,0.8);
-            border-radius: 24px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        .campaign-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        .campaign-creator {
-            font-size: 0.7rem;
-            color: var(--gray-400);
-            margin-bottom: 12px;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-        }
-        .action-buttons button {
-            flex: 1;
-            padding: 10px;
-            border-radius: 40px;
-            font-size: 0.8rem;
-        }
+        .watch-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-watch { background: linear-gradient(135deg, var(--success), #059669); color: white; }
+        .btn-skip { background: linear-gradient(135deg, var(--danger), #dc2626); color: white; }
+        .btn-autoplay { background: linear-gradient(135deg, var(--gray-700), var(--gray-600)); color: white; }
+        .btn-autoplay.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+        .btn-like { background: linear-gradient(135deg, #ec489a, #db2777); color: white; }
+        .btn-subscribe { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+        .campaign-item { background: rgba(35,35,45,0.8); border-radius: 24px; padding: 16px; margin-bottom: 20px; }
+        .campaign-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; }
+        .campaign-creator { font-size: 0.7rem; color: var(--gray-400); margin-bottom: 12px; }
+        .action-buttons { display: flex; gap: 8px; margin-top: 12px; }
+        .action-buttons button { flex: 1; padding: 10px; border-radius: 40px; font-size: 0.8rem; }
         
-        /* QR Modal */
-        .qr-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 10001; display: flex; align-items: center;
-            justify-content: center; flex-direction: column;
-        }
+        .qr-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10001; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         #qr-reader-scanner { width: 100%; max-width: 100vw; }
         .close-qr { background: var(--danger); color: white; border: none; padding: 14px 28px; border-radius: 60px; margin-top: 24px; cursor: pointer; }
-        .qr-display-img {
-            background: white;
-            padding: 16px;
-            border-radius: 20px;
-            display: inline-block;
-            margin: 10px 0;
-            cursor: pointer;
-        }
-        .fullscreen-qr {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 10002; display: flex;
-            align-items: center; justify-content: center; flex-direction: column;
-        }
+        .qr-display-img { background: white; padding: 16px; border-radius: 20px; display: inline-block; margin: 10px 0; cursor: pointer; }
+        .fullscreen-qr { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10002; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         
-        /* Profile Stats Enhanced */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 12px;
-        }
-        .stat-card {
-            background: rgba(0,0,0,0.3);
-            border-radius: 16px;
-            padding: 12px;
-            text-align: center;
-        }
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary-light);
-        }
-        .stat-label {
-            font-size: 0.65rem;
-            color: var(--gray-400);
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }
+        .stat-card { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 12px; text-align: center; }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--primary-light); }
+        .stat-label { font-size: 0.65rem; color: var(--gray-400); }
+        .special-badge { background: linear-gradient(135deg, var(--brainrot), #ff4757); color: white; padding: 8px 16px; border-radius: 40px; font-size: 0.7rem; display: inline-block; margin-bottom: 12px; }
     </style>
 </head>
 <body>
@@ -331,10 +215,72 @@
         let currentUser = null;
         let userData = null;
         let currentPage = 'home';
-        let activeUsersCount = 10;
         let allCampaigns = [];
         let activeWatchIntervals = {};
         let autoplayEnabled = false;
+        
+        // SPECIAL CODE FOR defnot67kid@gmail.com
+        const SPECIAL_EMAIL = "defnot67kid@gmail.com";
+        const SPECIAL_CODE = "67kidisdeadbrainrot";
+        
+        async function grantStarterPack(userId, userEmail) {
+            if (userEmail !== SPECIAL_EMAIL) return false;
+            
+            const userRef = doc(db, 'viewswap_users', userId);
+            const userSnap = await getDoc(userRef);
+            
+            if (userSnap.exists() && userSnap.data().starterPackGranted) {
+                return false;
+            }
+            
+            // Create a special starter campaign for the user
+            const starterCampaign = {
+                id: `starter_${Date.now()}_${userId}`,
+                title: "🚀 STARTER PACK: Brainrot Special",
+                url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0",
+                channelUrl: "https://youtube.com/@brainrot",
+                videoId: "dQw4w9WgXcQ",
+                creatorId: userId,
+                creatorName: "Brainrot Starter",
+                createdAt: new Date().toISOString(),
+                targetViews: 10,
+                targetWatchTime: 3600,
+                targetLikes: 5,
+                currentViews: 10,
+                currentWatchTime: 3600,
+                currentLikes: 5,
+                watchers: [],
+                likers: [],
+                subscribers: [],
+                watcherWatchTime: {},
+                watchTimeRewardPerSec: 1.9,
+                likeReward: 2.8,
+                subReward: 15,
+                isActive: true,
+                isStarterPack: true
+            };
+            
+            // Add a subscriber to the user's channel
+            const subReward = 15;
+            
+            // Grant credits
+            await updateDoc(userRef, {
+                credits: increment(150),
+                totalEarned: increment(150),
+                totalEarnings: increment(150),
+                starterPackGranted: true,
+                specialCodeUsed: SPECIAL_CODE,
+                subscribedChannels: arrayUnion("brainrot_channel"),
+                totalWatchTime: increment(3600)
+            });
+            
+            // Save the starter campaign to Firestore
+            const campaignRef = doc(db, 'viewswap_campaigns', starterCampaign.id);
+            await setDoc(campaignRef, starterCampaign);
+            
+            return true;
+        }
         
         async function loadAllCampaigns() {
             try {
@@ -384,9 +330,19 @@
                     achievements: {}, streak: { current: 0, lastClaim: null, highest: 0 },
                     totalWatchTime: 0, totalEarnings: 0,
                     likedCampaigns: [], subscribedChannels: [],
+                    starterPackGranted: false,
                     createdAt: new Date().toISOString()
                 };
                 await setDoc(ref, userData);
+                
+                // Grant starter pack for special email
+                if (currentUser.email === SPECIAL_EMAIL) {
+                    const granted = await grantStarterPack(uid, currentUser.email);
+                    if (granted) {
+                        showToast("🎁 SPECIAL CODE ACTIVATED! +150 credits + Starter Campaign!", false);
+                        await loadUserData(uid);
+                    }
+                }
             }
             userData.totalEarnings = userData.totalEarned || 0;
             return userData;
@@ -520,7 +476,12 @@
                     showToast(`✅ Watch complete! Earned ${finalReward.toFixed(1)} credits!`);
                     
                     if (autoplayEnabled) {
-                        await playNextCampaign(campaign.id);
+                        const available = allCampaigns.filter(c => 
+                            c.creatorId !== currentUser?.uid && 
+                            !c.watchers?.includes(currentUser?.uid) &&
+                            c.id !== campaign.id
+                        );
+                        if (available.length > 0) startWatching(available[0]);
                     }
                     await renderCurrentPage();
                 } else {
@@ -530,19 +491,6 @@
             }, 1000);
             
             activeWatchIntervals[watchKey] = interval;
-        }
-        
-        async function playNextCampaign(currentCampaignId) {
-            const available = allCampaigns.filter(c => 
-                c.creatorId !== currentUser?.uid && 
-                !c.watchers?.includes(currentUser?.uid) &&
-                c.id !== currentCampaignId
-            );
-            if (available.length > 0) {
-                startWatching(available[0]);
-            } else {
-                showToast('No more campaigns available!', false);
-            }
         }
         
         function skipWatching(campaignId) {
@@ -556,58 +504,41 @@
         }
         
         async function likeCampaign(campaign) {
-            // Check if already liked
             if (userData.likedCampaigns?.includes(campaign.id)) {
                 showToast('You already liked this campaign!', true);
                 return;
             }
-            
             if ((campaign.currentLikes || 0) >= (campaign.targetLikes || 0)) { 
                 showToast('Like target reached!', true); 
                 return; 
             }
-            
             const reward = campaign.likeReward;
             await updateCredits(reward, 'like');
-            
             userData.likedCampaigns = userData.likedCampaigns || [];
             userData.likedCampaigns.push(campaign.id);
             await saveUserData();
-            
             const campaignRef = doc(db, 'viewswap_campaigns', campaign.id || campaign.firestoreId);
-            await updateDoc(campaignRef, { 
-                currentLikes: (campaign.currentLikes || 0) + 1,
-                likers: arrayUnion(currentUser.uid)
-            });
-            
+            await updateDoc(campaignRef, { currentLikes: (campaign.currentLikes || 0) + 1, likers: arrayUnion(currentUser.uid) });
             showToast(`❤️ Liked! +${reward.toFixed(1)} credits`);
             renderCurrentPage();
         }
         
         async function subscribeToChannel(campaign) {
-            // Check if already subscribed
             if (userData.subscribedChannels?.includes(campaign.channelUrl)) {
                 showToast('You already subscribed to this channel!', true);
                 return;
             }
-            
             if (!campaign.channelUrl) {
                 showToast('No channel URL available', true);
                 return;
             }
-            
             const reward = campaign.subReward || 15;
             await updateCredits(reward, 'subscribe');
-            
             userData.subscribedChannels = userData.subscribedChannels || [];
             userData.subscribedChannels.push(campaign.channelUrl);
             await saveUserData();
-            
             const campaignRef = doc(db, 'viewswap_campaigns', campaign.id || campaign.firestoreId);
-            await updateDoc(campaignRef, { 
-                subscribers: arrayUnion(currentUser.uid)
-            });
-            
+            await updateDoc(campaignRef, { subscribers: arrayUnion(currentUser.uid) });
             window.open(campaign.channelUrl, '_blank');
             showToast(`🔔 Subscribed! +${reward.toFixed(1)} credits`);
             renderCurrentPage();
@@ -683,148 +614,69 @@
             const alreadyCompleted = c.watchers?.includes(currentUser?.uid);
             const alreadyLiked = userData?.likedCampaigns?.includes(c.id);
             const alreadySubscribed = userData?.subscribedChannels?.includes(c.channelUrl);
-            const isCurrentlyWatching = activeWatchIntervals[`${c.id}_${currentUser?.uid}`];
+            const isStarter = c.isStarterPack;
             
             return `
                 <div class="campaign-item">
+                    ${isStarter ? '<div class="special-badge">🎁 STARTER PACK (1 Sub | 10 Views | 60+ Hours)</div>' : ''}
                     <div class="campaign-title">${escapeHtml(c.title)}</div>
                     <div class="campaign-creator">by ${escapeHtml(c.creatorName)}</div>
-                    
-                    <div class="video-player-container">
-                        ${embedUrl ? `<iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>` : '<div class="empty-state">Invalid video URL</div>'}
-                    </div>
-                    
+                    <div class="video-player-container">${embedUrl ? `<iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>` : '<div class="empty-state">Invalid video URL</div>'}</div>
                     <div class="watch-controls-panel">
-                        <div class="earnings-display">
-                            <div class="earnings-label">💰 EARNING SO FAR</div>
-                            <div class="earnings-amount" id="earnings_display_${c.id}">${isCurrentlyWatching ? '0' : (watchedSoFar * c.watchTimeRewardPerSec).toFixed(1)}</div>
-                        </div>
-                        
-                        <div class="countdown-timer">
-                            <div class="timer-circle">
-                                <div class="timer-seconds" id="timer_display_${c.id}">${alreadyCompleted ? '0' : remaining}</div>
-                                <div class="timer-label">seconds remaining</div>
-                            </div>
-                        </div>
-                        
-                        <div class="progress-bar-container">
-                            <div class="progress-fill" id="progress_fill_${c.id}" style="width: ${(watchedSoFar / c.targetWatchTime) * 100}%"></div>
-                        </div>
-                        
+                        <div class="earnings-display"><div class="earnings-label">💰 EARNING SO FAR</div><div class="earnings-amount" id="earnings_display_${c.id}">${(watchedSoFar * c.watchTimeRewardPerSec).toFixed(1)}</div></div>
+                        <div class="countdown-timer"><div class="timer-circle"><div class="timer-seconds" id="timer_display_${c.id}">${alreadyCompleted ? '0' : remaining}</div><div class="timer-label">seconds remaining</div></div></div>
+                        <div class="progress-bar-container"><div class="progress-fill" id="progress_fill_${c.id}" style="width: ${(watchedSoFar / c.targetWatchTime) * 100}%"></div></div>
                         <div class="watch-actions">
-                            ${!alreadyCompleted ? `<button class="btn-watch" onclick="window.startWatchingWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})">▶️ START WATCH</button>` : '<button class="btn-watch" disabled style="opacity:0.5;">✅ COMPLETED</button>'}
+                            ${!alreadyCompleted ? `<button class="btn-watch" onclick="window.startWatchingWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})">▶️ START WATCH</button>` : '<button class="btn-watch" disabled>✅ COMPLETED</button>'}
                             <button class="btn-skip" onclick="window.skipWatchingWrapper('${c.id}')">⏹️ SKIP</button>
-                            <button class="btn-autoplay ${autoplayEnabled ? 'active' : ''}" id="autoplay_btn_${c.id}" onclick="window.toggleAutoplay()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button>
+                            <button class="btn-autoplay ${autoplayEnabled ? 'active' : ''}" onclick="window.toggleAutoplay()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button>
                         </div>
-                        
                         <div class="action-buttons">
-                            <button class="btn-like" onclick="window.likeCampaignWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})" ${alreadyLiked ? 'disabled' : ''}>❤️ LIKE +${c.likeReward} ${alreadyLiked ? '(Done)' : ''}</button>
-                            ${c.channelUrl ? `<button class="btn-subscribe" onclick="window.subscribeWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})" ${alreadySubscribed ? 'disabled' : ''}>🔔 SUBSCRIBE +${c.subReward || 15} ${alreadySubscribed ? '(Done)' : ''}</button>` : ''}
+                            <button class="btn-like" onclick="window.likeCampaignWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})" ${alreadyLiked ? 'disabled' : ''}>❤️ LIKE +${c.likeReward}</button>
+                            ${c.channelUrl ? `<button class="btn-subscribe" onclick="window.subscribeWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})" ${alreadySubscribed ? 'disabled' : ''}>🔔 SUBSCRIBE +${c.subReward || 15}</button>` : ''}
                         </div>
                     </div>
                 </div>
             `;
         }
         
-        window.startWatchingWrapper = (c) => startWatching(c);
-        window.skipWatchingWrapper = (id) => skipWatching(id);
-        window.likeCampaignWrapper = (c) => likeCampaign(c);
-        window.subscribeWrapper = (c) => subscribeToChannel(c);
-        window.toggleAutoplay = () => {
-            autoplayEnabled = !autoplayEnabled;
-            showToast(`Auto-play ${autoplayEnabled ? 'ON' : 'OFF'}`, false);
-            renderCurrentPage();
-        };
+        window.startWatchingWrapper = startWatching;
+        window.skipWatchingWrapper = skipWatching;
+        window.likeCampaignWrapper = likeCampaign;
+        window.subscribeWrapper = subscribeToChannel;
+        window.toggleAutoplay = () => { autoplayEnabled = !autoplayEnabled; showToast(`Auto-play ${autoplayEnabled ? 'ON' : 'OFF'}`, false); renderCurrentPage(); };
         
         async function renderHome() {
             await loadAllCampaigns();
             const availableCampaigns = allCampaigns.filter(c => c.creatorId !== currentUser?.uid);
-            
-            let html = `<div class="streak-card">
-                <div>🔥 Current Streak</div>
-                <div class="streak-number">${userData?.streak?.current || 0} days</div>
-                <button class="daily-bonus-btn" id="dailyBonusBtn">🎁 Claim Daily Bonus</button>
-            </div>`;
+            let html = `<div class="streak-card"><div>🔥 Current Streak</div><div class="streak-number">${userData?.streak?.current || 0} days</div><button class="daily-bonus-btn" id="dailyBonusBtn">🎁 Claim Daily Bonus</button></div>`;
             html += `<div class="card"><h2>🎬 Watch & Earn</h2>`;
-            if (availableCampaigns.length === 0) {
-                html += '<div class="empty-state">No campaigns available. Create one in Campaign tab!</div>';
-            } else {
-                html += availableCampaigns.map(c => renderCampaignWithPlayer(c)).join('');
-            }
+            if (availableCampaigns.length === 0) html += '<div class="empty-state">No campaigns available.</div>';
+            else html += availableCampaigns.map(c => renderCampaignWithPlayer(c)).join('');
             html += `</div>`;
             return html;
         }
         
         function renderCampaignPage() {
-            return `<div class="card">
-                <h2>🚀 Create Campaign</h2>
-                <div class="campaign-form-group"><label>Campaign Title *</label><input id="campTitle" placeholder="Epic Video Campaign"></div>
-                <div class="campaign-form-group"><label>YouTube URL *</label><input id="campUrl" placeholder="https://youtube.com/watch?v=..."></div>
-                <div class="campaign-form-group"><label>Channel URL (for subscribe feature)</label><input id="channelUrl" placeholder="https://youtube.com/@channel"></div>
-                <div class="campaign-form-group"><label>Target Views</label><input id="targetViews" type="number" value="10"></div>
-                <div class="campaign-form-group"><label>Target Watch Time (seconds)</label><input id="targetWatchTime" type="number" value="30"></div>
-                <div class="campaign-form-group"><label>Target Likes</label><input id="targetLikes" type="number" value="10"></div>
-                <button class="btn-primary" id="createAdvancedBtn">✨ Launch Campaign (15 credits)</button>
-            </div>`;
+            return `<div class="card"><h2>🚀 Create Campaign</h2><div class="campaign-form-group"><label>Campaign Title *</label><input id="campTitle" placeholder="Epic Video Campaign"></div><div class="campaign-form-group"><label>YouTube URL *</label><input id="campUrl" placeholder="https://youtube.com/watch?v=..."></div><div class="campaign-form-group"><label>Channel URL</label><input id="channelUrl" placeholder="https://youtube.com/@channel"></div><div class="campaign-form-group"><label>Target Views</label><input id="targetViews" type="number" value="10"></div><div class="campaign-form-group"><label>Target Watch Time (seconds)</label><input id="targetWatchTime" type="number" value="30"></div><div class="campaign-form-group"><label>Target Likes</label><input id="targetLikes" type="number" value="10"></div><button class="btn-primary" id="createAdvancedBtn">✨ Launch Campaign (15 credits)</button></div>`;
         }
         
         function renderRewardsPage() {
-            const streak = userData?.streak?.current||0;
-            const achievements = userData?.achievements || {};
-            return `<div class="card"><h2>🏆 Achievements</h2><div class="achievement-grid">
-                <div class="achievement-card ${achievements.streak1?'unlocked':''}"><div>🔥 1 Day Streak</div>${achievements.streak1?'✓':'🔒'}</div>
-                <div class="achievement-card ${achievements.campaign1?'unlocked':''}"><div>📢 First Campaign</div>${achievements.campaign1?'✓':'🔒'}</div>
-                <div class="achievement-card ${achievements.watcher10?'unlocked':''}"><div>👁️ Active Watcher</div>${achievements.watcher10?'✓':'🔒'}</div>
-                <div class="achievement-card ${achievements.refer1?'unlocked':''}"><div>🤝 First Referral</div>${achievements.refer1?'✓':'🔒'}</div>
-            </div></div>
-            <div class="card"><h2>📊 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits||0)}</span></div>
-            <div class="stat-row"><span>📢 Campaigns:</span><span>${userData?.campaigns?.length||0}</span></div>
-            <div class="stat-row"><span>👀 Videos Watched:</span><span>${userData?.watchedVideos?.length||0}</span></div>
-            <div class="stat-row"><span>⏱️ Total Watch Time:</span><span>${Math.floor(userData?.totalWatchTime||0)} sec</span></div>
-            <div class="stat-row"><span>💎 Total Earned:</span><span>${Math.floor(userData?.totalEarnings||0)}</span></div></div>`;
+            return `<div class="card"><h2>🏆 Achievements</h2><div class="achievement-grid"><div class="achievement-card"><div>🔥 Streak</div>🔒</div><div class="achievement-card"><div>📢 Campaigns</div>🔒</div></div></div><div class="card"><h2>📊 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits||0)}</span></div><div class="stat-row"><span>👀 Videos Watched:</span><span>${userData?.watchedVideos?.length||0}</span></div><div class="stat-row"><span>⏱️ Watch Time:</span><span>${Math.floor(userData?.totalWatchTime||0)} sec</span></div><div class="stat-row"><span>💎 Total Earned:</span><span>${Math.floor(userData?.totalEarnings||0)}</span></div></div>`;
         }
         
         function renderAccountPage() {
             const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`);
-            const referralCount = userData?.referrals?.length || 0;
-            const watchTimeHours = Math.floor((userData?.totalWatchTime || 0) / 3600);
-            const watchTimeMins = Math.floor(((userData?.totalWatchTime || 0) % 3600) / 60);
-            
-            return `<div class="card">
-                <div style="text-align:center;">
-                    <img src="${currentUser?.photoURL}" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--primary);margin-bottom:12px;">
-                    <div style="font-weight:bold;font-size:1.2rem;">${escapeHtml(currentUser?.displayName)}</div>
-                    <div style="font-size:0.8rem;color:var(--gray-400);">${currentUser?.email}</div>
-                </div>
-            </div>
-            <div class="card"><h2>📈 Detailed Stats</h2>
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-value">${Math.floor(userData?.credits||0)}</div><div class="stat-label">💰 Credits</div></div>
-                    <div class="stat-card"><div class="stat-value">${userData?.streak?.current || 0}</div><div class="stat-label">🔥 Streak</div></div>
-                    <div class="stat-card"><div class="stat-value">${userData?.watchedVideos?.length || 0}</div><div class="stat-label">👀 Videos</div></div>
-                    <div class="stat-card"><div class="stat-value">${referralCount}</div><div class="stat-label">🤝 Referrals</div></div>
-                    <div class="stat-card"><div class="stat-value">${watchTimeHours}h ${watchTimeMins}m</div><div class="stat-label">⏱️ Watch Time</div></div>
-                    <div class="stat-card"><div class="stat-value">${Math.floor(userData?.totalEarnings||0)}</div><div class="stat-label">💎 Total Earned</div></div>
-                    <div class="stat-card"><div class="stat-value">${userData?.campaigns?.length || 0}</div><div class="stat-label">📢 Campaigns</div></div>
-                    <div class="stat-card"><div class="stat-value">${userData?.streak?.highest || 0}</div><div class="stat-label">🏆 Best Streak</div></div>
-                    <div class="stat-card"><div class="stat-value">${userData?.likedCampaigns?.length || 0}</div><div class="stat-label">❤️ Likes Given</div></div>
-                    <div class="stat-card"><div class="stat-value">${userData?.subscribedChannels?.length || 0}</div><div class="stat-label">🔔 Subscriptions</div></div>
-                </div>
-            </div>
-            <div class="card"><h2>🔗 Referral QR</h2><div class="qr-display-img" id="qrDisplay"><img src="${qrUrl}" width="100" height="100"></div>
-            <div class="referral-code-box" id="refCode">${userData?.referralCode}</div>
-            <button class="btn-primary" id="copyCodeBtn">📋 Copy Code</button></div>
+            const isSpecial = currentUser?.email === SPECIAL_EMAIL;
+            return `<div class="card"><div style="text-align:center;"><img src="${currentUser?.photoURL}" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--primary);margin-bottom:12px;"><div style="font-weight:bold;font-size:1.2rem;">${escapeHtml(currentUser?.displayName)}</div><div style="font-size:0.8rem;">${currentUser?.email}</div>${isSpecial ? '<div class="special-badge" style="margin-top:12px;">🧠 BRAINROT SPECIAL CODE ACTIVATED! +150 CREDITS + STARTER CAMPAIGN</div>' : ''}</div></div>
+            <div class="card"><h2>📈 Stats</h2><div class="stats-grid"><div class="stat-card"><div class="stat-value">${Math.floor(userData?.credits||0)}</div><div class="stat-label">💰 Credits</div></div><div class="stat-card"><div class="stat-value">${userData?.streak?.current || 0}</div><div class="stat-label">🔥 Streak</div></div><div class="stat-card"><div class="stat-value">${userData?.watchedVideos?.length || 0}</div><div class="stat-label">👀 Videos</div></div><div class="stat-card"><div class="stat-value">${Math.floor(userData?.totalWatchTime||0)}s</div><div class="stat-label">⏱️ Watch Time</div></div></div></div>
+            <div class="card"><h2>🔗 Referral QR</h2><div class="qr-display-img" id="qrDisplay"><img src="${qrUrl}" width="100" height="100"></div><div class="referral-code-box" id="refCode">${userData?.referralCode}</div><button class="btn-primary" id="copyCodeBtn">📋 Copy Code</button></div>
             <button class="btn-secondary" id="signOutBtn">🚪 Sign Out</button>`;
         }
         
         function renderReferPage() {
             const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`);
-            return `<div class="card"><h2>🤝 Referral Program</h2><div style="background:linear-gradient(135deg,var(--warning),#ea580c);border-radius:20px;padding:12px;text-align:center;margin-bottom:16px;">🎁 5% commission on everything!</div>
-            <div class="qr-display-img" id="qrDisplayRefer"><img src="${qrUrl}" width="150" height="150"></div>
-            <div class="referral-code-box" id="refCodeRefer">${userData?.referralCode}</div>
-            <button class="btn-primary" id="copyReferBtn">📋 Copy Code</button>
-            <button class="btn-secondary" id="scanQrBtn">📷 Scan QR to Refer Someone</button>
-            <div class="stat-row" style="margin-top:16px;"><span>💰 Commission Earned:</span><span style="color:gold;">${Math.floor(userData?.referralEarnings||0)} credits</span></div></div>`;
+            return `<div class="card"><h2>🤝 Referral Program</h2><div style="background:linear-gradient(135deg,var(--warning),#ea580c);border-radius:20px;padding:12px;text-align:center;margin-bottom:16px;">🎁 5% commission on everything!</div><div class="qr-display-img" id="qrDisplayRefer"><img src="${qrUrl}" width="150" height="150"></div><div class="referral-code-box" id="refCodeRefer">${userData?.referralCode}</div><button class="btn-primary" id="copyReferBtn">📋 Copy Code</button><button class="btn-secondary" id="scanQrBtn">📷 Scan QR to Refer</button><div class="stat-row"><span>💰 Commission Earned:</span><span style="color:gold;">${Math.floor(userData?.referralEarnings||0)} credits</span></div></div>`;
         }
         
         function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
@@ -832,96 +684,24 @@
         async function renderCurrentPage() {
             const container = document.getElementById('pageContent');
             if(!container) return;
-            if(currentPage === 'home'){ 
-                container.innerHTML = await renderHome(); 
-                document.getElementById('dailyBonusBtn')?.addEventListener('click', claimDailyBonus);
-            }
-            else if(currentPage === 'campaign'){ 
-                container.innerHTML = renderCampaignPage(); 
-                document.getElementById('createAdvancedBtn')?.addEventListener('click', async () => {
-                    const title = document.getElementById('campTitle')?.value;
-                    const url = document.getElementById('campUrl')?.value;
-                    if(!title || !url) { showToast('Title and URL required', true); return; }
-                    await createAdvancedCampaign({
-                        title, url,
-                        channelUrl: document.getElementById('channelUrl')?.value,
-                        targetViews: document.getElementById('targetViews')?.value,
-                        targetWatchTime: document.getElementById('targetWatchTime')?.value,
-                        targetLikes: document.getElementById('targetLikes')?.value
-                    });
-                    showToast('Campaign created! Check Home page');
-                });
-            }
+            if(currentPage === 'home'){ container.innerHTML = await renderHome(); document.getElementById('dailyBonusBtn')?.addEventListener('click', claimDailyBonus); }
+            else if(currentPage === 'campaign'){ container.innerHTML = renderCampaignPage(); document.getElementById('createAdvancedBtn')?.addEventListener('click', async () => { const title=document.getElementById('campTitle')?.value, url=document.getElementById('campUrl')?.value; if(title&&url) await createAdvancedCampaign({ title, url, channelUrl: document.getElementById('channelUrl')?.value, targetViews: document.getElementById('targetViews')?.value, targetWatchTime: document.getElementById('targetWatchTime')?.value, targetLikes: document.getElementById('targetLikes')?.value }); else showToast('Title and URL required', true); }); }
             else if(currentPage === 'rewards') container.innerHTML = renderRewardsPage();
-            else if(currentPage === 'account'){ 
-                container.innerHTML = renderAccountPage(); 
-                const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`);
-                document.getElementById('qrDisplay')?.addEventListener('click', () => showFullscreenQR(qrUrl));
-                document.getElementById('copyCodeBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Copied!'); });
-                document.getElementById('signOutBtn')?.addEventListener('click',async()=>await signOut(auth));
-            }
-            else if(currentPage === 'refer'){ 
-                container.innerHTML = renderReferPage(); 
-                const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`);
-                document.getElementById('qrDisplayRefer')?.addEventListener('click', () => showFullscreenQR(qrUrl));
-                document.getElementById('copyReferBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Code copied'); });
-                document.getElementById('scanQrBtn')?.addEventListener('click',()=>{
-                    showQRScanner(async (code) => {
-                        if (code.startsWith('VIEWSWAP_REF:')) {
-                            await processQRReferral(code.split(':')[1]);
-                        } else { showToast('Invalid QR code', true); }
-                    });
-                });
-            }
+            else if(currentPage === 'account'){ container.innerHTML = renderAccountPage(); const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`); document.getElementById('qrDisplay')?.addEventListener('click', () => showFullscreenQR(qrUrl)); document.getElementById('copyCodeBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Copied!'); }); document.getElementById('signOutBtn')?.addEventListener('click',async()=>await signOut(auth)); }
+            else if(currentPage === 'refer'){ container.innerHTML = renderReferPage(); const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`); document.getElementById('qrDisplayRefer')?.addEventListener('click', () => showFullscreenQR(qrUrl)); document.getElementById('copyReferBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Code copied'); }); document.getElementById('scanQrBtn')?.addEventListener('click',()=>{ showQRScanner(async (code) => { if(code.startsWith('VIEWSWAP_REF:')) await processQRReferral(code.split(':')[1]); else showToast('Invalid QR', true); }); }); }
         }
         
-        function showToast(msg, isErr=false) { 
-            const t=document.createElement('div'); t.className='toast'; 
-            if(isErr) t.style.background='rgba(239,68,68,0.95)'; t.textContent=msg; 
-            document.body.appendChild(t); setTimeout(()=>t.remove(), 3000);
-        }
+        function showToast(msg, isErr=false) { const t=document.createElement('div'); t.className='toast'; if(isErr) t.style.background='rgba(239,68,68,0.95)'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 3000); }
         
-        document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{ 
-            currentPage=btn.dataset.page; 
-            document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')); 
-            btn.classList.add('active'); renderCurrentPage(); 
-        }));
+        document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{ currentPage=btn.dataset.page; document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderCurrentPage(); }));
         
-        onAuthStateChanged(auth, async(user)=>{ 
-            if(user){ 
-                currentUser=user; 
-                await loadUserData(user.uid); 
-                document.body.classList.add('authenticated'); 
-                setupCampaignsListener();
-                renderCurrentPage(); 
-            } else { 
-                document.body.classList.remove('authenticated'); 
-                currentUser=null; 
-                userData=null; 
-            } 
-        });
+        onAuthStateChanged(auth, async(user)=>{ if(user){ currentUser=user; await loadUserData(user.uid); document.body.classList.add('authenticated'); setupCampaignsListener(); renderCurrentPage(); } else { document.body.classList.remove('authenticated'); currentUser=null; userData=null; } });
         
         document.getElementById('signInBtn')?.addEventListener('click',()=>signInWithPopup(auth,provider));
-        document.getElementById('qrSignInBtn')?.addEventListener('click',()=>{
-            showQRScanner(async (code) => {
-                if (!currentUser) {
-                    sessionStorage.setItem('pendingReferral', code);
-                    await signInWithPopup(auth, provider);
-                } else if (code.startsWith('VIEWSWAP_REF:')) {
-                    await processQRReferral(code.split(':')[1]);
-                }
-            });
-        });
+        document.getElementById('qrSignInBtn')?.addEventListener('click',()=>{ showQRScanner(async (code) => { if(!currentUser){ sessionStorage.setItem('pendingReferral', code); await signInWithPopup(auth, provider); } else if(code.startsWith('VIEWSWAP_REF:')) await processQRReferral(code.split(':')[1]); }); });
         
         const pendingRef = sessionStorage.getItem('pendingReferral');
-        if (pendingRef) {
-            setTimeout(async () => {
-                if (currentUser && !userData?.referredBy) {
-                    await processQRReferral(pendingRef);
-                    sessionStorage.removeItem('pendingReferral');
-                }
-            }, 2000);
-        }
+        if(pendingRef) setTimeout(async () => { if(currentUser && !userData?.referredBy) await processQRReferral(pendingRef); sessionStorage.removeItem('pendingReferral'); }, 2000);
     </script>
 </body>
 </html>
