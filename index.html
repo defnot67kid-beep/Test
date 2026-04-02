@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>ViewSwap — Advanced Referral & Campaign Analytics</title>
+    <title>ViewSwap — Advanced Auto Video & Referral 2.5%</title>
     
     <!-- Firebase SDKs -->
     <script type="module">
@@ -34,24 +34,21 @@
             padding-bottom: 80px;
         }
         .header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
             padding: 20px;
             text-align: center;
-            border-bottom-left-radius: 28px;
-            border-bottom-right-radius: 28px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .header h1 { 
             font-size: 1.8rem; 
-            background: linear-gradient(135deg, #c084fc, #f472b6);
+            background: linear-gradient(135deg, #8b5cf6, #ec489a);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
-        .header p { color: #94a3b8; font-size: 0.75rem; }
         
-        /* BOTTOM NAVIGATION */
         .nav-wrapper {
             position: fixed;
             bottom: 0;
@@ -62,13 +59,12 @@
             z-index: 100;
         }
         .bottom-nav {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
+            background: #ffffff;
             display: flex;
             justify-content: space-around;
             padding: 8px 8px 12px;
-            border-top: 1px solid rgba(0,0,0,0.05);
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+            border-top: 1px solid #e2e8f0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
             position: relative;
         }
         .red-hill-container {
@@ -81,40 +77,147 @@
             justify-content: center;
             pointer-events: none;
         }
-        .red-hill { position: relative; width: 140px; height: 28px; background: transparent; }
-        .red-hill::before { content: ''; position: absolute; bottom: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #ff0000, #ff4444, #cc0000, #ff4444, #ff0000); border-radius: 2px; }
-        .red-hill::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 16px solid transparent; border-right: 16px solid transparent; border-bottom: 18px solid #ff0000; }
-        .hill-peak { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background: #ff0000; border-radius: 50%; z-index: 2; }
+        .red-hill {
+            position: relative;
+            width: 140px;
+            height: 28px;
+            background: transparent;
+        }
+        .red-hill::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ff0000 0%, #ff0000 15%, #ff4444 30%, #cc0000 50%, #ff4444 70%, #ff0000 85%, #ff0000 100%);
+            border-radius: 2px;
+        }
+        .red-hill::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 16px solid transparent;
+            border-right: 16px solid transparent;
+            border-bottom: 18px solid #ff0000;
+        }
+        .hill-peak {
+            position: absolute;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: #ff0000;
+            border-radius: 50%;
+            z-index: 2;
+        }
         
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; padding: 6px 10px; border-radius: 40px; flex: 1; color: #64748b; transition: all 0.2s; }
-        .nav-item.active { color: #8b5cf6; background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(236,72,153,0.1)); }
+        .nav-item { 
+            display: flex; flex-direction: column; align-items: center; gap: 4px; 
+            background: none; border: none; cursor: pointer; padding: 6px 10px; 
+            border-radius: 40px; flex: 1; color: #94a3b8; transition: all 0.2s; 
+        }
+        .nav-item.active { 
+            color: #8b5cf6; 
+            background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(236,72,153,0.1));
+        }
         .nav-icon { font-size: 1.3rem; } .nav-label { font-size: 0.6rem; font-weight: 600; }
         
-        .signin-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .signin-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff;
+            z-index: 10000; display: flex; align-items: center; justify-content: center;
+        }
         body.authenticated .signin-overlay { display: none; }
         #mainAppContent { opacity: 0; visibility: hidden; transition: opacity 0.5s ease; }
         body.authenticated #mainAppContent { opacity: 1; visibility: visible; }
-        .signin-card { background: #ffffff; border-radius: 48px; padding: 48px 32px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); max-width: 420px; width: 90%; }
-        .google-signin-btn, .qr-signin-btn { background: linear-gradient(135deg, #4285f4, #34a853); color: white; border: none; padding: 14px 24px; border-radius: 60px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 12px; margin-top: 12px; width: 100%; justify-content: center; }
+        .signin-card {
+            background: #ffffff;
+            border-radius: 48px; padding: 48px 32px; text-align: center;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2);
+            max-width: 420px; width: 90%;
+        }
+        .referral-input-area { margin-top: 20px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
+        .referral-input-area input { margin-bottom: 8px; text-align: center; letter-spacing: 1px; }
+        .google-signin-btn, .qr-signin-btn {
+            background: linear-gradient(135deg, #4285f4, #34a853); color: white;
+            border: none; padding: 14px 24px; border-radius: 60px; font-weight: 700;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 12px;
+            margin-top: 12px; width: 100%; justify-content: center;
+        }
         .qr-signin-btn { background: linear-gradient(135deg, #8b5cf6, #ec489a); }
         .container { max-width: 500px; margin: 0 auto; position: relative; z-index: 1; padding: 0 16px 20px; }
         
-        .card { background: #ffffff; border-radius: 28px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid #eef2ff; }
-        .card h2 { font-size: 1.2rem; margin-bottom: 16px; border-left: 4px solid #8b5cf6; padding-left: 12px; color: #0f172a; }
+        .card {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            border: 1px solid #eef2ff;
+        }
+        .card h2 { 
+            font-size: 1.2rem; 
+            margin-bottom: 16px; 
+            border-left: 4px solid #8b5cf6; 
+            padding-left: 12px;
+            color: #0f172a;
+        }
         
-        /* ADVANCED CAMPAIGN FORM */
-        .campaign-form { display: flex; flex-direction: column; gap: 16px; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-group label { font-weight: 600; font-size: 0.8rem; color: #475569; letter-spacing: 0.3px; }
-        .form-group input, .form-group textarea { width: 100%; padding: 14px 16px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; font-size: 0.9rem; transition: all 0.2s; }
-        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
-        .input-hint { font-size: 0.7rem; color: #94a3b8; margin-top: 4px; }
-        .btn-primary { background: linear-gradient(135deg, #8b5cf6, #ec489a); color: white; border: none; padding: 14px; border-radius: 60px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; transition: transform 0.1s; }
-        .btn-primary:active { transform: scale(0.97); }
-        .btn-secondary { background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #1e293b; border: none; padding: 12px; border-radius: 60px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 8px; }
+        /* ADVANCED CREATE CAMPAIGN STYLES */
+        .create-campaign-form {
+            background: linear-gradient(145deg, #ffffff, #faf9fe);
+            border-radius: 28px;
+            padding: 4px 0;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: #f1f5f9;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 24px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.2);
+        }
+        .cost-badge {
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            color: #8b5cf6;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
         
-        .campaign-item { background: #ffffff; border-radius: 24px; margin-bottom: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #eef2ff; overflow: hidden; }
-        .video-container { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; }
+        .campaign-item .campaign-header {
+            display: none;  /* HIDE campaign name and creator on home screen as requested */
+        }
+        
+        .video-container { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 20px; overflow: hidden; }
         .watch-stats { display: flex; gap: 16px; padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
         .stat-badge { flex: 1; text-align: center; }
         .stat-badge-label { font-size: 0.65rem; color: #64748b; text-transform: uppercase; }
@@ -124,27 +227,27 @@
         .progress-bar-container { background: #e2e8f0; border-radius: 10px; height: 6px; overflow: hidden; }
         .progress-fill { background: linear-gradient(90deg, #8b5cf6, #ec489a); height: 100%; width: 0%; transition: width 0.3s ease; }
         .action-buttons-area { display: flex; gap: 12px; padding: 12px 16px 16px; flex-wrap: wrap; }
-        .action-btn { flex: 1; padding: 10px 12px; border-radius: 40px; font-weight: 600; font-size: 0.8rem; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .action-btn { flex: 1; padding: 10px 12px; border-radius: 40px; font-weight: 600; font-size: 0.8rem; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: transform 0.1s; }
+        .action-btn:active { transform: scale(0.97); }
         .btn-next { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
         .btn-like { background: linear-gradient(135deg, #ec489a, #db2777); color: white; }
         .btn-subscribe { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; }
         .btn-autoplay { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
         .btn-autoplay.active { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; }
         .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }
-        .stat-card { background: #f9fafb; border-radius: 20px; padding: 14px; text-align: center; }
-        .stat-value { font-size: 1.8rem; font-weight: bold; color: #8b5cf6; }
-        .referral-code-box { background: linear-gradient(135deg, #f1f5f9, #ffffff); padding: 14px; border-radius: 20px; font-family: monospace; text-align: center; border: 2px dashed #8b5cf6; cursor: pointer; font-weight: 600; }
-        .qr-display-img { background: white; padding: 16px; border-radius: 24px; display: inline-block; margin: 10px 0; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .empty-state { text-align: center; padding: 40px; color: #94a3b8; }
-        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #1e293b; backdrop-filter: blur(10px); padding: 12px 20px; border-radius: 60px; z-index: 2000; animation: slideUp 0.3s ease; max-width: 90%; text-align: center; font-size: 0.85rem; color: white; font-weight: 500; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); }
+        .stat-card { background: #f9fafb; border-radius: 20px; padding: 12px; text-align: center; }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: #8b5cf6; }
+        .referral-code-box { background: #f3f4f6; padding: 12px; border-radius: 20px; font-family: monospace; text-align: center; border: 2px dashed #8b5cf6; cursor: pointer; }
+        .qr-display-img { background: white; padding: 16px; border-radius: 24px; display: inline-block; margin: 10px 0; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .share-button { background: #25D366; color: white; border: none; padding: 12px; border-radius: 60px; font-weight: 700; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; width: 100%; }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #1e293b; backdrop-filter: blur(10px); padding: 10px 18px; border-radius: 60px; z-index: 2000; animation: slideUp 0.3s ease; max-width: 90%; text-align: center; font-size: 0.85rem; color: white; font-weight: 500; }
         @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        .graph-container { margin-top: 16px; height: 200px; }
+        canvas { max-height: 180px; width: 100%; }
+        .empty-state { text-align: center; padding: 40px; color: #94a3b8; }
         .qr-modal, .fullscreen-qr { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 10001; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .fullscreen-qr { background: rgba(0,0,0,0.95); }
         .close-qr { background: #ef4444; color: white; border: none; padding: 14px 28px; border-radius: 60px; margin-top: 24px; cursor: pointer; }
-        .chart-container { max-width: 100%; margin: 16px 0; height: 220px; }
-        .share-buttons { display: flex; gap: 12px; margin-top: 12px; }
-        .share-btn { flex: 1; background: #0f172a; color: white; padding: 12px; border-radius: 40px; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .hidden-title { display: none; }
     </style>
 </head>
 <body>
@@ -152,9 +255,14 @@
         <div class="signin-card">
             <div style="font-size: 3.5rem;">🏆</div>
             <h2>ViewSwap</h2>
-            <p>Watch • Earn • Refer & get 2.5% forever</p>
+            <p>Auto-Play • Earn 2.5% from referrals</p>
             <button class="google-signin-btn" id="signInBtn">🟢 Sign in with Google</button>
-            <button class="qr-signin-btn" id="qrSignInBtn">📷 Scan QR Code</button>
+            <button class="qr-signin-btn" id="qrSignInBtn">📷 Scan QR Code to Refer</button>
+            <div class="referral-input-area">
+                <p style="font-size:0.75rem; margin-bottom:6px;">Have a referral code? Enter it</p>
+                <input type="text" id="signinReferralCode" placeholder="e.g., REFABC123">
+                <button class="btn-secondary" id="applyReferralBtn" style="margin-top:6px;">Apply & Sign In</button>
+            </div>
         </div>
     </div>
 
@@ -162,7 +270,7 @@
         <div class="container">
             <div class="header">
                 <h1>🏆 ViewSwap</h1>
-                <p>⚡ 0.5/sec | 2.5% referral income | Auto-play</p>
+                <p>⚡ 0.5/sec | Auto video | 2.5% referral income</p>
             </div>
             <div id="pageContent"></div>
         </div>
@@ -181,7 +289,7 @@
     <script type="module">
         const { initializeApp } = window.firebaseModules;
         const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } = window.firebaseModules;
-        const { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, arrayUnion, onSnapshot, where, orderBy } = window.firebaseModules;
+        const { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, increment, arrayUnion, updateDoc, onSnapshot, where, orderBy } = window.firebaseModules;
         
         const firebaseConfig = {
             apiKey: "AIzaSyAupBkllyicDPD9O6CmX4mS4sF5z96mqxc",
@@ -198,64 +306,43 @@
         const provider = new GoogleAuthProvider();
         
         let currentUser = null, userData = null, currentPage = 'home';
-        let allCampaigns = [], activeWatchData = null, autoplayEnabled = true;
-        let youtubePlayer = null, watchInterval = null, watchedHistory = [];
-        let unsubscribeCampaigns = null, unsubscribeReferrals = null;
-        let performanceChart = null;
+        let allCampaigns = [], activeWatchData = null, autoplayEnabled = true, youtubePlayer = null, watchInterval = null, watchedHistory = [];
+        let unsubscribeCampaigns = null, unsubscribeReferralEarnings = null;
+        let campaignChart = null;
+        const EARNINGS_RATE = 0.5, REFERRAL_PERCENT = 0.025;
         
-        const EARNINGS_RATE = 0.5;
-        const REFERRAL_PERCENT = 0.025;
-        
-        // REAL-TIME REFERRAL EARNINGS: When referred user earns, referrer gets 2.5%
-        async function giveReferralReward(referredUserId, earnedAmount) {
-            if (!referredUserId) return;
-            const referredRef = doc(db, 'viewswap_users', referredUserId);
-            const referredSnap = await getDoc(referredRef);
-            if (!referredSnap.exists()) return;
-            const referredData = referredSnap.data();
-            const referrerId = referredData.referredBy;
-            if (referrerId && referrerId !== referredUserId) {
-                const reward = earnedAmount * REFERRAL_PERCENT;
-                if (reward > 0) {
+        // Referral logic: Give 2.5% to referrer when referred user earns ANY credits
+        async function addReferralEarningsForEarner(earnerId, earnedAmount) {
+            if (!earnerId || earnedAmount <= 0) return;
+            const earnerRef = doc(db, 'viewswap_users', earnerId);
+            const earnerSnap = await getDoc(earnerRef);
+            if (!earnerSnap.exists()) return;
+            const earnerData = earnerSnap.data();
+            const referrerId = earnerData.referredBy;
+            if (referrerId && referrerId !== earnerId) {
+                const referralShare = earnedAmount * REFERRAL_PERCENT;
+                if (referralShare > 0) {
                     const referrerRef = doc(db, 'viewswap_users', referrerId);
                     await updateDoc(referrerRef, {
-                        referralEarnings: increment(reward),
-                        totalReferralCollected: increment(reward),
-                        totalEarnings: increment(reward)
+                        referralEarnings: increment(referralShare),
+                        totalEarnedByReferralShare: increment(referralShare)
                     });
-                    // Show real-time notification to referrer if they're online
-                    if (currentUser && currentUser.uid === referrerId) {
-                        showToast(`🎉 +${reward.toFixed(2)} credits from referral! (2.5% of their earning)`);
-                    }
-                    // Also log this transaction
-                    console.log(`Referral reward ${reward} from ${referredUserId} to ${referrerId}`);
+                    showToast(`🎉 +${referralShare.toFixed(2)} credits from your referral!`, false);
                 }
             }
+            await updateDoc(earnerRef, { totalEarnedByReferralShare: increment(earnedAmount * REFERRAL_PERCENT) });
         }
         
-        async function updateCredits(amount, sourceUserId = null) { 
+        async function updateCredits(amount) { 
             if (!userData) return;
             userData.credits += amount; 
-            if (amount > 0) { 
+            if(amount > 0) { 
                 userData.totalEarned += amount; 
-                userData.totalEarnings = (userData.totalEarned || 0) + (userData.referralEarnings || 0);
+                userData.totalEarnings = userData.totalEarned + (userData.referralEarnings || 0);
                 await saveUserData();
-                // CRITICAL: If this user has a referrer, give them 2.5% of this earning
-                if (userData.referredBy && sourceUserId === null) {
-                    await giveReferralReward(currentUser.uid, amount);
-                }
-            } else {
-                await saveUserData();
-            }
-            if (currentPage === 'home' || currentPage === 'rewards' || currentPage === 'account') renderCurrentPage();
-        }
-        
-        async function saveUserData() { 
-            if(currentUser) {
-                userData.recentlyWatched = watchedHistory;
-                userData.totalEarnings = (userData.totalEarned || 0) + (userData.referralEarnings || 0);
-                await setDoc(doc(db, 'viewswap_users', currentUser.uid), userData, { merge: true }); 
-            }
+                if (userData.referredBy) await addReferralEarningsForEarner(currentUser.uid, amount);
+            } else await saveUserData();
+            if (currentPage === 'home') renderCurrentPage();
         }
         
         async function loadUserData(uid) {
@@ -263,231 +350,140 @@
             const snap = await getDoc(ref);
             if (snap.exists()) {
                 userData = snap.data();
+                userData.streak = userData.streak || { current: 0, lastClaim: null };
+                userData.watchedVideos = userData.watchedVideos || [];
                 userData.referralEarnings = userData.referralEarnings || 0;
                 userData.totalEarned = userData.totalEarned || 0;
-                userData.totalEarnings = userData.totalEarned + userData.referralEarnings;
-                userData.watchedVideos = userData.watchedVideos || [];
-                userData.campaignsCreated = userData.campaignsCreated || [];
+                userData.totalEarnings = (userData.totalEarned || 0) + (userData.referralEarnings || 0);
+                userData.likedCampaigns = userData.likedCampaigns || [];
+                userData.subscribedChannels = userData.subscribedChannels || [];
+                userData.campaigns = userData.campaigns || [];
+                userData.campaignPerformance = userData.campaignPerformance || { totalViews: 0, totalEarnedFromCampaigns: 0 };
                 watchedHistory = userData.recentlyWatched || [];
             } else {
                 userData = {
-                    uid, email: currentUser.email, displayName: currentUser.displayName,
-                    photoURL: currentUser.photoURL, credits: 100,
-                    referralCode: 'REF' + uid.substring(0,8).toUpperCase(),
-                    referredBy: null, referralEarnings: 0, totalEarned: 0,
-                    watchedVideos: [], campaignsCreated: [],
-                    totalWatchTime: 0, totalEarnings: 100,
-                    recentlyWatched: [],
-                    totalReferralCollected: 0,
-                    createdAt: new Date().toISOString()
+                    uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, credits: 100,
+                    referralCode: 'REF' + uid.substring(0,8).toUpperCase(), referredBy: null, referralEarnings: 0, totalEarned: 0,
+                    watchedVideos: [], campaigns: [], streak: { current: 0, lastClaim: null }, totalWatchTime: 0, totalEarnings: 0,
+                    likedCampaigns: [], subscribedChannels: [], recentlyWatched: [], totalEarnedByReferralShare: 0,
+                    campaignPerformance: { totalViews: 0, totalEarnedFromCampaigns: 0 }
                 };
                 await setDoc(ref, userData);
             }
+            if (userData.referredBy) setupReferralEarningsListener();
             return userData;
         }
         
-        // Real-time campaigns (hidden title/creator from UI)
+        async function saveUserData() { if(currentUser) await setDoc(doc(db, 'viewswap_users', currentUser.uid), userData, { merge: true }); }
+        
+        function setupReferralEarningsListener() {
+            if (unsubscribeReferralEarnings) unsubscribeReferralEarnings();
+            if (!currentUser || !userData?.referralCode) return;
+            const qRef = query(collection(db, 'viewswap_users'), where('referredBy', '==', currentUser.uid));
+            unsubscribeReferralEarnings = onSnapshot(qRef, async (snap) => {
+                let total = 0;
+                for (const docSnap of snap.docs) total += (docSnap.data().totalEarnedByReferralShare || 0);
+                if (userData.referralEarnings !== total) { userData.referralEarnings = total; await saveUserData(); if (['home','rewards','account'].includes(currentPage)) renderCurrentPage(); }
+            });
+        }
+        
         function setupRealTimeCampaigns() {
             if (unsubscribeCampaigns) unsubscribeCampaigns();
             if (!currentUser) return;
-            const q = query(collection(db, 'viewswap_campaigns'), orderBy('createdAt', 'desc'));
-            unsubscribeCampaigns = onSnapshot(q, (snapshot) => {
-                const newCampaigns = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (!data.watchers?.includes(currentUser?.uid)) {
-                        newCampaigns.push({ ...data, firestoreId: doc.id });
-                    }
-                });
-                allCampaigns = newCampaigns;
-                if (!activeWatchData && allCampaigns.length > 0 && currentPage === 'home') {
-                    const next = getNextCampaign();
-                    if (next) startAutoWatch(next);
-                }
+            unsubscribeCampaigns = onSnapshot(query(collection(db, 'viewswap_campaigns'), orderBy('createdAt', 'desc')), (snap) => {
+                allCampaigns = [];
+                snap.forEach(doc => { const data = doc.data(); if (!data.watchers?.includes(currentUser?.uid)) allCampaigns.push({ ...data, firestoreId: doc.id }); });
+                if (!activeWatchData && allCampaigns.length && currentPage === 'home') { const next = getNextCampaign(); if (next) startAutoWatch(next); }
                 if (currentPage === 'home') renderCurrentPage();
             });
         }
         
-        function getNextCampaign() {
-            const available = allCampaigns.filter(c => c.creatorId !== currentUser?.uid && !watchedHistory.includes(c.id));
-            return available.length > 0 ? available[0] : allCampaigns.filter(c => c.creatorId !== currentUser?.uid)[0];
-        }
+        function getNextCampaign() { const avail = allCampaigns.filter(c => c.creatorId !== currentUser?.uid && !watchedHistory.includes(c.id)); return avail.length ? avail[0] : allCampaigns.filter(c => c.creatorId !== currentUser?.uid)[0]; }
         
-        function extractVideoId(url) {
-            if (!url) return null;
-            const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([^&\n?#]+)/;
-            const match = url.match(regex);
-            return match ? match[1] : null;
-        }
+        function extractVideoId(url) { const match = url?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([^&\n?#]+)/); return match ? match[1] : null; }
         
-        async function createAdvancedCampaign(campaignData) {
+        async function createAdvancedCampaign(data) {
             if (userData.credits < 15) { showToast('Need 15 credits', true); return false; }
             await updateCredits(-15);
-            const campaign = {
-                id: Date.now().toString(),
-                title: campaignData.title,
-                url: campaignData.url,
-                videoId: extractVideoId(campaignData.url),
-                creatorId: currentUser.uid,
-                creatorName: "Anonymous", // HIDDEN FROM VIEWERS
-                createdAt: new Date().toISOString(),
-                targetWatchTime: parseInt(campaignData.targetWatchTime) || 30,
-                watchers: [],
-                watcherWatchTime: {},
-                likeReward: 2.8,
-                subReward: 15,
-                channelUrl: campaignData.channelUrl || null,
-                isActive: true
-            };
-            const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
-            await setDoc(campaignRef, campaign);
-            userData.campaignsCreated = userData.campaignsCreated || [];
-            userData.campaignsCreated.push({ id: campaign.id, title: campaign.title, watchTimeTarget: campaign.targetWatchTime, createdAt: campaign.createdAt });
+            const campaign = { id: Date.now().toString(), title: data.title, url: data.url, videoId: extractVideoId(data.url), creatorId: currentUser.uid, creatorName: userData.displayName, createdAt: new Date().toISOString(), targetWatchTime: parseInt(data.targetWatchTime) || 30, watchers: [], watcherWatchTime: {}, likeReward: 2.8, subReward: 15, channelUrl: data.channelUrl || null };
+            await setDoc(doc(db, 'viewswap_campaigns', campaign.id), campaign);
+            userData.campaigns.push(campaign);
             await saveUserData();
-            showToast(`✅ Campaign created! (hidden creator)`);
+            showToast(`✅ Campaign "${data.title}" created!`);
             return true;
-        }
-        
-        function stopCurrentWatch() {
-            if (watchInterval) clearInterval(watchInterval);
-            if (youtubePlayer && youtubePlayer.destroy) try { youtubePlayer.destroy(); } catch(e) {}
-            youtubePlayer = null;
-            activeWatchData = null;
         }
         
         async function completeCampaign(campaign) {
             const reward = campaign.targetWatchTime * EARNINGS_RATE;
-            await updateCredits(reward, currentUser.uid);
-            userData.totalWatchTime = (userData.totalWatchTime || 0) + campaign.targetWatchTime;
-            const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
-            await updateDoc(campaignRef, { watchers: arrayUnion(currentUser.uid), [`watcherWatchTime.${currentUser.uid}`]: campaign.targetWatchTime });
-            if (!userData.watchedVideos.includes(campaign.videoId)) userData.watchedVideos.push(campaign.videoId);
-            watchedHistory.unshift(campaign.id);
-            if (watchedHistory.length > 10) watchedHistory.pop();
+            await updateCredits(reward);
+            userData.totalWatchTime += campaign.targetWatchTime;
+            userData.campaignPerformance.totalViews = (userData.campaignPerformance.totalViews || 0) + 1;
+            userData.campaignPerformance.totalEarnedFromCampaigns = (userData.campaignPerformance.totalEarnedFromCampaigns || 0) + reward;
+            await updateDoc(doc(db, 'viewswap_campaigns', campaign.id), { watchers: arrayUnion(currentUser.uid), [`watcherWatchTime.${currentUser.uid}`]: campaign.targetWatchTime });
+            watchedHistory.unshift(campaign.id); if (watchedHistory.length > 10) watchedHistory.pop();
             await saveUserData();
             showToast(`✅ Earned ${reward.toFixed(2)} credits!`);
-            if (autoplayEnabled) { const next = getNextCampaign(); if (next) setTimeout(() => startAutoWatch(next), 300); else showToast('No more videos'); renderCurrentPage(); }
-            else renderCurrentPage();
+            if (autoplayEnabled) { const next = getNextCampaign(); if (next) setTimeout(() => startAutoWatch(next), 300); else renderCurrentPage(); } else renderCurrentPage();
         }
         
         function initYouTubePlayer(videoId, campaign) {
-            const div = document.getElementById('current_player');
-            if (!div) return null;
-            if (youtubePlayer && youtubePlayer.destroy) try { youtubePlayer.destroy(); } catch(e) {}
-            return new YT.Player('current_player', {
-                videoId: videoId,
-                playerVars: { autoplay: 1, controls: 1, rel: 0, modestbranding: 1, playsinline: 1 },
-                events: {
-                    onReady: (e) => { e.target.playVideo(); if (activeWatchData) activeWatchData.isPaused = false; },
-                    onStateChange: (e) => {
-                        if (activeWatchData) {
-                            if (e.data === 2) { activeWatchData.isPaused = true; showToast('⏸️ Paused - timer stopped', false); }
-                            else if (e.data === 1) { activeWatchData.isPaused = false; }
-                            else if (e.data === 0 && activeWatchData && !activeWatchData.completed) {
-                                activeWatchData.completed = true;
-                                completeCampaign(campaign);
-                            }
-                        }
-                    },
-                    onError: () => { showToast('Video error', true); nextVideo(); }
-                }
-            });
+            if (youtubePlayer?.destroy) youtubePlayer.destroy();
+            return new YT.Player('current_player', { videoId, playerVars: { autoplay: 1, controls: 1 }, events: { onReady: (e) => { e.target.playVideo(); if (activeWatchData) activeWatchData.isPaused = false; }, onStateChange: (e) => { if (activeWatchData) { if (e.data === 2) { activeWatchData.isPaused = true; showToast('⏸️ Paused - timer stopped', false); } else if (e.data === 1) { activeWatchData.isPaused = false; } else if (e.data === 0 && !activeWatchData.completed) { activeWatchData.completed = true; completeCampaign(campaign); } } }, onError: () => { showToast('Video error', true); nextVideo(); } } });
         }
         
         async function startAutoWatch(campaign) {
-            if (!currentUser) return;
+            if (!currentUser || campaign.watchers?.includes(currentUser.uid)) return;
             if (activeWatchData) stopCurrentWatch();
-            if (campaign.watchers?.includes(currentUser.uid)) { showToast('Already completed', true); const next = getNextCampaign(); if (next) startAutoWatch(next); return; }
-            let elapsed = campaign.watcherWatchTime?.[currentUser.uid] || 0;
-            const target = campaign.targetWatchTime;
+            let elapsed = campaign.watcherWatchTime?.[currentUser.uid] || 0, target = campaign.targetWatchTime;
             if (elapsed >= target) return;
-            const updateUI = () => {
-                const remain = Math.max(0, target - elapsed);
-                const earned = elapsed * EARNINGS_RATE;
-                if (document.getElementById('current_timer')) document.getElementById('current_timer').textContent = `${Math.floor(remain)}`;
-                if (document.getElementById('current_earnings')) document.getElementById('current_earnings').textContent = `${earned.toFixed(2)}`;
-                if (document.getElementById('current_progress')) document.getElementById('current_progress').style.width = `${(elapsed / target) * 100}%`;
-            };
+            const updateUI = () => { let rem = Math.max(0, target - elapsed); document.getElementById('current_timer') && (document.getElementById('current_timer').innerText = Math.floor(rem)); document.getElementById('current_earnings') && (document.getElementById('current_earnings').innerText = (elapsed * EARNINGS_RATE).toFixed(2)); document.getElementById('current_progress') && (document.getElementById('current_progress').style.width = `${(elapsed / target) * 100}%`); };
             updateUI();
-            if (window.YT && YT.Player) youtubePlayer = initYouTubePlayer(campaign.videoId, campaign);
-            else window.onYouTubeIframeAPIReady = () => { youtubePlayer = initYouTubePlayer(campaign.videoId, campaign); };
+            if (window.YT?.Player) youtubePlayer = initYouTubePlayer(campaign.videoId, campaign); else window.onYouTubeIframeAPIReady = () => { youtubePlayer = initYouTubePlayer(campaign.videoId, campaign); };
             if (watchInterval) clearInterval(watchInterval);
-            watchInterval = setInterval(async () => {
-                if (!activeWatchData || activeWatchData.isPaused) return;
-                if (elapsed >= target) { clearInterval(watchInterval); watchInterval = null; if (!activeWatchData.completed) { activeWatchData.completed = true; await completeCampaign(campaign); } }
-                else { elapsed += 1; if (activeWatchData) activeWatchData.elapsed = elapsed; updateUI(); }
-            }, 1000);
+            watchInterval = setInterval(async () => { if (activeWatchData?.isPaused) return; if (elapsed >= target) { clearInterval(watchInterval); if (!activeWatchData?.completed) { activeWatchData.completed = true; await completeCampaign(campaign); } } else { elapsed++; if (activeWatchData) activeWatchData.elapsed = elapsed; updateUI(); } }, 1000);
             activeWatchData = { campaignId: campaign.id, elapsed, target, isPaused: false, campaign, completed: false };
         }
         
-        function nextVideo() {
-            if (activeWatchData?.campaign) { watchedHistory.unshift(activeWatchData.campaign.id); saveUserData(); }
-            stopCurrentWatch();
-            const next = getNextCampaign();
-            if (next) startAutoWatch(next);
-            else showToast('No more videos', true);
-        }
-        
-        async function likeCampaign() { if (!activeWatchData?.campaign) return; const c = activeWatchData.campaign; if (userData.likedCampaigns?.includes(c.id)) { showToast('Already liked', true); return; } await updateCredits(c.likeReward); userData.likedCampaigns = [...(userData.likedCampaigns || []), c.id]; await saveUserData(); showToast(`❤️ +${c.likeReward} credits`); renderCurrentPage(); }
-        async function subscribeToChannel() { if (!activeWatchData?.campaign) return; const c = activeWatchData.campaign; if (!c.channelUrl) { showToast('No channel URL', true); return; } if (userData.subscribedChannels?.includes(c.channelUrl)) { showToast('Already subscribed', true); return; } await updateCredits(c.subReward || 15); userData.subscribedChannels = [...(userData.subscribedChannels || []), c.channelUrl]; await saveUserData(); window.open(c.channelUrl, '_blank'); showToast(`🔔 +${c.subReward || 15} credits`); renderCurrentPage(); }
-        function toggleAutoplay() { autoplayEnabled = !autoplayEnabled; showToast(`Auto-next ${autoplayEnabled ? 'ON' : 'OFF'}`, false); renderCurrentPage(); }
-        
+        function stopCurrentWatch() { if (watchInterval) clearInterval(watchInterval); if (youtubePlayer?.destroy) youtubePlayer.destroy(); youtubePlayer = null; activeWatchData = null; }
+        function nextVideo() { if (activeWatchData?.campaign) watchedHistory.unshift(activeWatchData.campaign.id); stopCurrentWatch(); const next = getNextCampaign(); if (next) startAutoWatch(next); else showToast('No videos left', true); }
+        async function likeCampaign() { if (!activeWatchData?.campaign) return; const c = activeWatchData.campaign; if (userData.likedCampaigns?.includes(c.id)) { showToast('Already liked', true); return; } await updateCredits(c.likeReward); userData.likedCampaigns.push(c.id); await saveUserData(); showToast(`❤️ +${c.likeReward} credits`); renderCurrentPage(); }
+        async function subscribeToChannel() { if (!activeWatchData?.campaign?.channelUrl) return; if (userData.subscribedChannels?.includes(activeWatchData.campaign.channelUrl)) { showToast('Already subscribed', true); return; } await updateCredits(activeWatchData.campaign.subReward || 15); userData.subscribedChannels.push(activeWatchData.campaign.channelUrl); await saveUserData(); window.open(activeWatchData.campaign.channelUrl, '_blank'); showToast(`🔔 +${activeWatchData.campaign.subReward || 15} credits`); }
+        function toggleAutoplay() { autoplayEnabled = !autoplayEnabled; showToast(`Auto ${autoplayEnabled ? 'ON' : 'OFF'}`, false); renderCurrentPage(); }
         window.nextVideoWrapper = nextVideo; window.likeWrapper = likeCampaign; window.subscribeWrapper = subscribeToChannel; window.toggleAutoplayWrapper = toggleAutoplay;
         
         function renderCurrentCampaign() {
             if (!activeWatchData?.campaign) return `<div class="card"><div class="empty-state">✨ No active campaign. Create one or wait!</div></div>`;
-            const c = activeWatchData.campaign;
-            const elapsed = activeWatchData?.elapsed || 0;
-            const target = c.targetWatchTime;
-            return `<div class="campaign-item"><div class="video-container" id="current_player"></div><div class="watch-stats"><div class="stat-badge"><div class="stat-badge-label">EARNING</div><div class="stat-badge-value" id="current_earnings">${(elapsed * EARNINGS_RATE).toFixed(2)}</div></div><div class="stat-badge"><div class="stat-badge-label">TIME LEFT</div><div class="stat-badge-value timer-value" id="current_timer">${Math.max(0, target - elapsed)}</div><div class="stat-badge-label">sec</div></div></div><div class="progress-area"><div class="progress-bar-container"><div class="progress-fill" id="current_progress" style="width: ${(elapsed / target) * 100}%"></div></div></div><div class="action-buttons-area"><button class="action-btn btn-next" onclick="window.nextVideoWrapper()">⏭️ NEXT</button><button class="action-btn btn-like" onclick="window.likeWrapper()">❤️ +${c.likeReward}</button>${c.channelUrl ? `<button class="action-btn btn-subscribe" onclick="window.subscribeWrapper()">🔔 +${c.subReward || 15}</button>` : ''}<button class="action-btn btn-autoplay ${autoplayEnabled ? 'active' : ''}" onclick="window.toggleAutoplayWrapper()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button></div></div>`;
+            const c = activeWatchData.campaign, elapsed = activeWatchData.elapsed || 0, target = c.targetWatchTime;
+            return `<div class="campaign-item"><div class="video-container" id="current_player"></div><div class="watch-stats"><div class="stat-badge"><div class="stat-badge-label">EARNING</div><div class="stat-badge-value" id="current_earnings">${(elapsed * EARNINGS_RATE).toFixed(2)}</div></div><div class="stat-badge"><div class="stat-badge-label">TIME LEFT</div><div class="stat-badge-value timer-value" id="current_timer">${Math.max(0, target - elapsed)}</div><div class="stat-badge-label">sec</div></div></div><div class="progress-area"><div class="progress-bar-container"><div class="progress-fill" id="current_progress" style="width: ${(elapsed / target) * 100}%"></div></div></div><div class="action-buttons-area"><button class="action-btn btn-next" onclick="window.nextVideoWrapper()">⏭️ NEXT</button><button class="action-btn btn-like" onclick="window.likeWrapper()" ${userData.likedCampaigns?.includes(c.id) ? 'disabled' : ''}>❤️ +${c.likeReward}</button>${c.channelUrl ? `<button class="action-btn btn-subscribe" onclick="window.subscribeWrapper()" ${userData.subscribedChannels?.includes(c.channelUrl) ? 'disabled' : ''}>🔔 +${c.subReward || 15}</button>` : ''}<button class="action-btn btn-autoplay ${autoplayEnabled ? 'active' : ''}" onclick="window.toggleAutoplayWrapper()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button></div></div>`;
         }
         
-        async function renderHome() { if (!activeWatchData && allCampaigns.length > 0) { const first = getNextCampaign(); if (first) setTimeout(() => startAutoWatch(first), 50); return `<div class="card"><div class="loading-spinner">🎬 Loading...</div></div>`; } return `<div class="card"><h2>🎬 Now Playing</h2>${renderCurrentCampaign()}${(!activeWatchData && allCampaigns.length === 0) ? '<div class="empty-state">No campaigns. Create one!</div>' : ''}</div>`; }
+        async function renderHome() { if (!activeWatchData && allCampaigns.length) { const first = getNextCampaign(); if (first) setTimeout(() => startAutoWatch(first), 50); return `<div class="card"><div class="loading-spinner">🎬 Loading video...</div></div>`; } return `<div class="card"><h2>🎬 Now Playing</h2>${renderCurrentCampaign()}${(!activeWatchData && allCampaigns.length === 0) ? '<div class="empty-state">No campaigns. Create one!</div>' : ''}</div>`; }
+        function renderCampaignPage() { return `<div class="card"><h2>🚀 Create Campaign</h2><div class="create-campaign-form"><div class="cost-badge">⚡ Cost: 15 credits</div><div class="form-group"><label>📌 Title</label><input id="campTitle" placeholder="Video title"></div><div class="form-group"><label>▶️ YouTube URL</label><input id="campUrl" placeholder="https://youtube.com/watch?v=..."></div><div class="form-group"><label>🔗 Channel URL (for subscribe reward)</label><input id="channelUrl" placeholder="https://youtube.com/@channel"></div><div class="form-group"><label>⏱️ Watch Time (seconds)</label><input id="targetWatchTime" type="number" value="30"></div><button class="btn-primary" id="createAdvancedBtn">✨ Create Campaign</button></div></div>`; }
+        function renderRewardsPage() { return `<div class="card"><h2>🏆 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits||0)}</span></div><div class="stat-row"><span>👀 Videos Watched:</span><span>${userData?.watchedVideos?.length||0}</span></div><div class="stat-row"><span>💎 Referral Earnings:</span><span>${(userData?.referralEarnings||0).toFixed(2)}</span></div><div class="stat-row"><span>💎 Total Earned:</span><span>${(userData?.totalEarnings||0).toFixed(2)}</span></div></div>`; }
         
-        function renderCampaignPage() {
-            return `<div class="card"><h2>🚀 Create Campaign</h2><div class="campaign-form"><div class="form-group"><label>📹 Video Title</label><input id="campTitle" placeholder="Enter video title"><div class="input-hint">Title hidden from viewers</div></div><div class="form-group"><label>🔗 YouTube URL</label><input id="campUrl" placeholder="https://youtube.com/watch?v=..."></div><div class="form-group"><label>📺 Channel URL (for subscribe reward)</label><input id="channelUrl" placeholder="https://youtube.com/@channel"></div><div class="form-group"><label>⏱️ Watch Time Target (seconds)</label><input id="targetWatchTime" type="number" value="30"></div><button class="btn-primary" id="createAdvancedBtn">✨ Create (15 credits)</button></div></div>`;
-        }
+        function renderAccountPage() { const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIEWSWAP_REF:${userData?.referralCode}`; setTimeout(() => { if (campaignChart) campaignChart.destroy(); const ctx = document.getElementById('campaignChart')?.getContext('2d'); if (ctx && userData?.campaignPerformance) campaignChart = new Chart(ctx, { type: 'bar', data: { labels: ['Total Views', 'Earnings from Campaigns'], datasets: [{ label: 'Performance', data: [userData.campaignPerformance.totalViews || 0, (userData.campaignPerformance.totalEarnedFromCampaigns || 0).toFixed(2)], backgroundColor: ['#8b5cf6', '#ec489a'] }] } }); }, 100); return `<div class="card"><div style="text-align:center;"><img src="${currentUser?.photoURL}" style="width:80px;border-radius:50%;"><div>${escapeHtml(currentUser?.displayName)}</div></div></div><div class="card"><h2>📈 Campaign Performance Graph</h2><div class="graph-container"><canvas id="campaignChart"></canvas></div></div><div class="card"><h2>🔗 Referral QR</h2><div class="qr-display-img" id="qrDisplay"><img src="${qrUrl}" width="100"></div><div class="referral-code-box" id="refCode">${userData?.referralCode}</div><button class="btn-primary" id="copyCodeBtn">Copy Code</button><button class="share-button" id="shareReferralBtn">📤 Share Link / App</button></div><button class="btn-secondary" id="signOutBtn">Sign Out</button>`; }
         
-        function renderRewardsPage() { return `<div class="card"><h2>🏆 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits||0)}</span></div><div class="stat-row"><span>👀 Videos Watched:</span><span>${userData?.watchedVideos?.length||0}</span></div><div class="stat-row"><span>💎 Referral Earnings (2.5%):</span><span>${(userData?.referralEarnings||0).toFixed(2)}</span></div><div class="stat-row"><span>💎 Total Earned:</span><span>${(userData?.totalEarnings||0).toFixed(2)}</span></div></div>`; }
+        function renderReferPage() { const shareLink = `https://viewswap.page.link/ref?code=${userData?.referralCode}`; return `<div class="card"><h2>🤝 Referral (2.5% of their earnings)</h2><div class="qr-display-img" id="qrDisplayRefer"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VIEWSWAP_REF:${userData?.referralCode}" width="150"></div><div class="referral-code-box" id="refCodeRefer">${userData?.referralCode}</div><button class="btn-primary" id="copyReferBtn">Copy Code</button><button class="share-button" id="shareReferBtn">📱 Share Referral Link</button><button class="btn-secondary" id="scanQrBtn">Scan QR</button><div class="form-group" style="margin-top:16px;"><label>Enter referral code to claim bonus</label><input id="enterRefCode" placeholder="Friend's referral code"><button class="btn-primary" id="applyRefCodeBtn">Apply Code (+10 credits)</button></div></div>`; }
         
-        function renderAccountPage() {
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIEWSWAP_REF:${userData?.referralCode}`;
-            setTimeout(() => {
-                const canvas = document.getElementById('perfChart');
-                if (canvas && userData?.campaignsCreated?.length) {
-                    const ctx = canvas.getContext('2d');
-                    const campaigns = userData.campaignsCreated;
-                    const labels = campaigns.map((_, i) => `Campaign ${i+1}`);
-                    const watchTimes = campaigns.map(c => c.watchTimeTarget || 30);
-                    if (performanceChart) performanceChart.destroy();
-                    performanceChart = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Target Watch Time (sec)', data: watchTimes, backgroundColor: '#8b5cf6', borderRadius: 10 }] }, options: { responsive: true, maintainAspectRatio: true } });
-                }
-            }, 100);
-            return `<div class="card"><div style="text-align:center;"><img src="${currentUser?.photoURL}" style="width:70px;border-radius:50%;"><div><strong>${escapeHtml(currentUser?.displayName)}</strong></div></div></div><div class="card"><h2>📈 Campaign Performance</h2><div class="chart-container"><canvas id="perfChart" style="max-height:200px;"></canvas></div><div class="empty-state" style="font-size:0.7rem;">Your created campaigns target times</div></div><div class="card"><h2>🔗 Referral QR</h2><div class="qr-display-img" id="qrDisplay"><img src="${qrUrl}" width="100"></div><div class="referral-code-box" id="refCode">${userData?.referralCode}</div><div class="share-buttons"><button class="share-btn" id="copyLinkBtn">🔗 Copy Share Link</button><button class="share-btn" id="shareAppBtn">📱 Share App</button></div><button class="btn-secondary" id="signOutBtn">Sign Out</button></div>`;
-        }
+        async function processQRReferral(code) { if (!currentUser || userData.referredBy) return; const q = query(collection(db,'viewswap_users'), where('referralCode','==',code)); const snap = await getDocs(q); if (!snap.empty && snap.docs[0].id !== currentUser.uid) { userData.referredBy = snap.docs[0].id; await saveUserData(); await updateDoc(doc(db,'viewswap_users',snap.docs[0].id), { referrals: arrayUnion(currentUser.uid) }); await updateCredits(10); showToast('🎉 Referral linked! +10 credits. 2.5% forever!'); setupReferralEarningsListener(); } else showToast('Invalid code', true); }
         
-        function renderReferPage() { const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIEWSWAP_REF:${userData?.referralCode}`; return `<div class="card"><h2>🤝 Referral Program (2.5% forever)</h2><div class="qr-display-img" id="qrDisplayRefer"><img src="${qrUrl}" width="150"></div><div class="referral-code-box" id="refCodeRefer">${userData?.referralCode}</div><div class="share-buttons"><button class="share-btn" id="copyReferBtn">📋 Copy Code</button><button class="share-btn" id="scanQrBtn">📷 Scan QR</button><button class="share-btn" id="shareReferLinkBtn">📲 Share Referral</button></div></div>`; }
-        
-        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+        function escapeHtml(str) { return str?.replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]) || ''; }
+        function showToast(msg, isErr=false) { const t=document.createElement('div'); t.className='toast'; if(isErr) t.style.background='#ef4444'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 3000); }
         
         async function renderCurrentPage() {
             const container = document.getElementById('pageContent'); if(!container) return;
             if(currentPage === 'home') container.innerHTML = await renderHome();
-            else if(currentPage === 'campaign'){ container.innerHTML = renderCampaignPage(); document.getElementById('createAdvancedBtn')?.addEventListener('click', async () => { const title=document.getElementById('campTitle')?.value, url=document.getElementById('campUrl')?.value; if(title&&url) await createAdvancedCampaign({ title, url, channelUrl: document.getElementById('channelUrl')?.value, targetWatchTime: document.getElementById('targetWatchTime')?.value }); else showToast('Title and URL required', true); }); }
+            else if(currentPage === 'campaign'){ container.innerHTML = renderCampaignPage(); document.getElementById('createAdvancedBtn')?.addEventListener('click', async () => { const title=document.getElementById('campTitle')?.value, url=document.getElementById('campUrl')?.value; if(title&&url) await createAdvancedCampaign({ title, url, channelUrl: document.getElementById('channelUrl')?.value, targetWatchTime: document.getElementById('targetWatchTime')?.value }); else showToast('Title & URL required', true); }); }
             else if(currentPage === 'rewards') container.innerHTML = renderRewardsPage();
-            else if(currentPage === 'account'){ container.innerHTML = renderAccountPage(); document.getElementById('qrDisplay')?.addEventListener('click',()=>{const m=document.createElement('div');m.className='fullscreen-qr';m.innerHTML=`<div style="background:#0f172a;padding:30px;border-radius:40px;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=VIEWSWAP_REF:${userData?.referralCode}" width="250"><button class="close-qr" onclick="this.parentElement.parentElement.remove()">Close</button></div>`;document.body.appendChild(m);}); document.getElementById('copyLinkBtn')?.addEventListener('click',()=>{navigator.clipboard.writeText(`https://viewswap.page.link/refer?code=${userData?.referralCode}`);showToast('Referral link copied!');}); document.getElementById('shareAppBtn')?.addEventListener('click',()=>{if(navigator.share)navigator.share({title:'ViewSwap',text:`Join ViewSwap with my code: ${userData?.referralCode}`,url:window.location.href});else showToast('Share not supported',true);}); document.getElementById('signOutBtn')?.addEventListener('click',async()=>await signOut(auth)); }
-            else if(currentPage === 'refer'){ container.innerHTML = renderReferPage(); document.getElementById('copyReferBtn')?.addEventListener('click',()=>{navigator.clipboard.writeText(userData?.referralCode);showToast('Copied!');}); document.getElementById('shareReferLinkBtn')?.addEventListener('click',()=>{if(navigator.share)navigator.share({title:'ViewSwap Referral',text:`Use my code ${userData?.referralCode} to join ViewSwap!`,url:window.location.href});else showToast('Share not supported',true);}); document.getElementById('scanQrBtn')?.addEventListener('click',()=>{const modal=document.createElement('div');modal.className='qr-modal';modal.innerHTML=`<div><div id="qr-reader-scanner" style="width:100%;"></div><button class="close-qr" id="closeScannerBtn">Close</button></div>`;document.body.appendChild(modal);const scanner=new Html5Qrcode("qr-reader-scanner");scanner.start({facingMode:"environment"},{fps:10,qrbox:250},(text)=>{scanner.stop();modal.remove();if(text.startsWith('VIEWSWAP_REF:'))processQRReferral(text.split(':')[1]);else showToast('Invalid QR',true);},()=>{});document.getElementById('closeScannerBtn').onclick=()=>{scanner.stop();modal.remove();};}); }
+            else if(currentPage === 'account'){ container.innerHTML = renderAccountPage(); document.getElementById('qrDisplay')?.addEventListener('click',()=>{const m=document.createElement('div');m.className='fullscreen-qr';m.innerHTML=`<div style="background:#0f172a;padding:30px;border-radius:40px;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=VIEWSWAP_REF:${userData?.referralCode}" width="250"><button class="close-qr" onclick="this.parentElement.parentElement.remove()">Close</button></div>`;document.body.appendChild(m);}); document.getElementById('copyCodeBtn')?.addEventListener('click',()=>{navigator.clipboard.writeText(userData?.referralCode);showToast('Copied!');}); document.getElementById('shareReferralBtn')?.addEventListener('click',()=>{if(navigator.share) navigator.share({title:'ViewSwap',text:`Join ViewSwap with my code: ${userData?.referralCode}`}); else showToast('Copy code manually', true);}); document.getElementById('signOutBtn')?.addEventListener('click',async()=>await signOut(auth)); }
+            else if(currentPage === 'refer'){ container.innerHTML = renderReferPage(); document.getElementById('qrDisplayRefer')?.addEventListener('click',()=>{const m=document.createElement('div');m.className='fullscreen-qr';m.innerHTML=`<div style="background:#0f172a;padding:30px;border-radius:40px;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=VIEWSWAP_REF:${userData?.referralCode}" width="250"><button class="close-qr" onclick="this.parentElement.parentElement.remove()">Close</button></div>`;document.body.appendChild(m);}); document.getElementById('copyReferBtn')?.addEventListener('click',()=>{navigator.clipboard.writeText(userData?.referralCode);showToast('Copied');}); document.getElementById('shareReferBtn')?.addEventListener('click',()=>{if(navigator.share) navigator.share({title:'ViewSwap Referral',text:`Use my code ${userData?.referralCode} on ViewSwap!`}); else showToast('Copy code', true);}); document.getElementById('scanQrBtn')?.addEventListener('click',()=>{const modal=document.createElement('div');modal.className='qr-modal';modal.innerHTML=`<div><div id="qr-reader-scanner" style="width:100%;"></div><button class="close-qr" id="closeScannerBtn">Close</button></div>`;document.body.appendChild(modal);const scanner=new Html5Qrcode("qr-reader-scanner");scanner.start({facingMode:"environment"},{fps:10,qrbox:250},(text)=>{scanner.stop();modal.remove();if(text.startsWith('VIEWSWAP_REF:'))processQRReferral(text.split(':')[1]);else showToast('Invalid QR',true);},()=>{});document.getElementById('closeScannerBtn').onclick=()=>{scanner.stop();modal.remove();};}); document.getElementById('applyRefCodeBtn')?.addEventListener('click',()=>{const code=document.getElementById('enterRefCode')?.value.trim(); if(code) processQRReferral(code); else showToast('Enter code', true);}); }
         }
         
-        async function processQRReferral(code) { if(!currentUser || userData.referredBy) return; const q=query(collection(db,'viewswap_users'), where('referralCode','==',code)); const snap=await getDocs(q); if(!snap.empty && snap.docs[0].id !== currentUser.uid) { userData.referredBy = snap.docs[0].id; await saveUserData(); await updateDoc(doc(db,'viewswap_users',snap.docs[0].id), { referrals: arrayUnion(currentUser.uid) }); await updateCredits(10); showToast('🎉 Referral linked! You now earn 2.5% of their earnings!'); } }
-        
-        function showToast(msg, isErr=false) { const t=document.createElement('div'); t.className='toast'; if(isErr) t.style.background='#ef4444'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 3000); }
-        
         document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{ currentPage=btn.dataset.page; document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderCurrentPage(); }));
-        
-        onAuthStateChanged(auth, async(user)=>{ if(user){ currentUser=user; await loadUserData(user.uid); document.body.classList.add('authenticated'); setupRealTimeCampaigns(); renderCurrentPage(); } else { document.body.classList.remove('authenticated'); if(unsubscribeCampaigns) unsubscribeCampaigns(); currentUser=null; if(activeWatchData) stopCurrentWatch(); } });
+        onAuthStateChanged(auth, async(user)=>{ if(user){ currentUser=user; await loadUserData(user.uid); document.body.classList.add('authenticated'); setupRealTimeCampaigns(); renderCurrentPage(); } else { document.body.classList.remove('authenticated'); if(unsubscribeCampaigns) unsubscribeCampaigns(); if(unsubscribeReferralEarnings) unsubscribeReferralEarnings(); stopCurrentWatch(); } });
         document.getElementById('signInBtn')?.addEventListener('click',()=>signInWithPopup(auth,provider));
         document.getElementById('qrSignInBtn')?.addEventListener('click',()=>{ const modal=document.createElement('div');modal.className='qr-modal';modal.innerHTML=`<div><div id="qr-reader-scanner" style="width:100%;"></div><button class="close-qr" id="closeScannerBtn">Close</button></div>`;document.body.appendChild(modal);const scanner=new Html5Qrcode("qr-reader-scanner");scanner.start({facingMode:"environment"},{fps:10,qrbox:250},(text)=>{scanner.stop();modal.remove();if(!currentUser){sessionStorage.setItem('pendingReferral',text);signInWithPopup(auth,provider);}else if(text.startsWith('VIEWSWAP_REF:'))processQRReferral(text.split(':')[1]);else showToast('Invalid QR',true);},()=>{});document.getElementById('closeScannerBtn').onclick=()=>{scanner.stop();modal.remove();}; });
+        document.getElementById('applyReferralBtn')?.addEventListener('click',async()=>{ const code=document.getElementById('signinReferralCode')?.value.trim(); if(code) { sessionStorage.setItem('pendingReferral',code); signInWithPopup(auth,provider); } else showToast('Enter code', true); });
         const pending=sessionStorage.getItem('pendingReferral'); if(pending) setTimeout(async()=>{ if(currentUser && !userData?.referredBy) await processQRReferral(pending); sessionStorage.removeItem('pendingReferral'); },2000);
     </script>
 </body>
