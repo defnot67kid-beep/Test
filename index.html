@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>ViewSwap — Premium Video Campaigns</title>
+    <title>ViewSwap — Auto Video Campaigns</title>
     
     <!-- Firebase SDKs -->
     <script type="module">
@@ -20,6 +20,9 @@
     <!-- QR Scanner Library -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
@@ -31,7 +34,7 @@
         }
         
         /* White background for all tabs */
-        .container, .card, .header, .bottom-nav, .campaign-item, .watch-controls-panel {
+        .container, .card, .header, .campaign-item, .watch-controls-panel {
             background: #ffffff;
         }
         
@@ -39,7 +42,7 @@
             background: #ffffff;
             border-bottom: 1px solid #e0e0e0;
             padding: 20px;
-            margin: -16px -16px 20px -16px;
+            margin: -16px -16px 0 -16px;
             text-align: center;
         }
         .header h1 { 
@@ -50,63 +53,88 @@
             color: transparent;
         }
         
-        /* RED LINE under tabs - mountain peak shape */
+        /* RED LINE under tabs - mountain peak shape (placed at bottom of nav) */
+        .red-line-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
         .red-line-container {
             position: relative;
             width: 100%;
             height: 4px;
             background: linear-gradient(90deg, 
                 #ff0000 0%, 
-                #ff0000 35%,
-                #ff3333 45%,
+                #ff0000 30%,
+                #ff4444 40%,
                 #cc0000 50%,
-                #ff3333 55%,
-                #ff0000 65%,
+                #ff4444 60%,
+                #ff0000 70%,
                 #ff0000 100%);
-            margin-top: -1px;
-            margin-bottom: 20px;
             border-radius: 2px;
         }
         .red-line-container::before {
             content: '';
             position: absolute;
-            top: -8px;
+            top: -10px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
-            border-left: 12px solid transparent;
-            border-right: 12px solid transparent;
-            border-bottom: 12px solid #ff0000;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid #ff0000;
         }
         .red-line-container::after {
             content: '';
             position: absolute;
-            top: -16px;
+            top: -18px;
             left: 50%;
             transform: translateX(-50%);
             width: 4px;
-            height: 16px;
+            height: 18px;
             background: #ff0000;
             border-radius: 2px;
         }
         
-        /* Subtle shadow for cards */
-        .card {
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             background: #ffffff;
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 8px 12px;
+            border-top: 1px solid #e0e0e0;
+            max-width: 500px;
+            margin: 0 auto;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
         }
-        .card h2 { 
-            font-size: 1.2rem; 
-            margin-bottom: 16px; 
-            border-left: 3px solid #8b5cf6; 
-            padding-left: 12px;
-            color: #1a1a2e;
+        
+        /* Red line sits right below the bottom-nav */
+        .global-red-line {
+            position: fixed;
+            bottom: 68px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 500px;
+            z-index: 101;
         }
+        
+        .nav-item { 
+            display: flex; flex-direction: column; align-items: center; gap: 4px; 
+            background: none; border: none; cursor: pointer; padding: 6px 10px; 
+            border-radius: 40px; flex: 1; color: #9ca3af; transition: all 0.2s; 
+        }
+        .nav-item.active { 
+            color: #8b5cf6; 
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+        }
+        .nav-icon { font-size: 1.3rem; } .nav-label { font-size: 0.6rem; font-weight: 600; }
         
         .signin-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -131,24 +159,21 @@
         .qr-signin-btn { background: linear-gradient(135deg, #8b5cf6, #ec489a); }
         .container { max-width: 500px; margin: 0 auto; position: relative; z-index: 1; padding: 0 16px 20px; }
         
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
+        .card {
             background: #ffffff;
-            display: flex; justify-content: space-around; padding: 8px 8px 20px;
-            border-top: 1px solid #e0e0e0;
-            max-width: 500px; margin: 0 auto; z-index: 100;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
         }
-        .nav-item { 
-            display: flex; flex-direction: column; align-items: center; gap: 4px; 
-            background: none; border: none; cursor: pointer; padding: 6px 10px; 
-            border-radius: 40px; flex: 1; color: #9ca3af; transition: all 0.2s; 
+        .card h2 { 
+            font-size: 1.2rem; 
+            margin-bottom: 16px; 
+            border-left: 3px solid #8b5cf6; 
+            padding-left: 12px;
+            color: #1a1a2e;
         }
-        .nav-item.active { 
-            color: #8b5cf6; 
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
-        }
-        .nav-icon { font-size: 1.3rem; } .nav-label { font-size: 0.6rem; font-weight: 600; }
         
         input, textarea { 
             width: 100%; padding: 12px; background: #f5f5f5; 
@@ -174,91 +199,104 @@
         }
         @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         
-        /* Video Player */
-        .video-player-wrapper {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .video-player-container {
-            flex: 2;
-            min-width: 200px;
-            background: #000;
-            border-radius: 24px;
-            overflow: hidden;
-            position: relative;
-            aspect-ratio: 16 / 9;
-        }
-        .video-player-container iframe { width: 100%; height: 100%; border: none; }
-        
-        .watch-side-panel {
-            flex: 1;
-            min-width: 140px;
-            background: #f8f9fa;
-            border-radius: 24px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .watch-controls-panel {
+        /* Video Player - modern layout */
+        .campaign-item {
             background: #ffffff;
-            border-radius: 20px;
-            padding: 16px;
-            margin-top: 12px;
-            border: 1px solid #f0f0f0;
+            border-radius: 24px;
+            padding: 0;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 1px solid #eef2ff;
+            overflow: hidden;
         }
-        .earnings-display {
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-            border-radius: 60px;
+        .campaign-header {
+            padding: 16px 16px 0 16px;
+        }
+        .campaign-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; color: #1e293b; }
+        .campaign-creator { font-size: 0.7rem; color: #94a3b8; margin-bottom: 12px; }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+        }
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .watch-stats {
+            display: flex;
+            gap: 16px;
             padding: 12px 16px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .stat-badge {
+            flex: 1;
             text-align: center;
         }
-        .earnings-amount { font-size: 1.8rem; font-weight: 800; color: #10b981; }
-        .earnings-label { font-size: 0.7rem; color: #6b7280; }
-        .countdown-timer { text-align: center; margin-bottom: 12px; }
-        .timer-circle {
-            display: inline-block; background: #f3f4f6;
-            border-radius: 60px; padding: 12px 24px; border: 2px solid #8b5cf6;
+        .stat-badge-label {
+            font-size: 0.65rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .timer-seconds { font-size: 2rem; font-weight: 800; color: #f59e0b; }
-        .timer-label { font-size: 0.7rem; color: #6b7280; }
+        .stat-badge-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #10b981;
+        }
+        .timer-value {
+            color: #f59e0b;
+        }
+        
+        .progress-area {
+            padding: 8px 16px;
+        }
         .progress-bar-container {
-            background: #e5e7eb;
-            border-radius: 10px; height: 8px; overflow: hidden; margin: 12px 0;
+            background: #e2e8f0;
+            border-radius: 10px;
+            height: 6px;
+            overflow: hidden;
         }
         .progress-fill {
             background: linear-gradient(90deg, #8b5cf6, #ec489a);
-            height: 100%; width: 0%; transition: width 0.3s ease;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
         }
-        .watch-actions { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
-        .watch-actions button {
-            flex: 1; padding: 12px; border-radius: 60px; font-weight: bold;
-            border: none; cursor: pointer; transition: transform 0.1s;
+        
+        .action-buttons-area {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px 16px;
+            flex-wrap: wrap;
         }
-        .watch-actions button:active { transform: scale(0.97); }
-        .watch-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-watch { background: linear-gradient(135deg, #10b981, #059669); color: white; }
-        .btn-skip { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
-        .btn-pause { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
-        .btn-resume { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
-        .btn-autoplay { background: linear-gradient(135deg, #f3f4f6, #e5e7eb); color: #1f2937; }
-        .btn-autoplay.active { background: linear-gradient(135deg, #8b5cf6, #ec489a); color: white; }
+        .action-btn {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .action-btn:active { transform: scale(0.97); }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-next { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
         .btn-like { background: linear-gradient(135deg, #ec489a, #db2777); color: white; }
-        .btn-subscribe { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
-        .campaign-item { 
-            background: #ffffff; 
-            border-radius: 24px; 
-            padding: 16px; 
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border: 1px solid #f0f0f0;
-        }
-        .campaign-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; color: #1a1a2e; }
-        .campaign-creator { font-size: 0.7rem; color: #9ca3af; margin-bottom: 12px; }
-        .action-buttons { display: flex; gap: 8px; margin-top: 12px; }
-        .action-buttons button { flex: 1; padding: 10px; border-radius: 40px; font-size: 0.8rem; }
+        .btn-subscribe { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; }
+        .btn-autoplay { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+        .btn-autoplay.active { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; }
         
         .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }
         .stat-card { background: #f9fafb; border-radius: 16px; padding: 12px; text-align: center; }
@@ -266,7 +304,7 @@
         .stat-label { font-size: 0.65rem; color: #6b7280; }
         .referral-code-box { background: #f3f4f6; padding: 12px; border-radius: 16px; font-family: monospace; text-align: center; border: 2px dashed #8b5cf6; cursor: pointer; }
         .qr-display-img { background: white; padding: 16px; border-radius: 20px; display: inline-block; margin: 10px 0; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .empty-state { text-align: center; padding: 30px; color: #9ca3af; }
+        .empty-state { text-align: center; padding: 40px; color: #94a3b8; }
         .special-badge { background: linear-gradient(135deg, #ff6b6b, #ff4757); color: white; padding: 8px 16px; border-radius: 40px; font-size: 0.7rem; display: inline-block; margin-bottom: 12px; }
         
         .qr-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 10001; display: flex; align-items: center; justify-content: center; flex-direction: column; }
@@ -279,7 +317,7 @@
         <div class="signin-card">
             <div style="font-size: 3.5rem;">🏆</div>
             <h2>ViewSwap</h2>
-            <p>Watch • Earn • Auto-Play</p>
+            <p>Auto-Play • Watch • Earn</p>
             <button class="google-signin-btn" id="signInBtn">🟢 Sign in with Google</button>
             <button class="qr-signin-btn" id="qrSignInBtn">📷 Scan QR Code to Refer</button>
         </div>
@@ -289,10 +327,8 @@
         <div class="container">
             <div class="header">
                 <h1>🏆 ViewSwap</h1>
-                <p>Earn While Watching</p>
+                <p>Earn 0.5 per second | Auto video</p>
             </div>
-            <!-- RED LINE: mountain peak shape under tabs -->
-            <div class="red-line-container"></div>
             <div id="pageContent"></div>
         </div>
         <div class="bottom-nav">
@@ -301,6 +337,10 @@
             <button class="nav-item" data-page="rewards"><div class="nav-icon">🎁</div><div class="nav-label">Rewards</div></button>
             <button class="nav-item" data-page="account"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></button>
             <button class="nav-item" data-page="refer"><div class="nav-icon">🤝</div><div class="nav-label">Refer</div></button>
+        </div>
+        <!-- Red line placed exactly at the bottom of tabs (above content) -->
+        <div class="global-red-line">
+            <div class="red-line-container"></div>
         </div>
     </div>
 
@@ -327,21 +367,22 @@
         let userData = null;
         let currentPage = 'home';
         let allCampaigns = [];
-        let activeWatchIntervals = {};
-        let activePauseStates = {}; // track if watching is paused per campaign
-        let autoplayEnabled = false;
-        
-        // Helper: earnings rate = 0.5 per second
+        let activeWatchData = {}; // { campaignId: { interval, elapsed, target, isPaused, player } }
+        let autoplayEnabled = true; // auto-play next video after completion
         const EARNINGS_RATE = 0.5;
         
+        // YouTube player instances
+        let youtubePlayers = {};
+        
+        // Auto daily bonus (hidden)
         async function autoProcessDailyBonus() {
-            if (!currentUser || !userData) return false;
+            if (!currentUser || !userData) return;
             if (!userData.streak) userData.streak = { current: 0, lastClaim: null, highest: 0 };
             const today = new Date(); today.setHours(0,0,0,0);
             const lastClaimRaw = userData.streak.lastClaim;
             let lastDate = lastClaimRaw ? new Date(lastClaimRaw) : null;
             if (lastDate) lastDate.setHours(0,0,0,0);
-            if (lastDate && lastDate.getTime() === today.getTime()) return false;
+            if (lastDate && lastDate.getTime() === today.getTime()) return;
             let newStreak = 1;
             if (lastDate) {
                 const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
@@ -356,7 +397,6 @@
             userData.streak.lastClaim = today.toISOString();
             if (newStreak > (userData.streak.highest || 0)) userData.streak.highest = newStreak;
             await saveUserData();
-            return true;
         }
         
         async function loadAllCampaigns() {
@@ -430,11 +470,6 @@
             return match ? match[1] : null;
         }
         
-        function getYouTubeEmbedUrl(url) {
-            const videoId = extractVideoId(url);
-            return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&enablejsapi=1&rel=0` : null;
-        }
-        
         async function createAdvancedCampaign(campaignData) {
             if (userData.credits < 15) { showToast('Need 15 credits', true); return false; }
             await updateCredits(-15);
@@ -442,25 +477,19 @@
                 id: Date.now().toString(),
                 title: campaignData.title,
                 url: campaignData.url,
-                embedUrl: getYouTubeEmbedUrl(campaignData.url),
-                channelUrl: campaignData.channelUrl || null,
+                embedUrl: `https://www.youtube.com/embed/${extractVideoId(campaignData.url)}?autoplay=1&enablejsapi=1&rel=0`,
                 videoId: extractVideoId(campaignData.url),
                 creatorId: currentUser.uid,
                 creatorName: userData.displayName,
                 createdAt: new Date().toISOString(),
-                targetViews: Math.min(parseInt(campaignData.targetViews) || 10, 100),
                 targetWatchTime: parseInt(campaignData.targetWatchTime) || 30,
-                targetLikes: parseInt(campaignData.targetLikes) || 10,
-                currentViews: 0,
                 currentWatchTime: 0,
-                currentLikes: 0,
                 watchers: [],
-                likers: [],
-                subscribers: [],
                 watcherWatchTime: {},
                 watchTimeRewardPerSec: EARNINGS_RATE,
                 likeReward: 2.8,
                 subReward: 15,
+                channelUrl: campaignData.channelUrl || null,
                 isActive: true
             };
             const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
@@ -468,42 +497,66 @@
             userData.campaigns = userData.campaigns || [];
             userData.campaigns.push(campaign);
             await saveUserData();
-            showToast(`✅ Campaign "${campaignData.title}" created!`);
+            showToast(`✅ Campaign created!`);
             return true;
         }
         
-        // Pause/Resume logic
-        function pauseWatching(campaignId) {
-            activePauseStates[campaignId] = true;
-            showToast('⏸️ Timer paused', false);
-            renderCurrentPage(); // refresh to show resume button
+        // YouTube player ready callback
+        function onPlayerReady(campaignId, event) {
+            if (activeWatchData[campaignId] && activeWatchData[campaignId].isPaused === false) {
+                event.target.playVideo();
+            }
         }
         
-        function resumeWatching(campaignId) {
-            activePauseStates[campaignId] = false;
-            showToast('▶️ Timer resumed', false);
-            renderCurrentPage();
+        function onPlayerStateChange(campaignId, event) {
+            const data = activeWatchData[campaignId];
+            if (!data) return;
+            // 1 = playing, 2 = paused
+            if (event.data === 2) { // paused
+                data.isPaused = true;
+                showToast('⏸️ Video paused - timer stopped', false);
+            } else if (event.data === 1) { // playing
+                data.isPaused = false;
+                showToast('▶️ Playing - earning credits', false);
+            }
         }
         
-        async function startWatching(campaign) {
-            if (!currentUser) { showToast('Sign in first', true); return; }
-            const watchKey = `${campaign.id}_${currentUser.uid}`;
-            if (activeWatchIntervals[watchKey]) { showToast('Already watching!', true); return; }
-            const alreadyWatched = campaign.watchers?.includes(currentUser.uid);
-            if (alreadyWatched) { showToast('Already completed!', true); return; }
-            
+        async function startAutoWatch(campaign) {
+            if (!currentUser) return;
+            const campaignId = campaign.id;
+            if (activeWatchData[campaignId]) {
+                showToast('Already watching this video', true);
+                return;
+            }
+            const alreadyCompleted = campaign.watchers?.includes(currentUser.uid);
+            if (alreadyCompleted) {
+                showToast('Already completed this campaign!', true);
+                return;
+            }
             let elapsed = campaign.watcherWatchTime?.[currentUser.uid] || 0;
             const target = campaign.targetWatchTime;
-            if (elapsed >= target) { showToast('Watch time already completed!', true); return; }
+            if (elapsed >= target) return;
             
-            activePauseStates[campaign.id] = false;
+            // Create player if not exists
+            const playerDiv = document.getElementById(`player_${campaignId}`);
+            if (playerDiv && window.YT && window.YT.Player) {
+                const player = new window.YT.Player(playerDiv, {
+                    videoId: campaign.videoId,
+                    playerVars: { autoplay: 1, controls: 1, rel: 0 },
+                    events: {
+                        onReady: (e) => onPlayerReady(campaignId, e),
+                        onStateChange: (e) => onPlayerStateChange(campaignId, e)
+                    }
+                });
+                youtubePlayers[campaignId] = player;
+            }
             
             const updateUI = () => {
                 const remainingSec = Math.max(0, target - elapsed);
                 const earnedSoFar = elapsed * EARNINGS_RATE;
-                const timerEl = document.getElementById(`timer_display_${campaign.id}`);
-                const earningsEl = document.getElementById(`earnings_display_${campaign.id}`);
-                const progressEl = document.getElementById(`progress_fill_${campaign.id}`);
+                const timerEl = document.getElementById(`timer_display_${campaignId}`);
+                const earningsEl = document.getElementById(`earnings_display_${campaignId}`);
+                const progressEl = document.getElementById(`progress_fill_${campaignId}`);
                 if (timerEl) timerEl.textContent = `${Math.floor(remainingSec)}`;
                 if (earningsEl) earningsEl.textContent = `${earnedSoFar.toFixed(2)}`;
                 if (progressEl) progressEl.style.width = `${(elapsed / target) * 100}%`;
@@ -511,11 +564,13 @@
             updateUI();
             
             const interval = setInterval(async () => {
-                if (activePauseStates[campaign.id]) return; // paused, do nothing
+                const data = activeWatchData[campaignId];
+                if (!data) return;
+                if (data.isPaused) return;
                 if (elapsed >= target) {
                     clearInterval(interval);
-                    delete activeWatchIntervals[watchKey];
-                    delete activePauseStates[campaign.id];
+                    if (youtubePlayers[campaignId]) youtubePlayers[campaignId].stopVideo();
+                    delete activeWatchData[campaignId];
                     const finalReward = target * EARNINGS_RATE;
                     await updateCredits(finalReward);
                     userData.totalWatchTime = (userData.totalWatchTime || 0) + target;
@@ -530,10 +585,14 @@
                         userData.watchedVideos.push(campaign.videoId);
                         await saveUserData();
                     }
-                    showToast(`✅ Watch complete! Earned ${finalReward.toFixed(2)} credits!`);
+                    showToast(`✅ Earned ${finalReward.toFixed(2)} credits!`);
+                    
+                    // Auto-play next video if enabled
                     if (autoplayEnabled) {
                         const available = allCampaigns.filter(c => c.creatorId !== currentUser?.uid && !c.watchers?.includes(currentUser?.uid) && c.id !== campaign.id);
-                        if (available.length > 0) startWatching(available[0]);
+                        if (available.length > 0) {
+                            setTimeout(() => startAutoWatch(available[0]), 500);
+                        }
                     }
                     await renderCurrentPage();
                 } else {
@@ -541,141 +600,90 @@
                     updateUI();
                 }
             }, 1000);
-            activeWatchIntervals[watchKey] = interval;
+            
+            activeWatchData[campaignId] = { interval, elapsed, target, isPaused: false, player: youtubePlayers[campaignId] };
         }
         
-        function skipWatching(campaignId) {
-            const watchKey = Object.keys(activeWatchIntervals).find(key => key.startsWith(campaignId));
-            if (watchKey && activeWatchIntervals[watchKey]) {
-                clearInterval(activeWatchIntervals[watchKey]);
-                delete activeWatchIntervals[watchKey];
-                delete activePauseStates[campaignId];
-                showToast('⏹️ Stopped watching', false);
+        function nextVideo(currentCampaignId) {
+            if (activeWatchData[currentCampaignId]) {
+                clearInterval(activeWatchData[currentCampaignId].interval);
+                if (youtubePlayers[currentCampaignId]) youtubePlayers[currentCampaignId].stopVideo();
+                delete activeWatchData[currentCampaignId];
+            }
+            const available = allCampaigns.filter(c => c.creatorId !== currentUser?.uid && !c.watchers?.includes(currentUser?.uid) && c.id !== currentCampaignId);
+            if (available.length > 0) {
+                startAutoWatch(available[0]);
+            } else {
+                showToast('No more videos available', true);
                 renderCurrentPage();
             }
         }
         
         async function likeCampaign(campaign) {
-            if (userData.likedCampaigns?.includes(campaign.id)) { showToast('Already liked!', true); return; }
+            if (userData.likedCampaigns?.includes(campaign.id)) { showToast('Already liked', true); return; }
             await updateCredits(campaign.likeReward);
             userData.likedCampaigns = userData.likedCampaigns || [];
             userData.likedCampaigns.push(campaign.id);
             await saveUserData();
-            const campaignRef = doc(db, 'viewswap_campaigns', campaign.id || campaign.firestoreId);
-            await updateDoc(campaignRef, { currentLikes: (campaign.currentLikes || 0) + 1, likers: arrayUnion(currentUser.uid) });
-            showToast(`❤️ Liked! +${campaign.likeReward.toFixed(1)} credits`);
+            const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
+            await updateDoc(campaignRef, { likers: arrayUnion(currentUser.uid) });
+            showToast(`❤️ +${campaign.likeReward} credits`);
             renderCurrentPage();
         }
         
         async function subscribeToChannel(campaign) {
-            if (userData.subscribedChannels?.includes(campaign.channelUrl)) { showToast('Already subscribed!', true); return; }
             if (!campaign.channelUrl) { showToast('No channel URL', true); return; }
+            if (userData.subscribedChannels?.includes(campaign.channelUrl)) { showToast('Already subscribed', true); return; }
             await updateCredits(campaign.subReward || 15);
             userData.subscribedChannels = userData.subscribedChannels || [];
             userData.subscribedChannels.push(campaign.channelUrl);
             await saveUserData();
-            const campaignRef = doc(db, 'viewswap_campaigns', campaign.id || campaign.firestoreId);
-            await updateDoc(campaignRef, { subscribers: arrayUnion(currentUser.uid) });
             window.open(campaign.channelUrl, '_blank');
-            showToast(`🔔 Subscribed! +${(campaign.subReward || 15).toFixed(1)} credits`);
+            showToast(`🔔 +${campaign.subReward || 15} credits`);
             renderCurrentPage();
         }
         
-        async function processQRReferral(referrerCode) {
-            if (!currentUser) return false;
-            if (userData.referredBy) { showToast('Already have a referrer', true); return false; }
-            const q = query(collection(db, 'viewswap_users'), where('referralCode', '==', referrerCode));
-            const snapshot = await getDocs(q);
-            if (!snapshot.empty) {
-                const referrerId = snapshot.docs[0].id;
-                if (referrerId !== currentUser.uid) {
-                    userData.referredBy = referrerId;
-                    await saveUserData();
-                    await updateDoc(doc(db, 'viewswap_users', referrerId), { referrals: arrayUnion(currentUser.uid) });
-                    await updateCredits(10);
-                    showToast(`🎉 Referral success! +10 credits`);
-                    return true;
-                }
-            }
-            return false;
-        }
-        
-        function showQRScanner(onSuccess) {
-            const modal = document.createElement('div');
-            modal.className = 'qr-modal';
-            modal.innerHTML = `<div style="width:100%; padding:20px;"><div id="qr-reader-scanner" style="width:100%;"></div><button class="close-qr" id="closeScannerBtn">Close</button></div>`;
-            document.body.appendChild(modal);
-            const scanner = new Html5Qrcode("qr-reader-scanner");
-            scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 280, height: 280 } }, (text) => {
-                scanner.stop();
-                modal.remove();
-                onSuccess(text);
-            }, (err) => {});
-            document.getElementById('closeScannerBtn').onclick = () => { scanner.stop(); modal.remove(); };
-        }
-        
-        function showFullscreenQR(qrUrl) {
-            const modal = document.createElement('div');
-            modal.className = 'fullscreen-qr';
-            modal.innerHTML = `<div style="background:#1a1a2e; padding:30px; border-radius:40px; text-align:center;"><img src="${qrUrl}" width="250" height="250"><button class="close-qr" id="closeFullQr" style="margin-top:20px;">Close</button></div>`;
-            document.body.appendChild(modal);
-            document.getElementById('closeFullQr').onclick = () => modal.remove();
-        }
-        
-        function generateQRCodeURL(data) { return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data)}`; }
-        
         function renderCampaignWithPlayer(c) {
-            const embedUrl = getYouTubeEmbedUrl(c.url);
             const watchedSoFar = c.watcherWatchTime?.[currentUser?.uid] || 0;
-            const remaining = Math.max(0, c.targetWatchTime - watchedSoFar);
             const alreadyCompleted = c.watchers?.includes(currentUser?.uid);
             const alreadyLiked = userData?.likedCampaigns?.includes(c.id);
             const alreadySubscribed = userData?.subscribedChannels?.includes(c.channelUrl);
-            const isPaused = activePauseStates[c.id] || false;
-            const isWatchingActive = activeWatchIntervals[`${c.id}_${currentUser?.uid}`] !== undefined;
+            const isWatching = activeWatchData[c.id] !== undefined;
             
             return `
-                <div class="campaign-item">
-                    <div class="campaign-title">${escapeHtml(c.title)}</div>
-                    <div class="campaign-creator">by ${escapeHtml(c.creatorName)}</div>
-                    <div class="video-player-wrapper">
-                        <div class="video-player-container">${embedUrl ? `<iframe id="video_iframe_${c.id}" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>` : '<div class="empty-state">Invalid video URL</div>'}</div>
-                        <div class="watch-side-panel">
-                            <div class="earnings-display"><div class="earnings-label">💰 Earning so far</div><div class="earnings-amount" id="earnings_display_${c.id}">${(watchedSoFar * EARNINGS_RATE).toFixed(2)}</div></div>
-                            <div class="countdown-timer"><div class="timer-circle"><div class="timer-seconds" id="timer_display_${c.id}">${alreadyCompleted ? '0' : remaining}</div><div class="timer-label">seconds left</div></div></div>
-                            <div class="progress-bar-container"><div class="progress-fill" id="progress_fill_${c.id}" style="width: ${(watchedSoFar / c.targetWatchTime) * 100}%"></div></div>
-                        </div>
+                <div class="campaign-item" data-campaign-id="${c.id}">
+                    <div class="campaign-header">
+                        <div class="campaign-title">${escapeHtml(c.title)}</div>
+                        <div class="campaign-creator">by ${escapeHtml(c.creatorName)}</div>
                     </div>
-                    <div class="watch-controls-panel">
-                        <div class="watch-actions">
-                            ${!alreadyCompleted && !isWatchingActive ? `<button class="btn-watch" onclick="window.startWatchingWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})">▶️ START WATCH</button>` : ''}
-                            ${isWatchingActive && !alreadyCompleted ? `<button class="btn-pause" onclick="window.pauseWatchingWrapper('${c.id}')">⏸️ PAUSE</button>` : ''}
-                            ${isWatchingActive && !alreadyCompleted && isPaused ? `<button class="btn-resume" onclick="window.resumeWatchingWrapper('${c.id}')">▶️ RESUME</button>` : ''}
-                            ${isWatchingActive ? `<button class="btn-skip" onclick="window.skipWatchingWrapper('${c.id}')">⏹️ SKIP VIDEO</button>` : ''}
-                            ${!isWatchingActive && !alreadyCompleted ? `<button class="btn-skip" onclick="window.skipWatchingWrapper('${c.id}')" disabled style="opacity:0.5;">⏹️ SKIP</button>` : ''}
-                            <button class="btn-autoplay ${autoplayEnabled ? 'active' : ''}" onclick="window.toggleAutoplay()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button>
-                        </div>
-                        <div class="action-buttons">
-                            <button class="btn-like" onclick="window.likeCampaignWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})" ${alreadyLiked ? 'disabled' : ''}>❤️ LIKE +${c.likeReward}</button>
-                            ${c.channelUrl ? `<button class="btn-subscribe" onclick="window.subscribeWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})" ${alreadySubscribed ? 'disabled' : ''}>🔔 SUBSCRIBE +${c.subReward || 15}</button>` : ''}
-                        </div>
+                    <div class="video-container" id="player_${c.id}"></div>
+                    <div class="watch-stats">
+                        <div class="stat-badge"><div class="stat-badge-label">EARNING</div><div class="stat-badge-value" id="earnings_display_${c.id}">${(watchedSoFar * EARNINGS_RATE).toFixed(2)}</div></div>
+                        <div class="stat-badge"><div class="stat-badge-label">TIME LEFT</div><div class="stat-badge-value timer-value" id="timer_display_${c.id}">${alreadyCompleted ? '0' : Math.max(0, c.targetWatchTime - watchedSoFar)}</div><div class="stat-badge-label">sec</div></div>
+                    </div>
+                    <div class="progress-area"><div class="progress-bar-container"><div class="progress-fill" id="progress_fill_${c.id}" style="width: ${(watchedSoFar / c.targetWatchTime) * 100}%"></div></div></div>
+                    <div class="action-buttons-area">
+                        ${!alreadyCompleted && !isWatching ? `<button class="action-btn btn-next" onclick="window.startAutoWatchWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})">▶️ WATCH & EARN</button>` : ''}
+                        ${isWatching ? `<button class="action-btn btn-next" onclick="window.nextVideoWrapper('${c.id}')">⏭️ NEXT VIDEO</button>` : ''}
+                        ${alreadyCompleted ? `<button class="action-btn" disabled style="background:#e2e8f0;">✅ COMPLETED</button>` : ''}
+                        <button class="action-btn btn-like" onclick="window.likeCampaignWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})" ${alreadyLiked ? 'disabled' : ''}>❤️ LIKE +${c.likeReward}</button>
+                        ${c.channelUrl ? `<button class="action-btn btn-subscribe" onclick="window.subscribeWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})" ${alreadySubscribed ? 'disabled' : ''}>🔔 SUB +${c.subReward || 15}</button>` : ''}
+                        <button class="action-btn btn-autoplay ${autoplayEnabled ? 'active' : ''}" onclick="window.toggleAutoplayWrapper()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button>
                     </div>
                 </div>
             `;
         }
         
-        window.startWatchingWrapper = startWatching;
-        window.skipWatchingWrapper = skipWatching;
-        window.pauseWatchingWrapper = pauseWatching;
-        window.resumeWatchingWrapper = resumeWatching;
+        window.startAutoWatchWrapper = startAutoWatch;
+        window.nextVideoWrapper = nextVideo;
         window.likeCampaignWrapper = likeCampaign;
         window.subscribeWrapper = subscribeToChannel;
-        window.toggleAutoplay = () => { autoplayEnabled = !autoplayEnabled; showToast(`Auto-play ${autoplayEnabled ? 'ON' : 'OFF'}`, false); renderCurrentPage(); };
+        window.toggleAutoplayWrapper = () => { autoplayEnabled = !autoplayEnabled; showToast(`Auto-next ${autoplayEnabled ? 'ON' : 'OFF'}`, false); renderCurrentPage(); };
         
         async function renderHome() {
             await loadAllCampaigns();
             const availableCampaigns = allCampaigns.filter(c => c.creatorId !== currentUser?.uid);
-            let html = `<div class="card"><h2>🎬 Watch & Earn (${EARNINGS_RATE} credit/sec)</h2>`;
+            let html = `<div class="card"><h2>🎬 Auto-Play Campaigns (${EARNINGS_RATE} credit/sec)</h2>`;
             if (availableCampaigns.length === 0) html += '<div class="empty-state">No campaigns available. Create one!</div>';
             else html += availableCampaigns.map(c => renderCampaignWithPlayer(c)).join('');
             html += `</div>`;
@@ -683,24 +691,24 @@
         }
         
         function renderCampaignPage() {
-            return `<div class="card"><h2>🚀 Create Campaign</h2><div class="campaign-form-group"><label>Campaign Title *</label><input id="campTitle" placeholder="Epic Video Campaign"></div><div class="campaign-form-group"><label>YouTube URL *</label><input id="campUrl" placeholder="https://youtube.com/watch?v=..."></div><div class="campaign-form-group"><label>Channel URL</label><input id="channelUrl" placeholder="https://youtube.com/@channel"></div><div class="campaign-form-group"><label>Target Views</label><input id="targetViews" type="number" value="10"></div><div class="campaign-form-group"><label>Target Watch Time (seconds)</label><input id="targetWatchTime" type="number" value="30"></div><div class="campaign-form-group"><label>Target Likes</label><input id="targetLikes" type="number" value="10"></div><button class="btn-primary" id="createAdvancedBtn">✨ Launch Campaign (15 credits)</button></div>`;
+            return `<div class="card"><h2>🚀 Create Campaign</h2><div class="campaign-form-group"><label>Title *</label><input id="campTitle" placeholder="Video Title"></div><div class="campaign-form-group"><label>YouTube URL *</label><input id="campUrl" placeholder="https://youtube.com/watch?v=..."></div><div class="campaign-form-group"><label>Channel URL (for subscribe)</label><input id="channelUrl" placeholder="https://youtube.com/@channel"></div><div class="campaign-form-group"><label>Watch Time Target (seconds)</label><input id="targetWatchTime" type="number" value="30"></div><button class="btn-primary" id="createAdvancedBtn">✨ Create (15 credits)</button></div>`;
         }
         
         function renderRewardsPage() {
-            return `<div class="card"><h2>🏆 Achievements</h2><div class="achievement-grid"><div class="achievement-card">🎯 Coming Soon</div></div></div><div class="card"><h2>📊 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits||0)}</span></div><div class="stat-row"><span>👀 Videos Watched:</span><span>${userData?.watchedVideos?.length||0}</span></div><div class="stat-row"><span>⏱️ Watch Time:</span><span>${Math.floor(userData?.totalWatchTime||0)} sec</span></div><div class="stat-row"><span>💎 Total Earned:</span><span>${Math.floor(userData?.totalEarnings||0)}</span></div></div>`;
+            return `<div class="card"><h2>🏆 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits||0)}</span></div><div class="stat-row"><span>👀 Videos Watched:</span><span>${userData?.watchedVideos?.length||0}</span></div><div class="stat-row"><span>⏱️ Watch Time:</span><span>${Math.floor(userData?.totalWatchTime||0)} sec</span></div><div class="stat-row"><span>💎 Total Earned:</span><span>${Math.floor(userData?.totalEarnings||0)}</span></div></div>`;
         }
         
         function renderAccountPage() {
-            const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`);
-            return `<div class="card"><div style="text-align:center;"><img src="${currentUser?.photoURL}" style="width:80px;height:80px;border-radius:50%;border:3px solid #8b5cf6;margin-bottom:12px;"><div style="font-weight:bold;font-size:1.2rem;">${escapeHtml(currentUser?.displayName)}</div><div style="font-size:0.8rem;">${currentUser?.email}</div></div></div>
-            <div class="card"><h2>📈 Stats</h2><div class="stats-grid"><div class="stat-card"><div class="stat-value">${Math.floor(userData?.credits||0)}</div><div class="stat-label">💰 Credits</div></div><div class="stat-card"><div class="stat-value">${userData?.watchedVideos?.length || 0}</div><div class="stat-label">👀 Videos</div></div><div class="stat-card"><div class="stat-value">${Math.floor(userData?.totalWatchTime||0)}s</div><div class="stat-label">⏱️ Watch Time</div></div></div></div>
-            <div class="card"><h2>🔗 Referral QR</h2><div class="qr-display-img" id="qrDisplay"><img src="${qrUrl}" width="100" height="100"></div><div class="referral-code-box" id="refCode">${userData?.referralCode}</div><button class="btn-primary" id="copyCodeBtn">📋 Copy Code</button></div>
-            <button class="btn-secondary" id="signOutBtn">🚪 Sign Out</button>`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIEWSWAP_REF:${userData?.referralCode}`;
+            return `<div class="card"><div style="text-align:center;"><img src="${currentUser?.photoURL}" style="width:80px;height:80px;border-radius:50%;border:3px solid #8b5cf6;margin-bottom:12px;"><div style="font-weight:bold;">${escapeHtml(currentUser?.displayName)}</div><div style="font-size:0.8rem;">${currentUser?.email}</div></div></div>
+            <div class="card"><h2>📈 Stats</h2><div class="stats-grid"><div class="stat-card"><div class="stat-value">${Math.floor(userData?.credits||0)}</div><div class="stat-label">Credits</div></div><div class="stat-card"><div class="stat-value">${userData?.watchedVideos?.length||0}</div><div class="stat-label">Watched</div></div></div></div>
+            <div class="card"><h2>🔗 Referral QR</h2><div class="qr-display-img" id="qrDisplay"><img src="${qrUrl}" width="100" height="100"></div><div class="referral-code-box" id="refCode">${userData?.referralCode}</div><button class="btn-primary" id="copyCodeBtn">Copy Code</button></div>
+            <button class="btn-secondary" id="signOutBtn">Sign Out</button>`;
         }
         
         function renderReferPage() {
-            const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`);
-            return `<div class="card"><h2>🤝 Referral Program</h2><div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:20px;padding:12px;text-align:center;margin-bottom:16px;color:#92400e;">🎁 10 credits per referral!</div><div class="qr-display-img" id="qrDisplayRefer"><img src="${qrUrl}" width="150" height="150"></div><div class="referral-code-box" id="refCodeRefer">${userData?.referralCode}</div><button class="btn-primary" id="copyReferBtn">📋 Copy Code</button><button class="btn-secondary" id="scanQrBtn">📷 Scan QR to Refer</button><div class="stat-row"><span>💰 Referral Earnings:</span><span style="color:#10b981;">${Math.floor(userData?.referralEarnings||0)} credits</span></div></div>`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIEWSWAP_REF:${userData?.referralCode}`;
+            return `<div class="card"><h2>🤝 Referral</h2><div class="qr-display-img" id="qrDisplayRefer"><img src="${qrUrl}" width="150" height="150"></div><div class="referral-code-box" id="refCodeRefer">${userData?.referralCode}</div><button class="btn-primary" id="copyReferBtn">Copy Code</button><button class="btn-secondary" id="scanQrBtn">Scan QR</button></div>`;
         }
         
         function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
@@ -709,11 +717,13 @@
             const container = document.getElementById('pageContent');
             if(!container) return;
             if(currentPage === 'home'){ container.innerHTML = await renderHome(); }
-            else if(currentPage === 'campaign'){ container.innerHTML = renderCampaignPage(); document.getElementById('createAdvancedBtn')?.addEventListener('click', async () => { const title=document.getElementById('campTitle')?.value, url=document.getElementById('campUrl')?.value; if(title&&url) await createAdvancedCampaign({ title, url, channelUrl: document.getElementById('channelUrl')?.value, targetViews: document.getElementById('targetViews')?.value, targetWatchTime: document.getElementById('targetWatchTime')?.value, targetLikes: document.getElementById('targetLikes')?.value }); else showToast('Title and URL required', true); }); }
+            else if(currentPage === 'campaign'){ container.innerHTML = renderCampaignPage(); document.getElementById('createAdvancedBtn')?.addEventListener('click', async () => { const title=document.getElementById('campTitle')?.value, url=document.getElementById('campUrl')?.value; if(title&&url) await createAdvancedCampaign({ title, url, channelUrl: document.getElementById('channelUrl')?.value, targetWatchTime: document.getElementById('targetWatchTime')?.value }); else showToast('Title and URL required', true); }); }
             else if(currentPage === 'rewards') container.innerHTML = renderRewardsPage();
-            else if(currentPage === 'account'){ container.innerHTML = renderAccountPage(); const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`); document.getElementById('qrDisplay')?.addEventListener('click', () => showFullscreenQR(qrUrl)); document.getElementById('copyCodeBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Copied!'); }); document.getElementById('signOutBtn')?.addEventListener('click',async()=>await signOut(auth)); }
-            else if(currentPage === 'refer'){ container.innerHTML = renderReferPage(); const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`); document.getElementById('qrDisplayRefer')?.addEventListener('click', () => showFullscreenQR(qrUrl)); document.getElementById('copyReferBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Code copied'); }); document.getElementById('scanQrBtn')?.addEventListener('click',()=>{ showQRScanner(async (code) => { if(code.startsWith('VIEWSWAP_REF:')) await processQRReferral(code.split(':')[1]); else showToast('Invalid QR', true); }); }); }
+            else if(currentPage === 'account'){ container.innerHTML = renderAccountPage(); const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIEWSWAP_REF:${userData?.referralCode}`; document.getElementById('qrDisplay')?.addEventListener('click', () => { const modal = document.createElement('div'); modal.className='fullscreen-qr'; modal.innerHTML=`<div style="background:#1a1a2e;padding:30px;border-radius:40px;"><img src="${qrUrl}" width="250"><button class="close-qr" onclick="this.parentElement.parentElement.remove()">Close</button></div>`; document.body.appendChild(modal); }); document.getElementById('copyCodeBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Copied!'); }); document.getElementById('signOutBtn')?.addEventListener('click',async()=>await signOut(auth)); }
+            else if(currentPage === 'refer'){ container.innerHTML = renderReferPage(); const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIEWSWAP_REF:${userData?.referralCode}`; document.getElementById('qrDisplayRefer')?.addEventListener('click', () => { const modal = document.createElement('div'); modal.className='fullscreen-qr'; modal.innerHTML=`<div style="background:#1a1a2e;padding:30px;border-radius:40px;"><img src="${qrUrl}" width="250"><button class="close-qr" onclick="this.parentElement.parentElement.remove()">Close</button></div>`; document.body.appendChild(modal); }); document.getElementById('copyReferBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Copied'); }); document.getElementById('scanQrBtn')?.addEventListener('click',()=>{ const modal = document.createElement('div'); modal.className='qr-modal'; modal.innerHTML=`<div style="padding:20px;"><div id="qr-reader-scanner" style="width:100%;"></div><button class="close-qr" id="closeScannerBtn">Close</button></div>`; document.body.appendChild(modal); const scanner = new Html5Qrcode("qr-reader-scanner"); scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => { scanner.stop(); modal.remove(); if(text.startsWith('VIEWSWAP_REF:')) processQRReferral(text.split(':')[1]); else showToast('Invalid QR', true); }, (err)=>{}); document.getElementById('closeScannerBtn').onclick = () => { scanner.stop(); modal.remove(); }; }); }
         }
+        
+        async function processQRReferral(code) { if(!currentUser || userData.referredBy) return; const q = query(collection(db,'viewswap_users'), where('referralCode','==',code)); const snap = await getDocs(q); if(!snap.empty && snap.docs[0].id !== currentUser.uid) { userData.referredBy = snap.docs[0].id; await saveUserData(); await updateDoc(doc(db,'viewswap_users',snap.docs[0].id), { referrals: arrayUnion(currentUser.uid) }); await updateCredits(10); showToast('Referral +10 credits!'); } }
         
         function showToast(msg, isErr=false) { const t=document.createElement('div'); t.className='toast'; if(isErr) t.style.background='#ef4444'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 3000); }
         
@@ -722,7 +732,7 @@
         onAuthStateChanged(auth, async(user)=>{ if(user){ currentUser=user; await loadUserData(user.uid); document.body.classList.add('authenticated'); setupCampaignsListener(); renderCurrentPage(); } else { document.body.classList.remove('authenticated'); currentUser=null; userData=null; } });
         
         document.getElementById('signInBtn')?.addEventListener('click',()=>signInWithPopup(auth,provider));
-        document.getElementById('qrSignInBtn')?.addEventListener('click',()=>{ showQRScanner(async (code) => { if(!currentUser){ sessionStorage.setItem('pendingReferral', code); await signInWithPopup(auth, provider); } else if(code.startsWith('VIEWSWAP_REF:')) await processQRReferral(code.split(':')[1]); }); });
+        document.getElementById('qrSignInBtn')?.addEventListener('click',()=>{ const modal = document.createElement('div'); modal.className='qr-modal'; modal.innerHTML=`<div style="padding:20px;"><div id="qr-reader-scanner" style="width:100%;"></div><button class="close-qr" id="closeScannerBtn">Close</button></div>`; document.body.appendChild(modal); const scanner = new Html5Qrcode("qr-reader-scanner"); scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => { scanner.stop(); modal.remove(); if(!currentUser){ sessionStorage.setItem('pendingReferral', text); signInWithPopup(auth, provider); } else if(text.startsWith('VIEWSWAP_REF:')) processQRReferral(text.split(':')[1]); else showToast('Invalid QR', true); }, (err)=>{}); document.getElementById('closeScannerBtn').onclick = () => { scanner.stop(); modal.remove(); }; });
         
         const pendingRef = sessionStorage.getItem('pendingReferral');
         if(pendingRef) setTimeout(async () => { if(currentUser && !userData?.referredBy) await processQRReferral(pendingRef); sessionStorage.removeItem('pendingReferral'); }, 2000);
