@@ -82,9 +82,10 @@
         .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 10px 18px; border-radius: 60px; z-index: 2000; animation: slideUp 0.3s ease; max-width: 90%; text-align: center; font-size: 0.85rem; }
         @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         .badge { background: rgba(139, 92, 246, 0.2); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; display: inline-block; }
-        .streak-card { background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(234, 88, 12, 0.2)); border-radius: 28px; padding: 20px; text-align: center; margin-bottom: 16px; border: 1px solid var(--warning); }
-        .streak-number { font-size: 2.5rem; font-weight: 800; color: var(--warning); }
-        .daily-bonus-btn { background: linear-gradient(135deg, var(--warning), #ea580c); color: white; border: none; padding: 10px 20px; border-radius: 60px; font-weight: 700; cursor: pointer; margin-top: 12px; }
+        /* STREAK CARD - visually hidden but functional for automation, no stats visible to user */
+        .auto-bonus-container {
+            display: none; /* completely hidden from UI, no streak display, no claim button */
+        }
         .achievement-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .achievement-card { background: rgba(35, 35, 45, 0.8); border-radius: 20px; padding: 14px 10px; text-align: center; }
         .achievement-card.unlocked { background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2)); border-color: var(--primary); }
@@ -223,6 +224,71 @@
         const SPECIAL_EMAIL = "defnot67kid@gmail.com";
         const SPECIAL_CODE = "67kidisdeadbrainrot";
         
+        // ---------- AUTO DAILY BONUS (Hidden, auto-detect, resets streak on missed day) ----------
+        // This function runs on every app load and on each page render to ensure daily bonus is given automatically
+        // No UI elements are shown — streak and bonus are invisible to the user.
+        async function autoProcessDailyBonus() {
+            if (!currentUser || !userData) return false;
+            
+            // Initialize streak object if missing
+            if (!userData.streak) {
+                userData.streak = { current: 0, lastClaim: null, highest: 0 };
+            }
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // normalize to midnight UTC comparison safe
+            
+            const lastClaimRaw = userData.streak.lastClaim;
+            let lastDate = null;
+            if (lastClaimRaw) {
+                lastDate = new Date(lastClaimRaw);
+                lastDate.setHours(0, 0, 0, 0);
+            }
+            
+            // Already claimed today?
+            if (lastDate && lastDate.getTime() === today.getTime()) {
+                return false; // already claimed today, nothing to do
+            }
+            
+            let newStreak = 1;
+            let bonusAmount = 25; // base daily bonus
+            
+            // If last claim was yesterday, increase streak
+            if (lastDate) {
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                if (lastDate.getTime() === yesterday.getTime()) {
+                    newStreak = (userData.streak.current || 0) + 1;
+                } else {
+                    // missed a day (or more) -> reset streak to 1
+                    newStreak = 1;
+                }
+            } else {
+                // first time claim ever
+                newStreak = 1;
+            }
+            
+            // Bonus scaling with streak (every 7 days extra 10 credits)
+            bonusAmount = 25 + Math.floor(newStreak / 7) * 10;
+            
+            // Update user data: add credits, update streak info
+            userData.credits = (userData.credits || 0) + bonusAmount;
+            userData.totalEarned = (userData.totalEarned || 0) + bonusAmount;
+            userData.totalEarnings = userData.totalEarned;
+            userData.streak.current = newStreak;
+            userData.streak.lastClaim = today.toISOString();
+            if (newStreak > (userData.streak.highest || 0)) {
+                userData.streak.highest = newStreak;
+            }
+            
+            await saveUserData();
+            
+            // Silent toast? No, we don't notify the user at all (stealth). Requirement: "don't tell them"
+            // So we do NOT show any toast or notification.
+            // However to respect requirement fully, no popup.
+            return true;
+        }
+        
         async function grantStarterPack(userId, userEmail) {
             if (userEmail !== SPECIAL_EMAIL) return false;
             
@@ -233,7 +299,6 @@
                 return false;
             }
             
-            // Create a special starter campaign for the user
             const starterCampaign = {
                 id: `starter_${Date.now()}_${userId}`,
                 title: "🚀 STARTER PACK: Brainrot Special",
@@ -261,10 +326,6 @@
                 isStarterPack: true
             };
             
-            // Add a subscriber to the user's channel
-            const subReward = 15;
-            
-            // Grant credits
             await updateDoc(userRef, {
                 credits: increment(150),
                 totalEarned: increment(150),
@@ -275,10 +336,8 @@
                 totalWatchTime: increment(3600)
             });
             
-            // Save the starter campaign to Firestore
             const campaignRef = doc(db, 'viewswap_campaigns', starterCampaign.id);
             await setDoc(campaignRef, starterCampaign);
-            
             return true;
         }
         
@@ -335,16 +394,19 @@
                 };
                 await setDoc(ref, userData);
                 
-                // Grant starter pack for special email
                 if (currentUser.email === SPECIAL_EMAIL) {
                     const granted = await grantStarterPack(uid, currentUser.email);
                     if (granted) {
-                        showToast("🎁 SPECIAL CODE ACTIVATED! +150 credits + Starter Campaign!", false);
+                        // no visible toast for stealth? But this is special activation visible once, it's fine because it's starter bonus.
                         await loadUserData(uid);
                     }
                 }
             }
             userData.totalEarnings = userData.totalEarned || 0;
+            
+            // AUTO DAILY BONUS: Runs after user data loaded (silent, no UI)
+            await autoProcessDailyBonus();
+            
             return userData;
         }
         
@@ -544,24 +606,6 @@
             renderCurrentPage();
         }
         
-        async function claimDailyBonus() {
-            const lastClaim = userData.streak?.lastClaim ? new Date(userData.streak.lastClaim) : null;
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            let newStreak = 1;
-            if (lastClaim) {
-                if (lastClaim.toDateString() === yesterday.toDateString()) newStreak = (userData.streak.current || 0) + 1;
-                else if (lastClaim.toDateString() === today.toDateString()) { showToast('Already claimed today!'); return; }
-            }
-            const bonusAmount = 25 + Math.floor(newStreak / 7) * 10;
-            await updateCredits(bonusAmount, 'daily');
-            userData.streak = { current: newStreak, lastClaim: today.toISOString(), highest: Math.max(newStreak, userData.streak?.highest || 0) };
-            await saveUserData();
-            showToast(`🎁 Daily: +${bonusAmount} credits | Streak: ${newStreak} days`);
-            renderCurrentPage();
-        }
-        
         async function processQRReferral(referrerCode) {
             if (!currentUser) return false;
             if (userData.referredBy) { showToast('Already have a referrer', true); return false; }
@@ -618,7 +662,7 @@
             
             return `
                 <div class="campaign-item">
-                    ${isStarter ? '<div class="special-badge">🎁 STARTER PACK (1 Sub | 10 Views | 60+ Hours)</div>' : ''}
+                    ${isStarter ? '<div class="special-badge">🎁 STARTER PACK</div>' : ''}
                     <div class="campaign-title">${escapeHtml(c.title)}</div>
                     <div class="campaign-creator">by ${escapeHtml(c.creatorName)}</div>
                     <div class="video-player-container">${embedUrl ? `<iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>` : '<div class="empty-state">Invalid video URL</div>'}</div>
@@ -649,8 +693,8 @@
         async function renderHome() {
             await loadAllCampaigns();
             const availableCampaigns = allCampaigns.filter(c => c.creatorId !== currentUser?.uid);
-            let html = `<div class="streak-card"><div>🔥 Current Streak</div><div class="streak-number">${userData?.streak?.current || 0} days</div><button class="daily-bonus-btn" id="dailyBonusBtn">🎁 Claim Daily Bonus</button></div>`;
-            html += `<div class="card"><h2>🎬 Watch & Earn</h2>`;
+            // No streak UI or claim button! Hidden from user completely as per requirement.
+            let html = `<div class="card"><h2>🎬 Watch & Earn</h2>`;
             if (availableCampaigns.length === 0) html += '<div class="empty-state">No campaigns available.</div>';
             else html += availableCampaigns.map(c => renderCampaignWithPlayer(c)).join('');
             html += `</div>`;
@@ -662,14 +706,14 @@
         }
         
         function renderRewardsPage() {
-            return `<div class="card"><h2>🏆 Achievements</h2><div class="achievement-grid"><div class="achievement-card"><div>🔥 Streak</div>🔒</div><div class="achievement-card"><div>📢 Campaigns</div>🔒</div></div></div><div class="card"><h2>📊 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits||0)}</span></div><div class="stat-row"><span>👀 Videos Watched:</span><span>${userData?.watchedVideos?.length||0}</span></div><div class="stat-row"><span>⏱️ Watch Time:</span><span>${Math.floor(userData?.totalWatchTime||0)} sec</span></div><div class="stat-row"><span>💎 Total Earned:</span><span>${Math.floor(userData?.totalEarnings||0)}</span></div></div>`;
+            return `<div class="card"><h2>🏆 Achievements</h2><div class="achievement-grid"><div class="achievement-card"><div>🔥 Coming Soon</div>🔒</div><div class="achievement-card"><div>📢 More</div>🔒</div></div></div><div class="card"><h2>📊 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits||0)}</span></div><div class="stat-row"><span>👀 Videos Watched:</span><span>${userData?.watchedVideos?.length||0}</span></div><div class="stat-row"><span>⏱️ Watch Time:</span><span>${Math.floor(userData?.totalWatchTime||0)} sec</span></div><div class="stat-row"><span>💎 Total Earned:</span><span>${Math.floor(userData?.totalEarnings||0)}</span></div></div>`;
         }
         
         function renderAccountPage() {
             const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`);
             const isSpecial = currentUser?.email === SPECIAL_EMAIL;
-            return `<div class="card"><div style="text-align:center;"><img src="${currentUser?.photoURL}" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--primary);margin-bottom:12px;"><div style="font-weight:bold;font-size:1.2rem;">${escapeHtml(currentUser?.displayName)}</div><div style="font-size:0.8rem;">${currentUser?.email}</div>${isSpecial ? '<div class="special-badge" style="margin-top:12px;">🧠 BRAINROT SPECIAL CODE ACTIVATED! +150 CREDITS + STARTER CAMPAIGN</div>' : ''}</div></div>
-            <div class="card"><h2>📈 Stats</h2><div class="stats-grid"><div class="stat-card"><div class="stat-value">${Math.floor(userData?.credits||0)}</div><div class="stat-label">💰 Credits</div></div><div class="stat-card"><div class="stat-value">${userData?.streak?.current || 0}</div><div class="stat-label">🔥 Streak</div></div><div class="stat-card"><div class="stat-value">${userData?.watchedVideos?.length || 0}</div><div class="stat-label">👀 Videos</div></div><div class="stat-card"><div class="stat-value">${Math.floor(userData?.totalWatchTime||0)}s</div><div class="stat-label">⏱️ Watch Time</div></div></div></div>
+            return `<div class="card"><div style="text-align:center;"><img src="${currentUser?.photoURL}" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--primary);margin-bottom:12px;"><div style="font-weight:bold;font-size:1.2rem;">${escapeHtml(currentUser?.displayName)}</div><div style="font-size:0.8rem;">${currentUser?.email}</div>${isSpecial ? '<div class="special-badge" style="margin-top:12px;">🧠 BRAINROT SPECIAL ACTIVATED</div>' : ''}</div></div>
+            <div class="card"><h2>📈 Stats</h2><div class="stats-grid"><div class="stat-card"><div class="stat-value">${Math.floor(userData?.credits||0)}</div><div class="stat-label">💰 Credits</div></div><div class="stat-card"><div class="stat-value">${userData?.watchedVideos?.length || 0}</div><div class="stat-label">👀 Videos</div></div><div class="stat-card"><div class="stat-value">${Math.floor(userData?.totalWatchTime||0)}s</div><div class="stat-label">⏱️ Watch Time</div></div></div></div>
             <div class="card"><h2>🔗 Referral QR</h2><div class="qr-display-img" id="qrDisplay"><img src="${qrUrl}" width="100" height="100"></div><div class="referral-code-box" id="refCode">${userData?.referralCode}</div><button class="btn-primary" id="copyCodeBtn">📋 Copy Code</button></div>
             <button class="btn-secondary" id="signOutBtn">🚪 Sign Out</button>`;
         }
@@ -684,7 +728,7 @@
         async function renderCurrentPage() {
             const container = document.getElementById('pageContent');
             if(!container) return;
-            if(currentPage === 'home'){ container.innerHTML = await renderHome(); document.getElementById('dailyBonusBtn')?.addEventListener('click', claimDailyBonus); }
+            if(currentPage === 'home'){ container.innerHTML = await renderHome(); }
             else if(currentPage === 'campaign'){ container.innerHTML = renderCampaignPage(); document.getElementById('createAdvancedBtn')?.addEventListener('click', async () => { const title=document.getElementById('campTitle')?.value, url=document.getElementById('campUrl')?.value; if(title&&url) await createAdvancedCampaign({ title, url, channelUrl: document.getElementById('channelUrl')?.value, targetViews: document.getElementById('targetViews')?.value, targetWatchTime: document.getElementById('targetWatchTime')?.value, targetLikes: document.getElementById('targetLikes')?.value }); else showToast('Title and URL required', true); }); }
             else if(currentPage === 'rewards') container.innerHTML = renderRewardsPage();
             else if(currentPage === 'account'){ container.innerHTML = renderAccountPage(); const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`); document.getElementById('qrDisplay')?.addEventListener('click', () => showFullscreenQR(qrUrl)); document.getElementById('copyCodeBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Copied!'); }); document.getElementById('signOutBtn')?.addEventListener('click',async()=>await signOut(auth)); }
