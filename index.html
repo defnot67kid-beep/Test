@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>ViewSwap — Embedded Video Campaigns</title>
+    <title>ViewSwap — Premium Video Campaigns</title>
     
     <!-- Firebase SDKs -->
     <script type="module">
@@ -91,65 +91,125 @@
         .achievement-card.unlocked { background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2)); border-color: var(--primary); }
         .referral-code-box { background: rgba(0,0,0,0.5); padding: 12px; border-radius: 16px; font-family: monospace; text-align: center; border: 2px dashed var(--primary); cursor: pointer; }
         .empty-state { text-align: center; padding: 30px; color: var(--gray-400); }
-        .campaign-item { background: rgba(35,35,45,0.8); border-radius: 18px; padding: 14px; margin-bottom: 12px; }
-        .button-group { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-        .button-group button { flex: 1; min-width: 70px; }
         
-        /* Embedded Video Player */
+        /* Video Player - Half Screen */
         .video-player-container {
             margin-top: 12px;
             background: #000;
-            border-radius: 16px;
+            border-radius: 24px;
             overflow: hidden;
             position: relative;
+            height: 280px;
         }
         .video-player-container iframe {
             width: 100%;
-            height: 200px;
-            border: none;
-        }
-        .watch-controls {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px;
-            background: rgba(0,0,0,0.8);
-            gap: 10px;
-        }
-        .watch-timer {
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: var(--warning);
-        }
-        .watch-progress {
-            flex: 1;
-            height: 6px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        .watch-progress-fill {
             height: 100%;
-            background: var(--primary);
-            width: 0%;
-            transition: width 0.5s linear;
-        }
-        .skip-btn {
-            background: var(--danger);
-            color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 0.8rem;
         }
-        .skip-btn:active { transform: scale(0.96); }
-        .watch-status {
+        
+        /* Watch Controls - Clean Layout */
+        .watch-controls-panel {
+            background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(20,20,40,0.95));
+            border-radius: 20px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .earnings-display {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--success);
+            border-radius: 60px;
+            padding: 12px 16px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .earnings-amount {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--gold);
+        }
+        .earnings-label {
             font-size: 0.7rem;
             color: var(--gray-400);
-            margin-top: 8px;
+        }
+        .countdown-timer {
             text-align: center;
+            margin-bottom: 12px;
+        }
+        .timer-circle {
+            display: inline-block;
+            background: rgba(0,0,0,0.6);
+            border-radius: 60px;
+            padding: 12px 24px;
+            border: 2px solid var(--primary);
+        }
+        .timer-seconds {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--warning);
+        }
+        .timer-label {
+            font-size: 0.7rem;
+            color: var(--gray-400);
+        }
+        .progress-bar-container {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        .watch-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .watch-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 60px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .watch-actions button:active { transform: scale(0.97); }
+        .btn-watch {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+        }
+        .btn-skip {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+        }
+        .btn-autoplay {
+            background: linear-gradient(135deg, var(--gray-700), var(--gray-600));
+            color: white;
+        }
+        .btn-autoplay.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        .campaign-item {
+            background: rgba(35,35,45,0.8);
+            border-radius: 24px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .campaign-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .campaign-creator {
+            font-size: 0.7rem;
+            color: var(--gray-400);
+            margin-bottom: 12px;
         }
         
         /* QR Modal */
@@ -158,10 +218,8 @@
             background: #000; z-index: 10001; display: flex; align-items: center;
             justify-content: center; flex-direction: column;
         }
-        #qr-reader { width: 100%; max-width: 100vw; }
+        #qr-reader-scanner { width: 100%; max-width: 100vw; }
         .close-qr { background: var(--danger); color: white; border: none; padding: 14px 28px; border-radius: 60px; margin-top: 24px; cursor: pointer; }
-        
-        /* QR Display */
         .qr-display-img {
             background: white;
             padding: 16px;
@@ -169,13 +227,34 @@
             display: inline-block;
             margin: 10px 0;
             cursor: pointer;
-            transition: transform 0.2s;
         }
-        .qr-display-img:active { transform: scale(0.98); }
         .fullscreen-qr {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 10002; display: flex;
             align-items: center; justify-content: center; flex-direction: column;
+        }
+        
+        /* Profile Stats Enhanced */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .stat-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-light);
+        }
+        .stat-label {
+            font-size: 0.65rem;
+            color: var(--gray-400);
         }
     </style>
 </head>
@@ -184,7 +263,7 @@
         <div class="signin-card">
             <div style="font-size: 3.5rem;">🏆</div>
             <h2>ViewSwap</h2>
-            <p>Embedded Videos • QR Referrals</p>
+            <p>Watch • Earn • Auto-Play</p>
             <button class="google-signin-btn" id="signInBtn">🟢 Sign in with Google</button>
             <button class="qr-signin-btn" id="qrSignInBtn">📷 Scan QR Code to Refer</button>
         </div>
@@ -194,7 +273,7 @@
         <div class="container">
             <div class="header">
                 <h1>🏆 ViewSwap</h1>
-                <p>Watch • Earn • Refer</p>
+                <p>Earn While Watching</p>
                 <div class="online-badge" id="onlineCountBadge">👥 Loading...</div>
             </div>
             <div id="pageContent"></div>
@@ -203,7 +282,7 @@
             <button class="nav-item active" data-page="home"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></button>
             <button class="nav-item" data-page="campaign"><div class="nav-icon">📢</div><div class="nav-label">Campaign</div></button>
             <button class="nav-item" data-page="rewards"><div class="nav-icon">🎁</div><div class="nav-label">Rewards</div></button>
-            <button class="nav-item" data-page="account"><div class="nav-icon">👤</div><div class="nav-label">Account</div></button>
+            <button class="nav-item" data-page="account"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></button>
             <button class="nav-item" data-page="refer"><div class="nav-icon">🤝</div><div class="nav-label">Refer</div></button>
         </div>
     </div>
@@ -211,7 +290,7 @@
     <script type="module">
         const { initializeApp } = window.firebaseModules;
         const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } = window.firebaseModules;
-        const { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, updateDoc, onSnapshot, serverTimestamp, where, orderBy } = window.firebaseModules;
+        const { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, increment, arrayUnion, updateDoc, onSnapshot, serverTimestamp, where, orderBy } = window.firebaseModules;
         
         const firebaseConfig = {
             apiKey: "AIzaSyAupBkllyicDPD9O6CmX4mS4sF5z96mqxc",
@@ -232,14 +311,16 @@
         let currentPage = 'home';
         let activeUsersCount = 10;
         let allCampaigns = [];
-        let activeWatchTimers = {};
+        let activeWatchIntervals = {};
+        let autoplayEnabled = false;
+        let currentPlayingCampaign = null;
         
         function updateActiveUsersCount() {
             const onlineQuery = query(collection(db, 'viewswap_online'), where('isOnline', '==', true));
             onSnapshot(onlineQuery, (snap) => { 
                 activeUsersCount = Math.max(snap.size, 5);
                 document.getElementById('onlineCountBadge').innerHTML = `👥 ${activeUsersCount} active`;
-            }, (err) => { activeUsersCount = 10; });
+            });
         }
         
         async function loadAllCampaigns() {
@@ -265,8 +346,6 @@
             });
         }
         
-        function getEventMultiplier() { return 1.0; } // Removed random for consistency
-        
         async function loadUserData(uid) {
             const ref = doc(db, 'viewswap_users', uid);
             const snap = await getDoc(ref);
@@ -278,6 +357,8 @@
                 userData.watchedVideos = userData.watchedVideos || [];
                 userData.referrals = userData.referrals || [];
                 userData.referralEarnings = userData.referralEarnings || 0;
+                userData.totalWatchTime = userData.totalWatchTime || 0;
+                userData.totalEarnings = userData.totalEarnings || userData.totalEarned || 0;
             } else {
                 userData = {
                     uid, email: currentUser.email, displayName: currentUser.displayName,
@@ -286,10 +367,12 @@
                     referredBy: null, referralEarnings: 0, totalEarned: 0,
                     watchedVideos: [], campaigns: [],
                     achievements: {}, streak: { current: 0, lastClaim: null, highest: 0 },
+                    totalWatchTime: 0, totalEarnings: 0,
                     createdAt: new Date().toISOString()
                 };
                 await setDoc(ref, userData);
             }
+            userData.totalEarnings = userData.totalEarned || 0;
             return userData;
         }
         
@@ -297,9 +380,12 @@
             if(currentUser) await setDoc(doc(db, 'viewswap_users', currentUser.uid), userData, { merge: true }); 
         }
         
-        async function updateCredits(amount) { 
+        async function updateCredits(amount, source = 'watch') { 
             userData.credits += amount; 
-            if(amount > 0) userData.totalEarned += amount; 
+            if(amount > 0) {
+                userData.totalEarned += amount;
+                userData.totalEarnings = userData.totalEarned;
+            }
             await saveUserData(); 
         }
         
@@ -312,43 +398,33 @@
         
         function getYouTubeEmbedUrl(url) {
             const videoId = extractVideoId(url);
-            return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&enablejsapi=1` : null;
+            return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&enablejsapi=1&rel=0` : null;
         }
         
         async function createAdvancedCampaign(campaignData) {
             if (userData.credits < 15) { showToast('Need 15 credits', true); return false; }
-            await updateCredits(-15);
+            await updateCredits(-15, 'create');
             
-            const videoId = extractVideoId(campaignData.url);
             const campaign = {
                 id: Date.now().toString(),
                 title: campaignData.title,
                 url: campaignData.url,
                 embedUrl: getYouTubeEmbedUrl(campaignData.url),
                 channelUrl: campaignData.channelUrl || null,
-                videoId: videoId,
+                videoId: extractVideoId(campaignData.url),
                 creatorId: currentUser.uid,
                 creatorName: userData.displayName,
-                creatorPhoto: userData.photoURL,
                 createdAt: new Date().toISOString(),
                 targetViews: Math.min(parseInt(campaignData.targetViews) || activeUsersCount, activeUsersCount * 2),
                 targetWatchTime: parseInt(campaignData.targetWatchTime) || 30,
                 targetLikes: parseInt(campaignData.targetLikes) || 10,
-                targetSubs: campaignData.targetSubs ? parseInt(campaignData.targetSubs) : null,
-                targetComments: campaignData.targetComments ? parseInt(campaignData.targetComments) : null,
-                customCommentText: campaignData.customCommentText || null,
                 currentViews: 0,
                 currentWatchTime: 0,
                 currentLikes: 0,
-                currentSubs: 0,
-                currentComments: 0,
                 watchers: [],
                 watcherWatchTime: {},
-                viewReward: 10,
                 watchTimeRewardPerSec: 1.9,
                 likeReward: 2.8,
-                subReward: 15,
-                commentReward: 5,
                 isActive: true
             };
             
@@ -361,173 +437,121 @@
             return true;
         }
         
-        // Watch tracking with timer and skip
-        async function startWatchingCampaign(campaign) {
+        async function startWatching(campaign) {
             if (!currentUser) { showToast('Sign in first', true); return; }
             
             const watchKey = `${campaign.id}_${currentUser.uid}`;
-            if (activeWatchTimers[watchKey]) {
-                showToast('Already watching this video!', true);
+            if (activeWatchIntervals[watchKey]) {
+                showToast('Already watching!', true);
                 return;
             }
             
-            // Check if already fully watched this campaign
-            if (campaign.watchers && campaign.watchers.includes(currentUser.uid)) {
+            const alreadyWatched = campaign.watchers?.includes(currentUser.uid);
+            if (alreadyWatched) {
                 showToast('You already completed this campaign!', true);
                 return;
             }
             
-            const remainingWatchTime = Math.max(0, campaign.targetWatchTime - (campaign.watcherWatchTime?.[currentUser.uid] || 0));
-            if (remainingWatchTime <= 0) {
-                showToast('You already met watch time for this campaign!', true);
+            const watchedSoFar = campaign.watcherWatchTime?.[currentUser.uid] || 0;
+            const remaining = Math.max(0, campaign.targetWatchTime - watchedSoFar);
+            if (remaining <= 0) {
+                showToast('Watch time already completed!', true);
                 return;
             }
             
-            showToast(`⏱️ Watch for ${remainingWatchTime} seconds to earn credits!`, false);
-            
-            let elapsed = campaign.watcherWatchTime?.[currentUser.uid] || 0;
+            currentPlayingCampaign = campaign;
+            let elapsed = watchedSoFar;
             const target = campaign.targetWatchTime;
-            let interval = setInterval(async () => {
-                elapsed++;
-                
-                // Update UI
-                const progressEl = document.getElementById(`progress_${campaign.id}`);
-                const timerEl = document.getElementById(`timer_${campaign.id}`);
+            const rewardPerSec = campaign.watchTimeRewardPerSec;
+            let totalEarnedThisSession = 0;
+            
+            const updateUI = () => {
+                const remainingSec = target - elapsed;
+                const earnedSoFar = elapsed * rewardPerSec;
+                const timerEl = document.getElementById(`timer_display_${campaign.id}`);
+                const earningsEl = document.getElementById(`earnings_display_${campaign.id}`);
+                const progressEl = document.getElementById(`progress_fill_${campaign.id}`);
+                if (timerEl) timerEl.textContent = `${Math.floor(remainingSec)}`;
+                if (earningsEl) earningsEl.textContent = `${earnedSoFar.toFixed(1)}`;
                 if (progressEl) progressEl.style.width = `${(elapsed / target) * 100}%`;
-                if (timerEl) timerEl.textContent = `${Math.floor(elapsed)}/${target}s`;
-                
+            };
+            
+            updateUI();
+            
+            const interval = setInterval(async () => {
                 if (elapsed >= target) {
                     clearInterval(interval);
-                    delete activeWatchTimers[watchKey];
+                    delete activeWatchIntervals[watchKey];
                     
-                    // Reward the user for completing watch time
-                    const reward = target * campaign.watchTimeRewardPerSec;
-                    await updateCredits(reward);
+                    const finalReward = target * rewardPerSec;
+                    await updateCredits(finalReward, 'watch');
+                    userData.totalWatchTime = (userData.totalWatchTime || 0) + target;
+                    await saveUserData();
                     
-                    // Update campaign stats
                     const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
-                    const newWatchTime = (campaign.currentWatchTime || 0) + target;
                     await updateDoc(campaignRef, {
-                        currentWatchTime: newWatchTime,
+                        currentWatchTime: (campaign.currentWatchTime || 0) + target,
                         [`watcherWatchTime.${currentUser.uid}`]: target,
                         watchers: arrayUnion(currentUser.uid)
                     });
                     
-                    // Record watched video
                     if (!userData.watchedVideos.includes(campaign.videoId)) {
                         userData.watchedVideos.push(campaign.videoId);
                         await saveUserData();
                     }
                     
-                    // Reward creator
-                    if (campaign.creatorId !== currentUser.uid) {
-                        const creatorReward = Math.floor(reward * 0.1);
-                        if (creatorReward > 0) {
-                            await updateDoc(doc(db, 'viewswap_users', campaign.creatorId), { 
-                                credits: increment(creatorReward), 
-                                totalEarned: increment(creatorReward) 
-                            });
-                        }
-                    }
+                    showToast(`✅ Watch complete! Earned ${finalReward.toFixed(1)} credits!`);
                     
-                    showToast(`✅ Watch complete! Earned ${reward.toFixed(1)} credits!`);
-                    await checkAchievements();
-                    renderCurrentPage();
+                    if (autoplayEnabled) {
+                        await playNextCampaign(campaign.id);
+                    }
+                    await renderCurrentPage();
+                } else {
+                    elapsed += 1;
+                    const earnedNow = elapsed * rewardPerSec;
+                    totalEarnedThisSession = earnedNow;
+                    updateUI();
                 }
             }, 1000);
             
-            activeWatchTimers[watchKey] = interval;
+            activeWatchIntervals[watchKey] = interval;
         }
         
-        function skipWatchingCampaign(campaignId) {
-            const watchKey = Object.keys(activeWatchTimers).find(key => key.startsWith(campaignId));
-            if (watchKey && activeWatchTimers[watchKey]) {
-                clearInterval(activeWatchTimers[watchKey]);
-                delete activeWatchTimers[watchKey];
-                showToast('⏹️ Watching stopped', false);
+        async function playNextCampaign(currentCampaignId) {
+            const available = allCampaigns.filter(c => 
+                c.creatorId !== currentUser?.uid && 
+                !c.watchers?.includes(currentUser?.uid) &&
+                c.id !== currentCampaignId
+            );
+            if (available.length > 0) {
+                const nextCampaign = available[0];
+                startWatching(nextCampaign);
+            } else {
+                showToast('No more campaigns available!', false);
             }
         }
         
-        async function interactWithCampaign(campaign, actionType) {
-            if (!currentUser) return;
-            const multiplier = getEventMultiplier();
-            let reward = 0;
-            let updateData = {};
-            
-            if (actionType === 'like') {
-                if ((campaign.currentLikes || 0) >= (campaign.targetLikes || 0)) { 
-                    showToast('Like target reached!', true); return; 
-                }
-                reward = campaign.likeReward * multiplier;
-                await updateCredits(reward);
-                updateData = { currentLikes: (campaign.currentLikes || 0) + 1 };
-                showToast(`❤️ Liked! +${reward.toFixed(1)} credits`);
-            }
-            else if (actionType === 'subscribe' && campaign.channelUrl) {
-                if (campaign.targetSubs && (campaign.currentSubs || 0) >= campaign.targetSubs) { 
-                    showToast('Subscribe target reached!', true); return; 
-                }
-                reward = campaign.subReward * multiplier;
-                await updateCredits(reward);
-                updateData = { currentSubs: (campaign.currentSubs || 0) + 1 };
-                window.open(campaign.channelUrl, '_blank');
-                showToast(`🔔 Subscribed! +${reward.toFixed(1)} credits`);
-            }
-            else if (actionType === 'comment' && campaign.customCommentText) {
-                if (campaign.targetComments && (campaign.currentComments || 0) >= campaign.targetComments) { 
-                    showToast('Comment target reached!', true); return; 
-                }
-                reward = campaign.commentReward * multiplier;
-                await updateCredits(reward);
-                updateData = { currentComments: (campaign.currentComments || 0) + 1 };
-                showToast(`💬 Commented! +${reward.toFixed(1)} credits`);
-            }
-            
-            if (Object.keys(updateData).length > 0) {
-                const campaignRef = doc(db, 'viewswap_campaigns', campaign.id || campaign.firestoreId);
-                await updateDoc(campaignRef, updateData);
-                if (reward > 0 && campaign.creatorId !== currentUser.uid) {
-                    const creatorReward = Math.floor(reward * 0.1);
-                    if (creatorReward > 0) {
-                        await updateDoc(doc(db, 'viewswap_users', campaign.creatorId), { credits: increment(creatorReward), totalEarned: increment(creatorReward) });
-                    }
-                }
-                await checkAchievements();
+        function skipWatching(campaignId) {
+            const watchKey = Object.keys(activeWatchIntervals).find(key => key.startsWith(campaignId));
+            if (watchKey && activeWatchIntervals[watchKey]) {
+                clearInterval(activeWatchIntervals[watchKey]);
+                delete activeWatchIntervals[watchKey];
+                showToast('⏹️ Stopped watching', false);
+                currentPlayingCampaign = null;
                 renderCurrentPage();
             }
         }
         
-        window.interactWithCampaign = interactWithCampaign;
-        window.startWatchingCampaign = startWatchingCampaign;
-        window.skipWatchingCampaign = skipWatchingCampaign;
-        
-        async function checkAchievements() {
-            const campaignCount = userData.campaigns?.length || 0;
-            const watchedCount = userData.watchedVideos?.length || 0;
-            const referralCount = userData.referrals?.length || 0;
-            const streak = userData.streak?.current || 0;
-            
-            if (streak >= 1 && !userData.achievements.streak1) {
-                userData.achievements.streak1 = true;
-                await updateCredits(15);
-                showToast('🏆 Streak Starter! +15 credits');
+        async function likeCampaign(campaign) {
+            if ((campaign.currentLikes || 0) >= (campaign.targetLikes || 0)) { 
+                showToast('Like target reached!', true); return; 
             }
-            if (campaignCount >= 1 && !userData.achievements.campaign1) {
-                userData.achievements.campaign1 = true;
-                await updateCredits(20);
-                showToast('🏆 First Campaign! +20 credits');
-            }
-            if (watchedCount >= 10 && !userData.achievements.watcher10) {
-                userData.achievements.watcher10 = true;
-                await updateCredits(20);
-                showToast('🏆 Active Watcher! +20 credits');
-            }
-            if (referralCount >= 1 && !userData.achievements.refer1) {
-                userData.achievements.refer1 = true;
-                await updateCredits(25);
-                showToast('🏆 First Referral! +25 credits');
-            }
-            await saveUserData();
+            const reward = campaign.likeReward;
+            await updateCredits(reward, 'like');
+            const campaignRef = doc(db, 'viewswap_campaigns', campaign.id || campaign.firestoreId);
+            await updateDoc(campaignRef, { currentLikes: (campaign.currentLikes || 0) + 1 });
+            showToast(`❤️ Liked! +${reward.toFixed(1)} credits`);
+            renderCurrentPage();
         }
         
         async function claimDailyBonus() {
@@ -541,7 +565,7 @@
                 else if (lastClaim.toDateString() === today.toDateString()) { showToast('Already claimed today!'); return; }
             }
             const bonusAmount = 25 + Math.floor(newStreak / 7) * 10;
-            await updateCredits(bonusAmount);
+            await updateCredits(bonusAmount, 'daily');
             userData.streak = { current: newStreak, lastClaim: today.toISOString(), highest: Math.max(newStreak, userData.streak?.highest || 0) };
             await saveUserData();
             showToast(`🎁 Daily: +${bonusAmount} credits | Streak: ${newStreak} days`);
@@ -559,7 +583,7 @@
                     userData.referredBy = referrerId;
                     await saveUserData();
                     await updateDoc(doc(db, 'viewswap_users', referrerId), { referrals: arrayUnion(currentUser.uid) });
-                    await updateCredits(10);
+                    await updateCredits(10, 'referral');
                     showToast(`🎉 Referral success! +10 credits`);
                     return true;
                 }
@@ -567,15 +591,12 @@
             return false;
         }
         
-        // QR Scanner
-        let activeScanner = null;
         function showQRScanner(onSuccess) {
             const modal = document.createElement('div');
             modal.className = 'qr-modal';
             modal.innerHTML = `<div style="width:100%; padding:20px;"><div id="qr-reader-scanner" style="width:100%;"></div><button class="close-qr" id="closeScannerBtn">Close</button></div>`;
             document.body.appendChild(modal);
             const scanner = new Html5Qrcode("qr-reader-scanner");
-            activeScanner = scanner;
             scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 280, height: 280 } }, (text) => {
                 scanner.stop();
                 modal.remove();
@@ -587,7 +608,7 @@
         function showFullscreenQR(qrUrl) {
             const modal = document.createElement('div');
             modal.className = 'fullscreen-qr';
-            modal.innerHTML = `<div style="background:#1a1a2e; padding:30px; border-radius:40px; text-align:center;"><img src="${qrUrl}" width="250" height="250" style="border-radius:20px;"><button class="close-qr" id="closeFullQr" style="margin-top:20px;">Close</button></div>`;
+            modal.innerHTML = `<div style="background:#1a1a2e; padding:30px; border-radius:40px; text-align:center;"><img src="${qrUrl}" width="250" height="250"><button class="close-qr" id="closeFullQr" style="margin-top:20px;">Close</button></div>`;
             document.body.appendChild(modal);
             document.getElementById('closeFullQr').onclick = () => modal.remove();
         }
@@ -596,12 +617,74 @@
             return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data)}`;
         }
         
-        // Rendering
+        // Render Campaign with Half-Screen Video, Earnings, Countdown, Auto-Play Toggle
+        function renderCampaignWithPlayer(c) {
+            const embedUrl = getYouTubeEmbedUrl(c.url);
+            const watchedSoFar = c.watcherWatchTime?.[currentUser?.uid] || 0;
+            const remaining = Math.max(0, c.targetWatchTime - watchedSoFar);
+            const alreadyCompleted = c.watchers?.includes(currentUser?.uid);
+            const isCurrentlyWatching = activeWatchIntervals[`${c.id}_${currentUser?.uid}`];
+            
+            return `
+                <div class="campaign-item">
+                    <div class="campaign-title">${escapeHtml(c.title)}</div>
+                    <div class="campaign-creator">by ${escapeHtml(c.creatorName)}</div>
+                    
+                    <!-- Half Screen Video -->
+                    <div class="video-player-container">
+                        ${embedUrl ? `<iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>` : '<div class="empty-state">Invalid video URL</div>'}
+                    </div>
+                    
+                    <!-- Watch Controls Panel -->
+                    <div class="watch-controls-panel">
+                        <div class="earnings-display">
+                            <div class="earnings-label">💰 EARNING SO FAR</div>
+                            <div class="earnings-amount" id="earnings_display_${c.id}">${isCurrentlyWatching ? '0' : (watchedSoFar * c.watchTimeRewardPerSec).toFixed(1)}</div>
+                        </div>
+                        
+                        <div class="countdown-timer">
+                            <div class="timer-circle">
+                                <div class="timer-seconds" id="timer_display_${c.id}">${alreadyCompleted ? '0' : remaining}</div>
+                                <div class="timer-label">seconds remaining</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-bar-container">
+                            <div class="progress-fill" id="progress_fill_${c.id}" style="width: ${(watchedSoFar / c.targetWatchTime) * 100}%"></div>
+                        </div>
+                        
+                        <div class="watch-actions">
+                            ${!alreadyCompleted ? `<button class="btn-watch" onclick="window.startWatchingWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})">▶️ START WATCH</button>` : '<button class="btn-watch" disabled style="opacity:0.5;">✅ COMPLETED</button>'}
+                            <button class="btn-skip" onclick="window.skipWatchingWrapper('${c.id}')">⏹️ SKIP</button>
+                            <button class="btn-autoplay ${autoplayEnabled ? 'active' : ''}" id="autoplay_btn_${c.id}" onclick="window.toggleAutoplay()">🔄 AUTO-PLAY ${autoplayEnabled ? 'ON' : 'OFF'}</button>
+                        </div>
+                        
+                        <div class="watch-actions" style="margin-top: 8px;">
+                            <button class="btn-secondary" onclick="window.likeCampaignWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})">❤️ LIKE +${c.likeReward} credits</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        window.startWatchingWrapper = (c) => startWatching(c);
+        window.skipWatchingWrapper = (id) => skipWatching(id);
+        window.likeCampaignWrapper = (c) => likeCampaign(c);
+        window.toggleAutoplay = () => {
+            autoplayEnabled = !autoplayEnabled;
+            showToast(`Auto-play ${autoplayEnabled ? 'ON' : 'OFF'}`, false);
+            renderCurrentPage();
+        };
+        
         async function renderHome() {
             await loadAllCampaigns();
             const availableCampaigns = allCampaigns.filter(c => c.creatorId !== currentUser?.uid);
             
-            let html = `<div class="streak-card"><div>🔥 Current Streak</div><div class="streak-number">${userData?.streak?.current || 0} days</div><button class="daily-bonus-btn" id="dailyBonusBtn">🎁 Claim Daily Bonus</button></div>`;
+            let html = `<div class="streak-card">
+                <div>🔥 Current Streak</div>
+                <div class="streak-number">${userData?.streak?.current || 0} days</div>
+                <button class="daily-bonus-btn" id="dailyBonusBtn">🎁 Claim Daily Bonus</button>
+            </div>`;
             html += `<div class="card"><h2>🎬 Watch & Earn (No Limits!)</h2>`;
             if (availableCampaigns.length === 0) {
                 html += '<div class="empty-state">No campaigns available. Create one in Campaign tab!</div>';
@@ -612,79 +695,61 @@
             return html;
         }
         
-        function renderCampaignWithPlayer(c) {
-            const embedUrl = getYouTubeEmbedUrl(c.url);
-            const remainingTime = Math.max(0, c.targetWatchTime - (c.watcherWatchTime?.[currentUser?.uid] || 0));
-            const alreadyCompleted = c.watchers?.includes(currentUser?.uid);
-            
-            return `
-                <div class="campaign-item">
-                    <div style="font-weight:bold; margin-bottom:8px;">${escapeHtml(c.title)}</div>
-                    <div class="badge" style="margin:8px 0;">by ${escapeHtml(c.creatorName)}</div>
-                    <div class="stat-row"><span>👁️ Views:</span><span>${c.currentViews || 0}/${c.targetViews}</span></div>
-                    <div class="stat-row"><span>❤️ Likes:</span><span>${c.currentLikes || 0}/${c.targetLikes}</span></div>
-                    <div class="badge">💰 ${c.viewReward}/view | ${c.watchTimeRewardPerSec}/sec | ${c.likeReward}/like</div>
-                    
-                    ${embedUrl ? `
-                        <div class="video-player-container">
-                            <iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
-                            <div class="watch-controls">
-                                <span class="watch-timer" id="timer_${c.id}">${alreadyCompleted ? 'Completed!' : `${remainingTime}/${c.targetWatchTime}s`}</span>
-                                <div class="watch-progress"><div class="watch-progress-fill" id="progress_${c.id}" style="width:${((c.watcherWatchTime?.[currentUser?.uid] || 0) / c.targetWatchTime) * 100}%"></div></div>
-                                ${!alreadyCompleted ? `<button class="skip-btn" onclick="skipWatchingCampaign('${c.id}')">⏹️ Skip</button>` : ''}
-                            </div>
-                        </div>
-                        <div class="watch-status">
-                            ${!alreadyCompleted ? `⏱️ Need to watch ${remainingTime} seconds to earn credits!` : '✅ You completed this campaign!'}
-                        </div>
-                    ` : `<div class="empty-state">⚠️ Invalid video URL</div>`}
-                    
-                    <div class="button-group">
-                        ${!alreadyCompleted ? `<button class="btn-primary" onclick="startWatchingCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')})">▶️ Start Watching</button>` : ''}
-                        <button class="btn-secondary" onclick="interactWithCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')}, 'like')">❤️ Like</button>
-                        ${c.channelUrl ? `<button class="btn-secondary" onclick="interactWithCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')}, 'subscribe')">🔔 Subscribe</button>` : ''}
-                        ${c.customCommentText ? `<button class="btn-secondary" onclick="interactWithCampaign(${JSON.stringify(c).replace(/"/g, '&quot;')}, 'comment')">💬 Comment</button>` : ''}
-                    </div>
-                </div>
-            `;
-        }
-        
         function renderCampaignPage() {
             return `<div class="card">
                 <h2>🚀 Create Campaign</h2>
                 <div class="campaign-form-group"><label>Campaign Title *</label><input id="campTitle" placeholder="Epic Video Campaign"></div>
                 <div class="campaign-form-group"><label>YouTube URL *</label><input id="campUrl" placeholder="https://youtube.com/watch?v=..."></div>
-                <div class="campaign-form-group"><label>Channel URL (for subscribe)</label><input id="channelUrl" placeholder="https://youtube.com/@channel"></div>
+                <div class="campaign-form-group"><label>Channel URL (optional)</label><input id="channelUrl" placeholder="https://youtube.com/@channel"></div>
                 <div class="campaign-form-group"><label>Target Views</label><input id="targetViews" type="number" value="${activeUsersCount}"></div>
                 <div class="campaign-form-group"><label>Target Watch Time (seconds)</label><input id="targetWatchTime" type="number" value="30"></div>
                 <div class="campaign-form-group"><label>Target Likes</label><input id="targetLikes" type="number" value="10"></div>
-                <div class="campaign-form-group"><label>Target Subscribers (optional)</label><input id="targetSubs" type="number" placeholder="Optional"></div>
-                <div class="campaign-form-group"><label>Custom Comment Text</label><textarea id="commentText" placeholder="Type comment here..." rows="2"></textarea></div>
-                <div class="campaign-form-group"><label>How many comments?</label><input id="targetComments" type="number" placeholder="Optional"></div>
                 <button class="btn-primary" id="createAdvancedBtn">✨ Launch Campaign (15 credits)</button>
             </div>`;
         }
         
         function renderRewardsPage() {
-            const streak = userData?.streak?.current||0, campCount=userData?.campaigns?.length||0, watched=userData?.watchedVideos?.length||0, referralCount=userData?.referrals?.length||0;
+            const streak = userData?.streak?.current||0;
+            const achievements = userData?.achievements || {};
             return `<div class="card"><h2>🏆 Achievements</h2><div class="achievement-grid">
-                <div class="achievement-card ${userData?.achievements?.streak1?'unlocked':''}"><div>🔥 1 Day Streak</div>${userData?.achievements?.streak1?'✓':'🔒'}</div>
-                <div class="achievement-card ${userData?.achievements?.campaign1?'unlocked':''}"><div>📢 First Campaign</div>${userData?.achievements?.campaign1?'✓':'🔒'}</div>
-                <div class="achievement-card ${userData?.achievements?.watcher10?'unlocked':''}"><div>👁️ Active Watcher</div>${userData?.achievements?.watcher10?'✓':'🔒'}</div>
-                <div class="achievement-card ${userData?.achievements?.refer1?'unlocked':''}"><div>🤝 First Referral</div>${userData?.achievements?.refer1?'✓':'🔒'}</div>
+                <div class="achievement-card ${achievements.streak1?'unlocked':''}"><div>🔥 1 Day Streak</div>${achievements.streak1?'✓':'🔒'}</div>
+                <div class="achievement-card ${achievements.campaign1?'unlocked':''}"><div>📢 First Campaign</div>${achievements.campaign1?'✓':'🔒'}</div>
+                <div class="achievement-card ${achievements.watcher10?'unlocked':''}"><div>👁️ Active Watcher</div>${achievements.watcher10?'✓':'🔒'}</div>
+                <div class="achievement-card ${achievements.refer1?'unlocked':''}"><div>🤝 First Referral</div>${achievements.refer1?'✓':'🔒'}</div>
             </div></div>
             <div class="card"><h2>📊 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits||0)}</span></div>
-            <div class="stat-row"><span>📢 Campaigns:</span><span>${campCount}</span></div>
-            <div class="stat-row"><span>👀 Videos Watched:</span><span>${watched}</span></div>
-            <div class="stat-row"><span>🤝 Referrals:</span><span>${referralCount}</span></div>
-            <div class="stat-row"><span>💎 Total Earned:</span><span>${Math.floor(userData?.totalEarned||0)}</span></div></div>`;
+            <div class="stat-row"><span>📢 Campaigns:</span><span>${userData?.campaigns?.length||0}</span></div>
+            <div class="stat-row"><span>👀 Videos Watched:</span><span>${userData?.watchedVideos?.length||0}</span></div>
+            <div class="stat-row"><span>⏱️ Total Watch Time:</span><span>${Math.floor(userData?.totalWatchTime||0)} sec</span></div>
+            <div class="stat-row"><span>💎 Total Earned:</span><span>${Math.floor(userData?.totalEarnings||0)}</span></div></div>`;
         }
         
         function renderAccountPage() {
             const qrUrl = generateQRCodeURL(`VIEWSWAP_REF:${userData?.referralCode}`);
-            return `<div class="card"><div class="account-info"><img src="${currentUser?.photoURL}" style="width:70px;height:70px;border-radius:50%;border:3px solid var(--primary);"><div style="margin-top:10px;font-weight:bold;">${escapeHtml(currentUser?.displayName)}</div><div>${currentUser?.email}</div></div></div>
-            <div class="card"><h2>💰 Balance</h2><div style="font-size:2rem;text-align:center;">${Math.floor(userData?.credits||0)} credits</div></div>
-            <div class="card"><h2>🔗 Your QR Code</h2><div class="qr-display-img" id="qrDisplay"><img src="${qrUrl}" width="120" height="120"></div>
+            const referralCount = userData?.referrals?.length || 0;
+            const watchTimeHours = Math.floor((userData?.totalWatchTime || 0) / 3600);
+            const watchTimeMins = Math.floor(((userData?.totalWatchTime || 0) % 3600) / 60);
+            
+            return `<div class="card">
+                <div style="text-align:center;">
+                    <img src="${currentUser?.photoURL}" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--primary);margin-bottom:12px;">
+                    <div style="font-weight:bold;font-size:1.2rem;">${escapeHtml(currentUser?.displayName)}</div>
+                    <div style="font-size:0.8rem;color:var(--gray-400);">${currentUser?.email}</div>
+                </div>
+            </div>
+            <div class="card"><h2>📈 Detailed Stats</h2>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-value">${Math.floor(userData?.credits||0)}</div><div class="stat-label">💰 Credits</div></div>
+                    <div class="stat-card"><div class="stat-value">${userData?.streak?.current || 0}</div><div class="stat-label">🔥 Streak</div></div>
+                    <div class="stat-card"><div class="stat-value">${userData?.watchedVideos?.length || 0}</div><div class="stat-label">👀 Videos</div></div>
+                    <div class="stat-card"><div class="stat-value">${referralCount}</div><div class="stat-label">🤝 Referrals</div></div>
+                    <div class="stat-card"><div class="stat-value">${watchTimeHours}h ${watchTimeMins}m</div><div class="stat-label">⏱️ Watch Time</div></div>
+                    <div class="stat-card"><div class="stat-value">${Math.floor(userData?.totalEarnings||0)}</div><div class="stat-label">💎 Total Earned</div></div>
+                    <div class="stat-card"><div class="stat-value">${userData?.campaigns?.length || 0}</div><div class="stat-label">📢 Campaigns</div></div>
+                    <div class="stat-card"><div class="stat-value">${userData?.streak?.highest || 0}</div><div class="stat-label">🏆 Best Streak</div></div>
+                </div>
+            </div>
+            <div class="card"><h2>🔗 Referral QR</h2><div class="qr-display-img" id="qrDisplay"><img src="${qrUrl}" width="100" height="100"></div>
             <div class="referral-code-box" id="refCode">${userData?.referralCode}</div>
             <button class="btn-primary" id="copyCodeBtn">📋 Copy Code</button></div>
             <button class="btn-secondary" id="signOutBtn">🚪 Sign Out</button>`;
@@ -720,10 +785,7 @@
                         channelUrl: document.getElementById('channelUrl')?.value,
                         targetViews: document.getElementById('targetViews')?.value,
                         targetWatchTime: document.getElementById('targetWatchTime')?.value,
-                        targetLikes: document.getElementById('targetLikes')?.value,
-                        targetSubs: document.getElementById('targetSubs')?.value,
-                        customCommentText: document.getElementById('commentText')?.value,
-                        targetComments: document.getElementById('targetComments')?.value
+                        targetLikes: document.getElementById('targetLikes')?.value
                     });
                     showToast('Campaign created! Check Home page');
                 });
@@ -744,8 +806,7 @@
                 document.getElementById('scanQrBtn')?.addEventListener('click',()=>{
                     showQRScanner(async (code) => {
                         if (code.startsWith('VIEWSWAP_REF:')) {
-                            const refCode = code.split(':')[1];
-                            await processQRReferral(refCode);
+                            await processQRReferral(code.split(':')[1]);
                         } else { showToast('Invalid QR code', true); }
                     });
                 });
@@ -769,7 +830,6 @@
             const statusRef=doc(db,'viewswap_online',currentUser?.uid); 
             const update=async()=>{ if(currentUser) await setDoc(statusRef,{uid:currentUser.uid,isOnline:true,lastSeen:serverTimestamp()},{merge:true}); }; 
             update(); setInterval(update, 30000); 
-            window.addEventListener('beforeunload',()=>setDoc(statusRef,{isOnline:false},{merge:true}));
         }
         
         onAuthStateChanged(auth, async(user)=>{ 
@@ -793,10 +853,8 @@
                 if (!currentUser) {
                     sessionStorage.setItem('pendingReferral', code);
                     await signInWithPopup(auth, provider);
-                } else {
-                    if (code.startsWith('VIEWSWAP_REF:')) {
-                        await processQRReferral(code.split(':')[1]);
-                    }
+                } else if (code.startsWith('VIEWSWAP_REF:')) {
+                    await processQRReferral(code.split(':')[1]);
                 }
             });
         });
