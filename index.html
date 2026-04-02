@@ -9,11 +9,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, arrayUnion, onSnapshot, where, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, arrayUnion, onSnapshot, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
         window.firebaseModules = {
             initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
-            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, arrayUnion, onSnapshot, where, orderBy, deleteDoc
+            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, arrayUnion, onSnapshot, where, orderBy
         };
     </script>
     
@@ -52,7 +52,7 @@
             color: transparent;
         }
         
-        /* BOTTOM NAVIGATION with RED HILL LINE under middle tab */
+        /* BOTTOM NAVIGATION */
         .nav-wrapper {
             position: fixed;
             bottom: 0;
@@ -72,10 +72,10 @@
             position: relative;
         }
         
-        /* RED HILL LINE - centered under the middle tab (rewards tab) */
+        /* RED HILL LINE - placed UNDER the tabs (below the bottom-nav) */
         .red-hill-container {
             position: absolute;
-            bottom: 100%;
+            top: 100%;
             left: 0;
             right: 0;
             height: 28px;
@@ -85,7 +85,7 @@
         }
         .red-hill {
             position: relative;
-            width: 120px;
+            width: 140px;
             height: 28px;
             background: transparent;
         }
@@ -98,11 +98,11 @@
             height: 4px;
             background: linear-gradient(90deg, 
                 #ff0000 0%, 
-                #ff0000 20%,
-                #ff4444 35%,
+                #ff0000 15%,
+                #ff4444 30%,
                 #cc0000 50%,
-                #ff4444 65%,
-                #ff0000 80%,
+                #ff4444 70%,
+                #ff0000 85%,
                 #ff0000 100%);
             border-radius: 2px;
         }
@@ -114,14 +114,13 @@
             transform: translateX(-50%);
             width: 0;
             height: 0;
-            border-left: 14px solid transparent;
-            border-right: 14px solid transparent;
-            border-bottom: 16px solid #ff0000;
+            border-left: 16px solid transparent;
+            border-right: 16px solid transparent;
+            border-bottom: 18px solid #ff0000;
         }
-        /* Small peak accent */
         .hill-peak {
             position: absolute;
-            bottom: 20px;
+            bottom: 22px;
             left: 50%;
             transform: translateX(-50%);
             width: 6px;
@@ -205,12 +204,7 @@
         }
         @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         
-        /* SINGLE VIDEO CAROUSEL - full width, no scroll */
-        .carousel-container {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-        }
+        /* Single Video Player */
         .campaign-item {
             background: #ffffff;
             border-radius: 24px;
@@ -218,7 +212,6 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             border: 1px solid #eef2ff;
             overflow: hidden;
-            transition: all 0.3s ease;
         }
         .campaign-header {
             padding: 16px 16px 0 16px;
@@ -320,11 +313,6 @@
         .qr-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 10001; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .close-qr { background: #ef4444; color: white; border: none; padding: 14px 28px; border-radius: 60px; margin-top: 24px; cursor: pointer; }
         .fullscreen-qr { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10002; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        
-        /* Hide scrollbar but keep functionality */
-        .campaigns-view {
-            width: 100%;
-        }
     </style>
 </head>
 <body>
@@ -348,16 +336,17 @@
         </div>
         <div class="nav-wrapper">
             <div class="bottom-nav">
-                <div class="red-hill-container">
-                    <div class="red-hill">
-                        <div class="hill-peak"></div>
-                    </div>
-                </div>
                 <button class="nav-item active" data-page="home"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></button>
                 <button class="nav-item" data-page="campaign"><div class="nav-icon">📢</div><div class="nav-label">Campaign</div></button>
                 <button class="nav-item" data-page="rewards"><div class="nav-icon">🎁</div><div class="nav-label">Rewards</div></button>
                 <button class="nav-item" data-page="account"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></button>
                 <button class="nav-item" data-page="refer"><div class="nav-icon">🤝</div><div class="nav-label">Refer</div></button>
+                <!-- RED HILL LINE UNDER THE TABS -->
+                <div class="red-hill-container">
+                    <div class="red-hill">
+                        <div class="hill-peak"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -365,7 +354,7 @@
     <script type="module">
         const { initializeApp } = window.firebaseModules;
         const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } = window.firebaseModules;
-        const { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, increment, arrayUnion, updateDoc, onSnapshot, where, orderBy, deleteDoc } = window.firebaseModules;
+        const { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, increment, arrayUnion, updateDoc, onSnapshot, where, orderBy } = window.firebaseModules;
         
         const firebaseConfig = {
             apiKey: "AIzaSyAupBkllyicDPD9O6CmX4mS4sF5z96mqxc",
@@ -385,12 +374,11 @@
         let userData = null;
         let currentPage = 'home';
         let allCampaigns = [];
-        let currentCampaignIndex = 0;
-        let activeWatchData = null; // single active watch
+        let activeWatchData = null;
         let autoplayEnabled = true;
         let youtubePlayer = null;
         let watchInterval = null;
-        let watchedHistory = []; // track watched campaign IDs to avoid immediate repeats
+        let watchedHistory = [];
         
         const EARNINGS_RATE = 0.5;
         
@@ -426,7 +414,6 @@
                 allCampaigns = [];
                 snapshot.forEach(doc => { 
                     const data = doc.data();
-                    // Only show campaigns that are not completed by current user
                     if (!data.watchers?.includes(currentUser?.uid)) {
                         allCampaigns.push({ ...data, firestoreId: doc.id });
                     }
@@ -435,14 +422,11 @@
             } catch (error) { return []; }
         }
         
-        // Get next unseen campaign (avoid recent watches)
         function getNextCampaign() {
             const available = allCampaigns.filter(c => c.creatorId !== currentUser?.uid && !watchedHistory.includes(c.id));
             if (available.length > 0) return available[0];
-            // Fallback to any unwatched
             const anyUnwatched = allCampaigns.filter(c => c.creatorId !== currentUser?.uid);
-            if (anyUnwatched.length > 0) return anyUnwatched[0];
-            return null;
+            return anyUnwatched.length > 0 ? anyUnwatched[0] : null;
         }
         
         async function loadUserData(uid) {
@@ -505,7 +489,6 @@
                 id: Date.now().toString(),
                 title: campaignData.title,
                 url: campaignData.url,
-                embedUrl: `https://www.youtube.com/embed/${extractVideoId(campaignData.url)}?autoplay=1&enablejsapi=1&rel=0`,
                 videoId: extractVideoId(campaignData.url),
                 creatorId: currentUser.uid,
                 creatorName: userData.displayName,
@@ -526,6 +509,10 @@
             userData.campaigns.push(campaign);
             await saveUserData();
             showToast(`✅ Campaign created!`);
+            await loadAllCampaigns();
+            if (!activeWatchData && getNextCampaign()) {
+                startAutoWatch(getNextCampaign());
+            }
             return true;
         }
         
@@ -534,10 +521,10 @@
                 clearInterval(watchInterval);
                 watchInterval = null;
             }
-            if (youtubePlayer) {
-                try { youtubePlayer.stopVideo(); } catch(e) {}
-                youtubePlayer = null;
+            if (youtubePlayer && youtubePlayer.destroy) {
+                try { youtubePlayer.destroy(); } catch(e) {}
             }
+            youtubePlayer = null;
             activeWatchData = null;
         }
         
@@ -557,17 +544,14 @@
                 userData.watchedVideos.push(campaign.videoId);
             }
             
-            // Add to history to avoid immediate repeat
             watchedHistory.unshift(campaign.id);
             if (watchedHistory.length > 10) watchedHistory.pop();
             await saveUserData();
             
             showToast(`✅ Earned ${finalReward.toFixed(2)} credits!`);
             
-            // Remove from local campaigns array so it won't show again
             allCampaigns = allCampaigns.filter(c => c.id !== campaign.id);
             
-            // Auto load next campaign
             if (autoplayEnabled) {
                 await loadAllCampaigns();
                 const nextCamp = getNextCampaign();
@@ -582,11 +566,58 @@
             }
         }
         
+        function initYouTubePlayer(videoId, campaign) {
+            const playerDiv = document.getElementById('current_player');
+            if (!playerDiv) return null;
+            
+            if (youtubePlayer && youtubePlayer.destroy) {
+                try { youtubePlayer.destroy(); } catch(e) {}
+            }
+            
+            return new window.YT.Player('current_player', {
+                videoId: videoId,
+                playerVars: { 
+                    autoplay: 1, 
+                    controls: 1, 
+                    rel: 0, 
+                    modestbranding: 1,
+                    playsinline: 1
+                },
+                events: {
+                    onReady: (e) => {
+                        e.target.playVideo();
+                        if (activeWatchData) activeWatchData.isPaused = false;
+                    },
+                    onStateChange: (e) => {
+                        if (activeWatchData) {
+                            // 2 = paused, 1 = playing, 0 = ended
+                            if (e.data === 2) {
+                                activeWatchData.isPaused = true;
+                                showToast('⏸️ Paused - timer stopped', false);
+                            } else if (e.data === 1) {
+                                activeWatchData.isPaused = false;
+                                showToast('▶️ Playing - earning 0.5/sec', false);
+                            } else if (e.data === 0) {
+                                // Video ended naturally - complete campaign
+                                if (activeWatchData && !activeWatchData.completed) {
+                                    activeWatchData.completed = true;
+                                    completeCampaign(campaign, campaign.targetWatchTime);
+                                }
+                            }
+                        }
+                    },
+                    onError: (e) => {
+                        console.error('YouTube error', e);
+                        showToast('Video error, skipping...', true);
+                        nextVideo();
+                    }
+                }
+            });
+        }
+        
         async function startAutoWatch(campaign) {
             if (!currentUser) return;
-            if (activeWatchData) {
-                stopCurrentWatch();
-            }
+            if (activeWatchData) stopCurrentWatch();
             
             const alreadyCompleted = campaign.watchers?.includes(currentUser.uid);
             if (alreadyCompleted) {
@@ -601,40 +632,32 @@
             const target = campaign.targetWatchTime;
             if (elapsed >= target) return;
             
-            // Create or reuse player
-            const playerDiv = document.getElementById(`current_player`);
-            if (playerDiv && window.YT && window.YT.Player) {
-                if (youtubePlayer) {
-                    try { youtubePlayer.destroy(); } catch(e) {}
-                }
-                youtubePlayer = new window.YT.Player(playerDiv, {
-                    videoId: campaign.videoId,
-                    playerVars: { autoplay: 1, controls: 1, rel: 0, modestbranding: 1 },
-                    events: {
-                        onReady: (e) => { e.target.playVideo(); },
-                        onStateChange: (e) => {
-                            if (activeWatchData) {
-                                // 2 = paused
-                                activeWatchData.isPaused = (e.data === 2);
-                                if (activeWatchData.isPaused) showToast('⏸️ Paused - timer stopped', false);
-                                else if (e.data === 1) showToast('▶️ Playing - earning', false);
-                            }
-                        }
-                    }
-                });
-            }
-            
             const updateUI = () => {
                 const remainingSec = Math.max(0, target - elapsed);
                 const earnedSoFar = elapsed * EARNINGS_RATE;
-                const timerEl = document.getElementById(`current_timer`);
-                const earningsEl = document.getElementById(`current_earnings`);
-                const progressEl = document.getElementById(`current_progress`);
+                const timerEl = document.getElementById('current_timer');
+                const earningsEl = document.getElementById('current_earnings');
+                const progressEl = document.getElementById('current_progress');
                 if (timerEl) timerEl.textContent = `${Math.floor(remainingSec)}`;
                 if (earningsEl) earningsEl.textContent = `${earnedSoFar.toFixed(2)}`;
                 if (progressEl) progressEl.style.width = `${(elapsed / target) * 100}%`;
+                // Update title and creator
+                const titleEl = document.getElementById('campaign_title');
+                const creatorEl = document.getElementById('campaign_creator');
+                if (titleEl) titleEl.textContent = campaign.title;
+                if (creatorEl) creatorEl.textContent = `by ${campaign.creatorName}`;
             };
             updateUI();
+            
+            // Create player
+            if (window.YT && window.YT.Player) {
+                youtubePlayer = initYouTubePlayer(campaign.videoId, campaign);
+            } else {
+                // Wait for API
+                window.onYouTubeIframeAPIReady = () => {
+                    youtubePlayer = initYouTubePlayer(campaign.videoId, campaign);
+                };
+            }
             
             if (watchInterval) clearInterval(watchInterval);
             watchInterval = setInterval(async () => {
@@ -643,30 +666,28 @@
                 if (elapsed >= target) {
                     clearInterval(watchInterval);
                     watchInterval = null;
-                    activeWatchData = null;
-                    await completeCampaign(campaign, elapsed);
+                    if (!activeWatchData.completed) {
+                        activeWatchData.completed = true;
+                        await completeCampaign(campaign, elapsed);
+                    }
                 } else {
                     elapsed += 1;
-                    activeWatchData.elapsed = elapsed;
+                    if (activeWatchData) activeWatchData.elapsed = elapsed;
                     updateUI();
                 }
             }, 1000);
             
-            activeWatchData = { campaignId: campaign.id, elapsed, target, isPaused: false, campaign };
+            activeWatchData = { campaignId: campaign.id, elapsed, target, isPaused: false, campaign, completed: false };
         }
         
         function nextVideo() {
-            if (activeWatchData) {
-                stopCurrentWatch();
-            }
-            // Mark current as watched in history
-            if (activeWatchData?.campaign) {
+            if (activeWatchData && activeWatchData.campaign) {
                 watchedHistory.unshift(activeWatchData.campaign.id);
                 if (watchedHistory.length > 10) watchedHistory.pop();
                 saveUserData();
-                // Remove from allCampaigns
                 allCampaigns = allCampaigns.filter(c => c.id !== activeWatchData.campaign.id);
             }
+            stopCurrentWatch();
             loadAllCampaigns().then(() => {
                 const nextCamp = getNextCampaign();
                 if (nextCamp) {
@@ -711,24 +732,23 @@
         function renderCurrentCampaign() {
             const campaign = activeWatchData?.campaign;
             if (!campaign) {
-                return `<div class="card"><div class="empty-state">✨ No active campaign. Click "Watch & Earn" to start!</div></div>`;
+                return `<div class="card"><div class="empty-state">✨ No active campaign. Create one or wait for videos!</div></div>`;
             }
             const alreadyLiked = userData?.likedCampaigns?.includes(campaign.id);
             const alreadySubscribed = userData?.subscribedChannels?.includes(campaign.channelUrl);
             const elapsed = activeWatchData?.elapsed || 0;
             const target = campaign.targetWatchTime;
-            const remaining = Math.max(0, target - elapsed);
             
             return `
                 <div class="campaign-item">
                     <div class="campaign-header">
-                        <div class="campaign-title">${escapeHtml(campaign.title)}</div>
-                        <div class="campaign-creator">by ${escapeHtml(campaign.creatorName)}</div>
+                        <div class="campaign-title" id="campaign_title">${escapeHtml(campaign.title)}</div>
+                        <div class="campaign-creator" id="campaign_creator">by ${escapeHtml(campaign.creatorName)}</div>
                     </div>
                     <div class="video-container" id="current_player"></div>
                     <div class="watch-stats">
                         <div class="stat-badge"><div class="stat-badge-label">EARNING</div><div class="stat-badge-value" id="current_earnings">${(elapsed * EARNINGS_RATE).toFixed(2)}</div></div>
-                        <div class="stat-badge"><div class="stat-badge-label">TIME LEFT</div><div class="stat-badge-value timer-value" id="current_timer">${remaining}</div><div class="stat-badge-label">sec</div></div>
+                        <div class="stat-badge"><div class="stat-badge-label">TIME LEFT</div><div class="stat-badge-value timer-value" id="current_timer">${Math.max(0, target - elapsed)}</div><div class="stat-badge-label">sec</div></div>
                     </div>
                     <div class="progress-area"><div class="progress-bar-container"><div class="progress-fill" id="current_progress" style="width: ${(elapsed / target) * 100}%"></div></div></div>
                     <div class="action-buttons-area">
@@ -745,12 +765,6 @@
         window.likeWrapper = likeCampaign;
         window.subscribeWrapper = subscribeToChannel;
         window.toggleAutoplayWrapper = toggleAutoplay;
-        window.startNewCampaign = async () => {
-            await loadAllCampaigns();
-            const nextCamp = getNextCampaign();
-            if (nextCamp) startAutoWatch(nextCamp);
-            else showToast('No campaigns available', true);
-        };
         
         async function renderHome() {
             await loadAllCampaigns();
@@ -764,8 +778,6 @@
             html += renderCurrentCampaign();
             if (!activeWatchData && allCampaigns.length === 0) {
                 html += `<div class="empty-state">No campaigns. Create one in Campaign tab!</div>`;
-            } else if (!activeWatchData && allCampaigns.length > 0) {
-                html += `<button class="btn-primary" onclick="window.startNewCampaign()">▶️ START WATCHING</button>`;
             }
             html += `</div>`;
             return html;
