@@ -9,11 +9,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, onSnapshot, serverTimestamp, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, arrayUnion, onSnapshot, serverTimestamp, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
         window.firebaseModules = {
             initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
-            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, runTransaction, arrayUnion, onSnapshot, serverTimestamp, where, orderBy
+            getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, getDocs, increment, arrayUnion, onSnapshot, serverTimestamp, where, orderBy
         };
     </script>
     
@@ -62,7 +62,6 @@
             text-align: center; border-bottom: 1px solid rgba(139, 92, 246, 0.3);
         }
         .header h1 { font-size: 1.8rem; background: linear-gradient(135deg, #fff, var(--primary-light), var(--secondary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .online-badge { background: rgba(16, 185, 129, 0.2); padding: 6px 12px; border-radius: 40px; font-size: 0.7rem; display: inline-block; margin-top: 8px; border: 1px solid var(--success); }
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: rgba(15, 15, 26, 0.95); backdrop-filter: blur(20px);
@@ -180,6 +179,7 @@
             transition: transform 0.1s;
         }
         .watch-actions button:active { transform: scale(0.97); }
+        .watch-actions button:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
         .btn-watch {
             background: linear-gradient(135deg, var(--success), #059669);
             color: white;
@@ -194,6 +194,18 @@
         }
         .btn-autoplay.active {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        .btn-like {
+            background: linear-gradient(135deg, #ec489a, #db2777);
+            color: white;
+        }
+        .btn-subscribe {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        .btn-like:disabled, .btn-subscribe:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .campaign-item {
             background: rgba(35,35,45,0.8);
@@ -210,6 +222,17 @@
             font-size: 0.7rem;
             color: var(--gray-400);
             margin-bottom: 12px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .action-buttons button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 40px;
+            font-size: 0.8rem;
         }
         
         /* QR Modal */
@@ -274,7 +297,6 @@
             <div class="header">
                 <h1>🏆 ViewSwap</h1>
                 <p>Earn While Watching</p>
-                <div class="online-badge" id="onlineCountBadge">👥 Loading...</div>
             </div>
             <div id="pageContent"></div>
         </div>
@@ -313,15 +335,6 @@
         let allCampaigns = [];
         let activeWatchIntervals = {};
         let autoplayEnabled = false;
-        let currentPlayingCampaign = null;
-        
-        function updateActiveUsersCount() {
-            const onlineQuery = query(collection(db, 'viewswap_online'), where('isOnline', '==', true));
-            onSnapshot(onlineQuery, (snap) => { 
-                activeUsersCount = Math.max(snap.size, 5);
-                document.getElementById('onlineCountBadge').innerHTML = `👥 ${activeUsersCount} active`;
-            });
-        }
         
         async function loadAllCampaigns() {
             try {
@@ -359,6 +372,8 @@
                 userData.referralEarnings = userData.referralEarnings || 0;
                 userData.totalWatchTime = userData.totalWatchTime || 0;
                 userData.totalEarnings = userData.totalEarnings || userData.totalEarned || 0;
+                userData.likedCampaigns = userData.likedCampaigns || [];
+                userData.subscribedChannels = userData.subscribedChannels || [];
             } else {
                 userData = {
                     uid, email: currentUser.email, displayName: currentUser.displayName,
@@ -368,6 +383,7 @@
                     watchedVideos: [], campaigns: [],
                     achievements: {}, streak: { current: 0, lastClaim: null, highest: 0 },
                     totalWatchTime: 0, totalEarnings: 0,
+                    likedCampaigns: [], subscribedChannels: [],
                     createdAt: new Date().toISOString()
                 };
                 await setDoc(ref, userData);
@@ -415,16 +431,19 @@
                 creatorId: currentUser.uid,
                 creatorName: userData.displayName,
                 createdAt: new Date().toISOString(),
-                targetViews: Math.min(parseInt(campaignData.targetViews) || activeUsersCount, activeUsersCount * 2),
+                targetViews: Math.min(parseInt(campaignData.targetViews) || 10, 100),
                 targetWatchTime: parseInt(campaignData.targetWatchTime) || 30,
                 targetLikes: parseInt(campaignData.targetLikes) || 10,
                 currentViews: 0,
                 currentWatchTime: 0,
                 currentLikes: 0,
                 watchers: [],
+                likers: [],
+                subscribers: [],
                 watcherWatchTime: {},
                 watchTimeRewardPerSec: 1.9,
                 likeReward: 2.8,
+                subReward: 15,
                 isActive: true
             };
             
@@ -459,11 +478,9 @@
                 return;
             }
             
-            currentPlayingCampaign = campaign;
             let elapsed = watchedSoFar;
             const target = campaign.targetWatchTime;
             const rewardPerSec = campaign.watchTimeRewardPerSec;
-            let totalEarnedThisSession = 0;
             
             const updateUI = () => {
                 const remainingSec = target - elapsed;
@@ -508,8 +525,6 @@
                     await renderCurrentPage();
                 } else {
                     elapsed += 1;
-                    const earnedNow = elapsed * rewardPerSec;
-                    totalEarnedThisSession = earnedNow;
                     updateUI();
                 }
             }, 1000);
@@ -524,8 +539,7 @@
                 c.id !== currentCampaignId
             );
             if (available.length > 0) {
-                const nextCampaign = available[0];
-                startWatching(nextCampaign);
+                startWatching(available[0]);
             } else {
                 showToast('No more campaigns available!', false);
             }
@@ -537,20 +551,65 @@
                 clearInterval(activeWatchIntervals[watchKey]);
                 delete activeWatchIntervals[watchKey];
                 showToast('⏹️ Stopped watching', false);
-                currentPlayingCampaign = null;
                 renderCurrentPage();
             }
         }
         
         async function likeCampaign(campaign) {
-            if ((campaign.currentLikes || 0) >= (campaign.targetLikes || 0)) { 
-                showToast('Like target reached!', true); return; 
+            // Check if already liked
+            if (userData.likedCampaigns?.includes(campaign.id)) {
+                showToast('You already liked this campaign!', true);
+                return;
             }
+            
+            if ((campaign.currentLikes || 0) >= (campaign.targetLikes || 0)) { 
+                showToast('Like target reached!', true); 
+                return; 
+            }
+            
             const reward = campaign.likeReward;
             await updateCredits(reward, 'like');
+            
+            userData.likedCampaigns = userData.likedCampaigns || [];
+            userData.likedCampaigns.push(campaign.id);
+            await saveUserData();
+            
             const campaignRef = doc(db, 'viewswap_campaigns', campaign.id || campaign.firestoreId);
-            await updateDoc(campaignRef, { currentLikes: (campaign.currentLikes || 0) + 1 });
+            await updateDoc(campaignRef, { 
+                currentLikes: (campaign.currentLikes || 0) + 1,
+                likers: arrayUnion(currentUser.uid)
+            });
+            
             showToast(`❤️ Liked! +${reward.toFixed(1)} credits`);
+            renderCurrentPage();
+        }
+        
+        async function subscribeToChannel(campaign) {
+            // Check if already subscribed
+            if (userData.subscribedChannels?.includes(campaign.channelUrl)) {
+                showToast('You already subscribed to this channel!', true);
+                return;
+            }
+            
+            if (!campaign.channelUrl) {
+                showToast('No channel URL available', true);
+                return;
+            }
+            
+            const reward = campaign.subReward || 15;
+            await updateCredits(reward, 'subscribe');
+            
+            userData.subscribedChannels = userData.subscribedChannels || [];
+            userData.subscribedChannels.push(campaign.channelUrl);
+            await saveUserData();
+            
+            const campaignRef = doc(db, 'viewswap_campaigns', campaign.id || campaign.firestoreId);
+            await updateDoc(campaignRef, { 
+                subscribers: arrayUnion(currentUser.uid)
+            });
+            
+            window.open(campaign.channelUrl, '_blank');
+            showToast(`🔔 Subscribed! +${reward.toFixed(1)} credits`);
             renderCurrentPage();
         }
         
@@ -617,12 +676,13 @@
             return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data)}`;
         }
         
-        // Render Campaign with Half-Screen Video, Earnings, Countdown, Auto-Play Toggle
         function renderCampaignWithPlayer(c) {
             const embedUrl = getYouTubeEmbedUrl(c.url);
             const watchedSoFar = c.watcherWatchTime?.[currentUser?.uid] || 0;
             const remaining = Math.max(0, c.targetWatchTime - watchedSoFar);
             const alreadyCompleted = c.watchers?.includes(currentUser?.uid);
+            const alreadyLiked = userData?.likedCampaigns?.includes(c.id);
+            const alreadySubscribed = userData?.subscribedChannels?.includes(c.channelUrl);
             const isCurrentlyWatching = activeWatchIntervals[`${c.id}_${currentUser?.uid}`];
             
             return `
@@ -630,12 +690,10 @@
                     <div class="campaign-title">${escapeHtml(c.title)}</div>
                     <div class="campaign-creator">by ${escapeHtml(c.creatorName)}</div>
                     
-                    <!-- Half Screen Video -->
                     <div class="video-player-container">
                         ${embedUrl ? `<iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>` : '<div class="empty-state">Invalid video URL</div>'}
                     </div>
                     
-                    <!-- Watch Controls Panel -->
                     <div class="watch-controls-panel">
                         <div class="earnings-display">
                             <div class="earnings-label">💰 EARNING SO FAR</div>
@@ -656,11 +714,12 @@
                         <div class="watch-actions">
                             ${!alreadyCompleted ? `<button class="btn-watch" onclick="window.startWatchingWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})">▶️ START WATCH</button>` : '<button class="btn-watch" disabled style="opacity:0.5;">✅ COMPLETED</button>'}
                             <button class="btn-skip" onclick="window.skipWatchingWrapper('${c.id}')">⏹️ SKIP</button>
-                            <button class="btn-autoplay ${autoplayEnabled ? 'active' : ''}" id="autoplay_btn_${c.id}" onclick="window.toggleAutoplay()">🔄 AUTO-PLAY ${autoplayEnabled ? 'ON' : 'OFF'}</button>
+                            <button class="btn-autoplay ${autoplayEnabled ? 'active' : ''}" id="autoplay_btn_${c.id}" onclick="window.toggleAutoplay()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button>
                         </div>
                         
-                        <div class="watch-actions" style="margin-top: 8px;">
-                            <button class="btn-secondary" onclick="window.likeCampaignWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})">❤️ LIKE +${c.likeReward} credits</button>
+                        <div class="action-buttons">
+                            <button class="btn-like" onclick="window.likeCampaignWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})" ${alreadyLiked ? 'disabled' : ''}>❤️ LIKE +${c.likeReward} ${alreadyLiked ? '(Done)' : ''}</button>
+                            ${c.channelUrl ? `<button class="btn-subscribe" onclick="window.subscribeWrapper(${JSON.stringify(c).replace(/"/g, '&quot;')})" ${alreadySubscribed ? 'disabled' : ''}>🔔 SUBSCRIBE +${c.subReward || 15} ${alreadySubscribed ? '(Done)' : ''}</button>` : ''}
                         </div>
                     </div>
                 </div>
@@ -670,6 +729,7 @@
         window.startWatchingWrapper = (c) => startWatching(c);
         window.skipWatchingWrapper = (id) => skipWatching(id);
         window.likeCampaignWrapper = (c) => likeCampaign(c);
+        window.subscribeWrapper = (c) => subscribeToChannel(c);
         window.toggleAutoplay = () => {
             autoplayEnabled = !autoplayEnabled;
             showToast(`Auto-play ${autoplayEnabled ? 'ON' : 'OFF'}`, false);
@@ -685,7 +745,7 @@
                 <div class="streak-number">${userData?.streak?.current || 0} days</div>
                 <button class="daily-bonus-btn" id="dailyBonusBtn">🎁 Claim Daily Bonus</button>
             </div>`;
-            html += `<div class="card"><h2>🎬 Watch & Earn (No Limits!)</h2>`;
+            html += `<div class="card"><h2>🎬 Watch & Earn</h2>`;
             if (availableCampaigns.length === 0) {
                 html += '<div class="empty-state">No campaigns available. Create one in Campaign tab!</div>';
             } else {
@@ -700,8 +760,8 @@
                 <h2>🚀 Create Campaign</h2>
                 <div class="campaign-form-group"><label>Campaign Title *</label><input id="campTitle" placeholder="Epic Video Campaign"></div>
                 <div class="campaign-form-group"><label>YouTube URL *</label><input id="campUrl" placeholder="https://youtube.com/watch?v=..."></div>
-                <div class="campaign-form-group"><label>Channel URL (optional)</label><input id="channelUrl" placeholder="https://youtube.com/@channel"></div>
-                <div class="campaign-form-group"><label>Target Views</label><input id="targetViews" type="number" value="${activeUsersCount}"></div>
+                <div class="campaign-form-group"><label>Channel URL (for subscribe feature)</label><input id="channelUrl" placeholder="https://youtube.com/@channel"></div>
+                <div class="campaign-form-group"><label>Target Views</label><input id="targetViews" type="number" value="10"></div>
                 <div class="campaign-form-group"><label>Target Watch Time (seconds)</label><input id="targetWatchTime" type="number" value="30"></div>
                 <div class="campaign-form-group"><label>Target Likes</label><input id="targetLikes" type="number" value="10"></div>
                 <button class="btn-primary" id="createAdvancedBtn">✨ Launch Campaign (15 credits)</button>
@@ -747,6 +807,8 @@
                     <div class="stat-card"><div class="stat-value">${Math.floor(userData?.totalEarnings||0)}</div><div class="stat-label">💎 Total Earned</div></div>
                     <div class="stat-card"><div class="stat-value">${userData?.campaigns?.length || 0}</div><div class="stat-label">📢 Campaigns</div></div>
                     <div class="stat-card"><div class="stat-value">${userData?.streak?.highest || 0}</div><div class="stat-label">🏆 Best Streak</div></div>
+                    <div class="stat-card"><div class="stat-value">${userData?.likedCampaigns?.length || 0}</div><div class="stat-label">❤️ Likes Given</div></div>
+                    <div class="stat-card"><div class="stat-value">${userData?.subscribedChannels?.length || 0}</div><div class="stat-label">🔔 Subscriptions</div></div>
                 </div>
             </div>
             <div class="card"><h2>🔗 Referral QR</h2><div class="qr-display-img" id="qrDisplay"><img src="${qrUrl}" width="100" height="100"></div>
@@ -825,19 +887,11 @@
             btn.classList.add('active'); renderCurrentPage(); 
         }));
         
-        function initOnlineTracking() { 
-            updateActiveUsersCount(); 
-            const statusRef=doc(db,'viewswap_online',currentUser?.uid); 
-            const update=async()=>{ if(currentUser) await setDoc(statusRef,{uid:currentUser.uid,isOnline:true,lastSeen:serverTimestamp()},{merge:true}); }; 
-            update(); setInterval(update, 30000); 
-        }
-        
         onAuthStateChanged(auth, async(user)=>{ 
             if(user){ 
                 currentUser=user; 
                 await loadUserData(user.uid); 
                 document.body.classList.add('authenticated'); 
-                initOnlineTracking();
                 setupCampaignsListener();
                 renderCurrentPage(); 
             } else { 
