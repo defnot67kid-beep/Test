@@ -465,6 +465,7 @@ input:focus {
     cursor: pointer;
 }
 
+/* Admin Panel Enhanced Styles */
 .admin-stats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -550,9 +551,110 @@ input:focus {
     background: #10b981;
 }
 
+.admin-btn.info {
+    background: #3b82f6;
+}
+
 .amount-input {
     width: 80px;
     padding: 6px;
     margin: 0;
     border-radius: 20px;
+}
+
+/* Achievements Grid */
+.achievements-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.achievement-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.achievement-card.earned {
+    border-left: 4px solid #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.achievement-card.locked {
+    border-left: 4px solid #6b7280;
+    opacity: 0.7;
+}
+
+.achievement-icon {
+    font-size: 2rem;
+    min-width: 50px;
+    text-align: center;
+}
+
+.achievement-name {
+    font-weight: bold;
+    flex: 1;
+    min-width: 120px;
+}
+
+.achievement-desc {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    flex: 2;
+}
+
+.achievement-reward, .achievement-req {
+    font-size: 0.75rem;
+    font-weight: bold;
+    min-width: 100px;
+}
+
+.achievement-card.earned .achievement-reward {
+    color: #10b981;
+}
+
+/* Algorithm Controls */
+.algorithm-control {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.algorithm-control label {
+    display: block;
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+    opacity: 0.7;
+}
+
+.algorithm-control input, .algorithm-control select {
+    width: 100%;
+    padding: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 0;
+}
+
+.slider-value {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 0.75rem;
+    color: #f5576c;
+}
+
+@media (max-width: 600px) {
+    .achievement-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    .achievement-icon {
+        font-size: 1.5rem;
+    }
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+    }
 }
