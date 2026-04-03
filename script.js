@@ -26,7 +26,7 @@ const VIEWER_EARNING_RATE = 0.5;
 const CAMPAIGN_COST_PER_SECOND = 0.19;
 const BASE_URL = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
 
-// Algorithm Settings (can be changed by admin)
+// Algorithm Settings
 let algorithmSettings = {
     popularityWeight: 0.4,
     newCampaignBoost: 0.3,
@@ -36,7 +36,6 @@ let algorithmSettings = {
     viralThreshold: 100
 };
 
-// User notification preferences
 let userNotificationSettings = {
     enabled: true,
     achievements: true,
@@ -62,7 +61,7 @@ let isAdmin = false;
 let defaultReferrerIdCache = null;
 let videoFullyLoaded = false;
 
-// ============ ACHIEVEMENTS SYSTEM ============
+// ============ ACHIEVEMENTS ============
 const ACHIEVEMENTS = [
     { id: "first_video", name: "🎬 First Step", description: "Watch your first video", requirement: { type: "watched", count: 1 }, reward: 10 },
     { id: "video_enthusiast", name: "📺 Video Enthusiast", description: "Watch 10 videos", requirement: { type: "watched", count: 10 }, reward: 50 },
@@ -107,18 +106,15 @@ function showToast(msg, isErr = false) {
 
 function showNotification(title, body, type = 'info') {
     if (!userNotificationSettings.enabled) return;
-    
     if (type === 'achievement' && !userNotificationSettings.achievements) return;
     if (type === 'referral' && !userNotificationSettings.referralEarnings) return;
     if (type === 'daily' && !userNotificationSettings.dailyBonus) return;
     if (type === 'campaign' && !userNotificationSettings.campaignAlerts) return;
-    
     if (Notification.permission === 'granted') {
         new Notification(title, { body });
     }
 }
 
-// Tab visibility
 document.addEventListener('visibilitychange', () => {
     isTabVisible = !document.hidden;
     if (activeWatchData && youtubePlayer) {
@@ -133,12 +129,8 @@ document.addEventListener('visibilitychange', () => {
 });
 
 function pauseCurrentVideo() {
-    if (youtubePlayer && youtubePlayer.pauseVideo) {
-        youtubePlayer.pauseVideo();
-    }
-    if (activeWatchData) {
-        activeWatchData.isPaused = true;
-    }
+    if (youtubePlayer && youtubePlayer.pauseVideo) youtubePlayer.pauseVideo();
+    if (activeWatchData) activeWatchData.isPaused = true;
 }
 
 function resumeCurrentVideo() {
@@ -156,9 +148,7 @@ function stopCurrentWatch(keepPlayer = false) {
         youtubePlayer.destroy();
         youtubePlayer = null;
     }
-    if (!keepPlayer) {
-        activeWatchData = null;
-    }
+    if (!keepPlayer) activeWatchData = null;
 }
 
 async function getDefaultReferrerId() {
@@ -168,11 +158,6 @@ async function getDefaultReferrerId() {
         const snap = await getDocs(q);
         if (!snap.empty) {
             defaultReferrerIdCache = snap.docs[0].id;
-            const defaultRef = doc(db, 'viewswap_users', defaultReferrerIdCache);
-            const defaultSnap = await getDoc(defaultRef);
-            if (defaultSnap.exists() && defaultSnap.data().referralCode !== DEFAULT_REFERRAL_CODE) {
-                await updateDoc(defaultRef, { referralCode: DEFAULT_REFERRAL_CODE });
-            }
             return defaultReferrerIdCache;
         }
         return null;
@@ -206,7 +191,7 @@ async function processQRReferral(code) {
         await updateDoc(doc(db, 'viewswap_users', snap.docs[0].id), { referrals: arrayUnion(currentUser.uid) });
         await updateCredits(10);
         await checkAchievements();
-        showNotification('Referral Success', `+10 credits from ${snap.docs[0].data().displayName || 'referral'}!`, 'referral');
+        showNotification('Referral Success', `+10 credits!`, 'referral');
     } else {
         showToast('Invalid code', true);
     }
@@ -369,7 +354,7 @@ async function getRealVideoDuration(videoId) {
         const timeout = setTimeout(() => {
             if (!resolved) {
                 resolved = true;
-                reject(new Error("YouTube API timeout - could not get video duration"));
+                reject(new Error("YouTube API timeout"));
             }
         }, 10000);
         
@@ -392,18 +377,17 @@ async function getRealVideoDuration(videoId) {
                                     if (duration && duration > 0) {
                                         resolve(duration);
                                     } else {
-                                        reject(new Error("Invalid video duration"));
+                                        reject(new Error("Invalid duration"));
                                     }
                                 }
                             },
                             onError: (error) => {
-                                console.error("YouTube player error:", error);
                                 tempPlayer.destroy();
                                 tempDiv.remove();
                                 if (!resolved) {
                                     resolved = true;
                                     clearTimeout(timeout);
-                                    reject(new Error("YouTube API error - video unavailable"));
+                                    reject(new Error("YouTube API error"));
                                 }
                             }
                         }
@@ -413,7 +397,7 @@ async function getRealVideoDuration(videoId) {
                     if (!resolved) {
                         resolved = true;
                         clearTimeout(timeout);
-                        reject(new Error("Failed to initialize YouTube player"));
+                        reject(new Error("Player init failed"));
                     }
                 }
             } else {
@@ -424,9 +408,14 @@ async function getRealVideoDuration(videoId) {
     });
 }
 
+// FIXED: Campaign creation with proper error handling
 async function validateAndCreateCampaign(campaignData, isAdminAction = false, targetUserId = null) {
+    console.log("Starting campaign creation...", campaignData);
+    
     const targetTime = parseInt(campaignData.targetWatchTime) || 30;
     const totalCost = targetTime * CAMPAIGN_COST_PER_SECOND;
+    
+    console.log(`Target time: ${targetTime}s, Total cost: ${totalCost}, User credits: ${userData?.credits}`);
     
     if (!isAdminAction && userData.credits < totalCost) {
         showToast(`Need ${totalCost.toFixed(2)} credits (${targetTime}s × ${CAMPAIGN_COST_PER_SECOND}/sec)`, true);
@@ -439,10 +428,13 @@ async function validateAndCreateCampaign(campaignData, isAdminAction = false, ta
         return false;
     }
     
+    console.log(`Video ID: ${videoId}, fetching duration...`);
     showToast('Getting real video duration from YouTube...');
+    
     let duration;
     try {
         duration = await getRealVideoDuration(videoId);
+        console.log(`Video duration: ${duration}s`);
     } catch (error) {
         console.error("Duration fetch error:", error);
         showToast(`Failed to get video duration: ${error.message}. Please try again.`, true);
@@ -454,14 +446,17 @@ async function validateAndCreateCampaign(campaignData, isAdminAction = false, ta
         return false;
     }
     
+    // Deduct credits
     if (!isAdminAction) {
+        console.log("Deducting credits...");
         await updateCredits(-totalCost);
         await trackSpending(totalCost);
         await trackCampaignCreation();
     }
     
+    const campaignId = Date.now().toString();
     const campaign = {
-        id: Date.now().toString(), 
+        id: campaignId, 
         title: campaignData.title, 
         url: campaignData.url, 
         videoId,
@@ -479,14 +474,31 @@ async function validateAndCreateCampaign(campaignData, isAdminAction = false, ta
         campaignCost: totalCost,
         createdByAdmin: isAdminAction || false
     };
-    await setDoc(doc(db, 'viewswap_campaigns', campaign.id), campaign);
     
-    if (isAdminAction) {
-        showToast(`✅ Admin created campaign for user! Real duration: ${Math.floor(duration)}s, Target: ${targetTime}s | Cost: ${totalCost.toFixed(2)} credits taken from user`);
-    } else {
-        showToast(`✅ Campaign created! Real duration: ${Math.floor(duration)}s, Target: ${targetTime}s | Cost: ${totalCost.toFixed(2)} credits`);
+    console.log("Saving campaign to Firestore...", campaign);
+    
+    try {
+        await setDoc(doc(db, 'viewswap_campaigns', campaignId), campaign);
+        console.log("Campaign saved successfully!");
+        
+        if (isAdminAction) {
+            showToast(`✅ Admin created campaign! Duration: ${Math.floor(duration)}s, Target: ${targetTime}s | Cost: ${totalCost.toFixed(2)} credits`);
+        } else {
+            showToast(`✅ Campaign created! Real duration: ${Math.floor(duration)}s, Target: ${targetTime}s | Cost: ${totalCost.toFixed(2)} credits`);
+        }
+        
+        // Refresh campaigns list
+        if (unsubscribeCampaigns) {
+            unsubscribeCampaigns();
+            setupRealTimeCampaigns();
+        }
+        
+        return true;
+    } catch (error) {
+        console.error("Error saving campaign:", error);
+        showToast(`Failed to save campaign: ${error.message}`, true);
+        return false;
     }
-    return true;
 }
 
 async function deleteCampaign(campaignId) {
@@ -540,7 +552,7 @@ async function autoDeleteInvalidCampaigns() {
     }
 }
 
-// ============ FULL ADMIN CONTROL FUNCTIONS ============
+// ============ ADMIN FUNCTIONS ============
 
 async function adminDeleteCampaign(campaignId) {
     const campaignRef = doc(db, 'viewswap_campaigns', campaignId);
@@ -755,11 +767,7 @@ async function adminDisableAllNotifications(userEmail) {
 }
 
 async function adminBroadcastMessage(message) {
-    const usersSnapshot = await getDocs(collection(db, 'viewswap_users'));
-    for (const userDoc of usersSnapshot.docs) {
-        const userEmail = userDoc.data().email;
-        showNotification(`📢 Admin Broadcast`, message);
-    }
+    showNotification(`📢 Admin Broadcast`, message);
     showToast(`Broadcast sent to all users`);
 }
 
@@ -773,7 +781,6 @@ async function adminChangeCampaignCost(newCost) {
     showToast(`Campaign cost changed to ${newCost}/sec`);
 }
 
-// Algorithm for sorting campaigns
 function sortCampaignsByAlgorithm(campaigns) {
     const now = Date.now();
     const maxAge = algorithmSettings.maxCampaignAgeDays * 24 * 60 * 60 * 1000;
@@ -999,7 +1006,6 @@ async function trackCampaignView(campaign) {
     const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
     const campaignSnap = await getDoc(campaignRef);
     if (campaignSnap.exists()) {
-        const views = campaignSnap.data().totalViews || 0;
         const creatorRef = doc(db, 'viewswap_users', campaign.creatorId);
         const creatorSnap = await getDoc(creatorRef);
         if (creatorSnap.exists()) {
@@ -1228,7 +1234,6 @@ async function renderAdminPanel() {
     `;
     document.getElementById('pageContent').innerHTML = adminHtml;
     
-    // Algorithm slider event listeners
     document.getElementById('popularityWeight')?.addEventListener('input', (e) => {
         document.getElementById('popularityWeightVal').textContent = e.target.value;
     });
@@ -1353,10 +1358,11 @@ async function renderCurrentPage() {
     } else if (currentPage === 'campaign') {
         const userCampaigns = allCampaigns.filter(c => c.creatorId === currentUser?.uid);
         container.innerHTML = `<div style="display: flex; justify-content: flex-end; margin-bottom: 12px;"><button class="btn-primary" id="createCampaignBtn" style="width: auto; padding: 10px 20px;">+ Create Campaign</button></div>${userCampaigns.map(c => `<div class="campaign-item"><div style="padding:16px;"><div><strong>${escapeHtml(c.title)}</strong></div><div>Views: ${c.totalViews || 0} / Target: ${c.targetWatchTime}s</div><div>Real Video Duration: ${Math.floor(c.videoDuration || 0)}s</div><div>Total Watch Time: ${(c.totalWatchTimeSeconds || 0)}s</div><div>Campaign Cost: ${(c.campaignCost || (c.targetWatchTime * CAMPAIGN_COST_PER_SECOND)).toFixed(2)} credits</div><div class="${c.targetWatchTime > (c.videoDuration || 0) ? 'error-text' : ''}">${c.targetWatchTime > (c.videoDuration || 0) ? '⚠️ INVALID: Target time exceeds real video duration!' : '✅ Real video duration is longer than target time'}</div><button class="small-btn btn-danger" onclick="window.deleteCampaign('${c.id}')">Delete & Refund</button></div></div>`).join('') || '<div class="empty-state">No campaigns yet. Click + to create!</div>'}`;
+        
         document.getElementById('createCampaignBtn')?.addEventListener('click', () => {
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
-            modal.innerHTML = `<div class="modal-content"><h3>Create Campaign</h3><p style="font-size:0.8rem;margin-bottom:12px;color:#f87171;">⚠️ CRITICAL: Real video duration MUST be LONGER than target watch time!</p><p style="font-size:0.8rem;margin-bottom:12px;">💰 Campaign cost: <strong>${CAMPAIGN_COST_PER_SECOND} credits per second</strong> of target watch time</p><input id="newTitle" placeholder="Campaign Title"><input id="newUrl" placeholder="YouTube URL"><input id="newTarget" type="number" placeholder="Target watch time (seconds)" value="30"><p id="costPreview" style="font-size:0.8rem;margin-top:8px;">Cost: ${(30 * CAMPAIGN_COST_PER_SECOND).toFixed(2)} credits</p><p id="warningPreview" style="font-size:0.8rem;color:#f87171;"></p><button class="btn-primary" id="confirmCreateBtn">Create Campaign</button><button class="btn-secondary" id="cancelModal">Cancel</button></div>`;
+            modal.innerHTML = `<div class="modal-content"><h3>Create Campaign</h3><p style="font-size:0.8rem;margin-bottom:12px;color:#f87171;">⚠️ CRITICAL: Real video duration MUST be LONGER than target watch time!</p><p style="font-size:0.8rem;margin-bottom:12px;">💰 Campaign cost: <strong>${CAMPAIGN_COST_PER_SECOND} credits per second</strong> of target watch time</p><p style="font-size:0.8rem;margin-bottom:12px;">💳 Your balance: ${userData?.credits || 0} credits</p><input id="newTitle" placeholder="Campaign Title"><input id="newUrl" placeholder="YouTube URL"><input id="newTarget" type="number" placeholder="Target watch time (seconds)" value="30"><p id="costPreview" style="font-size:0.8rem;margin-top:8px;">Cost: ${(30 * CAMPAIGN_COST_PER_SECOND).toFixed(2)} credits</p><p id="warningPreview" style="font-size:0.8rem;color:#f87171;"></p><button class="btn-primary" id="confirmCreateBtn">Create Campaign</button><button class="btn-secondary" id="cancelModal">Cancel</button></div>`;
             document.body.appendChild(modal);
             const targetInput = document.getElementById('newTarget');
             const costPreview = document.getElementById('costPreview');
@@ -1368,13 +1374,24 @@ async function renderCurrentPage() {
             });
             document.getElementById('confirmCreateBtn')?.addEventListener('click', async () => {
                 const targetTime = parseInt(targetInput?.value) || 30;
-                await validateAndCreateCampaign({ 
-                    title: document.getElementById('newTitle').value, 
-                    url: document.getElementById('newUrl').value, 
+                const title = document.getElementById('newTitle').value;
+                const url = document.getElementById('newUrl').value;
+                
+                if (!title || !url) {
+                    showToast('Please enter a title and YouTube URL', true);
+                    return;
+                }
+                
+                console.log("Creating campaign with:", { title, url, targetWatchTime: targetTime });
+                const success = await validateAndCreateCampaign({ 
+                    title: title, 
+                    url: url, 
                     targetWatchTime: targetTime 
                 });
-                modal.remove();
-                renderCurrentPage();
+                if (success) {
+                    modal.remove();
+                    renderCurrentPage();
+                }
             });
             document.getElementById('cancelModal')?.addEventListener('click', () => modal.remove());
         });
@@ -1408,54 +1425,19 @@ async function renderCurrentPage() {
                     <img src="${userData?.photoURL}" style="width:80px;border-radius:50%;border:2px solid #f5576c;">
                     <div>${escapeHtml(userData?.displayName || currentUser?.email)}</div>
                     <div style="font-size:0.7rem;opacity:0.7;">${currentUser?.email}</div>
+                    <div style="font-size:1.2rem;margin-top:8px;">💰 Balance: ${Math.floor(userData?.credits || 0)} credits</div>
                 </div>
             </div>
             <div class="card">
                 <h2>🔔 Notification Settings</h2>
-                <div class="stat-row">
-                    <span>🔔 Push Notifications:</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="notifEnabled" ${userNotificationSettings.enabled !== false ? 'checked' : ''}>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="stat-row">
-                    <span>🏆 Achievements:</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="notifAchievements" ${userNotificationSettings.achievements !== false ? 'checked' : ''}>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="stat-row">
-                    <span>🤝 Referral Earnings:</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="notifReferrals" ${userNotificationSettings.referralEarnings !== false ? 'checked' : ''}>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="stat-row">
-                    <span>🎁 Daily Bonus:</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="notifDaily" ${userNotificationSettings.dailyBonus !== false ? 'checked' : ''}>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="stat-row">
-                    <span>📢 Campaign Alerts:</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="notifCampaigns" ${userNotificationSettings.campaignAlerts !== false ? 'checked' : ''}>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
+                <div class="stat-row"><span>🔔 Push Notifications:</span><label class="toggle-switch"><input type="checkbox" id="notifEnabled" ${userNotificationSettings.enabled !== false ? 'checked' : ''}><span class="toggle-slider"></span></label></div>
+                <div class="stat-row"><span>🏆 Achievements:</span><label class="toggle-switch"><input type="checkbox" id="notifAchievements" ${userNotificationSettings.achievements !== false ? 'checked' : ''}><span class="toggle-slider"></span></label></div>
+                <div class="stat-row"><span>🤝 Referral Earnings:</span><label class="toggle-switch"><input type="checkbox" id="notifReferrals" ${userNotificationSettings.referralEarnings !== false ? 'checked' : ''}><span class="toggle-slider"></span></label></div>
+                <div class="stat-row"><span>🎁 Daily Bonus:</span><label class="toggle-switch"><input type="checkbox" id="notifDaily" ${userNotificationSettings.dailyBonus !== false ? 'checked' : ''}><span class="toggle-slider"></span></label></div>
+                <div class="stat-row"><span>📢 Campaign Alerts:</span><label class="toggle-switch"><input type="checkbox" id="notifCampaigns" ${userNotificationSettings.campaignAlerts !== false ? 'checked' : ''}><span class="toggle-slider"></span></label></div>
             </div>
-            <div class="card">
-                <h2>📈 Performance (24h)</h2>
-                <div class="graph-container"><canvas id="performanceChart"></canvas></div>
-            </div>
-            <div class="card">
-                <div class="referral-code-box" id="refCodeBox">${userData?.referralCode}</div>
-                <button class="btn-primary" id="copyCodeBtn">Copy Code</button>
-            </div>
+            <div class="card"><h2>📈 Performance (24h)</h2><div class="graph-container"><canvas id="performanceChart"></canvas></div></div>
+            <div class="card"><div class="referral-code-box" id="refCodeBox">${userData?.referralCode}</div><button class="btn-primary" id="copyCodeBtn">Copy Code</button></div>
             <button class="btn-secondary" id="signOutBtn">Sign Out</button>
         `;
         
@@ -1473,27 +1455,11 @@ async function renderCurrentPage() {
             document.head.appendChild(style);
         }
         
-        document.getElementById('notifEnabled')?.addEventListener('change', (e) => {
-            userNotificationSettings.enabled = e.target.checked;
-            saveUserData();
-            showToast(`Notifications ${e.target.checked ? 'enabled' : 'disabled'}`);
-        });
-        document.getElementById('notifAchievements')?.addEventListener('change', (e) => {
-            userNotificationSettings.achievements = e.target.checked;
-            saveUserData();
-        });
-        document.getElementById('notifReferrals')?.addEventListener('change', (e) => {
-            userNotificationSettings.referralEarnings = e.target.checked;
-            saveUserData();
-        });
-        document.getElementById('notifDaily')?.addEventListener('change', (e) => {
-            userNotificationSettings.dailyBonus = e.target.checked;
-            saveUserData();
-        });
-        document.getElementById('notifCampaigns')?.addEventListener('change', (e) => {
-            userNotificationSettings.campaignAlerts = e.target.checked;
-            saveUserData();
-        });
+        document.getElementById('notifEnabled')?.addEventListener('change', (e) => { userNotificationSettings.enabled = e.target.checked; saveUserData(); });
+        document.getElementById('notifAchievements')?.addEventListener('change', (e) => { userNotificationSettings.achievements = e.target.checked; saveUserData(); });
+        document.getElementById('notifReferrals')?.addEventListener('change', (e) => { userNotificationSettings.referralEarnings = e.target.checked; saveUserData(); });
+        document.getElementById('notifDaily')?.addEventListener('change', (e) => { userNotificationSettings.dailyBonus = e.target.checked; saveUserData(); });
+        document.getElementById('notifCampaigns')?.addEventListener('change', (e) => { userNotificationSettings.campaignAlerts = e.target.checked; saveUserData(); });
         
         setTimeout(() => {
             const canvas = document.getElementById('performanceChart');
@@ -1546,9 +1512,7 @@ window.adminToggleNotifications = adminToggleNotifications;
 window.adminDisableAllNotifications = adminDisableAllNotifications;
 
 document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => {
-    if (currentPage !== btn.dataset.page) {
-        pauseCurrentVideo();
-    }
+    if (currentPage !== btn.dataset.page) pauseCurrentVideo();
     currentPage = btn.dataset.page;
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
