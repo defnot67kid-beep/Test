@@ -289,6 +289,9 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
         
+        // IMPORTANT: Disable automatic redirect to fix login loop
+        auth.useDeviceLanguage();
+        
         let currentUser = null;
         let userData = null;
         let currentPage = 'home';
@@ -305,7 +308,10 @@
         const EARNINGS_RATE = 0.5;
         const REFERRAL_PERCENT = 0.025;
         
-        // FIXED: Real-time referral earnings with immediate 2.5% cut
+        // Get base URL for sharing (actual GitHub Pages URL)
+        const BASE_URL = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
+        
+        // Real-time referral earnings with immediate 2.5% cut
         function setupReferralEarningsListener() {
             if (unsubscribeReferralEarnings) unsubscribeReferralEarnings();
             if (!currentUser || !userData?.referralCode) return;
@@ -394,7 +400,6 @@
                 userData.subscribedChannels = userData.subscribedChannels || [];
                 userData.totalEarnedByReferralShare = userData.totalEarnedByReferralShare || 0;
                 watchedHistory = userData.recentlyWatched || [];
-                // Initialize earnings history for graph (last 24h performance)
                 if (!userData.earningsHistory) userData.earningsHistory = [];
             } else {
                 userData = {
@@ -427,7 +432,7 @@
             }
         }
         
-        // FIXED: Immediate 2.5% referral cut when referred user earns
+        // Immediate 2.5% referral cut when referred user earns
         async function addReferralEarningsForEarner(earnerId, earnedAmount) {
             if (!earnerId || earnedAmount <= 0) return;
             const earnerRef = doc(db, 'viewswap_users', earnerId);
@@ -443,7 +448,6 @@
                         referralEarnings: increment(referralShare),
                         totalEarnedByReferralShare: increment(referralShare)
                     });
-                    // Show real-time notification
                     showToast(`🎉 +${referralShare.toFixed(2)} credits from your referral!`, false);
                 }
             }
@@ -457,11 +461,9 @@
             if(amount > 0) { 
                 userData.totalEarned += amount; 
                 userData.totalEarnings = userData.totalEarned + (userData.referralEarnings || 0);
-                // Record earnings history for graph (last 24 hours performance)
                 const now = Date.now();
                 userData.earningsHistory = userData.earningsHistory || [];
                 userData.earningsHistory.push({ timestamp: now, amount: amount });
-                // Keep only last 48 entries (approx 24h if many earnings)
                 if(userData.earningsHistory.length > 48) userData.earningsHistory.shift();
                 await saveUserData();
                 if (userData.referredBy && sourceUserId === null) {
@@ -483,7 +485,6 @@
         async function createAdvancedCampaign(campaignData) {
             if (userData.credits < 15) { showToast('Need 15 credits', true); return false; }
             await updateCredits(-15);
-            // HIDDEN: campaign name and creator not displayed anywhere
             const campaign = {
                 id: Date.now().toString(),
                 title: campaignData.title,
@@ -662,7 +663,8 @@
         
         function renderReferPage() { 
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIEWSWAP_REF:${userData?.referralCode}`; 
-            const shareLink = `${window.location.origin}?ref=${userData?.referralCode}`;
+            // FIXED: Use actual GitHub Pages URL for sharing
+            const shareLink = `${BASE_URL}?ref=${userData?.referralCode}`;
             return `<div class="card"><h2>🤝 Referral (2.5% of their earnings)</h2><div class="qr-display-img" id="qrDisplayRefer"><img src="${qrUrl}" width="150"></div><div class="referral-code-box" id="refCodeRefer">${userData?.referralCode}</div><div class="share-buttons"><div class="share-btn" id="copyShareLink">🔗 Copy Share Link</div><div class="share-btn" id="shareAppBtn">📱 Share via App</div></div><button class="btn-primary" id="copyReferBtn">Copy Code</button><button class="btn-secondary" id="scanQrBtn">Scan QR</button><input type="text" id="enterReferralCode" placeholder="Enter friend's referral code"><button class="btn-primary" id="applyFriendCodeBtn">Apply Code</button></div>`;
         }
         
@@ -674,15 +676,47 @@
             else if(currentPage === 'campaign'){ container.innerHTML = renderCampaignPage(); document.getElementById('createAdvancedBtn')?.addEventListener('click', async () => { const title=document.getElementById('campTitle')?.value, url=document.getElementById('campUrl')?.value; if(title&&url) await createAdvancedCampaign({ title, url, channelUrl: document.getElementById('channelUrl')?.value, targetWatchTime: document.getElementById('targetWatchTime')?.value }); else showToast('Title and URL required', true); }); }
             else if(currentPage === 'rewards') container.innerHTML = renderRewardsPage();
             else if(currentPage === 'account'){ container.innerHTML = renderAccountPage(); document.getElementById('qrDisplay')?.addEventListener('click',()=>{const m=document.createElement('div');m.className='fullscreen-qr';m.innerHTML=`<div style="background:#1a1a2e;padding:30px;border-radius:40px;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=VIEWSWAP_REF:${userData?.referralCode}" width="250"><button class="close-qr" onclick="this.parentElement.parentElement.remove()">Close</button></div>`;document.body.appendChild(m);}); document.getElementById('copyCodeBtn')?.addEventListener('click',()=>{navigator.clipboard.writeText(userData?.referralCode);showToast('Copied!');}); document.getElementById('signOutBtn')?.addEventListener('click',async()=>await signOut(auth)); }
-            else if(currentPage === 'refer'){ container.innerHTML = renderReferPage(); document.getElementById('qrDisplayRefer')?.addEventListener('click',()=>{const m=document.createElement('div');m.className='fullscreen-qr';m.innerHTML=`<div style="background:#1a1a2e;padding:30px;border-radius:40px;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=VIEWSWAP_REF:${userData?.referralCode}" width="250"><button class="close-qr" onclick="this.parentElement.parentElement.remove()">Close</button></div>`;document.body.appendChild(m);}); document.getElementById('copyReferBtn')?.addEventListener('click',()=>{navigator.clipboard.writeText(userData?.referralCode);showToast('Copied');}); document.getElementById('copyShareLink')?.addEventListener('click',()=>{const link=`https://viewswap.page.link?ref=${userData?.referralCode}`; navigator.clipboard.writeText(link); showToast('Share link copied!');}); document.getElementById('shareAppBtn')?.addEventListener('click',()=>{if(navigator.share) navigator.share({title:'Join ViewSwap',text:`Use my code ${userData?.referralCode} to earn 2.5% referral rewards!`,url:`https://viewswap.app?ref=${userData?.referralCode}`}); else showToast('Share not supported',true);}); document.getElementById('scanQrBtn')?.addEventListener('click',()=>{const modal=document.createElement('div');modal.className='qr-modal';modal.innerHTML=`<div><div id="qr-reader-scanner" style="width:100%;"></div><button class="close-qr" id="closeScannerBtn">Close</button></div>`;document.body.appendChild(modal);const scanner=new Html5Qrcode("qr-reader-scanner");scanner.start({facingMode:"environment"},{fps:10,qrbox:250},(text)=>{scanner.stop();modal.remove();if(text.startsWith('VIEWSWAP_REF:'))processQRReferral(text.split(':')[1]);else showToast('Invalid QR',true);},()=>{});document.getElementById('closeScannerBtn').onclick=()=>{scanner.stop();modal.remove();};}); document.getElementById('applyFriendCodeBtn')?.addEventListener('click',async()=>{const code=document.getElementById('enterReferralCode')?.value; if(code && !userData.referredBy) await processQRReferral(code); else showToast('Already referred or invalid',true);}); } }
+            else if(currentPage === 'refer'){ container.innerHTML = renderReferPage(); document.getElementById('qrDisplayRefer')?.addEventListener('click',()=>{const m=document.createElement('div');m.className='fullscreen-qr';m.innerHTML=`<div style="background:#1a1a2e;padding:30px;border-radius:40px;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=VIEWSWAP_REF:${userData?.referralCode}" width="250"><button class="close-qr" onclick="this.parentElement.parentElement.remove()">Close</button></div>`;document.body.appendChild(m);}); document.getElementById('copyReferBtn')?.addEventListener('click',()=>{navigator.clipboard.writeText(userData?.referralCode);showToast('Copied');}); 
+                // FIXED: Copy actual working share link
+                document.getElementById('copyShareLink')?.addEventListener('click',()=>{const link=`${BASE_URL}?ref=${userData?.referralCode}`; navigator.clipboard.writeText(link); showToast('Share link copied!');}); 
+                document.getElementById('shareAppBtn')?.addEventListener('click',()=>{if(navigator.share) navigator.share({title:'Join ViewSwap',text:`Use my code ${userData?.referralCode} to earn 2.5% referral rewards!`,url:`${BASE_URL}?ref=${userData?.referralCode}`}); else showToast('Share not supported',true);}); 
+                document.getElementById('scanQrBtn')?.addEventListener('click',()=>{const modal=document.createElement('div');modal.className='qr-modal';modal.innerHTML=`<div><div id="qr-reader-scanner" style="width:100%;"></div><button class="close-qr" id="closeScannerBtn">Close</button></div>`;document.body.appendChild(modal);const scanner=new Html5Qrcode("qr-reader-scanner");scanner.start({facingMode:"environment"},{fps:10,qrbox:250},(text)=>{scanner.stop();modal.remove();if(text.startsWith('VIEWSWAP_REF:'))processQRReferral(text.split(':')[1]);else showToast('Invalid QR',true);},()=>{});document.getElementById('closeScannerBtn').onclick=()=>{scanner.stop();modal.remove();};}); document.getElementById('applyFriendCodeBtn')?.addEventListener('click',async()=>{const code=document.getElementById('enterReferralCode')?.value; if(code && !userData.referredBy) await processQRReferral(code); else showToast('Already referred or invalid',true);}); } }
         
         async function processQRReferral(code) { if(!currentUser || userData.referredBy) return; const q=query(collection(db,'viewswap_users'), where('referralCode','==',code)); const snap=await getDocs(q); if(!snap.empty && snap.docs[0].id !== currentUser.uid) { userData.referredBy = snap.docs[0].id; await saveUserData(); await updateDoc(doc(db,'viewswap_users',snap.docs[0].id), { referrals: arrayUnion(currentUser.uid) }); await updateCredits(10); showToast('🎉 Referral linked! +10 credits. You now get 2.5% of their earnings!'); } else showToast('Invalid code',true); }
         function showToast(msg, isErr=false) { const t=document.createElement('div'); t.className='toast'; if(isErr) t.style.background='#ef4444'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 3000); }
         
         document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{ currentPage=btn.dataset.page; document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderCurrentPage(); }));
         
-        onAuthStateChanged(auth, async(user)=>{ if(user){ currentUser=user; await loadUserData(user.uid); document.body.classList.add('authenticated'); setupRealTimeCampaigns(); renderCurrentPage(); } else { document.body.classList.remove('authenticated'); if(unsubscribeCampaigns) unsubscribeCampaigns(); if(unsubscribeReferralEarnings) unsubscribeReferralEarnings(); currentUser=null; if(activeWatchData) stopCurrentWatch(); } });
-        document.getElementById('signInBtn')?.addEventListener('click',()=>signInWithPopup(auth,provider));
+        // FIXED: Proper auth state handling to prevent login loop
+        onAuthStateChanged(auth, async(user)=>{ 
+            if(user){ 
+                currentUser=user; 
+                await loadUserData(user.uid); 
+                document.body.classList.add('authenticated'); 
+                setupRealTimeCampaigns(); 
+                renderCurrentPage(); 
+            } else { 
+                document.body.classList.remove('authenticated'); 
+                if(unsubscribeCampaigns) unsubscribeCampaigns(); 
+                if(unsubscribeReferralEarnings) unsubscribeReferralEarnings(); 
+                currentUser=null; 
+                if(activeWatchData) stopCurrentWatch(); 
+                // Clear any pending redirects
+                sessionStorage.removeItem('pendingRedirect');
+            } 
+        });
+        
+        // FIXED: Sign in with popup only, no redirect
+        document.getElementById('signInBtn')?.addEventListener('click', async() => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                showToast(`Welcome ${result.user.displayName}!`);
+            } catch(error) {
+                console.error("Sign-in error:", error);
+                showToast("Sign-in failed. Please try again.", true);
+            }
+        });
+        
         document.getElementById('applyReferralBtn')?.addEventListener('click',async()=>{const code=document.getElementById('referralCodeInput')?.value; if(code && !userData?.referredBy && currentUser) await processQRReferral(code); else if(!currentUser) showToast('Sign in first',true);});
         document.getElementById('qrSignInBtn')?.addEventListener('click',()=>{ const modal=document.createElement('div');modal.className='qr-modal';modal.innerHTML=`<div><div id="qr-reader-scanner" style="width:100%;"></div><button class="close-qr" id="closeScannerBtn">Close</button></div>`;document.body.appendChild(modal);const scanner=new Html5Qrcode("qr-reader-scanner");scanner.start({facingMode:"environment"},{fps:10,qrbox:250},(text)=>{scanner.stop();modal.remove();if(!currentUser){sessionStorage.setItem('pendingReferral',text);signInWithPopup(auth,provider);}else if(text.startsWith('VIEWSWAP_REF:'))processQRReferral(text.split(':')[1]);else showToast('Invalid QR',true);},()=>{});document.getElementById('closeScannerBtn').onclick=()=>{scanner.stop();modal.remove();}; });
         const pending=sessionStorage.getItem('pendingReferral'); if(pending) setTimeout(async()=>{ if(currentUser && !userData?.referredBy) await processQRReferral(pending); sessionStorage.removeItem('pendingReferral'); },2000);
