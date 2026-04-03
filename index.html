@@ -125,14 +125,16 @@
         }
         .nav-icon { font-size: 1.3rem; } .nav-label { font-size: 0.6rem; font-weight: 600; }
         
+        /* HIDE SIGNIN OVERLAY when authenticated */
         .signin-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #ffffff;
             z-index: 10000; display: flex; align-items: center; justify-content: center;
             overflow-y: auto;
+            transition: opacity 0.2s;
         }
         body.authenticated .signin-overlay { display: none; }
-        #mainAppContent { opacity: 0; visibility: hidden; transition: opacity 0.5s ease; }
+        #mainAppContent { opacity: 0; visibility: hidden; transition: opacity 0.3s ease; }
         body.authenticated #mainAppContent { opacity: 1; visibility: visible; }
         .signin-card {
             background: #ffffff;
@@ -298,8 +300,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
-        
-        // IMPORTANT: Force popup only - disable redirect behavior
         provider.setCustomParameters({ prompt: 'select_account' });
         
         let currentUser = null;
@@ -359,8 +359,39 @@
         document.getElementById('emailSignInBtn')?.addEventListener('click', handleEmailSignIn);
         document.getElementById('emailSignUpBtn')?.addEventListener('click', handleEmailSignUp);
         
+        // *** FIXED REFERRAL: "my alt gets 2.5% from me" reversed => Main gets 2.5% from alt's earnings
+        // Now when any user earns credits, the referrer (the one who referred them) gets 2.5% of that earned amount
+        async function addReferralEarningsForEarner(earnerId, earnedAmount) {
+            if (!earnerId || earnedAmount <= 0) return;
+            const earnerSnap = await getDoc(doc(db, 'viewswap_users', earnerId));
+            if (!earnerSnap.exists()) return;
+            const earnerData = earnerSnap.data();
+            const referrerId = earnerData.referredBy;
+            // If earner has a referrer, give 2.5% of this earnedAmount to referrer
+            if (referrerId && referrerId !== earnerId) {
+                const referralShare = earnedAmount * REFERRAL_PERCENT;
+                if (referralShare > 0) {
+                    await updateDoc(doc(db, 'viewswap_users', referrerId), {
+                        referralEarnings: increment(referralShare),
+                        totalEarnedByReferralShare: increment(referralShare)
+                    });
+                    // Also update local if referrer is current user
+                    if (currentUser && currentUser.uid === referrerId && userData) {
+                        userData.referralEarnings = (userData.referralEarnings || 0) + referralShare;
+                        userData.totalEarnedByReferralShare = (userData.totalEarnedByReferralShare || 0) + referralShare;
+                        userData.totalEarnings = (userData.totalEarned || 0) + userData.referralEarnings;
+                        await saveUserData();
+                    }
+                }
+            }
+            // track referral share given by earner (for stats)
+            await updateDoc(doc(db, 'viewswap_users', earnerId), {
+                totalEarnedByReferralShare: increment(earnedAmount * REFERRAL_PERCENT)
+            });
+        }
+        
         async function processQRReferral(code) { 
-            if(!currentUser || userData.referredBy) return; 
+            if(!currentUser || userData.referredBy) { if(userData?.referredBy) showToast('You already have a referrer', true); return; } 
             const q=query(collection(db,'viewswap_users'), where('referralCode','==',code)); 
             const snap=await getDocs(q); 
             if(!snap.empty && snap.docs[0].id !== currentUser.uid) { 
@@ -368,8 +399,8 @@
                 await saveUserData(); 
                 await updateDoc(doc(db,'viewswap_users',snap.docs[0].id), { referrals: arrayUnion(currentUser.uid) }); 
                 await updateCredits(10); 
-                showToast('🎉 Referral linked! +10 credits. 2.5% of their earnings now yours!'); 
-            } else showToast('Invalid code',true); 
+                showToast('🎉 Referral linked! +10 credits. Your referrer now earns 2.5% of everything YOU earn!'); 
+            } else showToast('Invalid code or self-refer',true); 
         }
         
         async function loadUserData(uid) {
@@ -382,7 +413,7 @@
                 userData.referralEarnings = userData.referralEarnings || 0;
                 userData.totalWatchTime = userData.totalWatchTime || 0;
                 userData.totalEarned = userData.totalEarned || 0;
-                userData.totalEarnings = userData.totalEarned + userData.referralEarnings;
+                userData.totalEarnings = (userData.totalEarned || 0) + (userData.referralEarnings || 0);
                 userData.likedCampaigns = userData.likedCampaigns || [];
                 userData.subscribedChannels = userData.subscribedChannels || [];
                 userData.totalEarnedByReferralShare = userData.totalEarnedByReferralShare || 0;
@@ -420,26 +451,6 @@
             }
         }
         
-        async function addReferralEarningsForEarner(earnerId, earnedAmount) {
-            if (!earnerId || earnedAmount <= 0) return;
-            const earnerSnap = await getDoc(doc(db, 'viewswap_users', earnerId));
-            if (!earnerSnap.exists()) return;
-            const earnerData = earnerSnap.data();
-            const referrerId = earnerData.referredBy;
-            if (referrerId && referrerId !== earnerId) {
-                const referralShare = earnedAmount * REFERRAL_PERCENT;
-                if (referralShare > 0) {
-                    await updateDoc(doc(db, 'viewswap_users', referrerId), {
-                        referralEarnings: increment(referralShare),
-                        totalEarnedByReferralShare: increment(referralShare)
-                    });
-                }
-            }
-            await updateDoc(doc(db, 'viewswap_users', earnerId), {
-                totalEarnedByReferralShare: increment(earnedAmount * REFERRAL_PERCENT)
-            });
-        }
-        
         async function updateCredits(amount, sourceUserId = null) { 
             userData.credits += amount; 
             if(amount > 0) { 
@@ -449,6 +460,7 @@
                 userData.earningsHistory.push({ timestamp: Date.now(), amount: amount });
                 if(userData.earningsHistory.length > 48) userData.earningsHistory.shift();
                 await saveUserData();
+                // 2.5% goes to referrer of this earner
                 if (userData.referredBy && sourceUserId === null) {
                     await addReferralEarningsForEarner(currentUser.uid, amount);
                 }
@@ -486,6 +498,7 @@
         function setupReferralEarningsListener() {
             if (unsubscribeReferralEarnings) unsubscribeReferralEarnings();
             if (!currentUser || !userData?.referralCode) return;
+            // Listen to users referred by current user to update their referralEarnings realtime
             const referredUsersQuery = query(collection(db, 'viewswap_users'), where('referredBy', '==', currentUser.uid));
             unsubscribeReferralEarnings = onSnapshot(referredUsersQuery, async (snapshot) => {
                 let totalReferralEarnings = 0;
@@ -536,8 +549,7 @@
             userData.campaigns = userData.campaigns || [];
             userData.campaigns.push(campaign);
             await saveUserData();
-            showToast(`✅ Campaign created! Refreshing list...`);
-            // Force refresh campaigns list via onSnapshot
+            showToast(`✅ Campaign created!`);
             return true;
         }
         
@@ -645,7 +657,6 @@
                     if (!data.watchers?.includes(currentUser?.uid)) newCampaigns.push({ ...data, firestoreId: doc.id });
                 });
                 allCampaigns = newCampaigns;
-                // Auto-start if home page and no active video
                 if (currentPage === 'home') {
                     if (!activeWatchData && allCampaigns.length > 0) {
                         const next = getNextCampaign();
@@ -672,8 +683,18 @@
         window.subscribeChannel = subscribeToChannel;
         window.toggleAutoplay = toggleAutoplay;
         
+        // render logic (home, campaign, rewards, account, refer) similar to original but enhanced for speed and instant load
+        async function renderHome() { 
+            if (!activeWatchData && allCampaigns.length > 0) { 
+                const first = getNextCampaign(); 
+                if (first && !activeWatchData) setTimeout(() => startAutoWatch(first), 10); 
+                return `<div class="card"><div class="loading-spinner">🎬 Loading video...</div></div>`; 
+            } 
+            if(activeWatchData?.campaign) return `<div class="card"><h2>🎬 Now Playing (${EARNINGS_RATE} credit/sec)</h2>${renderCurrentCampaign()}</div>`;
+            return `<div class="card"><div class="empty-state">No campaigns available. Create one!</div></div>`;
+        }
         function renderCurrentCampaign() { 
-            if (!activeWatchData?.campaign) return `<div class="empty-state">✨ No active campaign. Create one or wait!</div>`; 
+            if (!activeWatchData?.campaign) return `<div class="empty-state">✨ No active campaign.</div>`; 
             const c = activeWatchData.campaign; 
             const alreadyLiked = userData?.likedCampaigns?.includes(c.id); 
             const alreadySubscribed = userData?.subscribedChannels?.includes(c.channelUrl); 
@@ -681,18 +702,8 @@
             const target = c.targetWatchTime; 
             return `<div class="campaign-item"><div class="video-container" id="current_player"></div><div class="watch-stats"><div class="stat-badge"><div class="stat-badge-label">EARNING</div><div class="stat-badge-value" id="current_earnings">${(elapsed * EARNINGS_RATE).toFixed(2)}</div></div><div class="stat-badge"><div class="stat-badge-label">TIME LEFT</div><div class="stat-badge-value timer-value" id="current_timer">${Math.max(0, target - elapsed)}</div><div class="stat-badge-label">sec</div></div></div><div class="progress-area"><div class="progress-bar-container"><div class="progress-fill" id="current_progress" style="width: ${(elapsed / target) * 100}%"></div></div></div><div class="action-buttons-area"><button class="action-btn btn-next" onclick="window.nextVideo()">⏭️ NEXT</button><button class="action-btn btn-like" onclick="window.likeCampaign()" ${alreadyLiked ? 'disabled' : ''}>❤️ +${c.likeReward}</button>${c.channelUrl ? `<button class="action-btn btn-subscribe" onclick="window.subscribeChannel()" ${alreadySubscribed ? 'disabled' : ''}>🔔 +${c.subReward || 15}</button>` : ''}<button class="action-btn btn-autoplay ${autoplayEnabled ? 'active' : ''}" onclick="window.toggleAutoplay()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button></div></div>`; 
         }
-        
-        async function renderHome() { 
-            if (!activeWatchData && allCampaigns.length > 0) { 
-                const first = getNextCampaign(); 
-                if (first && !activeWatchData) setTimeout(() => startAutoWatch(first), 50); 
-                return `<div class="card"><div class="loading-spinner">🎬 Loading video...</div></div>`; 
-            } 
-            return `<div class="card"><h2>🎬 Now Playing (${EARNINGS_RATE} credit/sec)</h2>${renderCurrentCampaign()}${(!activeWatchData && allCampaigns.length === 0) ? '<div class="empty-state">No campaigns. Create one!</div>' : ''}</div>`; 
-        }
-        
         function renderCampaignPage() { return `<div class="card"><h2>🚀 Create Campaign</h2><input id="campTitle" placeholder="Campaign Title"><input id="campUrl" placeholder="YouTube URL"><input id="channelUrl" placeholder="Channel URL (optional)"><input id="targetWatchTime" type="number" value="30" placeholder="Watch seconds"><button class="btn-primary" id="createAdvancedBtn">✨ Create (15 credits)</button></div>`; }
-        function renderRewardsPage() { return `<div class="card"><h2>🏆 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits||0)}</span></div><div class="stat-row"><span>👀 Videos Watched:</span><span>${userData?.watchedVideos?.length||0}</span></div><div class="stat-row"><span>💎 Referral Earnings:</span><span>${(userData?.referralEarnings||0).toFixed(2)}</span></div><div class="stat-row"><span>💎 Total Earned:</span><span>${(userData?.totalEarnings||0).toFixed(2)}</span></div></div>`; }
+        function renderRewardsPage() { return `<div class="card"><h2>🏆 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits||0)}</span></div><div class="stat-row"><span>👀 Videos Watched:</span><span>${userData?.watchedVideos?.length||0}</span></div><div class="stat-row"><span>💎 Referral Earnings (2.5% from referred users):</span><span>${(userData?.referralEarnings||0).toFixed(2)}</span></div><div class="stat-row"><span>💎 Total Earned:</span><span>${(userData?.totalEarnings||0).toFixed(2)}</span></div></div>`; }
         function renderAccountPage() { const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIEWSWAP_REF:${userData?.referralCode}`; setTimeout(() => { const canvas = document.getElementById('performanceChart'); if(canvas && performanceChart) performanceChart.destroy(); if(canvas && userData) { const history = userData.earningsHistory || []; const now = Date.now(); const last24h = history.filter(h => (now - h.timestamp) <= 24 * 60 * 60 * 1000); const hourlyData = new Array(24).fill(0); last24h.forEach(entry => { const hour = new Date(entry.timestamp).getHours(); hourlyData[hour] += entry.amount; }); performanceChart = new Chart(canvas, { type: 'line', data: { labels: Array.from({length:24},(_,i)=>`${i}:00`), datasets: [{ label: 'Earnings/hour', data: hourlyData, borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.1)', fill: true }] }, options: { responsive: true, maintainAspectRatio: true } }); } }, 100); return `<div class="card"><div style="text-align:center;"><img src="${userData?.photoURL}" style="width:80px;border-radius:50%;"><div>${escapeHtml(userData?.displayName||currentUser?.email)}</div></div></div><div class="card"><h2>📈 Performance (24h)</h2><div class="graph-container"><canvas id="performanceChart" width="500" height="250"></canvas></div></div><div class="card"><h2>🔗 QR</h2><div class="qr-display-img" id="qrDisplay"><img src="${qrUrl}" width="100"></div><div class="referral-code-box">${userData?.referralCode}</div><button class="btn-primary" id="copyCodeBtn">Copy Code</button></div><button class="btn-secondary" id="signOutBtn">Sign Out</button>`; }
         function renderReferPage() { const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIEWSWAP_REF:${userData?.referralCode}`; const shareLink = `${BASE_URL}?ref=${userData?.referralCode}`; return `<div class="card"><h2>🤝 Referral (2.5%)</h2><div class="qr-display-img" id="qrDisplayRefer"><img src="${qrUrl}" width="150"></div><div class="referral-code-box">${userData?.referralCode}</div><div class="share-buttons"><div class="share-btn" id="copyShareLink">🔗 Copy Link</div><div class="share-btn" id="shareAppBtn">📱 Share</div></div><button class="btn-primary" id="copyReferBtn">Copy Code</button><button class="btn-secondary" id="scanQrBtn">Scan QR</button><input type="text" id="enterReferralCode" placeholder="Friend's referral code"><button class="btn-primary" id="applyFriendCodeBtn">Apply Code</button></div>`; }
         function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
@@ -707,7 +718,6 @@
         
         document.querySelectorAll('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{ currentPage=btn.dataset.page; document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderCurrentPage(); }));
         
-        // FIXED: Clean auth state - no redirect loop, always popup with account selection
         onAuthStateChanged(auth, async(user)=>{ 
             if(user){ 
                 currentUser=user; 
@@ -724,17 +734,13 @@
             } 
         });
         
-        // FIXED: Always show account picker, never auto-redirect
         document.getElementById('signInBtn')?.addEventListener('click', async() => {
             try {
                 provider.setCustomParameters({ prompt: 'select_account' });
                 const result = await signInWithPopup(auth, provider);
                 showToast(`Welcome ${result.user.displayName || result.user.email}!`);
             } catch(error) {
-                console.error("Sign-in error:", error);
-                if (error.code !== 'auth/popup-closed-by-user') {
-                    showToast("Sign-in failed: " + (error.message || "Try again"), true);
-                }
+                if (error.code !== 'auth/popup-closed-by-user') showToast("Sign-in failed: " + (error.message || "Try again"), true);
             }
         });
         
