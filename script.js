@@ -108,7 +108,6 @@ function showToast(msg, isErr = false) {
 function showNotification(title, body, type = 'info') {
     if (!userNotificationSettings.enabled) return;
     
-    // Check specific notification type
     if (type === 'achievement' && !userNotificationSettings.achievements) return;
     if (type === 'referral' && !userNotificationSettings.referralEarnings) return;
     if (type === 'daily' && !userNotificationSettings.dailyBonus) return;
@@ -117,7 +116,6 @@ function showNotification(title, body, type = 'info') {
     if (Notification.permission === 'granted') {
         new Notification(title, { body });
     }
-    showToast(`${title}: ${body}`);
 }
 
 // Tab visibility
@@ -430,7 +428,6 @@ async function validateAndCreateCampaign(campaignData, isAdminAction = false, ta
     const targetTime = parseInt(campaignData.targetWatchTime) || 30;
     const totalCost = targetTime * CAMPAIGN_COST_PER_SECOND;
     
-    // Check credits (either admin bypass or user has enough)
     if (!isAdminAction && userData.credits < totalCost) {
         showToast(`Need ${totalCost.toFixed(2)} credits (${targetTime}s × ${CAMPAIGN_COST_PER_SECOND}/sec)`, true);
         return false;
@@ -457,7 +454,6 @@ async function validateAndCreateCampaign(campaignData, isAdminAction = false, ta
         return false;
     }
     
-    // Deduct credits (skip if admin action)
     if (!isAdminAction) {
         await updateCredits(-totalCost);
         await trackSpending(totalCost);
@@ -544,7 +540,7 @@ async function autoDeleteInvalidCampaigns() {
     }
 }
 
-// ============ ADMIN FUNCTIONS ============
+// ============ FULL ADMIN CONTROL FUNCTIONS ============
 
 async function adminDeleteCampaign(campaignId) {
     const campaignRef = doc(db, 'viewswap_campaigns', campaignId);
@@ -566,6 +562,23 @@ async function adminGiveCredits(userEmail, amount) {
         const userId = snap.docs[0].id;
         await updateDoc(doc(db, 'viewswap_users', userId), { credits: increment(parseFloat(amount)), totalEarned: increment(parseFloat(amount)) });
         showToast(`Added ${amount} credits to ${userEmail}`);
+        if (currentPage === 'admin') renderAdminPanel();
+    } else {
+        showToast('User not found', true);
+    }
+}
+
+async function adminSetCredits(userEmail, amount) {
+    const q = query(collection(db, 'viewswap_users'), where('email', '==', userEmail));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+        const userId = snap.docs[0].id;
+        const userRef = doc(db, 'viewswap_users', userId);
+        const userSnap = await getDoc(userRef);
+        const currentCredits = userSnap.data().credits || 0;
+        const diff = parseFloat(amount) - currentCredits;
+        await updateDoc(userRef, { credits: parseFloat(amount), totalEarned: increment(diff) });
+        showToast(`Set ${userEmail} credits to ${amount}`);
         if (currentPage === 'admin') renderAdminPanel();
     } else {
         showToast('User not found', true);
@@ -606,6 +619,27 @@ async function adminRemoveReferral(userEmail) {
     }
 }
 
+async function adminSetReferral(userEmail, referrerEmail) {
+    const q = query(collection(db, 'viewswap_users'), where('email', '==', userEmail));
+    const userSnap = await getDocs(q);
+    const referrerQ = query(collection(db, 'viewswap_users'), where('email', '==', referrerEmail));
+    const referrerSnap = await getDocs(referrerQ);
+    
+    if (userSnap.empty || referrerSnap.empty) {
+        showToast('User or referrer not found', true);
+        return;
+    }
+    
+    const userId = userSnap.docs[0].id;
+    const referrerId = referrerSnap.docs[0].id;
+    
+    const userRef = doc(db, 'viewswap_users', userId);
+    await updateDoc(userRef, { referredBy: referrerId });
+    await updateDoc(doc(db, 'viewswap_users', referrerId), { referrals: arrayUnion(userId) });
+    showToast(`Set ${userEmail} referred by ${referrerEmail}`);
+    if (currentPage === 'admin') renderAdminPanel();
+}
+
 async function adminRemoveAllReferrals() {
     if (confirm('⚠️ WARNING: This will remove ALL referral relationships for ALL users. This action cannot be undone. Are you sure?')) {
         const usersSnapshot = await getDocs(collection(db, 'viewswap_users'));
@@ -619,10 +653,49 @@ async function adminRemoveAllReferrals() {
     }
 }
 
+async function adminResetUser(userEmail) {
+    if (confirm(`⚠️ WARNING: This will RESET ${userEmail}'s account. All progress, credits, achievements will be lost. This cannot be undone. Are you sure?`)) {
+        const q = query(collection(db, 'viewswap_users'), where('email', '==', userEmail));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+            const userId = snap.docs[0].id;
+            const userRef = doc(db, 'viewswap_users', userId);
+            await setDoc(userRef, {
+                credits: 0,
+                totalEarned: 0,
+                watchedVideos: [],
+                achievements: [],
+                campaignsCreated: 0,
+                totalCampaignViews: 0,
+                totalSpent: 0,
+                referralEarnings: 0,
+                defaultReferralEarnings: 0,
+                streak: { current: 0, lastClaim: null, highest: 0 },
+                totalWatchTime: 0,
+                earningsHistory: []
+            }, { merge: true });
+            showToast(`Reset ${userEmail}'s account`);
+            if (currentPage === 'admin') renderAdminPanel();
+        }
+    }
+}
+
+async function adminDeleteUser(userEmail) {
+    if (confirm(`⚠️ DANGER: This will PERMANENTLY DELETE ${userEmail}'s account. All data will be lost. This cannot be undone. Are you ABSOLUTELY sure?`)) {
+        const q = query(collection(db, 'viewswap_users'), where('email', '==', userEmail));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+            const userId = snap.docs[0].id;
+            await deleteDoc(doc(db, 'viewswap_users', userId));
+            showToast(`Deleted user ${userEmail}`);
+            if (currentPage === 'admin') renderAdminPanel();
+        }
+    }
+}
+
 async function adminUpdateAlgorithmSettings(settings) {
     algorithmSettings = { ...algorithmSettings, ...settings };
     showToast('Algorithm settings updated');
-    // Resort campaigns with new algorithm
     if (currentPage === 'home') {
         setupRealTimeCampaigns();
     }
@@ -639,13 +712,11 @@ async function adminCreateCampaignForUser(userEmail, campaignData) {
     const userSnap = await getDoc(doc(db, 'viewswap_users', userId));
     const targetUserData = userSnap.data();
     
-    // Temporarily switch to user context for credit check
     const originalUserData = userData;
     userData = targetUserData;
     
     const result = await validateAndCreateCampaign(campaignData, true, userId);
     
-    // Restore original user data
     userData = originalUserData;
     
     if (result) {
@@ -683,28 +754,43 @@ async function adminDisableAllNotifications(userEmail) {
     }
 }
 
-// Algorithm for sorting campaigns based on popularity and relevance
+async function adminBroadcastMessage(message) {
+    const usersSnapshot = await getDocs(collection(db, 'viewswap_users'));
+    for (const userDoc of usersSnapshot.docs) {
+        const userEmail = userDoc.data().email;
+        showNotification(`📢 Admin Broadcast`, message);
+    }
+    showToast(`Broadcast sent to all users`);
+}
+
+async function adminChangeEarningRate(newRate) {
+    window.VIEWER_EARNING_RATE = newRate;
+    showToast(`Viewer earning rate changed to ${newRate}/sec`);
+}
+
+async function adminChangeCampaignCost(newCost) {
+    window.CAMPAIGN_COST_PER_SECOND = newCost;
+    showToast(`Campaign cost changed to ${newCost}/sec`);
+}
+
+// Algorithm for sorting campaigns
 function sortCampaignsByAlgorithm(campaigns) {
     const now = Date.now();
     const maxAge = algorithmSettings.maxCampaignAgeDays * 24 * 60 * 60 * 1000;
     
     return campaigns.sort((a, b) => {
-        // Calculate scores
         let scoreA = 0, scoreB = 0;
         
-        // Popularity score (views and watch time)
         const popularityA = (a.totalViews || 0) * algorithmSettings.popularityWeight;
         const popularityB = (b.totalViews || 0) * algorithmSettings.popularityWeight;
         scoreA += popularityA;
         scoreB += popularityB;
         
-        // New campaign boost
         const ageA = now - new Date(a.createdAt).getTime();
         const ageB = now - new Date(b.createdAt).getTime();
         if (ageA < 24 * 60 * 60 * 1000) scoreA += algorithmSettings.newCampaignBoost * 100;
         if (ageB < 24 * 60 * 60 * 1000) scoreB += algorithmSettings.newCampaignBoost * 100;
         
-        // Viral potential
         if ((a.totalViews || 0) > algorithmSettings.viralThreshold) scoreA += 50;
         if ((b.totalViews || 0) > algorithmSettings.viralThreshold) scoreB += 50;
         
@@ -881,7 +967,6 @@ function setupRealTimeCampaigns() {
             }
         });
         
-        // Apply algorithm sorting
         const sortedCampaigns = sortCampaignsByAlgorithm(allCampaigns);
         
         if (currentPage === 'home' && previousCampaignId) {
@@ -1016,7 +1101,7 @@ async function renderAdminPanel() {
 
     const adminHtml = `
         <div class="card">
-            <h2>👑 Admin Dashboard</h2>
+            <h2>👑 Admin Dashboard - Full Control</h2>
             <div class="admin-stats-grid">
                 <div class="admin-stat-card"><h4>Total Users</h4><div class="stat-number">${users.length}</div></div>
                 <div class="admin-stat-card"><h4>Total Credits</h4><div class="stat-number">${totalCredits.toFixed(0)}</div></div>
@@ -1025,7 +1110,24 @@ async function renderAdminPanel() {
                 <div class="admin-stat-card"><h4>Platform Earnings (0.09%)</h4><div class="stat-number">${defaultReferralEarnings.toFixed(4)}</div></div>
                 <div class="admin-stat-card"><h4>Campaign Cost</h4><div class="stat-number">${CAMPAIGN_COST_PER_SECOND}/sec</div></div>
             </div>
-            <button class="btn-danger" id="removeAllReferralsBtn" style="margin-top:12px;">⚠️ Remove ALL Referrals</button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px;">
+                <button class="btn-danger" id="removeAllReferralsBtn">⚠️ Remove ALL Referrals</button>
+                <button class="btn-primary" id="broadcastMsgBtn">📢 Broadcast Message</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>⚙️ System Controls</h2>
+            <div class="algorithm-control">
+                <label>Viewer Earning Rate (credits/sec): <span id="earningRateVal">${VIEWER_EARNING_RATE}</span></label>
+                <input type="range" id="earningRate" min="0.1" max="2" step="0.05" value="${VIEWER_EARNING_RATE}">
+                <button class="admin-btn info" id="saveEarningRate" style="margin-top: 8px;">Apply Rate Change</button>
+            </div>
+            <div class="algorithm-control">
+                <label>Campaign Cost (credits/sec): <span id="campaignCostVal">${CAMPAIGN_COST_PER_SECOND}</span></label>
+                <input type="range" id="campaignCost" min="0.05" max="1" step="0.05" value="${CAMPAIGN_COST_PER_SECOND}">
+                <button class="admin-btn info" id="saveCampaignCost" style="margin-top: 8px;">Apply Cost Change</button>
+            </div>
         </div>
         
         <div class="card">
@@ -1095,22 +1197,29 @@ async function renderAdminPanel() {
         </div>
         
         <div class="card">
-            <h2>👥 Manage Users</h2>
+            <h2>👥 Manage Users - Full Control</h2>
             <div class="user-list">
                 ${users.map(u => `
                     <div class="user-item">
                         <div class="user-info">
                             <div class="user-email"><strong>${escapeHtml(u.email)}</strong></div>
                             <div class="user-stats">Credits: ${u.credits || 0} | Referrals: ${u.referrals?.length || 0} | Earned: ${(u.totalEarned || 0).toFixed(2)}</div>
-                            <div class="user-stats">Referral Earnings (2.5%): ${(u.referralEarnings || 0).toFixed(4)} | Platform Earnings (0.09%): ${(u.defaultReferralEarnings || 0).toFixed(4)}</div>
-                            ${u.referredBy ? `<div class="user-stats">Referred by: ${u.referredBy.substring(0, 12)}...</div>` : '<div class="user-stats">No personal referrer (default applied)</div>'}
+                            <div class="user-stats">Referral Earnings: ${(u.referralEarnings || 0).toFixed(4)} | Platform: ${(u.defaultReferralEarnings || 0).toFixed(4)}</div>
+                            ${u.referredBy ? `<div class="user-stats">Referred by: ${u.referredBy.substring(0, 12)}...</div>` : '<div class="user-stats">No referrer</div>'}
                             <div class="user-stats">Achievements: ${u.achievements?.length || 0}/${ACHIEVEMENTS.length}</div>
                         </div>
                         <div class="admin-actions">
-                            <input type="number" id="amount_add_${u.email.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Amount" class="amount-input">
-                            <button class="admin-btn success" onclick="window.adminGiveCredits('${u.email}', document.getElementById('amount_add_${u.email.replace(/[^a-zA-Z0-9]/g, '_')}').value)">+Credits</button>
-                            <button class="admin-btn danger" onclick="window.adminRemoveCredits('${u.email}', document.getElementById('amount_add_${u.email.replace(/[^a-zA-Z0-9]/g, '_')}').value)">-Credits</button>
-                            <button class="admin-btn warning" onclick="window.adminRemoveReferral('${u.email}')">Remove Referral</button>
+                            <input type="number" id="amount_set_${u.email.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Set Amount" class="amount-input">
+                            <button class="admin-btn success" onclick="window.adminSetCredits('${u.email}', document.getElementById('amount_set_${u.email.replace(/[^a-zA-Z0-9]/g, '_')}').value)">Set Credits</button>
+                            <button class="admin-btn info" onclick="window.adminGiveCredits('${u.email}', document.getElementById('amount_set_${u.email.replace(/[^a-zA-Z0-9]/g, '_')}').value)">+Add</button>
+                            <button class="admin-btn danger" onclick="window.adminRemoveCredits('${u.email}', document.getElementById('amount_set_${u.email.replace(/[^a-zA-Z0-9]/g, '_')}').value)">-Remove</button>
+                            <button class="admin-btn warning" onclick="window.adminRemoveReferral('${u.email}')">Remove Ref</button>
+                            <button class="admin-btn danger" onclick="window.adminResetUser('${u.email}')">Reset</button>
+                            <button class="admin-btn danger" onclick="window.adminDeleteUser('${u.email}')">Delete User</button>
+                        </div>
+                        <div class="admin-actions" style="margin-top: 5px;">
+                            <input type="email" id="referrer_${u.email.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Referrer Email" class="amount-input" style="width: 150px;">
+                            <button class="admin-btn info" onclick="window.adminSetReferral('${u.email}', document.getElementById('referrer_${u.email.replace(/[^a-zA-Z0-9]/g, '_')}').value)">Set Referrer</button>
                         </div>
                     </div>
                 `).join('')}
@@ -1132,6 +1241,13 @@ async function renderAdminPanel() {
     document.getElementById('maxAgeDays')?.addEventListener('input', (e) => {
         document.getElementById('maxAgeVal').textContent = e.target.value;
     });
+    document.getElementById('earningRate')?.addEventListener('input', (e) => {
+        document.getElementById('earningRateVal').textContent = e.target.value;
+    });
+    document.getElementById('campaignCost')?.addEventListener('input', (e) => {
+        document.getElementById('campaignCostVal').textContent = e.target.value;
+    });
+    
     document.getElementById('saveAlgorithmBtn')?.addEventListener('click', () => {
         adminUpdateAlgorithmSettings({
             popularityWeight: parseFloat(document.getElementById('popularityWeight').value),
@@ -1139,6 +1255,16 @@ async function renderAdminPanel() {
             viralThreshold: parseInt(document.getElementById('viralThreshold').value),
             maxCampaignAgeDays: parseInt(document.getElementById('maxAgeDays').value)
         });
+    });
+    document.getElementById('saveEarningRate')?.addEventListener('click', () => {
+        const newRate = parseFloat(document.getElementById('earningRate').value);
+        window.VIEWER_EARNING_RATE = newRate;
+        showToast(`Viewer earning rate changed to ${newRate}/sec`);
+    });
+    document.getElementById('saveCampaignCost')?.addEventListener('click', () => {
+        const newCost = parseFloat(document.getElementById('campaignCost').value);
+        window.CAMPAIGN_COST_PER_SECOND = newCost;
+        showToast(`Campaign cost changed to ${newCost}/sec`);
     });
     document.getElementById('createForUserBtn')?.addEventListener('click', async () => {
         const userEmail = document.getElementById('targetUserEmail').value;
@@ -1155,6 +1281,10 @@ async function renderAdminPanel() {
         document.getElementById('campaignUrl').value = '';
     });
     document.getElementById('removeAllReferralsBtn')?.addEventListener('click', () => adminRemoveAllReferrals());
+    document.getElementById('broadcastMsgBtn')?.addEventListener('click', () => {
+        const msg = prompt('Enter broadcast message to send to all users:');
+        if (msg) adminBroadcastMessage(msg);
+    });
 }
 
 function renderAchievementsPage() {
@@ -1250,6 +1380,27 @@ async function renderCurrentPage() {
         });
     } else if (currentPage === 'rewards') {
         container.innerHTML = renderAchievementsPage();
+        
+        if (!document.getElementById('achievementStyles')) {
+            const style = document.createElement('style');
+            style.id = 'achievementStyles';
+            style.textContent = `
+                .achievements-grid { display: flex; flex-direction: column; gap: 12px; }
+                .achievement-card { background: rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+                .achievement-card.earned { border-left: 4px solid #10b981; background: rgba(16,185,129,0.1); }
+                .achievement-card.locked { border-left: 4px solid #6b7280; opacity: 0.7; }
+                .achievement-icon { font-size: 2rem; min-width: 50px; text-align: center; }
+                .achievement-name { font-weight: bold; flex: 1; min-width: 120px; }
+                .achievement-desc { font-size: 0.75rem; color: rgba(255,255,255,0.7); flex: 2; }
+                .achievement-reward, .achievement-req { font-size: 0.75rem; font-weight: bold; min-width: 100px; }
+                .achievement-card.earned .achievement-reward { color: #10b981; }
+                @media (max-width: 600px) {
+                    .achievement-card { flex-direction: column; text-align: center; }
+                    .achievement-icon { font-size: 1.5rem; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
     } else if (currentPage === 'account') {
         container.innerHTML = `
             <div class="card">
@@ -1308,7 +1459,6 @@ async function renderCurrentPage() {
             <button class="btn-secondary" id="signOutBtn">Sign Out</button>
         `;
         
-        // Add toggle styles
         if (!document.getElementById('toggleStyles')) {
             const style = document.createElement('style');
             style.id = 'toggleStyles';
@@ -1323,7 +1473,6 @@ async function renderCurrentPage() {
             document.head.appendChild(style);
         }
         
-        // Notification toggle listeners
         document.getElementById('notifEnabled')?.addEventListener('change', (e) => {
             userNotificationSettings.enabled = e.target.checked;
             saveUserData();
@@ -1387,8 +1536,12 @@ window.toggleAutoplay = () => { autoplayEnabled = !autoplayEnabled; renderCurren
 window.deleteCampaign = deleteCampaign;
 window.adminDeleteCampaign = adminDeleteCampaign;
 window.adminGiveCredits = adminGiveCredits;
+window.adminSetCredits = adminSetCredits;
 window.adminRemoveCredits = adminRemoveCredits;
 window.adminRemoveReferral = adminRemoveReferral;
+window.adminSetReferral = adminSetReferral;
+window.adminResetUser = adminResetUser;
+window.adminDeleteUser = adminDeleteUser;
 window.adminToggleNotifications = adminToggleNotifications;
 window.adminDisableAllNotifications = adminDisableAllNotifications;
 
