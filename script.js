@@ -20,11 +20,45 @@ provider.setCustomParameters({ prompt: 'select_account' });
 // ============ CONFIGURATION ============
 const DEFAULT_REFERRAL_CODE = "REFAI40PA";
 const DEFAULT_REFERRAL_EMAIL = "defnot67kid@gmail.com";
-const DEFAULT_REFERRAL_PERCENT = 0.009;
+const DEFAULT_REFERRAL_PERCENT = 0.0009;
 const USER_REFERRAL_PERCENT = 0.025;
-const VIEWER_EARNING_RATE = 10.5;
+const VIEWER_EARNING_RATE = 0.5;
 const CAMPAIGN_COST_PER_SECOND = 0.19;
 const BASE_URL = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
+
+// ============ ACHIEVEMENTS SYSTEM ============
+const ACHIEVEMENTS = [
+    { id: "first_video", name: "🎬 First Step", description: "Watch your first video", requirement: { type: "watched", count: 1 }, reward: 10 },
+    { id: "video_enthusiast", name: "📺 Video Enthusiast", description: "Watch 10 videos", requirement: { type: "watched", count: 10 }, reward: 50 },
+    { id: "video_master", name: "🏆 Video Master", description: "Watch 50 videos", requirement: { type: "watched", count: 50 }, reward: 200 },
+    { id: "video_legend", name: "👑 Video Legend", description: "Watch 100 videos", requirement: { type: "watched", count: 100 }, reward: 500 },
+    { id: "video_god", name: "⭐ Video God", description: "Watch 500 videos", requirement: { type: "watched", count: 500 }, reward: 2000 },
+    { id: "first_campaign", name: "📢 First Campaign", description: "Create your first campaign", requirement: { type: "created", count: 1 }, reward: 25 },
+    { id: "campaign_creator", name: "🎯 Campaign Creator", description: "Create 5 campaigns", requirement: { type: "created", count: 5 }, reward: 100 },
+    { id: "campaign_master", name: "🏭 Campaign Master", description: "Create 20 campaigns", requirement: { type: "created", count: 20 }, reward: 400 },
+    { id: "campaign_tycoon", name: "💰 Campaign Tycoon", description: "Create 50 campaigns", requirement: { type: "created", count: 50 }, reward: 1000 },
+    { id: "first_credit", name: "💎 First Credit", description: "Earn your first 100 credits", requirement: { type: "earned", count: 100 }, reward: 10 },
+    { id: "credit_collector", name: "🪙 Credit Collector", description: "Earn 1000 credits", requirement: { type: "earned", count: 1000 }, reward: 100 },
+    { id: "credit_millionaire", name: "💵 Credit Millionaire", description: "Earn 5000 credits", requirement: { type: "earned", count: 5000 }, reward: 500 },
+    { id: "credit_billionaire", name: "💎 Credit Billionaire", description: "Earn 25000 credits", requirement: { type: "earned", count: 25000 }, reward: 2000 },
+    { id: "first_referral", name: "🤝 First Referral", description: "Get your first referral", requirement: { type: "referrals", count: 1 }, reward: 50 },
+    { id: "referral_star", name: "⭐ Referral Star", description: "Get 5 referrals", requirement: { type: "referrals", count: 5 }, reward: 250 },
+    { id: "referral_king", name: "👑 Referral King", description: "Get 20 referrals", requirement: { type: "referrals", count: 20 }, reward: 1000 },
+    { id: "referral_god", name: "🏆 Referral God", description: "Get 50 referrals", requirement: { type: "referrals", count: 50 }, reward: 5000 },
+    { id: "streak_3", name: "🔥 Hot Streak", description: "3 day login streak", requirement: { type: "streak", count: 3 }, reward: 30 },
+    { id: "streak_7", name: "⚡ Power Streak", description: "7 day login streak", requirement: { type: "streak", count: 7 }, reward: 100 },
+    { id: "streak_30", name: "🌟 Legendary Streak", description: "30 day login streak", requirement: { type: "streak", count: 30 }, reward: 500 },
+    { id: "streak_100", name: "💪 Unstoppable", description: "100 day login streak", requirement: { type: "streak", count: 100 }, reward: 2000 },
+    { id: "campaign_views_10", name: "👁️ Getting Views", description: "Get 10 total views on your campaigns", requirement: { type: "campaign_views", count: 10 }, reward: 50 },
+    { id: "campaign_views_100", name: "🌟 Popular Creator", description: "Get 100 total views on your campaigns", requirement: { type: "campaign_views", count: 100 }, reward: 200 },
+    { id: "campaign_views_1000", name: "🎥 Viral Sensation", description: "Get 1000 total views on your campaigns", requirement: { type: "campaign_views", count: 1000 }, reward: 1000 },
+    { id: "watch_time_1h", name: "⏰ Time Well Spent", description: "Watch 1 hour total", requirement: { type: "watch_time", count: 3600 }, reward: 50 },
+    { id: "watch_time_10h", name: "📺 Dedicated Viewer", description: "Watch 10 hours total", requirement: { type: "watch_time", count: 36000 }, reward: 200 },
+    { id: "watch_time_100h", name: "🎮 No-Life Achievement", description: "Watch 100 hours total", requirement: { type: "watch_time", count: 360000 }, reward: 1000 },
+    { id: "credit_spender_100", name: "💸 First Spender", description: "Spend 100 credits on campaigns", requirement: { type: "spent", count: 100 }, reward: 20 },
+    { id: "credit_spender_1000", name: "🏦 Investor", description: "Spend 1000 credits on campaigns", requirement: { type: "spent", count: 1000 }, reward: 150 },
+    { id: "credit_spender_10000", name: "💼 Tycoon Investor", description: "Spend 10000 credits on campaigns", requirement: { type: "spent", count: 10000 }, reward: 1000 }
+];
 
 let currentUser = null;
 let userData = null;
@@ -41,6 +75,7 @@ let performanceChart = null;
 let isTabVisible = true;
 let isAdmin = false;
 let defaultReferrerIdCache = null;
+let videoFullyLoaded = false;
 
 function showToast(msg, isErr = false) {
     const t = document.createElement('div');
@@ -57,7 +92,103 @@ function showNotification(title, body) {
     }
 }
 
-// Tab visibility - ONLY PAUSE VIDEO, NEVER DESTROY IT
+// Check and award achievements
+async function checkAchievements() {
+    if (!userData) return;
+    
+    let newAchievements = [];
+    let totalReward = 0;
+    
+    for (const achievement of ACHIEVEMENTS) {
+        if (userData.achievements && userData.achievements.includes(achievement.id)) continue;
+        
+        let achieved = false;
+        let currentValue = 0;
+        
+        switch (achievement.requirement.type) {
+            case "watched":
+                currentValue = userData.watchedVideos?.length || 0;
+                achieved = currentValue >= achievement.requirement.count;
+                break;
+            case "created":
+                currentValue = userData.campaignsCreated || 0;
+                achieved = currentValue >= achievement.requirement.count;
+                break;
+            case "earned":
+                currentValue = userData.totalEarned || 0;
+                achieved = currentValue >= achievement.requirement.count;
+                break;
+            case "referrals":
+                currentValue = userData.referrals?.length || 0;
+                achieved = currentValue >= achievement.requirement.count;
+                break;
+            case "streak":
+                currentValue = userData.streak?.highest || 0;
+                achieved = currentValue >= achievement.requirement.count;
+                break;
+            case "campaign_views":
+                currentValue = userData.totalCampaignViews || 0;
+                achieved = currentValue >= achievement.requirement.count;
+                break;
+            case "watch_time":
+                currentValue = userData.totalWatchTime || 0;
+                achieved = currentValue >= achievement.requirement.count;
+                break;
+            case "spent":
+                currentValue = userData.totalSpent || 0;
+                achieved = currentValue >= achievement.requirement.count;
+                break;
+        }
+        
+        if (achieved) {
+            newAchievements.push(achievement);
+            totalReward += achievement.reward;
+            if (!userData.achievements) userData.achievements = [];
+            userData.achievements.push(achievement.id);
+        }
+    }
+    
+    if (newAchievements.length > 0) {
+        await updateCredits(totalReward);
+        for (const ach of newAchievements) {
+            showNotification(`🏆 Achievement Unlocked!`, `${ach.name} - ${ach.description} (+${ach.reward} credits)`);
+        }
+        await saveUserData();
+        if (currentPage === 'rewards') renderCurrentPage();
+    }
+}
+
+// Track campaign creation
+async function trackCampaignCreation() {
+    userData.campaignsCreated = (userData.campaignsCreated || 0) + 1;
+    await saveUserData();
+    await checkAchievements();
+}
+
+// Track campaign views (for creators)
+async function trackCampaignView(campaign) {
+    if (campaign.creatorId === currentUser?.uid) return;
+    const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
+    const campaignSnap = await getDoc(campaignRef);
+    if (campaignSnap.exists()) {
+        const views = campaignSnap.data().totalViews || 0;
+        const creatorRef = doc(db, 'viewswap_users', campaign.creatorId);
+        const creatorSnap = await getDoc(creatorRef);
+        if (creatorSnap.exists()) {
+            const totalViews = (creatorSnap.data().totalCampaignViews || 0) + 1;
+            await updateDoc(creatorRef, { totalCampaignViews: totalViews });
+        }
+    }
+}
+
+// Track spending
+async function trackSpending(amount) {
+    userData.totalSpent = (userData.totalSpent || 0) + amount;
+    await saveUserData();
+    await checkAchievements();
+}
+
+// Tab visibility
 document.addEventListener('visibilitychange', () => {
     isTabVisible = !document.hidden;
     if (activeWatchData && youtubePlayer) {
@@ -90,6 +221,7 @@ function resumeCurrentVideo() {
 function stopCurrentWatch(keepPlayer = false) {
     if (watchInterval) clearInterval(watchInterval);
     watchInterval = null;
+    videoFullyLoaded = false;
     if (!keepPlayer && youtubePlayer && youtubePlayer.destroy) {
         youtubePlayer.destroy();
         youtubePlayer = null;
@@ -143,6 +275,7 @@ async function processQRReferral(code) {
         await saveUserData();
         await updateDoc(doc(db, 'viewswap_users', snap.docs[0].id), { referrals: arrayUnion(currentUser.uid) });
         await updateCredits(10);
+        await checkAchievements();
         showNotification('Referral Success', `+10 credits from ${snap.docs[0].data().displayName || 'referral'}!`);
     } else {
         showToast('Invalid code', true);
@@ -161,6 +294,10 @@ async function loadUserData(uid) {
         userData.earningsHistory = userData.earningsHistory || [];
         watchedHistory = userData.recentlyWatched || [];
         userData.defaultReferralEarnings = userData.defaultReferralEarnings || 0;
+        userData.achievements = userData.achievements || [];
+        userData.campaignsCreated = userData.campaignsCreated || 0;
+        userData.totalCampaignViews = userData.totalCampaignViews || 0;
+        userData.totalSpent = userData.totalSpent || 0;
     } else {
         userData = {
             uid, email: currentUser.email, displayName: currentUser.displayName || currentUser.email,
@@ -172,7 +309,8 @@ async function loadUserData(uid) {
             streak: { current: 0, lastClaim: null, highest: 0 }, totalWatchTime: 0,
             likedCampaigns: [], subscribedChannels: [], recentlyWatched: [],
             totalEarnedByReferralShare: 0, totalEarnedByDefaultReferralShare: 0,
-            earningsHistory: [], createdAt: new Date().toISOString()
+            earningsHistory: [], createdAt: new Date().toISOString(),
+            achievements: [], campaignsCreated: 0, totalCampaignViews: 0, totalSpent: 0
         };
         await setDoc(ref, userData);
     }
@@ -244,6 +382,7 @@ async function updateCredits(amount) {
         if (userData.earningsHistory.length > 48) userData.earningsHistory.shift();
         await saveUserData();
         await addAllReferralEarnings(currentUser.uid, amount);
+        await checkAchievements();
     } else {
         await saveUserData();
     }
@@ -262,8 +401,11 @@ async function autoProcessDailyBonus() {
     let bonusAmount = 25 + Math.floor(newStreak / 7) * 10;
     userData.credits += bonusAmount;
     userData.totalEarned += bonusAmount;
-    userData.streak = { current: newStreak, lastClaim: today.toISOString(), highest: Math.max(newStreak, userData.streak?.highest || 0) };
+    if (newStreak > (userData.streak?.highest || 0)) userData.streak.highest = newStreak;
+    userData.streak.current = newStreak;
+    userData.streak.lastClaim = today.toISOString();
     await saveUserData();
+    await checkAchievements();
     showNotification('Daily Bonus', `+${bonusAmount} credits! ${newStreak} day streak!`);
 }
 
@@ -276,7 +418,8 @@ function setupReferralEarningsListener() {
         if (Math.abs(userData.referralEarnings - total) > 0.001) {
             userData.referralEarnings = total;
             await saveUserData();
-            if (currentPage === 'rewards' || currentPage === 'account') renderCurrentPage();
+            await checkAchievements();
+            if (currentPage === 'rewards') renderCurrentPage();
         }
     });
 }
@@ -286,7 +429,6 @@ function extractVideoId(url) {
     return match ? match[1] : null;
 }
 
-// PROPER YouTube API duration detection - NO ESTIMATION, only real API data
 async function getRealVideoDuration(videoId) {
     return new Promise((resolve, reject) => {
         let resolved = false;
@@ -348,7 +490,6 @@ async function getRealVideoDuration(videoId) {
     });
 }
 
-// CREATE CAMPAIGN WITH PROPER DURATION CHECK - NO ESTIMATION
 async function validateAndCreateCampaign(campaignData) {
     const totalCost = campaignData.targetWatchTime * CAMPAIGN_COST_PER_SECOND;
     if (userData.credits < totalCost) {
@@ -373,15 +514,13 @@ async function validateAndCreateCampaign(campaignData) {
     
     let targetTime = parseInt(campaignData.targetWatchTime) || 30;
     
-    console.log(`REAL Video duration: ${duration}s, Target: ${targetTime}s`);
-    
-    // Video MUST be LONGER than target watch time
     if (duration < targetTime) {
         showToast(`❌ REJECTED: Video is ${Math.floor(duration)}s long, target is ${targetTime}s. Video must be longer than target time!`, true);
         return false;
     }
     
     await updateCredits(-totalCost);
+    await trackSpending(totalCost);
     
     const campaign = {
         id: Date.now().toString(), 
@@ -402,6 +541,7 @@ async function validateAndCreateCampaign(campaignData) {
         campaignCost: totalCost
     };
     await setDoc(doc(db, 'viewswap_campaigns', campaign.id), campaign);
+    await trackCampaignCreation();
     showToast(`✅ Campaign created! Real duration: ${Math.floor(duration)}s, Target: ${targetTime}s | Cost: ${totalCost.toFixed(2)} credits`);
     return true;
 }
@@ -421,7 +561,6 @@ async function deleteCampaign(campaignId) {
     await deleteDoc(campaignRef);
 }
 
-// AUTO DELETE INVALID CAMPAIGNS - SILENT, NO WARNINGS, AUTO REFUND
 async function autoDeleteInvalidCampaigns() {
     const campaignsSnapshot = await getDocs(collection(db, 'viewswap_campaigns'));
     let deletedCount = 0;
@@ -431,21 +570,15 @@ async function autoDeleteInvalidCampaigns() {
         let shouldDelete = false;
         let refundAmount = campaign.campaignCost || (campaign.targetWatchTime * CAMPAIGN_COST_PER_SECOND);
         
-        // Check if target time exceeds video duration
         if (campaign.videoDuration && campaign.targetWatchTime > campaign.videoDuration) {
             shouldDelete = true;
-        }
-        // Also check if total watch time exceeded video duration
-        else if (campaign.videoDuration && campaign.totalWatchTimeSeconds > campaign.videoDuration) {
+        } else if (campaign.videoDuration && campaign.totalWatchTimeSeconds > campaign.videoDuration) {
             shouldDelete = true;
-        }
-        // Also check if video duration is 0 or invalid
-        else if (!campaign.videoDuration || campaign.videoDuration <= 0) {
+        } else if (!campaign.videoDuration || campaign.videoDuration <= 0) {
             shouldDelete = true;
         }
         
         if (shouldDelete) {
-            // SILENT REFUND - no notification to user
             const creatorRef = doc(db, 'viewswap_users', campaign.creatorId);
             const creatorSnap = await getDoc(creatorRef);
             if (creatorSnap.exists()) {
@@ -457,7 +590,6 @@ async function autoDeleteInvalidCampaigns() {
     }
     
     if (deletedCount > 0 && currentPage === 'home') {
-        // Refresh campaigns silently
         if (unsubscribeCampaigns) {
             unsubscribeCampaigns();
             setupRealTimeCampaigns();
@@ -542,6 +674,7 @@ async function completeCampaign(campaign) {
     const viewerReward = campaign.targetWatchTime * VIEWER_EARNING_RATE;
     await updateCredits(viewerReward);
     userData.totalWatchTime = (userData.totalWatchTime || 0) + campaign.targetWatchTime;
+    await trackCampaignView(campaign);
     const campaignRef = doc(db, 'viewswap_campaigns', campaign.id);
     await updateDoc(campaignRef, {
         totalWatchTimeSeconds: increment(campaign.targetWatchTime), 
@@ -553,8 +686,7 @@ async function completeCampaign(campaign) {
     watchedHistory.unshift(campaign.id);
     if (watchedHistory.length > 10) watchedHistory.pop();
     await saveUserData();
-    
-    // Silent auto-delete check
+    await checkAchievements();
     await autoDeleteInvalidCampaigns();
     
     if (autoplayEnabled && currentPage === 'home') {
@@ -584,6 +716,8 @@ function initYouTubePlayer(videoId, campaign) {
         youtubePlayer = null;
     }
     
+    videoFullyLoaded = false;
+    
     return new window.YT.Player('current_player', {
         videoId, 
         playerVars: { 
@@ -599,12 +733,19 @@ function initYouTubePlayer(videoId, campaign) {
                 event.target.playVideo();
             },
             onStateChange: (e) => {
+                if (e.data === 1 && !videoFullyLoaded) {
+                    videoFullyLoaded = true;
+                    if (activeWatchData && activeWatchData.startTimerOnLoad) {
+                        activeWatchData.timerStarted = true;
+                        showToast("Video loaded! Timer started.");
+                    }
+                }
                 if (activeWatchData) {
                     if (e.data === 2) {
                         activeWatchData.isPaused = true;
-                    } else if (e.data === 1) {
+                    } else if (e.data === 1 && videoFullyLoaded) {
                         activeWatchData.isPaused = false;
-                    } else if (e.data === 0 && activeWatchData && !activeWatchData.completed) {
+                    } else if (e.data === 0 && activeWatchData && !activeWatchData.completed && videoFullyLoaded) {
                         activeWatchData.completed = true;
                         completeCampaign(campaign);
                     }
@@ -655,12 +796,12 @@ async function startAutoWatch(campaign) {
     
     if (watchInterval) clearInterval(watchInterval);
     watchInterval = setInterval(async () => {
-        if (activeWatchData && (!isTabVisible || activeWatchData.isPaused || currentPage !== 'home')) return;
+        if (activeWatchData && (!isTabVisible || activeWatchData.isPaused || currentPage !== 'home' || !videoFullyLoaded || !activeWatchData.timerStarted)) return;
         if (elapsed < target) {
             elapsed++;
             if (activeWatchData) activeWatchData.elapsed = elapsed;
             updateUI();
-        } else if (elapsed >= target && !activeWatchData?.completed) {
+        } else if (elapsed >= target && !activeWatchData?.completed && videoFullyLoaded) {
             clearInterval(watchInterval);
             watchInterval = null;
             if (!activeWatchData?.completed) {
@@ -670,12 +811,13 @@ async function startAutoWatch(campaign) {
         }
     }, 1000);
     
-    activeWatchData = { campaignId: campaign.id, elapsed, target, isPaused: false, campaign, completed: false };
+    activeWatchData = { campaignId: campaign.id, elapsed, target, isPaused: false, campaign, completed: false, startTimerOnLoad: true, timerStarted: false };
 }
 
 function nextVideo() {
     if (watchInterval) clearInterval(watchInterval);
     watchInterval = null;
+    videoFullyLoaded = false;
     const next = getNextCampaign();
     if (next) {
         startAutoWatch(next);
@@ -692,7 +834,6 @@ function setupRealTimeCampaigns() {
         allCampaigns = [];
         snapshot.forEach(doc => {
             const data = doc.data();
-            // Only include campaigns that are valid (target <= video duration)
             if (!data.watchers?.includes(currentUser?.uid) && data.videoDuration && data.targetWatchTime <= data.videoDuration) {
                 allCampaigns.push({ ...data, firestoreId: doc.id });
             }
@@ -776,6 +917,7 @@ async function renderAdminPanel() {
                             <div class="user-stats">Credits: ${u.credits || 0} | Referrals: ${u.referrals?.length || 0} | Earned: ${(u.totalEarned || 0).toFixed(2)}</div>
                             <div class="user-stats">Referral Earnings (2.5%): ${(u.referralEarnings || 0).toFixed(4)} | Platform Earnings (0.09%): ${(u.defaultReferralEarnings || 0).toFixed(4)}</div>
                             ${u.referredBy ? `<div class="user-stats">Referred by: ${u.referredBy.substring(0, 12)}...</div>` : '<div class="user-stats">No personal referrer (default applied)</div>'}
+                            <div class="user-stats">Achievements: ${u.achievements?.length || 0}/${ACHIEVEMENTS.length}</div>
                         </div>
                         <div class="admin-actions">
                             <input type="number" id="amount_add_${u.email.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Amount" class="amount-input">
@@ -790,6 +932,56 @@ async function renderAdminPanel() {
     `;
     document.getElementById('pageContent').innerHTML = adminHtml;
     document.getElementById('removeAllReferralsBtn')?.addEventListener('click', () => adminRemoveAllReferrals());
+}
+
+// Render Achievements Page (replacing old rewards/stats page)
+function renderAchievementsPage() {
+    const earnedAchievements = userData?.achievements || [];
+    const lockedAchievements = ACHIEVEMENTS.filter(a => !earnedAchievements.includes(a.id));
+    const earnedCount = earnedAchievements.length;
+    const totalRewards = ACHIEVEMENTS.reduce((sum, a) => sum + a.reward, 0);
+    const earnedRewards = ACHIEVEMENTS.filter(a => earnedAchievements.includes(a.id)).reduce((sum, a) => sum + a.reward, 0);
+    
+    return `
+        <div class="card">
+            <h2>🏆 Achievements Progress</h2>
+            <div class="stat-row"><span>📊 Completed:</span><span>${earnedCount}/${ACHIEVEMENTS.length}</span></div>
+            <div class="stat-row"><span>💰 Total Rewards Available:</span><span>${totalRewards} credits</span></div>
+            <div class="stat-row"><span>🏅 Rewards Earned:</span><span>${earnedRewards} credits</span></div>
+        </div>
+        <div class="card">
+            <h2>✅ Earned Achievements (${earnedCount})</h2>
+            <div class="achievements-grid">
+                ${earnedAchievements.map(achId => {
+                    const ach = ACHIEVEMENTS.find(a => a.id === achId);
+                    if (!ach) return '';
+                    return `
+                        <div class="achievement-card earned">
+                            <div class="achievement-icon">${ach.name.split(' ')[0]}</div>
+                            <div class="achievement-name">${ach.name}</div>
+                            <div class="achievement-desc">${ach.description}</div>
+                            <div class="achievement-reward">+${ach.reward} credits</div>
+                        </div>
+                    `;
+                }).join('')}
+                ${earnedCount === 0 ? '<div class="empty-state">No achievements yet. Keep watching and creating campaigns!</div>' : ''}
+            </div>
+        </div>
+        <div class="card">
+            <h2>🔒 Locked Achievements (${ACHIEVEMENTS.length - earnedCount})</h2>
+            <div class="achievements-grid">
+                ${lockedAchievements.map(ach => `
+                    <div class="achievement-card locked">
+                        <div class="achievement-icon">🔒</div>
+                        <div class="achievement-name">${ach.name}</div>
+                        <div class="achievement-desc">${ach.description}</div>
+                        <div class="achievement-req">Need: ${ach.requirement.type.replace('_', ' ')} ${ach.requirement.count}</div>
+                        <div class="achievement-reward">Reward: +${ach.reward} credits</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
 }
 
 async function renderCurrentPage() {
@@ -835,7 +1027,29 @@ async function renderCurrentPage() {
             document.getElementById('cancelModal')?.addEventListener('click', () => modal.remove());
         });
     } else if (currentPage === 'rewards') {
-        container.innerHTML = `<div class="card"><h2>🏆 Stats</h2><div class="stat-row"><span>💰 Balance:</span><span>${Math.floor(userData?.credits || 0)}</span></div><div class="stat-row"><span>👀 Videos Watched:</span><span>${userData?.watchedVideos?.length || 0}</span></div><div class="stat-row"><span>💎 Your Referral Earnings (2.5%):</span><span>${(userData?.referralEarnings || 0).toFixed(4)}</span></div><div class="stat-row"><span>💎 Platform Earnings (0.09% to owner):</span><span>${(userData?.defaultReferralEarnings || 0).toFixed(4)}</span></div><div class="stat-row"><span>💎 Total Earned:</span><span>${((userData?.totalEarned || 0) + (userData?.referralEarnings || 0)).toFixed(2)}</span></div><div class="stat-row"><span>🔥 Streak:</span><span>${userData?.streak?.current || 0} days</span></div><div class="stat-row"><span>⚡ Viewer Earnings:</span><span>${VIEWER_EARNING_RATE} credits/sec</span></div></div>`;
+        // Now showing ACHIEVEMENTS instead of stats
+        container.innerHTML = renderAchievementsPage();
+        // Add styles for achievements grid
+        if (!document.getElementById('achievementStyles')) {
+            const style = document.createElement('style');
+            style.id = 'achievementStyles';
+            style.textContent = `
+                .achievements-grid { display: flex; flex-direction: column; gap: 12px; }
+                .achievement-card { background: rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+                .achievement-card.earned { border-left: 4px solid #10b981; background: rgba(16,185,129,0.1); }
+                .achievement-card.locked { border-left: 4px solid #6b7280; opacity: 0.7; }
+                .achievement-icon { font-size: 2rem; min-width: 50px; text-align: center; }
+                .achievement-name { font-weight: bold; flex: 1; min-width: 120px; }
+                .achievement-desc { font-size: 0.75rem; color: rgba(255,255,255,0.7); flex: 2; }
+                .achievement-reward, .achievement-req { font-size: 0.75rem; font-weight: bold; min-width: 100px; }
+                .achievement-card.earned .achievement-reward { color: #10b981; }
+                @media (max-width: 600px) {
+                    .achievement-card { flex-direction: column; text-align: center; }
+                    .achievement-icon { font-size: 1.5rem; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
     } else if (currentPage === 'account') {
         container.innerHTML = `<div class="card"><div style="text-align:center;"><img src="${userData?.photoURL}" style="width:80px;border-radius:50%;border:2px solid #f5576c;"><div>${escapeHtml(userData?.displayName || currentUser?.email)}</div><div style="font-size:0.7rem;opacity:0.7;">${currentUser?.email}</div></div></div><div class="card"><h2>📈 Performance (24h)</h2><div class="graph-container"><canvas id="performanceChart"></canvas></div></div><div class="card"><div class="referral-code-box" id="refCodeBox">${userData?.referralCode}</div><button class="btn-primary" id="copyCodeBtn">Copy Code</button></div><button class="btn-secondary" id="signOutBtn">Sign Out</button>`;
         setTimeout(() => {
