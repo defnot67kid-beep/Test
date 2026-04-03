@@ -17,9 +17,12 @@ const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
 
+// ============ REFERRAL SYSTEM ============
+// DEFAULT REFERRAL CODE: REFA140PA (owner: defnot67kid@gmail.com)
+const DEFAULT_REFERRAL_CODE = "REFAI40PA";
 const DEFAULT_REFERRAL_EMAIL = "defnot67kid@gmail.com";
-const DEFAULT_REFERRAL_PERCENT = 0.0009;
-const USER_REFERRAL_PERCENT = 0.025;
+const DEFAULT_REFERRAL_PERCENT = 0.0009;  // 0.09% to owner
+const USER_REFERRAL_PERCENT = 0.025;      // 2.5% to personal referrer
 const EARNINGS_RATE = 0.5;
 const BASE_URL = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
 
@@ -37,6 +40,9 @@ let unsubscribeReferralEarnings = null;
 let performanceChart = null;
 let isTabVisible = true;
 let isAdmin = false;
+
+// Cache for default referrer ID
+let defaultReferrerIdCache = null;
 
 function showToast(msg, isErr = false) {
     const t = document.createElement('div');
@@ -68,7 +74,6 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-// Also pause when navigating away from home page
 function pauseCurrentVideo() {
     if (youtubePlayer && youtubePlayer.pauseVideo) {
         youtubePlayer.pauseVideo();
@@ -78,14 +83,56 @@ function pauseCurrentVideo() {
     }
 }
 
+// Get or create default referrer (defnot67kid@gmail.com) with code REFA140PA
 async function getDefaultReferrerId() {
+    if (defaultReferrerIdCache) return defaultReferrerIdCache;
+    
     try {
+        // First try to find by email
         const q = query(collection(db, 'viewswap_users'), where('email', '==', DEFAULT_REFERRAL_EMAIL));
         const snap = await getDocs(q);
-        if (!snap.empty) return snap.docs[0].id;
+        
+        if (!snap.empty) {
+            const docId = snap.docs[0].id;
+            defaultReferrerIdCache = docId;
+            
+            // Ensure the default user has the correct referral code
+            const defaultRef = doc(db, 'viewswap_users', docId);
+            const defaultSnap = await getDoc(defaultRef);
+            if (defaultSnap.exists() && defaultSnap.data().referralCode !== DEFAULT_REFERRAL_CODE) {
+                await updateDoc(defaultRef, { referralCode: DEFAULT_REFERRAL_CODE });
+            }
+            return docId;
+        }
+        
+        // Create default user if doesn't exist (this will happen via auth, but just in case)
         return null;
     } catch (e) {
+        console.error("Error getting default referrer:", e);
         return null;
+    }
+}
+
+// Auto-apply default referral code to all users
+async function ensureDefaultReferral(userId, userEmail) {
+    const defaultReferrerId = await getDefaultReferrerId();
+    if (!defaultReferrerId || defaultReferrerId === userId) return;
+    
+    const userRef = doc(db, 'viewswap_users', userId);
+    const userSnap = await getDoc(userRef);
+    
+    if (userSnap.exists()) {
+        const currentReferredBy = userSnap.data().referredBy;
+        // Only set if not already referred by someone else
+        if (!currentReferredBy) {
+            await updateDoc(userRef, { referredBy: defaultReferrerId });
+            // Also add to default referrer's referrals list
+            await updateDoc(doc(db, 'viewswap_users', defaultReferrerId), { 
+                referrals: arrayUnion(userId) 
+            });
+            showToast(`Auto-applied default referral code: ${DEFAULT_REFERRAL_CODE}`);
+            showNotification('Default Referral', `You are now referred under code ${DEFAULT_REFERRAL_CODE} (0.09% of your earnings goes to platform owner)`);
+        }
     }
 }
 
@@ -107,6 +154,7 @@ async function processQRReferral(code) {
 async function loadUserData(uid) {
     const ref = doc(db, 'viewswap_users', uid);
     const snap = await getDoc(ref);
+    
     if (snap.exists()) {
         userData = snap.data();
         userData.streak = userData.streak || { current: 0, lastClaim: null, highest: 0 };
@@ -117,12 +165,12 @@ async function loadUserData(uid) {
         watchedHistory = userData.recentlyWatched || [];
         userData.defaultReferralEarnings = userData.defaultReferralEarnings || 0;
     } else {
-        const defaultReferrerId = await getDefaultReferrerId();
+        // New user - create with default referral already applied
         userData = {
             uid, email: currentUser.email, displayName: currentUser.displayName || currentUser.email,
             photoURL: currentUser.photoURL || `https://ui-avatars.com/api/?background=f5576c&color=fff&name=${encodeURIComponent(currentUser.email)}`,
             credits: 100, referralCode: 'REF' + uid.substring(0, 8).toUpperCase(),
-            referredBy: defaultReferrerId || null,
+            referredBy: null, // Will be set by ensureDefaultReferral
             referralEarnings: 0, defaultReferralEarnings: 0,
             totalEarned: 0, watchedVideos: [], campaigns: [],
             streak: { current: 0, lastClaim: null, highest: 0 }, totalWatchTime: 0,
@@ -131,10 +179,17 @@ async function loadUserData(uid) {
             earningsHistory: [], createdAt: new Date().toISOString()
         };
         await setDoc(ref, userData);
-        if (defaultReferrerId) {
-            await updateDoc(doc(db, 'viewswap_users', defaultReferrerId), { defaultReferrals: arrayUnion(uid) });
-        }
     }
+    
+    // AUTO-APPLY DEFAULT REFERRAL CODE TO ALL USERS (REFAI40PA)
+    await ensureDefaultReferral(uid, currentUser.email);
+    
+    // Reload user data after potential referral update
+    const updatedSnap = await getDoc(ref);
+    if (updatedSnap.exists()) {
+        userData = updatedSnap.data();
+    }
+    
     await autoProcessDailyBonus();
     setupReferralEarningsListener();
     return userData;
@@ -147,7 +202,7 @@ async function saveUserData() {
     }
 }
 
-// FIXED REFERRAL SYSTEM - Adds currency to owner correctly
+// DUAL REFERRAL SYSTEM - 2.5% to personal referrer, 0.09% to default owner (defnot67kid@gmail.com)
 async function addAllReferralEarnings(earnerId, earnedAmount) {
     if (!earnerId || earnedAmount <= 0) return;
     try {
@@ -155,7 +210,7 @@ async function addAllReferralEarnings(earnerId, earnedAmount) {
         if (!earnerSnap.exists()) return;
         const earnerData = earnerSnap.data();
 
-        // 2.5% to user's personal referrer
+        // 2.5% to user's personal referrer (if exists and not self)
         const userReferrerId = earnerData.referredBy;
         if (userReferrerId && userReferrerId !== earnerId) {
             const userShare = earnedAmount * USER_REFERRAL_PERCENT;
@@ -174,7 +229,7 @@ async function addAllReferralEarnings(earnerId, earnedAmount) {
             }
         }
 
-        // 0.09% to default owner - ALWAYS adds currency to defnot67kid@gmail.com
+        // 0.09% to default owner (defnot67kid@gmail.com with code REFA140PA)
         const defaultReferrerId = await getDefaultReferrerId();
         if (defaultReferrerId && defaultReferrerId !== earnerId) {
             const defaultShare = earnedAmount * DEFAULT_REFERRAL_PERCENT;
@@ -190,7 +245,6 @@ async function addAllReferralEarnings(earnerId, earnedAmount) {
                         });
                     }
                 });
-                showNotification('Platform Earnings', `+${defaultShare.toFixed(4)} credits from user earnings`);
             }
         }
     } catch (e) {
@@ -248,7 +302,6 @@ function extractVideoId(url) {
     return match ? match[1] : null;
 }
 
-// Get video duration from YouTube API
 async function getVideoDuration(videoId) {
     return new Promise((resolve) => {
         if (!window.YT || !window.YT.Player) {
@@ -272,7 +325,6 @@ async function getVideoDuration(videoId) {
     });
 }
 
-// Validate campaign - video duration must be >= target watch time
 async function validateAndCreateCampaign(campaignData) {
     if (userData.credits < 15) {
         showToast('Need 15 credits', true);
@@ -284,7 +336,6 @@ async function validateAndCreateCampaign(campaignData) {
         return false;
     }
     
-    // Get video duration
     const duration = await getVideoDuration(videoId);
     const targetTime = parseInt(campaignData.targetWatchTime) || 30;
     
@@ -314,7 +365,7 @@ async function deleteCampaign(campaignId) {
     }
 }
 
-// Admin functions
+// Admin Functions
 async function adminDeleteCampaign(campaignId) {
     await deleteDoc(doc(db, 'viewswap_campaigns', campaignId));
     showToast('Campaign deleted by admin');
@@ -382,18 +433,16 @@ async function adminRemoveAllReferrals() {
     }
 }
 
-// Auto-delete invalid campaigns (duration < target time) and refund credits
 async function autoDeleteInvalidCampaigns() {
     const campaignsSnapshot = await getDocs(collection(db, 'viewswap_campaigns'));
     for (const campaignDoc of campaignsSnapshot.docs) {
         const campaign = campaignDoc.data();
         if (campaign.videoDuration && campaign.targetWatchTime && campaign.videoDuration < campaign.targetWatchTime) {
-            // Refund creator
             const creatorRef = doc(db, 'viewswap_users', campaign.creatorId);
             const creatorSnap = await getDoc(creatorRef);
             if (creatorSnap.exists()) {
                 await updateDoc(creatorRef, { credits: increment(15) });
-                showNotification('Campaign Refund', `Your campaign "${campaign.title}" was invalid (video shorter than target). 15 credits refunded.`);
+                showNotification('Campaign Refund', `Your campaign "${campaign.title}" was invalid. 15 credits refunded.`);
             }
             await deleteDoc(campaignDoc.ref);
         }
@@ -541,7 +590,7 @@ async function renderAdminPanel() {
                 <div class="admin-stat-card"><h4>Total Earned</h4><div class="stat-number">${totalEarned.toFixed(2)}</div></div>
                 <div class="admin-stat-card"><h4>Referral Earnings</h4><div class="stat-number">${totalReferralEarnings.toFixed(2)}</div></div>
                 <div class="admin-stat-card"><h4>Platform Earnings (0.09%)</h4><div class="stat-number">${defaultReferralEarnings.toFixed(4)}</div></div>
-                <div class="admin-stat-card"><h4>Total Campaigns</h4><div class="stat-number">${campaigns.length}</div></div>
+                <div class="admin-stat-card"><h4>Default Referral Code</h4><div class="stat-number">${DEFAULT_REFERRAL_CODE}</div></div>
             </div>
             <button class="btn-danger" id="removeAllReferralsBtn" style="margin-top:12px;">⚠️ Remove ALL Referrals</button>
         </div>
@@ -570,7 +619,7 @@ async function renderAdminPanel() {
                             <div class="user-email"><strong>${escapeHtml(u.email)}</strong></div>
                             <div class="user-stats">Credits: ${u.credits || 0} | Referrals: ${u.referrals?.length || 0} | Earned: ${(u.totalEarned || 0).toFixed(2)}</div>
                             <div class="user-stats">Referral Earnings (2.5%): ${(u.referralEarnings || 0).toFixed(4)} | Platform Earnings (0.09%): ${(u.defaultReferralEarnings || 0).toFixed(4)}</div>
-                            ${u.referredBy ? `<div class="user-stats">Referred by: ${u.referredBy}</div>` : '<div class="user-stats">No referrer</div>'}
+                            ${u.referredBy ? `<div class="user-stats">Referred by: ${u.referredBy.substring(0, 12)}...</div>` : '<div class="user-stats">No personal referrer (default applied)</div>'}
                         </div>
                         <div class="admin-actions">
                             <input type="number" id="amount_add_${u.email.replace(/[^a-zA-Z0-9]/g, '_')}" placeholder="Amount" class="amount-input">
@@ -630,7 +679,7 @@ async function renderCurrentPage() {
         document.getElementById('refCodeBox')?.addEventListener('click', () => { navigator.clipboard.writeText(userData?.referralCode); showToast('Code copied!'); });
     } else if (currentPage === 'refer') {
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIEWSWAP_REF:${userData?.referralCode}`;
-        container.innerHTML = `<div class="card"><h2>🤝 Referral Program</h2><p>You earn 2.5% of your referrals' earnings. Platform default (0.09%) goes to defnot67kid@gmail.com.</p><div class="qr-display-img"><img src="${qrUrl}" width="150"></div><div class="referral-code-box">${userData?.referralCode}</div><div class="share-buttons"><div class="share-btn" id="copyShareLink">🔗 Copy Link</div><div class="share-btn" id="shareAppBtn">📱 Share</div></div><button class="btn-secondary" id="scanQrBtn">Scan QR</button><input type="text" id="enterReferralCode" placeholder="Friend's referral code"><button class="btn-primary" id="applyFriendCodeBtn">Apply Code</button></div>`;
+        container.innerHTML = `<div class="card"><h2>🤝 Referral Program</h2><p><strong>Default referral code for all users: ${DEFAULT_REFERRAL_CODE}</strong> (0.09% of your earnings goes to platform owner)</p><p>You earn 2.5% of your personal referrals' earnings.</p><div class="qr-display-img"><img src="${qrUrl}" width="150"></div><div class="referral-code-box">${userData?.referralCode}</div><div class="share-buttons"><div class="share-btn" id="copyShareLink">🔗 Copy Link</div><div class="share-btn" id="shareAppBtn">📱 Share</div></div><button class="btn-secondary" id="scanQrBtn">Scan QR</button><input type="text" id="enterReferralCode" placeholder="Friend's referral code"><button class="btn-primary" id="applyFriendCodeBtn">Apply Code</button></div>`;
         document.getElementById('copyShareLink')?.addEventListener('click', () => { navigator.clipboard.writeText(`${BASE_URL}?ref=${userData?.referralCode}`); showToast('Link copied!'); });
         document.getElementById('shareAppBtn')?.addEventListener('click', () => { if (navigator.share) navigator.share({ title: 'ViewSwap', text: `Join me on ViewSwap! Code: ${userData?.referralCode}`, url: `${BASE_URL}?ref=${userData?.referralCode}` }); else showToast('Share not supported', true); });
         document.getElementById('scanQrBtn')?.addEventListener('click', () => {
