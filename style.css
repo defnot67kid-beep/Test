@@ -292,6 +292,19 @@ input:focus {
     overflow: hidden;
 }
 
+.video-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    background: rgba(0,0,0,0.7);
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    z-index: 10;
+}
+
 .watch-stats {
     display: flex;
     gap: 16px;
@@ -555,4 +568,19 @@ input:focus {
     padding: 6px;
     margin: 0;
     border-radius: 20px;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
