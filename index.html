@@ -235,6 +235,10 @@
         .graph-container { margin: 20px 0; height: 260px; }
         .share-buttons { display: flex; gap: 12px; margin-top: 12px; }
         .share-btn { background: #eef2ff; padding: 10px; border-radius: 40px; flex: 1; text-align: center; font-weight: 600; cursor: pointer; }
+        .error-text { color: #ef4444; font-size: 0.75rem; }
+        .stat-badge { flex: 1; text-align: center; }
+        .stat-badge-label { font-size: 0.65rem; color: #64748b; text-transform: uppercase; }
+        .stat-badge-value { font-size: 1.4rem; font-weight: 800; color: #10b981; }
     </style>
 </head>
 <body>
@@ -308,7 +312,7 @@
         
         function showToast(msg, isErr=false) { const t=document.createElement('div'); t.className='toast'; if(isErr) t.style.background='#ef4444'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 3000); }
         
-        // Email auth
+        // Email auth handlers
         document.getElementById('showEmailAuthBtn')?.addEventListener('click',()=>{ document.getElementById('emailAuthPanel').style.display='block'; document.getElementById('showEmailAuthBtn').style.display='none'; });
         document.getElementById('backToGoogleBtn')?.addEventListener('click',()=>{ document.getElementById('emailAuthPanel').style.display='none'; document.getElementById('showEmailAuthBtn').style.display='flex'; });
         document.getElementById('emailSignInBtn')?.addEventListener('click', async()=>{ try { await signInWithEmailAndPassword(auth, document.getElementById('emailInput').value, document.getElementById('passwordInput').value); showToast('Signed in!'); } catch(e) { document.getElementById('authErrorMsg').innerText=e.message; } });
@@ -342,6 +346,7 @@
         
         async function saveUserData() { if(currentUser) { userData.recentlyWatched = watchedHistory; userData.totalEarnings = (userData.totalEarned || 0) + (userData.referralEarnings || 0); await setDoc(doc(db, 'viewswap_users', currentUser.uid), userData, { merge: true }); } }
         
+        // FIXED: Referral owner gets 2.5% of any earnings from referred user
         async function addReferralEarningsForEarner(earnerId, earnedAmount) {
             if (!earnerId || earnedAmount <= 0) return;
             const earnerSnap = await getDoc(doc(db, 'viewswap_users', earnerId));
@@ -351,7 +356,12 @@
                 const referralShare = earnedAmount * REFERRAL_PERCENT;
                 if (referralShare > 0) {
                     await updateDoc(doc(db, 'viewswap_users', referrerId), { referralEarnings: increment(referralShare), totalEarnedByReferralShare: increment(referralShare) });
-                    if (referrerId === currentUser?.uid) showToast(`🎉 +${referralShare.toFixed(2)} credits from referral!`, false);
+                    // Push notification to referrer
+                    if (referrerId === currentUser?.uid) showToast(`🎉 +${referralShare.toFixed(2)} credits from your referral!`, false);
+                    else {
+                        // Notify via toast for the referrer (simulated)
+                        console.log(`Referral earnings sent to ${referrerId}`);
+                    }
                 }
             }
             await updateDoc(doc(db, 'viewswap_users', earnerId), { totalEarnedByReferralShare: increment(earnedAmount * REFERRAL_PERCENT) });
@@ -365,6 +375,7 @@
                 userData.earningsHistory.push({ timestamp: Date.now(), amount: amount });
                 if(userData.earningsHistory.length > 48) userData.earningsHistory.shift();
                 await saveUserData();
+                // Give 2.5% to referrer when user earns
                 if (userData.referredBy && sourceUserId === null) await addReferralEarningsForEarner(currentUser.uid, amount);
             } else { await saveUserData(); }
             if (currentPage === 'home') renderCurrentPage();
@@ -413,7 +424,7 @@
         }
         
         async function deleteCampaign(campaignId) {
-            if (confirm('Delete this campaign?')) { await deleteDoc(doc(db, 'viewswap_campaigns', campaignId)); showToast('Campaign deleted'); }
+            if (confirm('Delete this campaign?')) { await deleteDoc(doc(db, 'viewswap_campaigns', campaignId)); showToast('Campaign deleted'); renderCurrentPage(); }
         }
         
         async function toggleAutoRenew(campaignId) {
@@ -467,7 +478,10 @@
             else renderCurrentPage();
         }
         
-        function getNextCampaign() { const available = allCampaigns.filter(c => c.creatorId !== currentUser?.uid && !watchedHistory.includes(c.id) && c.isActive !== false && (!c.totalViews || c.totalViews < (c.targetWatchTime || 999))); return available[0] || allCampaigns.filter(c => c.creatorId !== currentUser?.uid)[0]; }
+        function getNextCampaign() { 
+            const available = allCampaigns.filter(c => c.creatorId !== currentUser?.uid && !watchedHistory.includes(c.id) && c.isActive !== false && (!c.totalViews || c.totalViews < (c.targetWatchTime || 999))); 
+            return available[0] || allCampaigns.filter(c => c.creatorId !== currentUser?.uid)[0]; 
+        }
         
         function initYouTubePlayer(videoId, campaign) {
             const div = document.getElementById('current_player');
@@ -498,10 +512,9 @@
             if (!currentUser) return;
             unsubscribeCampaigns = onSnapshot(query(collection(db, 'viewswap_campaigns'), orderBy('createdAt', 'desc')), (snapshot) => {
                 allCampaigns = [];
-                snapshot.forEach(doc => { const data = doc.data(); if (!data.watchers?.includes(currentUser?.uid) && data.creatorId !== currentUser?.uid && (!data.totalViews || data.totalViews < (data.targetWatchTime || 999))) allCampaigns.push({ ...data, firestoreId: doc.id }); });
+                snapshot.forEach(doc => { const data = doc.data(); if (!data.watchers?.includes(currentUser?.uid) && (!data.totalViews || data.totalViews < (data.targetWatchTime || 999))) allCampaigns.push({ ...data, firestoreId: doc.id }); });
                 if (currentPage === 'home' && !activeWatchData && allCampaigns.length) { const next = getNextCampaign(); if (next) startAutoWatch(next); }
-                if (currentPage === 'home') renderCurrentPage();
-                else if (currentPage === 'campaign') renderCurrentPage();
+                renderCurrentPage();
             });
         }
         
@@ -527,7 +540,7 @@
             else if(currentPage === 'campaign'){ container.innerHTML = renderCampaignPage(); document.getElementById('createCampaignBtn')?.addEventListener('click',()=>{ const modal=document.createElement('div'); modal.className='modal-overlay'; modal.innerHTML=`<div class="modal-content"><h3>Create Campaign</h3><input id="newTitle" placeholder="Title"><input id="newUrl" placeholder="YouTube URL"><input id="newChannel" placeholder="Channel URL (optional)"><input id="newTarget" type="number" placeholder="Target views (seconds)" value="30"><button class="btn-primary" id="confirmCreateBtn">Create (15 credits)</button><button class="btn-secondary" id="cancelModal">Cancel</button></div>`; document.body.appendChild(modal); document.getElementById('confirmCreateBtn')?.addEventListener('click',async()=>{ await createCampaign({ title:document.getElementById('newTitle').value, url:document.getElementById('newUrl').value, channelUrl:document.getElementById('newChannel').value, targetWatchTime:document.getElementById('newTarget').value }); modal.remove(); renderCurrentPage(); }); document.getElementById('cancelModal')?.addEventListener('click',()=>modal.remove()); }); }
             else if(currentPage === 'rewards') container.innerHTML = renderRewardsPage();
             else if(currentPage === 'account'){ container.innerHTML = renderAccountPage(); document.getElementById('copyCodeBtn')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Copied!'); }); document.getElementById('signOutBtn')?.addEventListener('click',async()=>await signOut(auth)); document.getElementById('refCodeBox')?.addEventListener('click',()=>{ navigator.clipboard.writeText(userData?.referralCode); showToast('Code copied!'); }); }
-            else if(currentPage === 'refer'){ container.innerHTML = renderReferPage(); document.getElementById('copyShareLink')?.addEventListener('click',()=>{ navigator.clipboard.writeText(`${BASE_URL}?ref=${userData?.referralCode}`); showToast('Link copied!'); }); document.getElementById('shareAppBtn')?.addEventListener('click',()=>{ if(navigator.share) navigator.share({title:'ViewSwap',text:`Join me on ViewSwap! Code: ${userData?.referralCode}`,url:`${BASE_URL}?ref=${userData?.referralCode}`}); else showToast('Share not supported',true); }); document.getElementById('scanQrBtn')?.addEventListener('click',()=>{ const modal=document.createElement('div'); modal.className='modal-overlay'; modal.innerHTML=`<div><div id="qr-reader" style="width:100%;"></div><button class="btn-secondary" onclick="this.parentElement.parentElement.remove()">Close</button></div>`; document.body.appendChild(modal); const scanner=new Html5Qrcode("qr-reader"); scanner.start({facingMode:"environment"},{fps:10,qrbox:250},(text)=>{ scanner.stop(); modal.remove(); if(text.startsWith('VIEWSWAP_REF:')) processQRReferral(text.split(':')[1]); else showToast('Invalid QR',true); },()=>{}); }); document.getElementById('applyFriendCodeBtn')?.addEventListener('click',async()=>{ const code=document.getElementById('enterReferralCode')?.value; if(code && !userData.referredBy) await processQRReferral(code); else showToast('Already referred or invalid',true); }); } }
+            else if(currentPage === 'refer'){ container.innerHTML = renderReferPage(); document.getElementById('copyShareLink')?.addEventListener('click',()=>{ navigator.clipboard.writeText(`${BASE_URL}?ref=${userData?.referralCode}`); showToast('Link copied!'); }); document.getElementById('shareAppBtn')?.addEventListener('click',()=>{ if(navigator.share) navigator.share({title:'ViewSwap',text:`Join me on ViewSwap! Code: ${userData?.referralCode}`,url:`${BASE_URL}?ref=${userData?.referralCode}`}); else showToast('Share not supported',true); }); document.getElementById('scanQrBtn')?.addEventListener('click',()=>{ const modal=document.createElement('div'); modal.className='modal-overlay'; modal.innerHTML=`<div style="background:white;padding:20px;border-radius:24px;"><div id="qr-reader" style="width:100%;"></div><button class="btn-secondary" onclick="this.parentElement.parentElement.remove()">Close</button></div>`; document.body.appendChild(modal); const scanner=new Html5Qrcode("qr-reader"); scanner.start({facingMode:"environment"},{fps:10,qrbox:250},(text)=>{ scanner.stop(); modal.remove(); if(text.startsWith('VIEWSWAP_REF:')) processQRReferral(text.split(':')[1]); else showToast('Invalid QR',true); },()=>{}); }); document.getElementById('applyFriendCodeBtn')?.addEventListener('click',async()=>{ const code=document.getElementById('enterReferralCode')?.value; if(code && !userData.referredBy) await processQRReferral(code); else showToast('Already referred or invalid',true); }); } }
         
         window.nextVideo = nextVideo;
         window.toggleAutoplay = () => { autoplayEnabled = !autoplayEnabled; showToast(`Auto ${autoplayEnabled ? 'ON' : 'OFF'}`); renderCurrentPage(); };
@@ -540,7 +553,7 @@
         
         document.getElementById('signInBtn')?.addEventListener('click', async()=>{ try { await signInWithPopup(auth, provider); showToast('Welcome!'); } catch(e) { showToast(e.message, true); } });
         document.getElementById('applyReferralBtn')?.addEventListener('click',async()=>{ const code=document.getElementById('referralCodeInput')?.value; if(code && !userData?.referredBy && currentUser) await processQRReferral(code); else if(!currentUser) showToast('Sign in first',true); });
-        document.getElementById('qrSignInBtn')?.addEventListener('click',()=>{ const modal=document.createElement('div'); modal.className='modal-overlay'; modal.innerHTML=`<div><div id="qr-signin-reader" style="width:100%;"></div><button class="btn-secondary" onclick="this.parentElement.parentElement.remove()">Close</button></div>`; document.body.appendChild(modal); const scanner=new Html5Qrcode("qr-signin-reader"); scanner.start({facingMode:"environment"},{fps:10,qrbox:250},(text)=>{ scanner.stop(); modal.remove(); if(!currentUser){ sessionStorage.setItem('pendingReferral',text); signInWithPopup(auth,provider); } else if(text.startsWith('VIEWSWAP_REF:')) processQRReferral(text.split(':')[1]); else showToast('Invalid QR',true); },()=>{}); });
+        document.getElementById('qrSignInBtn')?.addEventListener('click',()=>{ const modal=document.createElement('div'); modal.className='modal-overlay'; modal.innerHTML=`<div style="background:white;padding:20px;border-radius:24px;"><div id="qr-signin-reader" style="width:100%;"></div><button class="btn-secondary" onclick="this.parentElement.parentElement.remove()">Close</button></div>`; document.body.appendChild(modal); const scanner=new Html5Qrcode("qr-signin-reader"); scanner.start({facingMode:"environment"},{fps:10,qrbox:250},(text)=>{ scanner.stop(); modal.remove(); if(!currentUser){ sessionStorage.setItem('pendingReferral',text); signInWithPopup(auth,provider); } else if(text.startsWith('VIEWSWAP_REF:')) processQRReferral(text.split(':')[1]); else showToast('Invalid QR',true); },()=>{}); });
         const pending=sessionStorage.getItem('pendingReferral'); if(pending) setTimeout(async()=>{ if(currentUser && !userData?.referredBy) await processQRReferral(pending); sessionStorage.removeItem('pendingReferral'); },2000);
     </script>
 </body>
