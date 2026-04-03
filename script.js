@@ -20,9 +20,9 @@ provider.setCustomParameters({ prompt: 'select_account' });
 // ============ CONFIGURATION ============
 const DEFAULT_REFERRAL_CODE = "REFAI40PA";
 const DEFAULT_REFERRAL_EMAIL = "defnot67kid@gmail.com";
-const DEFAULT_REFERRAL_PERCENT = 0.0009;
+const DEFAULT_REFERRAL_PERCENT = 0.009;
 const USER_REFERRAL_PERCENT = 0.025;
-const VIEWER_EARNING_RATE = 0.5;
+const VIEWER_EARNING_RATE = 10.5;
 const CAMPAIGN_COST_PER_SECOND = 0.19;
 const BASE_URL = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
 
@@ -55,7 +55,6 @@ function showNotification(title, body) {
     if (Notification.permission === 'granted') {
         new Notification(title, { body });
     }
-    showToast(`${title}: ${body}`);
 }
 
 // Tab visibility - ONLY PAUSE VIDEO, NEVER DESTROY IT
@@ -88,7 +87,6 @@ function resumeCurrentVideo() {
     }
 }
 
-// NEVER destroy the video player when switching tabs - only when explicitly changing videos
 function stopCurrentWatch(keepPlayer = false) {
     if (watchInterval) clearInterval(watchInterval);
     watchInterval = null;
@@ -132,7 +130,6 @@ async function ensureDefaultReferral(userId, userEmail) {
         if (!currentReferredBy) {
             await updateDoc(userRef, { referredBy: defaultReferrerId });
             await updateDoc(doc(db, 'viewswap_users', defaultReferrerId), { referrals: arrayUnion(userId) });
-            showToast(`Auto-applied default referral code: ${DEFAULT_REFERRAL_CODE}`);
         }
     }
 }
@@ -289,19 +286,18 @@ function extractVideoId(url) {
     return match ? match[1] : null;
 }
 
-// IMPROVED: Reliable video duration detection with multiple attempts
-async function getVideoDuration(videoId) {
-    return new Promise((resolve) => {
+// PROPER YouTube API duration detection - NO ESTIMATION, only real API data
+async function getRealVideoDuration(videoId) {
+    return new Promise((resolve, reject) => {
         let resolved = false;
         const timeout = setTimeout(() => {
             if (!resolved) {
                 resolved = true;
-                console.warn("Duration timeout for:", videoId);
-                resolve(30);
+                reject(new Error("YouTube API timeout - could not get video duration"));
             }
-        }, 8000);
+        }, 10000);
         
-        const checkPlayer = () => {
+        const checkAPI = () => {
             if (window.YT && window.YT.Player) {
                 const tempDiv = document.createElement('div');
                 tempDiv.style.display = 'none';
@@ -317,16 +313,21 @@ async function getVideoDuration(videoId) {
                                 if (!resolved) {
                                     resolved = true;
                                     clearTimeout(timeout);
-                                    resolve(duration && duration > 0 ? duration : 30);
+                                    if (duration && duration > 0) {
+                                        resolve(duration);
+                                    } else {
+                                        reject(new Error("Invalid video duration"));
+                                    }
                                 }
                             },
-                            onError: () => {
+                            onError: (error) => {
+                                console.error("YouTube player error:", error);
                                 tempPlayer.destroy();
                                 tempDiv.remove();
                                 if (!resolved) {
                                     resolved = true;
                                     clearTimeout(timeout);
-                                    resolve(30);
+                                    reject(new Error("YouTube API error - video unavailable"));
                                 }
                             }
                         }
@@ -336,19 +337,18 @@ async function getVideoDuration(videoId) {
                     if (!resolved) {
                         resolved = true;
                         clearTimeout(timeout);
-                        resolve(30);
+                        reject(new Error("Failed to initialize YouTube player"));
                     }
                 }
             } else {
-                setTimeout(checkPlayer, 200);
+                setTimeout(checkAPI, 200);
             }
         };
-        checkPlayer();
+        checkAPI();
     });
 }
 
-// CRITICAL FIX: Validate that video duration is LONGER than target watch time
-// A 16-second short CANNOT have a 30-second target!
+// CREATE CAMPAIGN WITH PROPER DURATION CHECK - NO ESTIMATION
 async function validateAndCreateCampaign(campaignData) {
     const totalCost = campaignData.targetWatchTime * CAMPAIGN_COST_PER_SECOND;
     if (userData.credits < totalCost) {
@@ -361,21 +361,24 @@ async function validateAndCreateCampaign(campaignData) {
         return false;
     }
     
-    showToast('Checking video duration...');
-    const duration = await getVideoDuration(videoId);
-    let targetTime = parseInt(campaignData.targetWatchTime) || 30;
-    
-    console.log(`Video duration: ${duration}s, Target: ${targetTime}s`);
-    
-    // CRITICAL: Video MUST be LONGER than or equal to target watch time
-    if (duration < targetTime) {
-        showToast(`❌ REJECTED: Video is only ${Math.floor(duration)}s long, but target is ${targetTime}s. Video must be LONGER than target time!`, true);
+    showToast('Getting real video duration from YouTube...');
+    let duration;
+    try {
+        duration = await getRealVideoDuration(videoId);
+    } catch (error) {
+        console.error("Duration fetch error:", error);
+        showToast(`Failed to get video duration: ${error.message}. Please try again.`, true);
         return false;
     }
     
-    // Optional: Warn if too close
-    if (duration - targetTime < 2) {
-        showToast(`⚠️ Warning: Video (${Math.floor(duration)}s) is only ${Math.floor(duration - targetTime)}s longer than target (${targetTime}s). Consider lowering target time.`, false);
+    let targetTime = parseInt(campaignData.targetWatchTime) || 30;
+    
+    console.log(`REAL Video duration: ${duration}s, Target: ${targetTime}s`);
+    
+    // Video MUST be LONGER than target watch time
+    if (duration < targetTime) {
+        showToast(`❌ REJECTED: Video is ${Math.floor(duration)}s long, target is ${targetTime}s. Video must be longer than target time!`, true);
+        return false;
     }
     
     await updateCredits(-totalCost);
@@ -399,51 +402,62 @@ async function validateAndCreateCampaign(campaignData) {
         campaignCost: totalCost
     };
     await setDoc(doc(db, 'viewswap_campaigns', campaign.id), campaign);
-    showToast(`✅ Campaign created! Duration: ${Math.floor(duration)}s, Target: ${targetTime}s | Cost: ${totalCost.toFixed(2)} credits`);
+    showToast(`✅ Campaign created! Real duration: ${Math.floor(duration)}s, Target: ${targetTime}s | Cost: ${totalCost.toFixed(2)} credits`);
     return true;
 }
 
 async function deleteCampaign(campaignId) {
-    if (confirm('Delete this campaign?')) {
-        const campaignRef = doc(db, 'viewswap_campaigns', campaignId);
-        const campaignSnap = await getDoc(campaignRef);
-        if (campaignSnap.exists()) {
-            const campaign = campaignSnap.data();
-            const usedWatchTime = campaign.totalWatchTimeSeconds || 0;
-            const remainingTime = Math.max(0, campaign.targetWatchTime - usedWatchTime);
-            const refundAmount = remainingTime * CAMPAIGN_COST_PER_SECOND;
-            if (refundAmount > 0) {
-                await updateDoc(doc(db, 'viewswap_users', campaign.creatorId), { credits: increment(refundAmount) });
-                showToast(`Refunded ${refundAmount.toFixed(2)} credits for unused time`);
-            }
+    const campaignRef = doc(db, 'viewswap_campaigns', campaignId);
+    const campaignSnap = await getDoc(campaignRef);
+    if (campaignSnap.exists()) {
+        const campaign = campaignSnap.data();
+        const usedWatchTime = campaign.totalWatchTimeSeconds || 0;
+        const remainingTime = Math.max(0, campaign.targetWatchTime - usedWatchTime);
+        const refundAmount = remainingTime * CAMPAIGN_COST_PER_SECOND;
+        if (refundAmount > 0) {
+            await updateDoc(doc(db, 'viewswap_users', campaign.creatorId), { credits: increment(refundAmount) });
         }
-        await deleteDoc(campaignRef);
-        showToast('Campaign deleted');
-        renderCurrentPage();
     }
+    await deleteDoc(campaignRef);
 }
 
+// AUTO DELETE INVALID CAMPAIGNS - SILENT, NO WARNINGS, AUTO REFUND
 async function autoDeleteInvalidCampaigns() {
     const campaignsSnapshot = await getDocs(collection(db, 'viewswap_campaigns'));
     let deletedCount = 0;
+    
     for (const campaignDoc of campaignsSnapshot.docs) {
         const campaign = campaignDoc.data();
-        // Check if target time exceeds video duration (invalid)
+        let shouldDelete = false;
+        let refundAmount = campaign.campaignCost || (campaign.targetWatchTime * CAMPAIGN_COST_PER_SECOND);
+        
+        // Check if target time exceeds video duration
         if (campaign.videoDuration && campaign.targetWatchTime > campaign.videoDuration) {
+            shouldDelete = true;
+        }
+        // Also check if total watch time exceeded video duration
+        else if (campaign.videoDuration && campaign.totalWatchTimeSeconds > campaign.videoDuration) {
+            shouldDelete = true;
+        }
+        // Also check if video duration is 0 or invalid
+        else if (!campaign.videoDuration || campaign.videoDuration <= 0) {
+            shouldDelete = true;
+        }
+        
+        if (shouldDelete) {
+            // SILENT REFUND - no notification to user
             const creatorRef = doc(db, 'viewswap_users', campaign.creatorId);
             const creatorSnap = await getDoc(creatorRef);
             if (creatorSnap.exists()) {
-                const refundAmount = campaign.campaignCost || (campaign.targetWatchTime * CAMPAIGN_COST_PER_SECOND);
                 await updateDoc(creatorRef, { credits: increment(refundAmount) });
-                showNotification('Campaign Auto-Deleted', `Your campaign "${campaign.title}" had target time (${campaign.targetWatchTime}s) > video duration (${Math.floor(campaign.videoDuration)}s). ${refundAmount.toFixed(2)} credits refunded.`);
             }
             await deleteDoc(campaignDoc.ref);
             deletedCount++;
         }
     }
-    if (deletedCount > 0) {
-        showToast(`🗑️ Auto-deleted ${deletedCount} invalid campaign(s)`);
-        // Refresh campaigns list
+    
+    if (deletedCount > 0 && currentPage === 'home') {
+        // Refresh campaigns silently
         if (unsubscribeCampaigns) {
             unsubscribeCampaigns();
             setupRealTimeCampaigns();
@@ -471,7 +485,6 @@ async function adminGiveCredits(userEmail, amount) {
         const userId = snap.docs[0].id;
         await updateDoc(doc(db, 'viewswap_users', userId), { credits: increment(parseFloat(amount)), totalEarned: increment(parseFloat(amount)) });
         showToast(`Added ${amount} credits to ${userEmail}`);
-        showNotification('Admin Action', `You received ${amount} credits from admin!`);
         if (currentPage === 'admin') renderAdminPanel();
     } else {
         showToast('User not found', true);
@@ -541,6 +554,7 @@ async function completeCampaign(campaign) {
     if (watchedHistory.length > 10) watchedHistory.pop();
     await saveUserData();
     
+    // Silent auto-delete check
     await autoDeleteInvalidCampaigns();
     
     if (autoplayEnabled && currentPage === 'home') {
@@ -557,12 +571,10 @@ function getNextCampaign() {
     return available[0] || allCampaigns.filter(c => c.creatorId !== currentUser?.uid)[0];
 }
 
-// IMPROVED: Instant YouTube embed loading
 function initYouTubePlayer(videoId, campaign) {
     const div = document.getElementById('current_player');
     if (!div || !videoId) return null;
     
-    // Don't destroy if same video
     if (youtubePlayer && youtubePlayer.getVideoData && youtubePlayer.getVideoData().video_id === videoId) {
         return youtubePlayer;
     }
@@ -609,7 +621,6 @@ function initYouTubePlayer(videoId, campaign) {
 async function startAutoWatch(campaign) {
     if (!currentUser || campaign.watchers?.includes(currentUser.uid)) return;
     
-    // Don't restart if already watching the same campaign
     if (activeWatchData && activeWatchData.campaignId === campaign.id && youtubePlayer) {
         if (activeWatchData.isPaused) {
             youtubePlayer.playVideo();
@@ -619,7 +630,7 @@ async function startAutoWatch(campaign) {
     }
     
     if (activeWatchData) {
-        stopCurrentWatch(true); // Keep player?
+        stopCurrentWatch(true);
     }
     
     let elapsed = campaign.watcherWatchTime?.[currentUser.uid] || 0;
@@ -633,7 +644,6 @@ async function startAutoWatch(campaign) {
     };
     updateUI();
     
-    // Wait for YT API
     const initPlayer = () => {
         if (window.YT && window.YT.Player) {
             youtubePlayer = initYouTubePlayer(campaign.videoId, campaign);
@@ -645,7 +655,6 @@ async function startAutoWatch(campaign) {
     
     if (watchInterval) clearInterval(watchInterval);
     watchInterval = setInterval(async () => {
-        // Only count time if: tab is visible, video not paused, and on home page, and player exists
         if (activeWatchData && (!isTabVisible || activeWatchData.isPaused || currentPage !== 'home')) return;
         if (elapsed < target) {
             elapsed++;
@@ -683,14 +692,15 @@ function setupRealTimeCampaigns() {
         allCampaigns = [];
         snapshot.forEach(doc => {
             const data = doc.data();
-            if (!data.watchers?.includes(currentUser?.uid)) allCampaigns.push({ ...data, firestoreId: doc.id });
+            // Only include campaigns that are valid (target <= video duration)
+            if (!data.watchers?.includes(currentUser?.uid) && data.videoDuration && data.targetWatchTime <= data.videoDuration) {
+                allCampaigns.push({ ...data, firestoreId: doc.id });
+            }
         });
         
-        // If we were watching a campaign, check if it still exists and continue
         if (currentPage === 'home' && previousCampaignId) {
             const existingCampaign = allCampaigns.find(c => c.id === previousCampaignId);
             if (existingCampaign && activeWatchData && !activeWatchData.completed) {
-                // Continue watching same campaign
                 if (youtubePlayer && activeWatchData.isPaused) {
                     youtubePlayer.playVideo();
                     activeWatchData.isPaused = false;
@@ -746,8 +756,8 @@ async function renderAdminPanel() {
                     <div class="user-item">
                         <div class="user-info">
                             <div class="user-email">${escapeHtml(c.title)}</div>
-                            <div class="user-stats">Creator: ${escapeHtml(c.creatorEmail || c.creatorName)} | Views: ${c.totalViews || 0} | Target: ${c.targetWatchTime}s | Duration: ${Math.floor(c.videoDuration || 0)}s</div>
-                            <div class="user-stats ${c.targetWatchTime > (c.videoDuration || 0) ? 'error-text' : ''}">${c.targetWatchTime > (c.videoDuration || 0) ? '⚠️ INVALID: Target > Duration' : '✅ Valid'}</div>
+                            <div class="user-stats">Creator: ${escapeHtml(c.creatorEmail || c.creatorName)} | Views: ${c.totalViews || 0} | Target: ${c.targetWatchTime}s | Real Duration: ${Math.floor(c.videoDuration || 0)}s</div>
+                            <div class="user-stats ${c.targetWatchTime > (c.videoDuration || 0) ? 'error-text' : ''}">${c.targetWatchTime > (c.videoDuration || 0) ? '⚠️ INVALID' : '✅ Valid'}</div>
                         </div>
                         <div class="admin-actions">
                             <button class="admin-btn danger" onclick="window.adminDeleteCampaign('${c.id}')">Delete & Refund</button>
@@ -786,9 +796,8 @@ async function renderCurrentPage() {
     const container = document.getElementById('pageContent');
     
     if (currentPage === 'home') {
-        container.innerHTML = `<div class="card"><h2>🎬 Now Playing</h2>${activeWatchData?.campaign ? `<div class="campaign-item"><div class="video-container" id="current_player"></div><div class="watch-stats"><div class="stat-badge"><div class="stat-badge-label">YOU EARN</div><div class="stat-badge-value" id="current_earnings">0</div></div><div class="stat-badge"><div class="stat-badge-label">TIME LEFT</div><div class="stat-badge-value timer-value" id="current_timer">0</div></div></div><div class="progress-area"><div class="progress-bar-container"><div class="progress-fill" id="current_progress"></div></div></div><div class="action-buttons-area"><button class="action-btn btn-next" onclick="window.nextVideo()">⏭️ NEXT</button><button class="action-btn btn-autoplay ${autoplayEnabled ? 'active' : ''}" onclick="window.toggleAutoplay()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button></div></div>` : '<div class="empty-state">✨ No campaigns available. Create one to start earning!</div>'}</div>`;
+        container.innerHTML = `<div class="card"><h2>🎬 Now Playing</h2>${activeWatchData?.campaign ? `<div class="campaign-item"><div class="video-container" id="current_player"></div><div class="watch-stats"><div class="stat-badge"><div class="stat-badge-label">YOU EARN</div><div class="stat-badge-value" id="current_earnings">0</div></div><div class="stat-badge"><div class="stat-badge-label">TIME LEFT</div><div class="stat-badge-value timer-value" id="current_timer">0</div></div></div><div class="progress-area"><div class="progress-bar-container"><div class="progress-fill" id="current_progress"></div></div></div><div class="action-buttons-area"><button class="action-btn btn-next" onclick="window.nextVideo()">⏭️ NEXT</button><button class="action-btn btn-autoplay ${autoplayEnabled ? 'active' : ''}" onclick="window.toggleAutoplay()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button></div></div>` : '<div class="empty-state">✨ No valid campaigns available. Create one with a video longer than target time!</div>'}</div>`;
         
-        // Resume video if needed
         if (activeWatchData?.campaign && youtubePlayer && activeWatchData.isPaused && !activeWatchData.completed && isTabVisible) {
             setTimeout(() => {
                 if (youtubePlayer && activeWatchData.isPaused) {
@@ -799,11 +808,11 @@ async function renderCurrentPage() {
         }
     } else if (currentPage === 'campaign') {
         const userCampaigns = allCampaigns.filter(c => c.creatorId === currentUser?.uid);
-        container.innerHTML = `<div style="display: flex; justify-content: flex-end; margin-bottom: 12px;"><button class="btn-primary" id="createCampaignBtn" style="width: auto; padding: 10px 20px;">+ Create Campaign</button></div>${userCampaigns.map(c => `<div class="campaign-item"><div style="padding:16px;"><div><strong>${escapeHtml(c.title)}</strong></div><div>Views: ${c.totalViews || 0} / Target: ${c.targetWatchTime}s</div><div>Video Duration: ${Math.floor(c.videoDuration || 0)}s</div><div>Total Watch Time: ${(c.totalWatchTimeSeconds || 0)}s</div><div>Campaign Cost: ${(c.campaignCost || (c.targetWatchTime * CAMPAIGN_COST_PER_SECOND)).toFixed(2)} credits</div><div class="${c.targetWatchTime > (c.videoDuration || 0) ? 'error-text' : ''}">${c.targetWatchTime > (c.videoDuration || 0) ? '⚠️ INVALID: Target time exceeds video duration!' : '✅ Video duration is longer than target time'}</div><button class="small-btn btn-danger" onclick="window.deleteCampaign('${c.id}')">Delete & Refund</button></div></div>`).join('') || '<div class="empty-state">No campaigns yet. Click + to create!</div>'}`;
+        container.innerHTML = `<div style="display: flex; justify-content: flex-end; margin-bottom: 12px;"><button class="btn-primary" id="createCampaignBtn" style="width: auto; padding: 10px 20px;">+ Create Campaign</button></div>${userCampaigns.map(c => `<div class="campaign-item"><div style="padding:16px;"><div><strong>${escapeHtml(c.title)}</strong></div><div>Views: ${c.totalViews || 0} / Target: ${c.targetWatchTime}s</div><div>Real Video Duration: ${Math.floor(c.videoDuration || 0)}s</div><div>Total Watch Time: ${(c.totalWatchTimeSeconds || 0)}s</div><div>Campaign Cost: ${(c.campaignCost || (c.targetWatchTime * CAMPAIGN_COST_PER_SECOND)).toFixed(2)} credits</div><div class="${c.targetWatchTime > (c.videoDuration || 0) ? 'error-text' : ''}">${c.targetWatchTime > (c.videoDuration || 0) ? '⚠️ INVALID: Target time exceeds real video duration!' : '✅ Real video duration is longer than target time'}</div><button class="small-btn btn-danger" onclick="window.deleteCampaign('${c.id}')">Delete & Refund</button></div></div>`).join('') || '<div class="empty-state">No campaigns yet. Click + to create!</div>'}`;
         document.getElementById('createCampaignBtn')?.addEventListener('click', () => {
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
-            modal.innerHTML = `<div class="modal-content"><h3>Create Campaign</h3><p style="font-size:0.8rem;margin-bottom:12px;color:#f87171;">⚠️ CRITICAL: Video duration MUST be LONGER than target watch time!</p><p style="font-size:0.8rem;margin-bottom:12px;">💰 Campaign cost: <strong>${CAMPAIGN_COST_PER_SECOND} credits per second</strong> of target watch time</p><input id="newTitle" placeholder="Campaign Title"><input id="newUrl" placeholder="YouTube URL"><input id="newTarget" type="number" placeholder="Target watch time (seconds)" value="30"><p id="costPreview" style="font-size:0.8rem;margin-top:8px;">Cost: ${(30 * CAMPAIGN_COST_PER_SECOND).toFixed(2)} credits</p><p id="warningPreview" style="font-size:0.8rem;color:#f87171;"></p><button class="btn-primary" id="confirmCreateBtn">Create Campaign</button><button class="btn-secondary" id="cancelModal">Cancel</button></div>`;
+            modal.innerHTML = `<div class="modal-content"><h3>Create Campaign</h3><p style="font-size:0.8rem;margin-bottom:12px;color:#f87171;">⚠️ CRITICAL: Real video duration MUST be LONGER than target watch time!</p><p style="font-size:0.8rem;margin-bottom:12px;">💰 Campaign cost: <strong>${CAMPAIGN_COST_PER_SECOND} credits per second</strong> of target watch time</p><input id="newTitle" placeholder="Campaign Title"><input id="newUrl" placeholder="YouTube URL"><input id="newTarget" type="number" placeholder="Target watch time (seconds)" value="30"><p id="costPreview" style="font-size:0.8rem;margin-top:8px;">Cost: ${(30 * CAMPAIGN_COST_PER_SECOND).toFixed(2)} credits</p><p id="warningPreview" style="font-size:0.8rem;color:#f87171;"></p><button class="btn-primary" id="confirmCreateBtn">Create Campaign</button><button class="btn-secondary" id="cancelModal">Cancel</button></div>`;
             document.body.appendChild(modal);
             const targetInput = document.getElementById('newTarget');
             const costPreview = document.getElementById('costPreview');
@@ -811,7 +820,7 @@ async function renderCurrentPage() {
             targetInput?.addEventListener('input', (e) => {
                 const val = parseInt(e.target.value) || 0;
                 costPreview.textContent = `Cost: ${(val * CAMPAIGN_COST_PER_SECOND).toFixed(2)} credits`;
-                warningPreview.textContent = `⚠️ Video must be at least ${val} seconds long!`;
+                warningPreview.textContent = `⚠️ Video must be at least ${val} seconds long (real duration)!`;
             });
             document.getElementById('confirmCreateBtn')?.addEventListener('click', async () => {
                 const targetTime = parseInt(targetInput?.value) || 30;
