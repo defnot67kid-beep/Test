@@ -22,9 +22,83 @@ const DEFAULT_REFERRAL_CODE = "REFAI40PA";
 const DEFAULT_REFERRAL_EMAIL = "defnot67kid@gmail.com";
 const DEFAULT_REFERRAL_PERCENT = 0.0009;
 const USER_REFERRAL_PERCENT = 0.025;
-const VIEWER_EARNING_RATE = 0.5;
-const CAMPAIGN_COST_PER_SECOND = 0.19;
+let VIEWER_EARNING_RATE = 0.5;
+let CAMPAIGN_COST_PER_SECOND = 0.19;
 const BASE_URL = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
+
+// Hidden Admin Logs System
+let adminLogs = [];
+let showLogs = false;
+let logPanel = null;
+
+// Secret key combo (Ctrl+Shift+L) to toggle logs
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+        e.preventDefault();
+        toggleAdminLogs();
+    }
+});
+
+function toggleAdminLogs() {
+    showLogs = !showLogs;
+    if (showLogs) {
+        if (!logPanel) {
+            logPanel = document.createElement('div');
+            logPanel.id = 'adminLogPanel';
+            logPanel.style.cssText = `
+                position: fixed;
+                bottom: 10px;
+                right: 10px;
+                width: 400px;
+                max-height: 300px;
+                background: rgba(0,0,0,0.95);
+                color: #0f0;
+                font-family: monospace;
+                font-size: 11px;
+                border-radius: 8px;
+                padding: 10px;
+                overflow-y: auto;
+                z-index: 10001;
+                border: 1px solid #0f0;
+                box-shadow: 0 0 10px rgba(0,255,0,0.3);
+            `;
+            document.body.appendChild(logPanel);
+        }
+        refreshLogPanel();
+        logPanel.style.display = 'block';
+    } else if (logPanel) {
+        logPanel.style.display = 'none';
+    }
+}
+
+function addAdminLog(message, type = 'info') {
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = { timestamp, message, type };
+    adminLogs.unshift(logEntry);
+    if (adminLogs.length > 100) adminLogs.pop();
+    
+    console.log(`[${timestamp}] ${message}`);
+    
+    if (showLogs && logPanel) {
+        refreshLogPanel();
+    }
+}
+
+function refreshLogPanel() {
+    if (!logPanel) return;
+    logPanel.innerHTML = `<div style="border-bottom:1px solid #0f0; margin-bottom:5px; padding-bottom:3px;">
+        <strong>📋 Admin Logs (Ctrl+Shift+L to hide)</strong>
+        <button id="clearLogsBtn" style="float:right; background:#333; color:#0f0; border:none; border-radius:3px; cursor:pointer;">Clear</button>
+    </div>`;
+    adminLogs.forEach(log => {
+        const color = log.type === 'error' ? '#f00' : (log.type === 'success' ? '#0f0' : '#ff0');
+        logPanel.innerHTML += `<div style="color:${color}; border-bottom:1px solid #333; padding:3px 0;">
+            <span style="color:#888;">[${log.timestamp}]</span> ${log.message}
+        </div>`;
+    });
+    const clearBtn = document.getElementById('clearLogsBtn');
+    if (clearBtn) clearBtn.onclick = () => { adminLogs = []; refreshLogPanel(); };
+}
 
 // Algorithm Settings
 let algorithmSettings = {
@@ -60,40 +134,7 @@ let isTabVisible = true;
 let isAdmin = false;
 let defaultReferrerIdCache = null;
 let videoFullyLoaded = false;
-
-// ============ ACHIEVEMENTS ============
-const ACHIEVEMENTS = [
-    { id: "first_video", name: "🎬 First Step", description: "Watch your first video", requirement: { type: "watched", count: 1 }, reward: 10 },
-    { id: "video_enthusiast", name: "📺 Video Enthusiast", description: "Watch 10 videos", requirement: { type: "watched", count: 10 }, reward: 50 },
-    { id: "video_master", name: "🏆 Video Master", description: "Watch 50 videos", requirement: { type: "watched", count: 50 }, reward: 200 },
-    { id: "video_legend", name: "👑 Video Legend", description: "Watch 100 videos", requirement: { type: "watched", count: 100 }, reward: 500 },
-    { id: "video_god", name: "⭐ Video God", description: "Watch 500 videos", requirement: { type: "watched", count: 500 }, reward: 2000 },
-    { id: "first_campaign", name: "📢 First Campaign", description: "Create your first campaign", requirement: { type: "created", count: 1 }, reward: 25 },
-    { id: "campaign_creator", name: "🎯 Campaign Creator", description: "Create 5 campaigns", requirement: { type: "created", count: 5 }, reward: 100 },
-    { id: "campaign_master", name: "🏭 Campaign Master", description: "Create 20 campaigns", requirement: { type: "created", count: 20 }, reward: 400 },
-    { id: "campaign_tycoon", name: "💰 Campaign Tycoon", description: "Create 50 campaigns", requirement: { type: "created", count: 50 }, reward: 1000 },
-    { id: "first_credit", name: "💎 First Credit", description: "Earn your first 100 credits", requirement: { type: "earned", count: 100 }, reward: 10 },
-    { id: "credit_collector", name: "🪙 Credit Collector", description: "Earn 1000 credits", requirement: { type: "earned", count: 1000 }, reward: 100 },
-    { id: "credit_millionaire", name: "💵 Credit Millionaire", description: "Earn 5000 credits", requirement: { type: "earned", count: 5000 }, reward: 500 },
-    { id: "credit_billionaire", name: "💎 Credit Billionaire", description: "Earn 25000 credits", requirement: { type: "earned", count: 25000 }, reward: 2000 },
-    { id: "first_referral", name: "🤝 First Referral", description: "Get your first referral", requirement: { type: "referrals", count: 1 }, reward: 50 },
-    { id: "referral_star", name: "⭐ Referral Star", description: "Get 5 referrals", requirement: { type: "referrals", count: 5 }, reward: 250 },
-    { id: "referral_king", name: "👑 Referral King", description: "Get 20 referrals", requirement: { type: "referrals", count: 20 }, reward: 1000 },
-    { id: "referral_god", name: "🏆 Referral God", description: "Get 50 referrals", requirement: { type: "referrals", count: 50 }, reward: 5000 },
-    { id: "streak_3", name: "🔥 Hot Streak", description: "3 day login streak", requirement: { type: "streak", count: 3 }, reward: 30 },
-    { id: "streak_7", name: "⚡ Power Streak", description: "7 day login streak", requirement: { type: "streak", count: 7 }, reward: 100 },
-    { id: "streak_30", name: "🌟 Legendary Streak", description: "30 day login streak", requirement: { type: "streak", count: 30 }, reward: 500 },
-    { id: "streak_100", name: "💪 Unstoppable", description: "100 day login streak", requirement: { type: "streak", count: 100 }, reward: 2000 },
-    { id: "campaign_views_10", name: "👁️ Getting Views", description: "Get 10 total views on your campaigns", requirement: { type: "campaign_views", count: 10 }, reward: 50 },
-    { id: "campaign_views_100", name: "🌟 Popular Creator", description: "Get 100 total views on your campaigns", requirement: { type: "campaign_views", count: 100 }, reward: 200 },
-    { id: "campaign_views_1000", name: "🎥 Viral Sensation", description: "Get 1000 total views on your campaigns", requirement: { type: "campaign_views", count: 1000 }, reward: 1000 },
-    { id: "watch_time_1h", name: "⏰ Time Well Spent", description: "Watch 1 hour total", requirement: { type: "watch_time", count: 3600 }, reward: 50 },
-    { id: "watch_time_10h", name: "📺 Dedicated Viewer", description: "Watch 10 hours total", requirement: { type: "watch_time", count: 36000 }, reward: 200 },
-    { id: "watch_time_100h", name: "🎮 No-Life Achievement", description: "Watch 100 hours total", requirement: { type: "watch_time", count: 360000 }, reward: 1000 },
-    { id: "credit_spender_100", name: "💸 First Spender", description: "Spend 100 credits on campaigns", requirement: { type: "spent", count: 100 }, reward: 20 },
-    { id: "credit_spender_1000", name: "🏦 Investor", description: "Spend 1000 credits on campaigns", requirement: { type: "spent", count: 1000 }, reward: 150 },
-    { id: "credit_spender_10000", name: "💼 Tycoon Investor", description: "Spend 10000 credits on campaigns", requirement: { type: "spent", count: 10000 }, reward: 1000 }
-];
+let currentVideoId = null; // Track current video to prevent re-initialization
 
 function showToast(msg, isErr = false) {
     const t = document.createElement('div');
@@ -102,6 +143,7 @@ function showToast(msg, isErr = false) {
     t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 3000);
+    addAdminLog(`Toast: ${msg}`, isErr ? 'error' : 'info');
 }
 
 function showNotification(title, body, type = 'info') {
@@ -115,22 +157,153 @@ function showNotification(title, body, type = 'info') {
     }
 }
 
+// ============ AI BUG FIXER ============
+async function aiFixEverything() {
+    addAdminLog("🤖 AI Bug Fixer Activated - Scanning for issues...", "info");
+    showToast("🤖 AI Bug Fixer: Scanning for issues...");
+    
+    let fixesApplied = [];
+    let errorsFound = [];
+    
+    try {
+        // 1. Check and fix Firebase connection
+        addAdminLog("Checking Firebase connection...", "info");
+        try {
+            const testQuery = await getDocs(query(collection(db, 'viewswap_users'), limit(1)));
+            addAdminLog("✅ Firebase connection OK", "success");
+        } catch (e) {
+            errorsFound.push("Firebase connection issue");
+            addAdminLog("❌ Firebase connection issue detected", "error");
+        }
+        
+        // 2. Auto-delete invalid campaigns
+        addAdminLog("Scanning for invalid campaigns...", "info");
+        const invalidCampaigns = await autoDeleteInvalidCampaigns(true);
+        if (invalidCampaigns > 0) {
+            fixesApplied.push(`Deleted ${invalidCampaigns} invalid campaigns`);
+            addAdminLog(`✅ Deleted ${invalidCampaigns} invalid campaigns`, "success");
+        }
+        
+        // 3. Check and fix user data consistency
+        addAdminLog("Checking user data consistency...", "info");
+        const usersSnapshot = await getDocs(collection(db, 'viewswap_users'));
+        let userFixes = 0;
+        for (const userDoc of usersSnapshot.docs) {
+            const user = userDoc.data();
+            let needsFix = false;
+            const updates = {};
+            
+            if (!user.streak) {
+                updates.streak = { current: 0, lastClaim: null, highest: 0 };
+                needsFix = true;
+            }
+            if (!user.achievements) {
+                updates.achievements = [];
+                needsFix = true;
+            }
+            if (!user.notificationSettings) {
+                updates.notificationSettings = { enabled: true, achievements: true, referralEarnings: true, dailyBonus: true, campaignAlerts: true };
+                needsFix = true;
+            }
+            
+            if (needsFix) {
+                await updateDoc(doc(db, 'viewswap_users', userDoc.id), updates);
+                userFixes++;
+            }
+        }
+        if (userFixes > 0) {
+            fixesApplied.push(`Fixed ${userFixes} user profiles`);
+            addAdminLog(`✅ Fixed ${userFixes} user profiles`, "success");
+        }
+        
+        // 4. Check YouTube API
+        addAdminLog("Checking YouTube API...", "info");
+        if (typeof YT === 'undefined') {
+            errorsFound.push("YouTube API not loaded");
+            addAdminLog("⚠️ YouTube API not loaded - will retry", "error");
+            const script = document.createElement('script');
+            script.src = "https://www.youtube.com/iframe_api";
+            document.head.appendChild(script);
+            fixesApplied.push("Reloaded YouTube API");
+        } else {
+            addAdminLog("✅ YouTube API available", "success");
+        }
+        
+        // 5. Reset any stuck video state
+        if (activeWatchData && !activeWatchData.completed && !youtubePlayer) {
+            addAdminLog("Resetting stuck video state...", "info");
+            stopCurrentWatch();
+            fixesApplied.push("Reset stuck video player");
+        }
+        
+        // 6. Refresh campaigns
+        addAdminLog("Refreshing campaigns list...", "info");
+        if (unsubscribeCampaigns) {
+            unsubscribeCampaigns();
+            setupRealTimeCampaigns();
+            fixesApplied.push("Refreshed campaigns listener");
+        }
+        
+        // 7. Check for orphaned campaigns (creator deleted)
+        addAdminLog("Checking for orphaned campaigns...", "info");
+        const allCampaignsSnap = await getDocs(collection(db, 'viewswap_campaigns'));
+        let orphanedCount = 0;
+        for (const campDoc of allCampaignsSnap.docs) {
+            const camp = campDoc.data();
+            const creatorSnap = await getDoc(doc(db, 'viewswap_users', camp.creatorId));
+            if (!creatorSnap.exists()) {
+                await deleteDoc(campDoc.ref);
+                orphanedCount++;
+            }
+        }
+        if (orphanedCount > 0) {
+            fixesApplied.push(`Deleted ${orphanedCount} orphaned campaigns`);
+            addAdminLog(`✅ Deleted ${orphanedCount} orphaned campaigns`, "success");
+        }
+        
+        // 8. Re-render current page without destroying player
+        await renderCurrentPage();
+        
+        const resultMsg = fixesApplied.length > 0 
+            ? `✅ AI Fixer completed! Applied: ${fixesApplied.join(', ')}` 
+            : "✅ AI Fixer: No issues found! System is healthy.";
+        
+        showToast(resultMsg);
+        addAdminLog(resultMsg, "success");
+        
+        if (errorsFound.length > 0) {
+            addAdminLog(`⚠️ Warning: Some issues couldn't be auto-fixed: ${errorsFound.join(', ')}`, "error");
+        }
+        
+    } catch (error) {
+        addAdminLog(`AI Fixer error: ${error.message}`, "error");
+        showToast(`AI Fixer error: ${error.message}`, true);
+    }
+}
+
+// FIXED: Tab visibility - ONLY PAUSE/RESUME, NEVER DESTROY PLAYER
 document.addEventListener('visibilitychange', () => {
     isTabVisible = !document.hidden;
     if (activeWatchData && youtubePlayer) {
         if (!isTabVisible) {
             youtubePlayer.pauseVideo();
             activeWatchData.isPaused = true;
+            addAdminLog("Video paused - tab hidden", "info");
         } else if (isTabVisible && activeWatchData.isPaused && !activeWatchData.completed) {
             youtubePlayer.playVideo();
             activeWatchData.isPaused = false;
+            addAdminLog("Video resumed - tab visible", "info");
         }
     }
 });
 
 function pauseCurrentVideo() {
-    if (youtubePlayer && youtubePlayer.pauseVideo) youtubePlayer.pauseVideo();
-    if (activeWatchData) activeWatchData.isPaused = true;
+    if (youtubePlayer && youtubePlayer.pauseVideo) {
+        youtubePlayer.pauseVideo();
+    }
+    if (activeWatchData) {
+        activeWatchData.isPaused = true;
+    }
 }
 
 function resumeCurrentVideo() {
@@ -140,15 +313,20 @@ function resumeCurrentVideo() {
     }
 }
 
+// FIXED: Stop watch but preserve player when switching tabs
 function stopCurrentWatch(keepPlayer = false) {
     if (watchInterval) clearInterval(watchInterval);
     watchInterval = null;
     videoFullyLoaded = false;
+    // Only destroy player if explicitly told to (like when changing videos)
     if (!keepPlayer && youtubePlayer && youtubePlayer.destroy) {
         youtubePlayer.destroy();
         youtubePlayer = null;
+        currentVideoId = null;
     }
-    if (!keepPlayer) activeWatchData = null;
+    if (!keepPlayer) {
+        activeWatchData = null;
+    }
 }
 
 async function getDefaultReferrerId() {
@@ -162,7 +340,7 @@ async function getDefaultReferrerId() {
         }
         return null;
     } catch (e) {
-        console.error("Error getting default referrer:", e);
+        addAdminLog(`Error getting default referrer: ${e.message}`, "error");
         return null;
     }
 }
@@ -177,6 +355,7 @@ async function ensureDefaultReferral(userId, userEmail) {
         if (!currentReferredBy) {
             await updateDoc(userRef, { referredBy: defaultReferrerId });
             await updateDoc(doc(db, 'viewswap_users', defaultReferrerId), { referrals: arrayUnion(userId) });
+            addAdminLog(`Auto-referred user ${userEmail} to default referrer`, "info");
         }
     }
 }
@@ -192,6 +371,7 @@ async function processQRReferral(code) {
         await updateCredits(10);
         await checkAchievements();
         showNotification('Referral Success', `+10 credits!`, 'referral');
+        addAdminLog(`User ${currentUser.email} used referral code ${code}`, "success");
     } else {
         showToast('Invalid code', true);
     }
@@ -215,6 +395,7 @@ async function loadUserData(uid) {
         userData.totalSpent = userData.totalSpent || 0;
         userData.notificationSettings = userData.notificationSettings || { ...userNotificationSettings };
         userNotificationSettings = userData.notificationSettings;
+        addAdminLog(`Loaded user data for ${currentUser.email}`, "info");
     } else {
         userData = {
             uid, email: currentUser.email, displayName: currentUser.displayName || currentUser.email,
@@ -231,6 +412,7 @@ async function loadUserData(uid) {
             notificationSettings: { ...userNotificationSettings }
         };
         await setDoc(ref, userData);
+        addAdminLog(`Created new user: ${currentUser.email}`, "success");
     }
     await ensureDefaultReferral(uid, currentUser.email);
     const updatedSnap = await getDoc(ref);
@@ -289,7 +471,7 @@ async function addAllReferralEarnings(earnerId, earnedAmount) {
             }
         }
     } catch (e) {
-        console.error("Referral error:", e);
+        addAdminLog(`Referral error: ${e.message}`, "error");
     }
 }
 
@@ -326,6 +508,7 @@ async function autoProcessDailyBonus() {
     await saveUserData();
     await checkAchievements();
     showNotification('Daily Bonus', `+${bonusAmount} credits! ${newStreak} day streak!`, 'daily');
+    addAdminLog(`Daily bonus: ${bonusAmount} credits, streak: ${newStreak}`, "info");
 }
 
 function setupReferralEarningsListener() {
@@ -408,50 +591,47 @@ async function getRealVideoDuration(videoId) {
     });
 }
 
-// FIXED: Campaign creation with proper error handling
 async function validateAndCreateCampaign(campaignData, isAdminAction = false, targetUserId = null) {
-    console.log("Starting campaign creation...", campaignData);
+    addAdminLog(`Starting campaign creation for ${campaignData.title}`, "info");
     
     const targetTime = parseInt(campaignData.targetWatchTime) || 30;
     const totalCost = targetTime * CAMPAIGN_COST_PER_SECOND;
     
-    console.log(`Target time: ${targetTime}s, Total cost: ${totalCost}, User credits: ${userData?.credits}`);
-    
     if (!isAdminAction && userData.credits < totalCost) {
-        showToast(`Need ${totalCost.toFixed(2)} credits (${targetTime}s × ${CAMPAIGN_COST_PER_SECOND}/sec)`, true);
+        showToast(`Need ${totalCost.toFixed(2)} credits`, true);
+        addAdminLog(`Insufficient credits: need ${totalCost}, have ${userData.credits}`, "error");
         return false;
     }
     
     const videoId = extractVideoId(campaignData.url);
     if (!videoId) {
         showToast('Invalid YouTube URL', true);
+        addAdminLog(`Invalid YouTube URL: ${campaignData.url}`, "error");
         return false;
     }
     
-    console.log(`Video ID: ${videoId}, fetching duration...`);
     showToast('Getting real video duration from YouTube...');
-    
     let duration;
     try {
         duration = await getRealVideoDuration(videoId);
-        console.log(`Video duration: ${duration}s`);
+        addAdminLog(`Video duration: ${duration}s for ${videoId}`, "info");
     } catch (error) {
-        console.error("Duration fetch error:", error);
-        showToast(`Failed to get video duration: ${error.message}. Please try again.`, true);
+        addAdminLog(`Duration fetch error: ${error.message}`, "error");
+        showToast(`Failed to get video duration: ${error.message}`, true);
         return false;
     }
     
     if (duration < targetTime) {
-        showToast(`❌ REJECTED: Video is ${Math.floor(duration)}s long, target is ${targetTime}s. Video must be longer than target time!`, true);
+        showToast(`❌ REJECTED: Video is ${Math.floor(duration)}s long, target is ${targetTime}s`, true);
+        addAdminLog(`Campaign rejected: duration ${duration} < target ${targetTime}`, "error");
         return false;
     }
     
-    // Deduct credits
     if (!isAdminAction) {
-        console.log("Deducting credits...");
         await updateCredits(-totalCost);
         await trackSpending(totalCost);
         await trackCampaignCreation();
+        addAdminLog(`Deducted ${totalCost} credits from user`, "info");
     }
     
     const campaignId = Date.now().toString();
@@ -475,19 +655,11 @@ async function validateAndCreateCampaign(campaignData, isAdminAction = false, ta
         createdByAdmin: isAdminAction || false
     };
     
-    console.log("Saving campaign to Firestore...", campaign);
-    
     try {
         await setDoc(doc(db, 'viewswap_campaigns', campaignId), campaign);
-        console.log("Campaign saved successfully!");
+        addAdminLog(`Campaign created successfully: ${campaignData.title}`, "success");
+        showToast(`✅ Campaign created! Duration: ${Math.floor(duration)}s, Target: ${targetTime}s`);
         
-        if (isAdminAction) {
-            showToast(`✅ Admin created campaign! Duration: ${Math.floor(duration)}s, Target: ${targetTime}s | Cost: ${totalCost.toFixed(2)} credits`);
-        } else {
-            showToast(`✅ Campaign created! Real duration: ${Math.floor(duration)}s, Target: ${targetTime}s | Cost: ${totalCost.toFixed(2)} credits`);
-        }
-        
-        // Refresh campaigns list
         if (unsubscribeCampaigns) {
             unsubscribeCampaigns();
             setupRealTimeCampaigns();
@@ -495,7 +667,7 @@ async function validateAndCreateCampaign(campaignData, isAdminAction = false, ta
         
         return true;
     } catch (error) {
-        console.error("Error saving campaign:", error);
+        addAdminLog(`Error saving campaign: ${error.message}`, "error");
         showToast(`Failed to save campaign: ${error.message}`, true);
         return false;
     }
@@ -511,12 +683,13 @@ async function deleteCampaign(campaignId) {
         const refundAmount = remainingTime * CAMPAIGN_COST_PER_SECOND;
         if (refundAmount > 0) {
             await updateDoc(doc(db, 'viewswap_users', campaign.creatorId), { credits: increment(refundAmount) });
+            addAdminLog(`Refunded ${refundAmount} credits for deleted campaign ${campaign.title}`, "info");
         }
     }
     await deleteDoc(campaignRef);
 }
 
-async function autoDeleteInvalidCampaigns() {
+async function autoDeleteInvalidCampaigns(silent = false) {
     const campaignsSnapshot = await getDocs(collection(db, 'viewswap_campaigns'));
     let deletedCount = 0;
     
@@ -541,6 +714,7 @@ async function autoDeleteInvalidCampaigns() {
             }
             await deleteDoc(campaignDoc.ref);
             deletedCount++;
+            if (!silent) addAdminLog(`Auto-deleted invalid campaign: ${campaign.title}`, "warning");
         }
     }
     
@@ -550,6 +724,8 @@ async function autoDeleteInvalidCampaigns() {
             setupRealTimeCampaigns();
         }
     }
+    
+    return deletedCount;
 }
 
 // ============ ADMIN FUNCTIONS ============
@@ -564,6 +740,7 @@ async function adminDeleteCampaign(campaignId) {
     }
     await deleteDoc(campaignRef);
     showToast('Campaign deleted by admin with refund');
+    addAdminLog(`Admin deleted campaign ${campaignId}`, "info");
     if (currentPage === 'admin') renderAdminPanel();
 }
 
@@ -574,6 +751,7 @@ async function adminGiveCredits(userEmail, amount) {
         const userId = snap.docs[0].id;
         await updateDoc(doc(db, 'viewswap_users', userId), { credits: increment(parseFloat(amount)), totalEarned: increment(parseFloat(amount)) });
         showToast(`Added ${amount} credits to ${userEmail}`);
+        addAdminLog(`Admin added ${amount} credits to ${userEmail}`, "success");
         if (currentPage === 'admin') renderAdminPanel();
     } else {
         showToast('User not found', true);
@@ -591,6 +769,7 @@ async function adminSetCredits(userEmail, amount) {
         const diff = parseFloat(amount) - currentCredits;
         await updateDoc(userRef, { credits: parseFloat(amount), totalEarned: increment(diff) });
         showToast(`Set ${userEmail} credits to ${amount}`);
+        addAdminLog(`Admin set ${userEmail} credits to ${amount}`, "success");
         if (currentPage === 'admin') renderAdminPanel();
     } else {
         showToast('User not found', true);
@@ -604,6 +783,7 @@ async function adminRemoveCredits(userEmail, amount) {
         const userId = snap.docs[0].id;
         await updateDoc(doc(db, 'viewswap_users', userId), { credits: increment(-parseFloat(amount)) });
         showToast(`Removed ${amount} credits from ${userEmail}`);
+        addAdminLog(`Admin removed ${amount} credits from ${userEmail}`, "warning");
         if (currentPage === 'admin') renderAdminPanel();
     } else {
         showToast('User not found', true);
@@ -627,6 +807,7 @@ async function adminRemoveReferral(userEmail) {
             }
         }
         showToast(`Removed referral for ${userEmail}`);
+        addAdminLog(`Admin removed referral for ${userEmail}`, "info");
         if (currentPage === 'admin') renderAdminPanel();
     }
 }
@@ -649,6 +830,7 @@ async function adminSetReferral(userEmail, referrerEmail) {
     await updateDoc(userRef, { referredBy: referrerId });
     await updateDoc(doc(db, 'viewswap_users', referrerId), { referrals: arrayUnion(userId) });
     showToast(`Set ${userEmail} referred by ${referrerEmail}`);
+    addAdminLog(`Admin set ${userEmail} referred by ${referrerEmail}`, "success");
     if (currentPage === 'admin') renderAdminPanel();
 }
 
@@ -661,6 +843,7 @@ async function adminRemoveAllReferrals() {
         });
         await batch.commit();
         showToast('All referrals have been removed');
+        addAdminLog(`Admin removed ALL referrals`, "warning");
         if (currentPage === 'admin') renderAdminPanel();
     }
 }
@@ -687,6 +870,7 @@ async function adminResetUser(userEmail) {
                 earningsHistory: []
             }, { merge: true });
             showToast(`Reset ${userEmail}'s account`);
+            addAdminLog(`Admin reset account for ${userEmail}`, "warning");
             if (currentPage === 'admin') renderAdminPanel();
         }
     }
@@ -700,6 +884,7 @@ async function adminDeleteUser(userEmail) {
             const userId = snap.docs[0].id;
             await deleteDoc(doc(db, 'viewswap_users', userId));
             showToast(`Deleted user ${userEmail}`);
+            addAdminLog(`Admin DELETED user ${userEmail}`, "error");
             if (currentPage === 'admin') renderAdminPanel();
         }
     }
@@ -708,6 +893,7 @@ async function adminDeleteUser(userEmail) {
 async function adminUpdateAlgorithmSettings(settings) {
     algorithmSettings = { ...algorithmSettings, ...settings };
     showToast('Algorithm settings updated');
+    addAdminLog(`Algorithm settings updated: ${JSON.stringify(settings)}`, "info");
     if (currentPage === 'home') {
         setupRealTimeCampaigns();
     }
@@ -733,6 +919,7 @@ async function adminCreateCampaignForUser(userEmail, campaignData) {
     
     if (result) {
         showToast(`Campaign created for ${userEmail} using their credits`);
+        addAdminLog(`Admin created campaign for user ${userEmail}: ${campaignData.title}`, "success");
         if (currentPage === 'admin') renderAdminPanel();
     }
     return result;
@@ -749,6 +936,7 @@ async function adminToggleNotifications(userEmail, notificationType, enabled) {
         currentSettings[notificationType] = enabled;
         await updateDoc(userRef, { notificationSettings: currentSettings });
         showToast(`Updated notifications for ${userEmail}: ${notificationType} = ${enabled}`);
+        addAdminLog(`Admin set ${notificationType}=${enabled} for ${userEmail}`, "info");
         if (currentPage === 'admin') renderAdminPanel();
     }
 }
@@ -762,6 +950,7 @@ async function adminDisableAllNotifications(userEmail) {
         const currentSettings = { enabled: false, achievements: false, referralEarnings: false, dailyBonus: false, campaignAlerts: false };
         await updateDoc(userRef, { notificationSettings: currentSettings });
         showToast(`All notifications disabled for ${userEmail}`);
+        addAdminLog(`Admin disabled all notifications for ${userEmail}`, "info");
         if (currentPage === 'admin') renderAdminPanel();
     }
 }
@@ -769,16 +958,19 @@ async function adminDisableAllNotifications(userEmail) {
 async function adminBroadcastMessage(message) {
     showNotification(`📢 Admin Broadcast`, message);
     showToast(`Broadcast sent to all users`);
+    addAdminLog(`Broadcast message sent: "${message}"`, "info");
 }
 
 async function adminChangeEarningRate(newRate) {
-    window.VIEWER_EARNING_RATE = newRate;
+    VIEWER_EARNING_RATE = newRate;
     showToast(`Viewer earning rate changed to ${newRate}/sec`);
+    addAdminLog(`Viewer earning rate changed to ${newRate}/sec`, "info");
 }
 
 async function adminChangeCampaignCost(newCost) {
-    window.CAMPAIGN_COST_PER_SECOND = newCost;
+    CAMPAIGN_COST_PER_SECOND = newCost;
     showToast(`Campaign cost changed to ${newCost}/sec`);
+    addAdminLog(`Campaign cost changed to ${newCost}/sec`, "info");
 }
 
 function sortCampaignsByAlgorithm(campaigns) {
@@ -839,20 +1031,27 @@ function getNextCampaign() {
     return sorted[0] || allCampaigns.filter(c => c.creatorId !== currentUser?.uid)[0];
 }
 
+// FIXED: Reuse player if same video, don't destroy on tab switch
 function initYouTubePlayer(videoId, campaign) {
     const div = document.getElementById('current_player');
     if (!div || !videoId) return null;
     
-    if (youtubePlayer && youtubePlayer.getVideoData && youtubePlayer.getVideoData().video_id === videoId) {
+    // If we already have a player with the same video, just return it
+    if (youtubePlayer && currentVideoId === videoId) {
+        addAdminLog(`Reusing existing player for video ${videoId}`, "info");
         return youtubePlayer;
     }
     
+    // Only destroy if different video
     if (youtubePlayer && youtubePlayer.destroy) {
         youtubePlayer.destroy();
         youtubePlayer = null;
     }
     
+    currentVideoId = videoId;
     videoFullyLoaded = false;
+    
+    addAdminLog(`Creating new YouTube player for video ${videoId}`, "info");
     
     return new window.YT.Player('current_player', {
         videoId, 
@@ -867,12 +1066,14 @@ function initYouTubePlayer(videoId, campaign) {
         events: {
             onReady: (event) => {
                 event.target.playVideo();
+                addAdminLog(`YouTube player ready for ${videoId}`, "success");
             },
             onStateChange: (e) => {
                 if (e.data === 1 && !videoFullyLoaded) {
                     videoFullyLoaded = true;
                     if (activeWatchData && activeWatchData.startTimerOnLoad) {
                         activeWatchData.timerStarted = true;
+                        addAdminLog(`Video loaded, timer started`, "info");
                     }
                 }
                 if (activeWatchData) {
@@ -887,7 +1088,7 @@ function initYouTubePlayer(videoId, campaign) {
                 }
             },
             onError: (e) => {
-                console.error("YouTube error:", e);
+                addAdminLog(`YouTube error: ${e.data}`, "error");
                 nextVideo();
             }
         }
@@ -897,16 +1098,19 @@ function initYouTubePlayer(videoId, campaign) {
 async function startAutoWatch(campaign) {
     if (!currentUser || campaign.watchers?.includes(currentUser.uid)) return;
     
+    // If already watching the same campaign and player exists, just resume
     if (activeWatchData && activeWatchData.campaignId === campaign.id && youtubePlayer) {
         if (activeWatchData.isPaused) {
             youtubePlayer.playVideo();
             activeWatchData.isPaused = false;
+            addAdminLog(`Resumed watching campaign: ${campaign.title}`, "info");
         }
         return;
     }
     
+    // Only stop if switching to different campaign
     if (activeWatchData) {
-        stopCurrentWatch(true);
+        stopCurrentWatch(true); // Keep player if same video
     }
     
     let elapsed = campaign.watcherWatchTime?.[currentUser.uid] || 0;
@@ -947,6 +1151,7 @@ async function startAutoWatch(campaign) {
     }, 1000);
     
     activeWatchData = { campaignId: campaign.id, elapsed, target, isPaused: false, campaign, completed: false, startTimerOnLoad: true, timerStarted: false };
+    addAdminLog(`Started watching campaign: ${campaign.title}`, "info");
 }
 
 function nextVideo() {
@@ -979,7 +1184,8 @@ function setupRealTimeCampaigns() {
         if (currentPage === 'home' && previousCampaignId) {
             const existingCampaign = sortedCampaigns.find(c => c.id === previousCampaignId);
             if (existingCampaign && activeWatchData && !activeWatchData.completed) {
-                if (youtubePlayer && activeWatchData.isPaused) {
+                // Campaign still exists, preserve player
+                if (youtubePlayer && activeWatchData.isPaused && isTabVisible) {
                     youtubePlayer.playVideo();
                     activeWatchData.isPaused = false;
                 }
@@ -999,6 +1205,7 @@ async function trackCampaignCreation() {
     userData.campaignsCreated = (userData.campaignsCreated || 0) + 1;
     await saveUserData();
     await checkAchievements();
+    addAdminLog(`User created campaign #${userData.campaignsCreated}`, "info");
 }
 
 async function trackCampaignView(campaign) {
@@ -1073,6 +1280,7 @@ async function checkAchievements() {
             totalReward += achievement.reward;
             if (!userData.achievements) userData.achievements = [];
             userData.achievements.push(achievement.id);
+            addAdminLog(`Achievement unlocked: ${achievement.name}`, "success");
         }
     }
     
@@ -1119,7 +1327,9 @@ async function renderAdminPanel() {
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px;">
                 <button class="btn-danger" id="removeAllReferralsBtn">⚠️ Remove ALL Referrals</button>
                 <button class="btn-primary" id="broadcastMsgBtn">📢 Broadcast Message</button>
+                <button class="btn-primary" id="aiFixEverythingBtn" style="background: linear-gradient(135deg, #8b5cf6, #ec489a);">🤖 AI FIX EVERYTHING</button>
             </div>
+            <p style="font-size:0.7rem; margin-top:8px;">💡 Press <strong>Ctrl+Shift+L</strong> to toggle hidden admin logs panel</p>
         </div>
         
         <div class="card">
@@ -1263,13 +1473,11 @@ async function renderAdminPanel() {
     });
     document.getElementById('saveEarningRate')?.addEventListener('click', () => {
         const newRate = parseFloat(document.getElementById('earningRate').value);
-        window.VIEWER_EARNING_RATE = newRate;
-        showToast(`Viewer earning rate changed to ${newRate}/sec`);
+        adminChangeEarningRate(newRate);
     });
     document.getElementById('saveCampaignCost')?.addEventListener('click', () => {
         const newCost = parseFloat(document.getElementById('campaignCost').value);
-        window.CAMPAIGN_COST_PER_SECOND = newCost;
-        showToast(`Campaign cost changed to ${newCost}/sec`);
+        adminChangeCampaignCost(newCost);
     });
     document.getElementById('createForUserBtn')?.addEventListener('click', async () => {
         const userEmail = document.getElementById('targetUserEmail').value;
@@ -1290,6 +1498,7 @@ async function renderAdminPanel() {
         const msg = prompt('Enter broadcast message to send to all users:');
         if (msg) adminBroadcastMessage(msg);
     });
+    document.getElementById('aiFixEverythingBtn')?.addEventListener('click', () => aiFixEverything());
 }
 
 function renderAchievementsPage() {
@@ -1341,11 +1550,30 @@ function renderAchievementsPage() {
     `;
 }
 
+// FIXED: renderCurrentPage - NEVER destroys the video player when switching away from home
 async function renderCurrentPage() {
     const container = document.getElementById('pageContent');
     
     if (currentPage === 'home') {
         container.innerHTML = `<div class="card"><h2>🎬 Now Playing</h2>${activeWatchData?.campaign ? `<div class="campaign-item"><div class="video-container" id="current_player"></div><div class="watch-stats"><div class="stat-badge"><div class="stat-badge-label">YOU EARN</div><div class="stat-badge-value" id="current_earnings">0</div></div><div class="stat-badge"><div class="stat-badge-label">TIME LEFT</div><div class="stat-badge-value timer-value" id="current_timer">0</div></div></div><div class="progress-area"><div class="progress-bar-container"><div class="progress-fill" id="current_progress"></div></div></div><div class="action-buttons-area"><button class="action-btn btn-next" onclick="window.nextVideo()">⏭️ NEXT</button><button class="action-btn btn-autoplay ${autoplayEnabled ? 'active' : ''}" onclick="window.toggleAutoplay()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button></div></div>` : '<div class="empty-state">✨ No valid campaigns available. Create one with a video longer than target time!</div>'}</div>`;
+        
+        // If we have a player but it's not attached to the DOM (because we recreated the container),
+        // we need to reattach it. Check if player exists but container is empty.
+        if (youtubePlayer && activeWatchData && !activeWatchData.completed) {
+            // Player exists but might need to be reattached - we'll recreate the player
+            const playerDiv = document.getElementById('current_player');
+            if (playerDiv && playerDiv.innerHTML === '') {
+                addAdminLog("Reattaching existing player to DOM", "info");
+                // Reinitialize the player with the same video
+                const campaign = activeWatchData.campaign;
+                youtubePlayer = initYouTubePlayer(campaign.videoId, campaign);
+                if (activeWatchData.isPaused) {
+                    youtubePlayer.pauseVideo();
+                } else {
+                    youtubePlayer.playVideo();
+                }
+            }
+        }
         
         if (activeWatchData?.campaign && youtubePlayer && activeWatchData.isPaused && !activeWatchData.completed && isTabVisible) {
             setTimeout(() => {
@@ -1382,7 +1610,6 @@ async function renderCurrentPage() {
                     return;
                 }
                 
-                console.log("Creating campaign with:", { title, url, targetWatchTime: targetTime });
                 const success = await validateAndCreateCampaign({ 
                     title: title, 
                     url: url, 
@@ -1510,15 +1737,31 @@ window.adminResetUser = adminResetUser;
 window.adminDeleteUser = adminDeleteUser;
 window.adminToggleNotifications = adminToggleNotifications;
 window.adminDisableAllNotifications = adminDisableAllNotifications;
+window.aiFixEverything = aiFixEverything;
 
 document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => {
-    if (currentPage !== btn.dataset.page) pauseCurrentVideo();
+    if (currentPage !== btn.dataset.page) {
+        // Only pause video, never destroy the player
+        if (youtubePlayer) {
+            youtubePlayer.pauseVideo();
+        }
+        if (activeWatchData) {
+            activeWatchData.isPaused = true;
+        }
+        addAdminLog(`Switched to ${btn.dataset.page} tab - video paused`, "info");
+    }
     currentPage = btn.dataset.page;
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     renderCurrentPage();
     if (currentPage === 'home' && activeWatchData && activeWatchData.isPaused && !activeWatchData.completed && isTabVisible) {
-        setTimeout(() => resumeCurrentVideo(), 200);
+        setTimeout(() => {
+            if (youtubePlayer && activeWatchData.isPaused) {
+                youtubePlayer.playVideo();
+                activeWatchData.isPaused = false;
+                addAdminLog(`Returned to Home tab - video resumed`, "info");
+            }
+        }, 200);
     }
 }));
 
@@ -1537,6 +1780,8 @@ onAuthStateChanged(auth, async (user) => {
         renderCurrentPage();
         
         if (Notification.permission === 'default') Notification.requestPermission();
+        
+        addAdminLog(`User logged in: ${user.email}`, "success");
     } else {
         document.body.classList.remove('authenticated');
         if (unsubscribeCampaigns) unsubscribeCampaigns();
@@ -1544,6 +1789,7 @@ onAuthStateChanged(auth, async (user) => {
         if (activeWatchData) stopCurrentWatch();
         currentUser = null;
         isAdmin = false;
+        addAdminLog(`User logged out`, "info");
     }
 });
 
