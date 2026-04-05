@@ -491,7 +491,7 @@ async function validateAndCreateCampaign(campaignData, isAdminAction = false, ta
         addAdminLog(`Deducting ${totalCost} credits from user`, "info");
         await updateCredits(-totalCost);
         await trackSpending(totalCost);
-        await trackCampaignCreation();
+        await trackCampaignCreation(); // FIXED: Added this line
     }
     
     // Create campaign object
@@ -582,6 +582,21 @@ async function autoDeleteInvalidCampaigns() {
         }
     }
     return deletedCount;
+}
+
+// ============ TRACKING FUNCTIONS ============
+
+async function trackCampaignCreation() {
+    if (!userData) return;
+    userData.campaignsCreated = (userData.campaignsCreated || 0) + 1;
+    await saveUserData();
+    await checkAchievements();
+}
+
+async function trackSpending(amount) {
+    userData.totalSpent = (userData.totalSpent || 0) + amount;
+    await saveUserData();
+    await checkAchievements();
 }
 
 // ============ ADMIN FUNCTIONS ============
@@ -878,18 +893,6 @@ function setupRealTimeCampaigns() {
         }
         renderCurrentPage();
     });
-}
-
-async function trackCampaignCreation() {
-    userData.campaignsCreated = (userData.campaignsCreated || 0) + 1;
-    await saveUserData();
-    await checkAchievements();
-}
-
-async function trackSpending(amount) {
-    userData.totalSpent = (userData.totalSpent || 0) + amount;
-    await saveUserData();
-    await checkAchievements();
 }
 
 async function checkAchievements() {
