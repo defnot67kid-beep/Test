@@ -491,7 +491,7 @@ async function validateAndCreateCampaign(campaignData, isAdminAction = false, ta
         addAdminLog(`Deducting ${totalCost} credits from user`, "info");
         await updateCredits(-totalCost);
         await trackSpending(totalCost);
-        await trackCampaignCreation(); // FIXED: Added this line
+        await trackCampaignCreation();
     }
     
     // Create campaign object
@@ -794,8 +794,21 @@ async function completeCampaign(campaign) {
 }
 
 function getNextCampaign() {
-    const available = allCampaigns.filter(c => c.creatorId !== currentUser?.uid && !watchedHistory.includes(c.id));
-    return sortCampaignsByAlgorithm(available)[0] || allCampaigns[0];
+    // Get campaigns not created by current user and not already watched
+    const available = allCampaigns.filter(c => {
+        const notOwn = c.creatorId !== currentUser?.uid;
+        const notWatched = !watchedHistory.includes(c.id);
+        return notOwn && notWatched;
+    });
+    
+    if (available.length === 0) {
+        addAdminLog("No available campaigns found", "info");
+        return null;
+    }
+    
+    const sorted = sortCampaignsByAlgorithm(available);
+    addAdminLog(`Next campaign selected: ${sorted[0]?.title || 'none'}`, "info");
+    return sorted[0];
 }
 
 function initYouTubePlayer(videoId, campaign) {
@@ -877,6 +890,7 @@ function nextVideo() {
     else renderCurrentPage();
 }
 
+// FIXED: Setup real-time campaigns with proper filtering
 function setupRealTimeCampaigns() {
     if (unsubscribeCampaigns) unsubscribeCampaigns();
     if (!currentUser) return;
@@ -884,12 +898,20 @@ function setupRealTimeCampaigns() {
         allCampaigns = [];
         snapshot.forEach(doc => {
             const data = doc.data();
-            if (!data.watchers?.includes(currentUser?.uid) && data.videoDuration && data.targetWatchTime <= data.videoDuration) {
+            // Only filter out campaigns the user has already watched
+            if (!data.watchers?.includes(currentUser?.uid)) {
                 allCampaigns.push({ ...data, firestoreId: doc.id });
             }
         });
-        if (currentPage === 'home' && !activeWatchData && allCampaigns.length) {
-            startAutoWatch(getNextCampaign());
+        
+        addAdminLog(`Loaded ${allCampaigns.length} available campaigns`, "info");
+        
+        if (currentPage === 'home' && !activeWatchData && allCampaigns.length > 0) {
+            const nextCampaign = getNextCampaign();
+            if (nextCampaign) {
+                addAdminLog(`Starting auto-watch on campaign: ${nextCampaign.title}`, "success");
+                startAutoWatch(nextCampaign);
+            }
         }
         renderCurrentPage();
     });
@@ -1023,10 +1045,39 @@ function renderAchievementsPage() {
     `;
 }
 
+// Helper function to start watching from list
+window.startAutoWatchFromList = async (campaignId) => {
+    const campaign = allCampaigns.find(c => c.id === campaignId);
+    if (campaign) {
+        if (activeWatchData) stopCurrentWatch(true);
+        await startAutoWatch(campaign);
+        renderCurrentPage();
+    }
+};
+
 async function renderCurrentPage() {
     const container = document.getElementById('pageContent');
     if (currentPage === 'home') {
-        container.innerHTML = `<div class="card"><h2>🎬 Now Playing</h2>${activeWatchData?.campaign ? `<div class="campaign-item"><div class="video-container" id="current_player"></div><div class="watch-stats"><div class="stat-badge"><div class="stat-badge-label">YOU EARN</div><div class="stat-badge-value" id="current_earnings">0</div></div><div class="stat-badge"><div class="stat-badge-label">TIME LEFT</div><div class="stat-badge-value timer-value" id="current_timer">0</div></div></div><div class="progress-area"><div class="progress-bar-container"><div class="progress-fill" id="current_progress"></div></div></div><div class="action-buttons-area"><button class="action-btn btn-next" onclick="window.nextVideo()">⏭️ NEXT</button><button class="action-btn btn-autoplay ${autoplayEnabled ? 'active' : ''}" onclick="window.toggleAutoplay()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button></div></div>` : '<div class="empty-state">✨ No campaigns available. Create one to start earning!</div>'}</div>`;
+        if (activeWatchData?.campaign) {
+            container.innerHTML = `<div class="card"><h2>🎬 Now Playing</h2><div class="campaign-item"><div class="video-container" id="current_player"></div><div class="watch-stats"><div class="stat-badge"><div class="stat-badge-label">YOU EARN</div><div class="stat-badge-value" id="current_earnings">0</div></div><div class="stat-badge"><div class="stat-badge-label">TIME LEFT</div><div class="stat-badge-value timer-value" id="current_timer">0</div></div></div><div class="progress-area"><div class="progress-bar-container"><div class="progress-fill" id="current_progress"></div></div></div><div class="action-buttons-area"><button class="action-btn btn-next" onclick="window.nextVideo()">⏭️ NEXT</button><button class="action-btn btn-autoplay ${autoplayEnabled ? 'active' : ''}" onclick="window.toggleAutoplay()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button></div></div></div>`;
+        } else if (allCampaigns.length > 0) {
+            // There are campaigns but none are playing yet
+            const availableCampaigns = allCampaigns.filter(c => c.creatorId !== currentUser?.uid);
+            if (availableCampaigns.length > 0) {
+                container.innerHTML = `<div class="card"><h2>🎬 Ready to Watch</h2><div class="empty-state">Click a campaign below to start earning!</div><div class="campaigns-grid">${availableCampaigns.slice(0, 5).map(c => `<div class="campaign-card" onclick="window.startAutoWatchFromList('${c.id}')"><strong>${escapeHtml(c.title)}</strong><div>💰 +${c.targetWatchTime * VIEWER_EARNING_RATE} credits</div><div>⏱️ ${c.targetWatchTime}s watch time</div></div>`).join('')}</div></div>`;
+            } else {
+                container.innerHTML = `<div class="card"><h2>🎬 No Campaigns Available</h2><div class="empty-state">✨ No campaigns available right now.<br><br>💡 <strong>Create a campaign</strong> to start earning!<br><br>Your campaigns will be shown to other users, and you'll earn when they watch your videos.</div><button class="btn-primary" id="goToCampaignBtn" style="margin-top: 20px;">📢 Create Campaign</button></div>`;
+                document.getElementById('goToCampaignBtn')?.addEventListener('click', () => {
+                    document.querySelector('.nav-item[data-page="campaign"]').click();
+                });
+            }
+        } else {
+            container.innerHTML = `<div class="card"><h2>🎬 No Campaigns Available</h2><div class="empty-state">✨ No campaigns available right now.<br><br>💡 <strong>Create a campaign</strong> to start earning!<br><br>Your campaigns will be shown to other users, and you'll earn when they watch your videos.</div><button class="btn-primary" id="goToCampaignBtn" style="margin-top: 20px;">📢 Create Campaign</button></div>`;
+            document.getElementById('goToCampaignBtn')?.addEventListener('click', () => {
+                document.querySelector('.nav-item[data-page="campaign"]').click();
+            });
+        }
+        
         if (youtubePlayer && activeWatchData && activeWatchData.isPaused && !activeWatchData.completed && isTabVisible) {
             setTimeout(() => { if (youtubePlayer && activeWatchData.isPaused) { youtubePlayer.playVideo(); activeWatchData.isPaused = false; } }, 100);
         }
@@ -1034,15 +1085,13 @@ async function renderCurrentPage() {
         const userCampaigns = allCampaigns.filter(c => c.creatorId === currentUser?.uid);
         container.innerHTML = `<button class="btn-primary" id="createCampaignBtn" style="width:auto; margin-bottom:12px;">+ Create Campaign</button>${userCampaigns.map(c => `<div class="campaign-item"><div style="padding:16px;"><strong>${escapeHtml(c.title)}</strong><div>Views: ${c.totalViews || 0} | Target: ${c.targetWatchTime}s | Duration: ${Math.floor(c.videoDuration || 0)}s</div><button class="small-btn btn-danger" onclick="window.deleteCampaign('${c.id}')">Delete</button></div></div>`).join('') || '<div class="empty-state">No campaigns yet. Click + to create!</div>'}`;
         
-        // FIXED: Create campaign button event listener - completely rewritten
+        // FIXED: Create campaign button event listener
         const createBtn = document.getElementById('createCampaignBtn');
         if (createBtn) {
-            // Remove existing listeners by replacing with clone
             const newBtn = createBtn.cloneNode(true);
             createBtn.parentNode.replaceChild(newBtn, createBtn);
             newBtn.addEventListener('click', () => {
                 addAdminLog("Create campaign button clicked", "info");
-                // Create modal
                 const modal = document.createElement('div');
                 modal.className = 'modal-overlay';
                 modal.style.zIndex = '10005';
@@ -1090,7 +1139,6 @@ async function renderCurrentPage() {
                         }
                         
                         addAdminLog(`Creating campaign: ${title}`, "info");
-                        // Disable button to prevent double-click
                         confirmBtn.disabled = true;
                         confirmBtn.textContent = "⏳ Creating...";
                         
