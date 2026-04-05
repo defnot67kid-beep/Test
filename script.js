@@ -163,7 +163,7 @@ function showNotification(title, body, type = 'info') {
     }
 }
 
-// Tab visibility - ONLY PAUSE/RESUME, NEVER DESTROY
+// Tab visibility
 document.addEventListener('visibilitychange', () => {
     isTabVisible = !document.hidden;
     if (activeWatchData && youtubePlayer) {
@@ -428,7 +428,7 @@ async function getRealVideoDuration(videoId) {
     });
 }
 
-// FIXED: Campaign creation with proper error handling and debugging
+// FIXED: Campaign creation with proper async/await
 async function validateAndCreateCampaign(campaignData, isAdminAction = false, targetUserId = null) {
     addAdminLog(`Starting campaign creation for: ${campaignData.title}`, "info");
     
@@ -1031,28 +1031,32 @@ async function renderCurrentPage() {
         const userCampaigns = allCampaigns.filter(c => c.creatorId === currentUser?.uid);
         container.innerHTML = `<button class="btn-primary" id="createCampaignBtn" style="width:auto; margin-bottom:12px;">+ Create Campaign</button>${userCampaigns.map(c => `<div class="campaign-item"><div style="padding:16px;"><strong>${escapeHtml(c.title)}</strong><div>Views: ${c.totalViews || 0} | Target: ${c.targetWatchTime}s | Duration: ${Math.floor(c.videoDuration || 0)}s</div><button class="small-btn btn-danger" onclick="window.deleteCampaign('${c.id}')">Delete</button></div></div>`).join('') || '<div class="empty-state">No campaigns yet. Click + to create!</div>'}`;
         
-        // FIXED: Create campaign button event listener
+        // FIXED: Create campaign button event listener - completely rewritten
         const createBtn = document.getElementById('createCampaignBtn');
         if (createBtn) {
-            // Remove any existing listeners to avoid duplicates
+            // Remove existing listeners by replacing with clone
             const newBtn = createBtn.cloneNode(true);
             createBtn.parentNode.replaceChild(newBtn, createBtn);
             newBtn.addEventListener('click', () => {
                 addAdminLog("Create campaign button clicked", "info");
+                // Create modal
                 const modal = document.createElement('div');
                 modal.className = 'modal-overlay';
+                modal.style.zIndex = '10005';
                 modal.innerHTML = `
-                    <div class="modal-content">
-                        <h3>Create Campaign</h3>
+                    <div class="modal-content" style="max-width: 450px;">
+                        <h3>📢 Create New Campaign</h3>
                         <p style="font-size:0.8rem;margin-bottom:12px;">💰 Campaign cost: <strong>${CAMPAIGN_COST_PER_SECOND} credits per second</strong></p>
-                        <p style="font-size:0.8rem;margin-bottom:12px;">💳 Your balance: <strong>${userData?.credits || 0}</strong> credits</p>
+                        <p style="font-size:0.8rem;margin-bottom:12px;">💳 Your balance: <strong style="color:#10b981;">${userData?.credits || 0}</strong> credits</p>
                         <p style="font-size:0.8rem;margin-bottom:12px;color:#f87171;">⚠️ Video must be LONGER than target watch time!</p>
-                        <input id="newTitle" placeholder="Campaign Title">
-                        <input id="newUrl" placeholder="YouTube URL">
-                        <input id="newTarget" type="number" placeholder="Target watch time (seconds)" value="30">
-                        <p id="costPreview" style="font-size:0.8rem;margin-top:8px;">Cost: ${(30 * CAMPAIGN_COST_PER_SECOND).toFixed(2)} credits</p>
-                        <button class="btn-primary" id="confirmCreateBtn">Create Campaign</button>
-                        <button class="btn-secondary" id="cancelModal">Cancel</button>
+                        <input id="newTitle" placeholder="Campaign Title" style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:none;">
+                        <input id="newUrl" placeholder="YouTube URL" style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:none;">
+                        <input id="newTarget" type="number" placeholder="Target watch time (seconds)" value="30" style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:none;">
+                        <p id="costPreview" style="font-size:0.9rem; margin-bottom:16px; text-align:center;">💸 Cost: <strong>${(30 * CAMPAIGN_COST_PER_SECOND).toFixed(2)} credits</strong></p>
+                        <div style="display:flex; gap:12px;">
+                            <button id="confirmCreateBtn" style="flex:1; background: linear-gradient(135deg, #10b981, #059669); color:white; padding:12px; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">✅ Create Campaign</button>
+                            <button id="cancelModal" style="flex:1; background:#333; color:white; padding:12px; border:none; border-radius:12px; cursor:pointer;">❌ Cancel</button>
+                        </div>
                     </div>
                 `;
                 document.body.appendChild(modal);
@@ -1062,7 +1066,7 @@ async function renderCurrentPage() {
                 if (targetInput) {
                     targetInput.addEventListener('input', (e) => {
                         const val = parseInt(e.target.value) || 0;
-                        costPreview.textContent = `Cost: ${(val * CAMPAIGN_COST_PER_SECOND).toFixed(2)} credits`;
+                        costPreview.innerHTML = `💸 Cost: <strong>${(val * CAMPAIGN_COST_PER_SECOND).toFixed(2)} credits</strong>`;
                     });
                 }
                 
@@ -1073,16 +1077,28 @@ async function renderCurrentPage() {
                         const url = document.getElementById('newUrl')?.value;
                         const targetTime = parseInt(document.getElementById('newTarget')?.value) || 30;
                         
-                        if (!title || !url) {
-                            showToast('Please enter a title and YouTube URL', true);
+                        if (!title || !title.trim()) {
+                            showToast('❌ Please enter a campaign title', true);
+                            return;
+                        }
+                        if (!url || !url.trim()) {
+                            showToast('❌ Please enter a YouTube URL', true);
                             return;
                         }
                         
                         addAdminLog(`Creating campaign: ${title}`, "info");
-                        const success = await validateAndCreateCampaign({ title, url, targetWatchTime: targetTime });
+                        // Disable button to prevent double-click
+                        confirmBtn.disabled = true;
+                        confirmBtn.textContent = "⏳ Creating...";
+                        
+                        const success = await validateAndCreateCampaign({ title: title.trim(), url: url.trim(), targetWatchTime: targetTime });
+                        
                         if (success) {
                             modal.remove();
                             renderCurrentPage();
+                        } else {
+                            confirmBtn.disabled = false;
+                            confirmBtn.textContent = "✅ Create Campaign";
                         }
                     });
                 }
