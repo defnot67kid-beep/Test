@@ -218,6 +218,23 @@ async function ensureDefaultReferral(userId, userEmail) {
     }
 }
 
+async function processQRReferral(code) {
+    if (!currentUser || userData.referredBy) return;
+    const q = query(collection(db, 'viewswap_users'), where('referralCode', '==', code));
+    const snap = await getDocs(q);
+    if (!snap.empty && snap.docs[0].id !== currentUser.uid) {
+        userData.referredBy = snap.docs[0].id;
+        await saveUserData();
+        await updateDoc(doc(db, 'viewswap_users', snap.docs[0].id), { referrals: arrayUnion(currentUser.uid) });
+        await updateCredits(10);
+        await checkAchievements();
+        showNotification('Referral Success', `+10 credits!`, 'referral');
+        addAdminLog(`User ${currentUser.email} used referral code ${code}`, "success");
+    } else {
+        showToast('Invalid code', true);
+    }
+}
+
 async function loadUserData(uid) {
     const ref = doc(db, 'viewswap_users', uid);
     const snap = await getDoc(ref);
@@ -411,46 +428,129 @@ async function getRealVideoDuration(videoId) {
     });
 }
 
+// FIXED: Campaign creation with proper error handling and debugging
 async function validateAndCreateCampaign(campaignData, isAdminAction = false, targetUserId = null) {
+    addAdminLog(`Starting campaign creation for: ${campaignData.title}`, "info");
+    
+    // Validate inputs
+    if (!campaignData.title || campaignData.title.trim() === "") {
+        showToast("Please enter a campaign title", true);
+        addAdminLog("Campaign creation failed: No title", "error");
+        return false;
+    }
+    
+    if (!campaignData.url || campaignData.url.trim() === "") {
+        showToast("Please enter a YouTube URL", true);
+        addAdminLog("Campaign creation failed: No URL", "error");
+        return false;
+    }
+    
     const targetTime = parseInt(campaignData.targetWatchTime) || 30;
     const totalCost = targetTime * CAMPAIGN_COST_PER_SECOND;
+    
+    addAdminLog(`Target time: ${targetTime}s, Total cost: ${totalCost}, User credits: ${userData?.credits}`, "info");
+    
+    // Check if user has enough credits (skip for admin actions)
     if (!isAdminAction && userData.credits < totalCost) {
-        showToast(`Need ${totalCost.toFixed(2)} credits`, true);
+        showToast(`Need ${totalCost.toFixed(2)} credits (${targetTime}s × ${CAMPAIGN_COST_PER_SECOND}/sec). You have ${userData.credits} credits`, true);
+        addAdminLog(`Insufficient credits: need ${totalCost}, have ${userData.credits}`, "error");
         return false;
     }
+    
+    // Extract video ID
     const videoId = extractVideoId(campaignData.url);
     if (!videoId) {
-        showToast('Invalid YouTube URL', true);
+        showToast('Invalid YouTube URL. Make sure it\'s a valid YouTube link', true);
+        addAdminLog(`Invalid YouTube URL: ${campaignData.url}`, "error");
         return false;
     }
+    
+    addAdminLog(`Video ID: ${videoId}`, "info");
+    showToast('Getting video duration from YouTube...');
+    
+    // Get video duration
     let duration;
     try {
         duration = await getRealVideoDuration(videoId);
+        addAdminLog(`Video duration: ${duration}s`, "success");
     } catch (error) {
-        showToast(`Failed to get video duration`, true);
+        addAdminLog(`Duration fetch error: ${error.message}`, "error");
+        showToast(`Failed to get video duration: ${error.message}. Please try again.`, true);
         return false;
     }
+    
+    // Validate video duration vs target time
     if (duration < targetTime) {
-        showToast(`Video is ${Math.floor(duration)}s long, target is ${targetTime}s`, true);
+        showToast(`❌ REJECTED: Video is only ${Math.floor(duration)} seconds long, but target is ${targetTime} seconds. Video must be LONGER than target time!`, true);
+        addAdminLog(`Campaign rejected: duration ${duration} < target ${targetTime}`, "error");
         return false;
     }
+    
+    // Deduct credits (skip for admin actions)
     if (!isAdminAction) {
+        addAdminLog(`Deducting ${totalCost} credits from user`, "info");
         await updateCredits(-totalCost);
         await trackSpending(totalCost);
         await trackCampaignCreation();
     }
+    
+    // Create campaign object
     const campaignId = Date.now().toString();
+    const creatorId = (isAdminAction && targetUserId) ? targetUserId : currentUser.uid;
+    const creatorName = userData.displayName;
+    const creatorEmail = currentUser.email;
+    
     const campaign = {
-        id: campaignId, title: campaignData.title, url: campaignData.url, videoId,
-        creatorId: isAdminAction && targetUserId ? targetUserId : currentUser.uid,
-        creatorName: userData.displayName, creatorEmail: currentUser.email,
-        createdAt: new Date().toISOString(), targetWatchTime: targetTime, videoDuration: duration,
-        totalWatchTimeSeconds: 0, watchers: [], watcherWatchTime: {},
-        isActive: true, totalViews: 0, campaignCost: totalCost, createdByAdmin: isAdminAction || false
+        id: campaignId,
+        title: campaignData.title.trim(),
+        url: campaignData.url.trim(),
+        videoId: videoId,
+        creatorId: creatorId,
+        creatorName: creatorName,
+        creatorEmail: creatorEmail,
+        createdAt: new Date().toISOString(),
+        targetWatchTime: targetTime,
+        videoDuration: duration,
+        totalWatchTimeSeconds: 0,
+        watchers: [],
+        watcherWatchTime: {},
+        isActive: true,
+        totalViews: 0,
+        campaignCost: totalCost,
+        createdByAdmin: isAdminAction || false
     };
-    await setDoc(doc(db, 'viewswap_campaigns', campaignId), campaign);
-    showToast(`✅ Campaign created! Duration: ${Math.floor(duration)}s, Target: ${targetTime}s`);
-    return true;
+    
+    addAdminLog(`Saving campaign to Firestore: ${campaign.title}`, "info");
+    
+    // Save to Firestore
+    try {
+        await setDoc(doc(db, 'viewswap_campaigns', campaignId), campaign);
+        addAdminLog(`Campaign saved successfully! ID: ${campaignId}`, "success");
+        
+        if (isAdminAction) {
+            showToast(`✅ Admin created campaign for user! Duration: ${Math.floor(duration)}s, Target: ${targetTime}s | Cost: ${totalCost.toFixed(2)} credits`);
+        } else {
+            showToast(`✅ Campaign "${campaignData.title}" created! Duration: ${Math.floor(duration)}s, Target: ${targetTime}s | Cost: ${totalCost.toFixed(2)} credits`);
+        }
+        
+        // Refresh campaigns list
+        if (unsubscribeCampaigns) {
+            unsubscribeCampaigns();
+            setupRealTimeCampaigns();
+        }
+        
+        return true;
+    } catch (error) {
+        addAdminLog(`Error saving campaign: ${error.message}`, "error");
+        showToast(`Failed to save campaign: ${error.message}`, true);
+        
+        // Refund credits if deduction happened
+        if (!isAdminAction) {
+            await updateCredits(totalCost);
+            addAdminLog(`Refunded ${totalCost} credits due to save failure`, "info");
+        }
+        return false;
+    }
 }
 
 async function deleteCampaign(campaignId) {
@@ -466,6 +566,7 @@ async function deleteCampaign(campaignId) {
         }
     }
     await deleteDoc(campaignRef);
+    showToast('Campaign deleted');
 }
 
 async function autoDeleteInvalidCampaigns() {
@@ -922,23 +1023,76 @@ function renderAchievementsPage() {
 async function renderCurrentPage() {
     const container = document.getElementById('pageContent');
     if (currentPage === 'home') {
-        container.innerHTML = `<div class="card"><h2>🎬 Now Playing</h2>${activeWatchData?.campaign ? `<div class="campaign-item"><div class="video-container" id="current_player"></div><div class="watch-stats"><div class="stat-badge"><div class="stat-badge-label">YOU EARN</div><div class="stat-badge-value" id="current_earnings">0</div></div><div class="stat-badge"><div class="stat-badge-label">TIME LEFT</div><div class="stat-badge-value timer-value" id="current_timer">0</div></div></div><div class="progress-area"><div class="progress-bar-container"><div class="progress-fill" id="current_progress"></div></div></div><div class="action-buttons-area"><button class="action-btn btn-next" onclick="window.nextVideo()">⏭️ NEXT</button><button class="action-btn btn-autoplay ${autoplayEnabled ? 'active' : ''}" onclick="window.toggleAutoplay()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button></div></div>` : '<div class="empty-state">✨ No campaigns available</div>'}</div>`;
+        container.innerHTML = `<div class="card"><h2>🎬 Now Playing</h2>${activeWatchData?.campaign ? `<div class="campaign-item"><div class="video-container" id="current_player"></div><div class="watch-stats"><div class="stat-badge"><div class="stat-badge-label">YOU EARN</div><div class="stat-badge-value" id="current_earnings">0</div></div><div class="stat-badge"><div class="stat-badge-label">TIME LEFT</div><div class="stat-badge-value timer-value" id="current_timer">0</div></div></div><div class="progress-area"><div class="progress-bar-container"><div class="progress-fill" id="current_progress"></div></div></div><div class="action-buttons-area"><button class="action-btn btn-next" onclick="window.nextVideo()">⏭️ NEXT</button><button class="action-btn btn-autoplay ${autoplayEnabled ? 'active' : ''}" onclick="window.toggleAutoplay()">🔄 AUTO ${autoplayEnabled ? 'ON' : 'OFF'}</button></div></div>` : '<div class="empty-state">✨ No campaigns available. Create one to start earning!</div>'}</div>`;
         if (youtubePlayer && activeWatchData && activeWatchData.isPaused && !activeWatchData.completed && isTabVisible) {
             setTimeout(() => { if (youtubePlayer && activeWatchData.isPaused) { youtubePlayer.playVideo(); activeWatchData.isPaused = false; } }, 100);
         }
     } else if (currentPage === 'campaign') {
         const userCampaigns = allCampaigns.filter(c => c.creatorId === currentUser?.uid);
-        container.innerHTML = `<button class="btn-primary" id="createCampaignBtn" style="width:auto; margin-bottom:12px;">+ Create Campaign</button>${userCampaigns.map(c => `<div class="campaign-item"><div style="padding:16px;"><strong>${escapeHtml(c.title)}</strong><div>Views: ${c.totalViews || 0} | Target: ${c.targetWatchTime}s | Duration: ${Math.floor(c.videoDuration || 0)}s</div><button class="small-btn btn-danger" onclick="window.deleteCampaign('${c.id}')">Delete</button></div></div>`).join('') || '<div class="empty-state">No campaigns</div>'}`;
-        document.getElementById('createCampaignBtn')?.addEventListener('click', () => {
-            const modal = document.createElement('div'); modal.className = 'modal-overlay';
-            modal.innerHTML = `<div class="modal-content"><h3>Create Campaign</h3><p>Cost: ${CAMPAIGN_COST_PER_SECOND}/sec | Your balance: ${userData?.credits || 0}</p><input id="newTitle" placeholder="Title"><input id="newUrl" placeholder="YouTube URL"><input id="newTarget" type="number" placeholder="Target seconds" value="30"><button class="btn-primary" id="confirmCreateBtn">Create</button><button class="btn-secondary" id="cancelModal">Cancel</button></div>`;
-            document.body.appendChild(modal);
-            document.getElementById('confirmCreateBtn')?.addEventListener('click', async () => {
-                await validateAndCreateCampaign({ title: document.getElementById('newTitle').value, url: document.getElementById('newUrl').value, targetWatchTime: document.getElementById('newTarget').value });
-                modal.remove(); renderCurrentPage();
+        container.innerHTML = `<button class="btn-primary" id="createCampaignBtn" style="width:auto; margin-bottom:12px;">+ Create Campaign</button>${userCampaigns.map(c => `<div class="campaign-item"><div style="padding:16px;"><strong>${escapeHtml(c.title)}</strong><div>Views: ${c.totalViews || 0} | Target: ${c.targetWatchTime}s | Duration: ${Math.floor(c.videoDuration || 0)}s</div><button class="small-btn btn-danger" onclick="window.deleteCampaign('${c.id}')">Delete</button></div></div>`).join('') || '<div class="empty-state">No campaigns yet. Click + to create!</div>'}`;
+        
+        // FIXED: Create campaign button event listener
+        const createBtn = document.getElementById('createCampaignBtn');
+        if (createBtn) {
+            // Remove any existing listeners to avoid duplicates
+            const newBtn = createBtn.cloneNode(true);
+            createBtn.parentNode.replaceChild(newBtn, createBtn);
+            newBtn.addEventListener('click', () => {
+                addAdminLog("Create campaign button clicked", "info");
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <h3>Create Campaign</h3>
+                        <p style="font-size:0.8rem;margin-bottom:12px;">💰 Campaign cost: <strong>${CAMPAIGN_COST_PER_SECOND} credits per second</strong></p>
+                        <p style="font-size:0.8rem;margin-bottom:12px;">💳 Your balance: <strong>${userData?.credits || 0}</strong> credits</p>
+                        <p style="font-size:0.8rem;margin-bottom:12px;color:#f87171;">⚠️ Video must be LONGER than target watch time!</p>
+                        <input id="newTitle" placeholder="Campaign Title">
+                        <input id="newUrl" placeholder="YouTube URL">
+                        <input id="newTarget" type="number" placeholder="Target watch time (seconds)" value="30">
+                        <p id="costPreview" style="font-size:0.8rem;margin-top:8px;">Cost: ${(30 * CAMPAIGN_COST_PER_SECOND).toFixed(2)} credits</p>
+                        <button class="btn-primary" id="confirmCreateBtn">Create Campaign</button>
+                        <button class="btn-secondary" id="cancelModal">Cancel</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                const targetInput = document.getElementById('newTarget');
+                const costPreview = document.getElementById('costPreview');
+                if (targetInput) {
+                    targetInput.addEventListener('input', (e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        costPreview.textContent = `Cost: ${(val * CAMPAIGN_COST_PER_SECOND).toFixed(2)} credits`;
+                    });
+                }
+                
+                const confirmBtn = document.getElementById('confirmCreateBtn');
+                if (confirmBtn) {
+                    confirmBtn.addEventListener('click', async () => {
+                        const title = document.getElementById('newTitle')?.value;
+                        const url = document.getElementById('newUrl')?.value;
+                        const targetTime = parseInt(document.getElementById('newTarget')?.value) || 30;
+                        
+                        if (!title || !url) {
+                            showToast('Please enter a title and YouTube URL', true);
+                            return;
+                        }
+                        
+                        addAdminLog(`Creating campaign: ${title}`, "info");
+                        const success = await validateAndCreateCampaign({ title, url, targetWatchTime: targetTime });
+                        if (success) {
+                            modal.remove();
+                            renderCurrentPage();
+                        }
+                    });
+                }
+                
+                const cancelBtn = document.getElementById('cancelModal');
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', () => modal.remove());
+                }
             });
-            document.getElementById('cancelModal')?.addEventListener('click', () => modal.remove());
-        });
+        }
     } else if (currentPage === 'rewards') {
         container.innerHTML = renderAchievementsPage();
     } else if (currentPage === 'account') {
