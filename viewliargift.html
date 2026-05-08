@@ -3,151 +3,141 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-<title>Roblox Send — Full User Search + Black Screen (CORS Fixed)</title>
+<title>Roblox Send — Premium Robux Hub | Send Any Amount</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
   html, body { width: 100%; height: 100%; background: #0a0c12; overflow-x: hidden; }
-  body { display: flex; align-items: center; justify-content: center; background: #0a0c12; }
-  .fullscreen-root { width: 100%; height: 100%; background: #f2f4f5; display: flex; flex-direction: column; overflow-y: auto; position: relative; }
-  .app { width: 100%; max-width: 100%; margin: 0 auto; background: #f2f4f5; min-height: 100%; flex: 1; }
-  .topbar { height: 74px; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid #ececec; }
+  body { display: flex; align-items: center; justify-content: center; background: #0f1117; }
+  .fullscreen-root { width: 100%; height: 100%; background: #f4f6fa; display: flex; flex-direction: column; overflow-y: auto; position: relative; }
+  .app { width: 100%; max-width: 100%; margin: 0 auto; background: #f4f6fa; min-height: 100%; flex: 1; }
+  .topbar { height: 74px; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid #eceef2; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
   .left-top { display: flex; align-items: center; gap: 16px; }
-  .menu { font-size: 30px; font-weight: 700; cursor: pointer; }
-  .roblox-logo { width: 40px; height: 40px; object-fit: cover; border-radius: 10px; cursor: pointer; }
+  .menu { font-size: 30px; font-weight: 700; cursor: pointer; color: #1f2937; }
+  .roblox-logo { width: 40px; height: 40px; object-fit: cover; border-radius: 12px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
   .right-icons { display: flex; align-items: center; gap: 12px; }
-  .icon-btn { width: 36px; height: 36px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; overflow: hidden; }
-  .avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; cursor: pointer; background: #ddd; }
-  .nav { display: flex; justify-content: space-around; background: white; padding: 14px 0; border-bottom: 1px solid #ececec; font-size: 15px; font-weight: 600; }
-  .nav span { opacity: .65; cursor: pointer; }
-  .nav .active { opacity: 1; font-weight: 800; }
-  .balance-bar { height: 88px; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid #ececec; }
-  .balance-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .balance-robux { width: 34px; height: 34px; object-fit: contain; cursor: pointer; }
-  .balance-number { font-size: 28px; font-weight: 900; color: #111827; }
-  .edit-robux-panel { display: flex; align-items: center; gap: 8px; background: #f2f4f5; padding: 4px 10px; border-radius: 40px; }
-  .robux-value-input { width: 85px; padding: 8px 10px; font-size: 18px; font-weight: 800; border: 2px solid #3156f5; border-radius: 40px; text-align: center; background: white; }
-  .robux-enter-btn { background: #3156f5; border: none; color: white; font-weight: 800; font-size: 14px; padding: 6px 16px; border-radius: 40px; cursor: pointer; }
-  .send-button { height: 60px; padding: 0 26px; border: none; border-radius: 18px; background: #e5e7eb; display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 800; cursor: pointer; color: #111827; }
-  .send-button:active { transform: scale(.96); }
-  .send-icon { font-size: 28px; margin-top: -4px; }
-  .main { padding: 22px 16px 50px; }
-  .big-title { font-size: clamp(32px, 8vw, 44px); font-weight: 900; line-height: 1; margin-bottom: 28px; letter-spacing: -2px; }
-  .section-title { font-size: 25px; font-weight: 800; margin-bottom: 18px; }
-  .bonus-card { background: white; border-radius: 24px; overflow: hidden; border: 1px solid #e5e7eb; margin-bottom: 30px; }
-  .bonus-top { height: 190px; position: relative; padding: 20px; display: flex; align-items: flex-end; cursor: pointer; background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop'); background-size: cover !important; background-position: center center !important; }
-  .banner-camera { position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,.65); color: white; padding: 8px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; backdrop-filter: blur(6px); z-index: 5; }
-  .game-circle { position: absolute; top: 18px; left: 18px; width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,255,255,.9); background: #1e1e2a; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+  .icon-btn { width: 38px; height: 38px; border-radius: 50%; background: #f0f2f5; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: 0.1s; }
+  .avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; cursor: pointer; background: #e2e8f0; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .nav { display: flex; justify-content: space-around; background: white; padding: 14px 0; border-bottom: 1px solid #eef2f6; font-size: 15px; font-weight: 600; color: #3a4a6e; }
+  .nav span { opacity: .65; cursor: pointer; transition: 0.1s; }
+  .nav .active { opacity: 1; font-weight: 800; color: #2563eb; }
+  .balance-bar { background: white; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid #eef2f6; flex-wrap: wrap; gap: 12px; }
+  .balance-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .balance-robux { width: 38px; height: 38px; object-fit: contain; cursor: pointer; }
+  .edit-robux-panel { display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 4px 12px; border-radius: 60px; }
+  .robux-value-input { width: 95px; padding: 9px 12px; font-size: 18px; font-weight: 800; border: 2px solid #2563eb; border-radius: 60px; text-align: center; background: white; outline: none; }
+  .robux-enter-btn { background: #2563eb; border: none; color: white; font-weight: 800; font-size: 14px; padding: 6px 18px; border-radius: 60px; cursor: pointer; transition: 0.1s; }
+  .send-button { height: 56px; padding: 0 26px; border: none; border-radius: 40px; background: #1e293b; display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 800; cursor: pointer; color: white; box-shadow: 0 5px 12px rgba(0,0,0,0.1); transition: 0.1s; }
+  .send-button:active { transform: scale(0.96); }
+  .send-icon { font-size: 28px; }
+  .main { padding: 20px 16px 50px; }
+  .big-title { font-size: clamp(32px, 7vw, 46px); font-weight: 900; line-height: 1.1; margin-bottom: 22px; letter-spacing: -1.5px; }
+  .section-title { font-size: 24px; font-weight: 800; margin-bottom: 16px; }
+  .bonus-card { background: white; border-radius: 32px; overflow: hidden; border: 1px solid #e9edf2; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.02); }
+  .bonus-top { height: 200px; position: relative; padding: 20px; display: flex; align-items: flex-end; cursor: pointer; background: linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.45)), url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop'); background-size: cover !important; background-position: center center !important; }
+  .banner-camera { position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,.7); color: white; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; backdrop-filter: blur(6px); z-index: 5; cursor: pointer; }
+  .game-circle { position: absolute; top: 20px; left: 20px; width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,255,255,0.95); background: #15171f; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; box-shadow: 0 6px 14px rgba(0,0,0,0.3); }
   .game-circle img { width: 100%; height: 100%; object-fit: cover; }
-  .camera-icon { position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.7); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; backdrop-filter: blur(4px); }
+  .camera-icon { position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.75); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; color: white; backdrop-filter: blur(4px); cursor: pointer; }
   #planeCrazyInput, #bannerInput { display: none; }
-  .game-info { margin-left: 128px; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.5); z-index: 2; position: relative; }
-  .game-title { font-size: 20px; font-weight: 800; line-height: 1.2; margin-bottom: 6px; }
-  .game-sub { font-size: 14px; opacity: 0.9; }
-  .packages { padding: 18px; }
-  .package { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-  .package-left { display: flex; align-items: center; gap: 12px; }
-  .robux-icon { width: 34px; height: 34px; object-fit: contain; cursor: pointer; }
+  .game-info { margin-left: 130px; color: white; text-shadow: 0 1px 4px black; z-index: 2; position: relative; }
+  .game-title { font-size: 22px; font-weight: 800; line-height: 1.2; margin-bottom: 6px; }
+  .game-sub { font-size: 14px; opacity: 0.9; font-weight: 500; }
+  .packages { padding: 20px; }
+  .package { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; background: #fafcff; padding: 6px 12px 6px 8px; border-radius: 28px; transition: 0.05s; }
+  .package-left { display: flex; align-items: center; gap: 14px; }
+  .robux-icon { width: 42px; height: 42px; object-fit: contain; cursor: pointer; transition: 0.1s; }
   .amount-wrap { display: flex; flex-direction: column; }
-  .amount-row { display: flex; align-items: center; gap: 8px; }
-  .amount { font-size: 23px; font-weight: 800; }
-  .old { font-size: 16px; text-decoration: line-through; color: #6b7280; font-weight: 700; }
-  .popular { margin-top: 7px; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; background: #f3f4f6; font-size: 14px; font-weight: 700; width: max-content; }
-  .buy-btn { border: none; width: 145px; height: 72px; border-radius: 18px; background: #e5e7eb; font-size: 21px; font-weight: 800; cursor: pointer; transition: 0.1s; }
-  .buy-btn.blue { background: #3156f5; color: white; }
+  .amount-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .amount { font-size: 26px; font-weight: 900; letter-spacing: -0.5px; }
+  .old { font-size: 16px; text-decoration: line-through; color: #7f8ea3; font-weight: 700; }
+  .popular { margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 999px; background: #fee2e2; font-size: 13px; font-weight: 800; color: #b91c1c; width: max-content; }
+  .buy-btn { border: none; width: 140px; height: 68px; border-radius: 28px; background: #eef2ff; font-size: 20px; font-weight: 800; cursor: pointer; transition: 0.07s linear; color: #1e293b; }
+  .buy-btn.blue { background: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
   .buy-btn:active { transform: scale(0.96); }
-  .purchase-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #10b981; color: white; padding: 14px 24px; border-radius: 60px; font-weight: 700; font-size: 18px; z-index: 30000; transition: transform 0.3s ease; box-shadow: 0 10px 25px rgba(0,0,0,0.2); white-space: nowrap; }
+  .purchase-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #10b981; color: white; padding: 14px 28px; border-radius: 60px; font-weight: 700; font-size: 18px; z-index: 30000; transition: transform 0.25s ease; box-shadow: 0 12px 28px rgba(0,0,0,0.2); white-space: nowrap; backdrop-filter: blur(5px); }
   .purchase-toast.show { transform: translateX(-50%) translateY(0); }
-  .send-popup { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: flex-start; justify-content: center; z-index: 9999; padding-top: 20px; overflow-y: auto; }
+  
+  /* send popup */
+  .send-popup { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; align-items: flex-start; justify-content: center; z-index: 9999; padding-top: 28px; overflow-y: auto; backdrop-filter: blur(4px); }
   .send-popup.show { display: flex; }
-  .send-popup-box { width: 95%; max-width: 520px; background: #f2f4f5; border-radius: 32px; padding: 22px; animation: popupAnim .15s ease; box-shadow: 0 20px 35px rgba(0,0,0,0.2); max-height: 85vh; overflow-y: auto; }
+  .send-popup-box { width: 95%; max-width: 560px; background: #ffffff; border-radius: 44px; padding: 24px; animation: popupAnim 0.2s ease; box-shadow: 0 30px 50px rgba(0,0,0,0.3); max-height: 85vh; overflow-y: auto; }
   @keyframes popupAnim { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   .popup-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
   .popup-title-wrap { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-  .popup-icon { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; background: #e5e7eb; border-radius: 50%; font-size: 24px; overflow: hidden; }
+  .popup-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: #eef2ff; border-radius: 30px; font-size: 28px; overflow: hidden; }
   .popup-icon img { width: 100%; height: 100%; object-fit: cover; }
-  .popup-title { font-size: 24px; font-weight: 800; }
-  .popup-right { display: flex; align-items: center; gap: 14px; }
-  .popup-balance { display: flex; align-items: center; gap: 6px; font-size: 20px; font-weight: 800; cursor: pointer; background: #eef2ff; padding: 6px 14px; border-radius: 40px; }
-  .popup-balance img { width: 26px; height: 26px; object-fit: contain; }
-  .close-popup { border: none; background: none; font-size: 32px; cursor: pointer; line-height: 1; color: #4b5563; }
-  .search-modes { display: flex; gap: 12px; margin-bottom: 16px; }
-  .mode-btn { flex: 1; padding: 12px; border-radius: 60px; border: none; background: white; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.1s; border: 1px solid #e2e8f0; }
-  .mode-btn.active-mode { background: #3156f5; color: white; border-color: #3156f5; }
-  .user-search { width: 100%; height: 70px; border: 3px solid #3156f5; border-radius: 50px; padding: 0 22px; font-size: 18px; outline: none; background: white; font-weight: 500; }
-  .cors-info { background: #dbeafe; color: #1e40af; padding: 12px; border-radius: 16px; font-size: 13px; margin-top: 12px; text-align: center; }
-  .search-results { margin-top: 16px; background: white; border-radius: 28px; max-height: 440px; overflow-y: auto; padding: 8px 4px; }
-  .search-user { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 24px; cursor: pointer; transition: 0.1s; border-bottom: 1px solid #f0f2f5; }
-  .search-user:hover { background: #f5f9ff; }
-  .search-user img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: #ebeff5; }
+  .popup-title { font-size: 26px; font-weight: 800; }
+  .popup-right { display: flex; align-items: center; gap: 16px; }
+  .popup-balance { display: flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 800; cursor: pointer; background: #eef2ff; padding: 8px 20px; border-radius: 60px; }
+  .popup-balance img { width: 30px; height: 30px; object-fit: contain; }
+  .close-popup { border: none; background: none; font-size: 34px; cursor: pointer; color: #5b6b8c; }
+  .search-modes { display: flex; gap: 12px; margin-bottom: 18px; }
+  .mode-btn { flex: 1; padding: 12px; border-radius: 60px; border: none; background: #f1f5f9; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.1s; }
+  .mode-btn.active-mode { background: #2563eb; color: white; }
+  .user-search { width: 100%; height: 68px; border: 2px solid #2563eb; border-radius: 60px; padding: 0 24px; font-size: 18px; outline: none; background: white; font-weight: 500; }
+  .cors-info { background: #dbeafe; color: #1e3a8a; padding: 12px; border-radius: 28px; font-size: 13px; margin-top: 14px; text-align: center; font-weight: 500; }
+  .search-results { margin-top: 18px; background: #ffffff; border-radius: 32px; max-height: 440px; overflow-y: auto; padding: 8px 4px; border: 1px solid #eef2ff; }
+  .search-user { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: 30px; cursor: pointer; transition: 0.08s linear; border-bottom: 1px solid #f0f4fa; }
+  .search-user:hover { background: #f5f9ff; transform: scale(0.99); }
+  .search-user img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #eef2ff; border: 2px solid white; }
   .user-info { flex: 1; }
-  .user-display { font-weight: 800; font-size: 17px; }
-  .user-username { font-size: 13px; color: #5a6e8a; margin-top: 3px; }
-  .user-id-badge { font-size: 10px; background: #f1f4f9; padding: 2px 8px; border-radius: 40px; display: inline-block; margin-top: 4px; }
-  .no-results { padding: 30px; text-align: center; color: #6c7a96; font-weight: 500; }
-  .loading { text-align: center; padding: 30px; font-weight: 600; }
-  .btn-scan-full { background: #00a2ff20; border: 1px solid #3156f5; border-radius: 40px; padding: 8px; font-size: 13px; width: 100%; margin-top: 12px; font-weight: 700; cursor: pointer; }
-  body:not(.editor-off) .banner-camera, body:not(.editor-off) .camera-icon, body:not(.editor-off) .game-circle,
-  body:not(.editor-off) .roblox-logo, body:not(.editor-off) .avatar, body:not(.editor-off) .balance-robux,
-  body:not(.editor-off) .robux-icon, body:not(.editor-off) .popup-icon, body:not(.editor-off) .popup-balance { cursor: pointer; }
-  body:not(.editor-off) .bonus-top { outline: 2px dashed #3156f5; outline-offset: 2px; }
-  body:not(.editor-off) .game-circle { outline: 2px solid #ffcc00; outline-offset: 2px; }
-  body.editor-off .banner-camera, body.editor-off .camera-icon { display: none; }
-  body.editor-off .edit-robux-panel { display: none !important; }
-  #searchBtn, #cubeBtn, #settingsBtn { display: none !important; }
+  .user-display { font-weight: 800; font-size: 18px; }
+  .user-username { font-size: 13px; color: #5f7d9c; margin-top: 4px; }
+  .user-id-badge { font-size: 10px; background: #eef2ff; padding: 4px 12px; border-radius: 40px; display: inline-block; margin-top: 6px; font-weight: 700; }
+  .btn-scan-full { background: #2563eb10; border: 1.5px solid #2563eb; border-radius: 50px; padding: 10px; font-size: 14px; width: 100%; margin-top: 16px; font-weight: 800; cursor: pointer; transition: 0.1s; }
+  .fullscreen-btn { background: #1e293b; border: none; color: white; font-size: 12px; padding: 6px 14px; border-radius: 30px; cursor: pointer; font-weight: 700; margin-left: 8px; }
+  
+  /* BLACK SEND SCREEN with extra amount options (includes 1000,2500,5000,10000) */
   .send-black-screen { position: fixed; inset: 0; background: #000000; z-index: 20000; display: none; flex-direction: column; padding: 20px 18px; overflow-y: auto; align-items: center; justify-content: center; }
   .send-black-screen.show { display: flex; }
-  .send-black-screen .black-topbar, .send-black-screen .black-main { width: 100%; max-width: 550px; }
+  .send-black-screen .black-topbar, .send-black-screen .black-main { width: 100%; max-width: 600px; }
   .black-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; padding-top: 12px; width: 100%; }
   .black-title-wrap { display: flex; align-items: center; gap: 12px; }
-  .black-robux-icon { width: 38px; height: 38px; object-fit: contain; }
-  .black-title { color: white; font-size: 26px; font-weight: 800; }
+  .black-robux-icon { width: 44px; height: 44px; object-fit: contain; cursor: pointer; }
+  .black-title { color: white; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
   .black-right { display: flex; align-items: center; gap: 18px; }
-  .black-balance-wrap { display: flex; align-items: center; gap: 8px; background: #1f1f2a; padding: 8px 16px; border-radius: 60px; }
-  .black-small-robux { width: 24px; height: 24px; object-fit: contain; }
-  .black-balance-wrap span { color: white; font-weight: 800; font-size: 22px; }
-  .black-close { background: none; border: none; color: #9ca3af; font-size: 34px; cursor: pointer; line-height: 1; }
+  .black-balance-wrap { display: flex; align-items: center; gap: 10px; background: #1a1c27; padding: 8px 18px; border-radius: 60px; }
+  .black-small-robux { width: 26px; height: 26px; object-fit: contain; cursor: pointer; }
+  .black-balance-wrap span { color: white; font-weight: 800; font-size: 24px; }
+  .black-close { background: none; border: none; color: #a0a5c0; font-size: 38px; cursor: pointer; line-height: 1; }
   .black-main { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
-  .black-big-text { color: white; font-size: clamp(36px, 8vw, 48px); font-weight: 800; margin-bottom: 20px; text-align: center; }
-  .selected-player-avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid #3156f5; margin-bottom: 14px; pointer-events: none; }
-  .selected-player-name { color: white; font-size: clamp(22px, 5vw, 30px); font-weight: 800; text-align: center; margin-bottom: 35px; pointer-events: none; word-break: break-word; max-width: 90%; }
-  .middle-robux-area { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 45px; background: #1a1c26; padding: 16px 28px; border-radius: 80px; flex-wrap: wrap; }
-  .middle-robux-icon { width: 52px; height: 52px; object-fit: contain; cursor: pointer; }
-  .selected-amount-display { color: #ffd966; font-size: 48px; font-weight: 900; letter-spacing: 2px; background: #0f0f14; padding: 6px 24px; border-radius: 60px; min-width: 130px; text-align: center; }
+  .black-big-text { color: #eef2ff; font-size: clamp(36px, 8vw, 48px); font-weight: 800; margin-bottom: 16px; text-align: center; letter-spacing: -1px; }
+  .selected-player-avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #3b82f6; margin-bottom: 16px; background: #262c3a; }
+  .selected-player-name { color: white; font-size: clamp(22px, 6vw, 32px); font-weight: 800; text-align: center; margin-bottom: 35px; word-break: break-word; background: #0f0f1680; padding: 6px 20px; border-radius: 60px; backdrop-filter: blur(5px); }
+  .middle-robux-area { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 35px; background: #11131f; padding: 14px 28px; border-radius: 80px; flex-wrap: wrap; }
+  .middle-robux-icon { width: 55px; height: 55px; object-fit: contain; cursor: pointer; }
+  .selected-amount-display { color: #facc15; font-size: 52px; font-weight: 900; letter-spacing: 2px; background: #000000aa; padding: 4px 28px; border-radius: 70px; min-width: 150px; text-align: center; backdrop-filter: blur(8px); font-family: monospace; }
   .robux-amount-grid { width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
-  .amount-option { height: 70px; border-radius: 18px; border: none; background: #23252f; color: white; font-size: 24px; font-weight: 800; cursor: pointer; transition: 0.1s; }
-  .amount-option.active { outline: 3px solid #3156f5; background: #2c3570; transform: scale(0.97); }
-  .next-btn { width: 100%; height: 68px; border-radius: 18px; border: none; background: #3156f5; color: white; font-size: 26px; font-weight: 800; cursor: pointer; transition: 0.1s; }
+  .amount-option { height: 72px; border-radius: 24px; border: none; background: #1e212f; color: white; font-size: 22px; font-weight: 800; cursor: pointer; transition: 0.07s linear; font-weight: 800; letter-spacing: -0.5px; }
+  .amount-option.active { outline: 3px solid #3b82f6; background: #2d3a8c; transform: scale(0.97); color: #ffdf8c; }
+  .next-btn { width: 100%; height: 74px; border-radius: 28px; border: none; background: #3b82f6; color: white; font-size: 28px; font-weight: 800; cursor: pointer; transition: 0.08s; margin-top: 8px; box-shadow: 0 6px 18px rgba(59,130,246,0.4); }
   .next-btn:active { transform: scale(0.97); }
-  .bottom-note { color: #a0a5b5; margin-top: 22px; font-size: 14px; text-align: center; }
-  .fullscreen-btn { background: #3156f5; border: none; color: white; font-size: 12px; padding: 6px 12px; border-radius: 30px; cursor: pointer; font-weight: 600; margin-left: 8px; }
+  .bottom-note { color: #9aa2c2; margin-top: 20px; font-size: 14px; text-align: center; font-weight: 500; }
+  body.editor-off .edit-robux-panel { display: none !important; }
+  body.editor-off .banner-camera, body.editor-off .camera-icon { display: none; }
+  .scan-stats { font-size: 13px; padding: 6px 0; color: #2563eb; font-weight: 600; margin-top: 6px; }
 </style>
 </head>
 <body>
 <div class="fullscreen-root" id="fullscreenRoot">
 <div class="app">
   <div class="topbar">
-    <div class="left-top"><div class="menu">☰</div><img class="roblox-logo" id="robloxLogo" src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Roblox_Logo_2022.jpg"></div>
-    <div class="right-icons">
-      <img class="avatar" id="avatar" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3108E34E89B5C5179D8C2B7D1E3E6E2F-Png/150/150/AvatarHeadshot/Png/noFilter">
-      <div class="icon-btn" id="searchBtn">🔍</div><div class="icon-btn" id="cubeBtn">⬡</div><div class="icon-btn" id="settingsBtn">⚙️</div>
-      <button class="fullscreen-btn" id="forceFullscreenBtn">⛶ Full</button>
-    </div>
+    <div class="left-top"><div class="menu">☰</div><img class="roblox-logo" id="robloxLogo" src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Roblox_Logo_2022.jpg" alt="logo"></div>
+    <div class="right-icons"><img class="avatar" id="avatar" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3108E34E89B5C5179D8C2B7D1E3E6E2F-Png/150/150/AvatarHeadshot/Png/noFilter"><button class="fullscreen-btn" id="forceFullscreenBtn">⛶ Full</button></div>
   </div>
   <div class="nav"><span id="homeBtn">Home</span><span>Charts</span><span>Marketplace</span><span>Create</span><span class="active">Robux</span></div>
   <div class="balance-bar">
-    <div class="balance-left"><img class="balance-robux" id="balanceRobux" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><div class="edit-robux-panel"><input type="number" id="robuxValueInput" class="robux-value-input" value="21" step="1"><button id="updateRobuxBtn" class="robux-enter-btn">Enter</button></div><span class="balance-number" id="balanceNumber">21</span></div>
+    <div class="balance-left"><img class="balance-robux" id="balanceRobux" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><div class="edit-robux-panel"><input type="number" id="robuxValueInput" class="robux-value-input" value="12500" step="1"><button id="updateRobuxBtn" class="robux-enter-btn">Set</button></div><span class="balance-number" id="balanceNumber">12500</span></div>
     <button class="send-button" id="sendBtn"><span class="send-icon">↥</span>Send</button>
   </div>
   <div class="main">
-    <div class="big-title">Enjoy up to 25%<br>more Robux</div>
-    <div class="section-title">Bonus item we picked for you</div>
+    <div class="big-title">Unlock exclusive<br>bonus rewards</div>
+    <div class="section-title">⭐ Featured deal</div>
     <div class="bonus-card">
-      <div class="bonus-top" id="bonusBanner">
-        <div class="banner-camera">📷 Change Banner</div><input type="file" id="bannerInput" accept="image/*">
-        <div class="game-circle" id="gameCircleTrigger"><img id="planeCrazyImage" src="https://static.wikia.nocookie.net/plane-crazy/images/e/e7/GameIcon.png"><div class="camera-icon">📷</div></div>
-        <input type="file" id="planeCrazyInput" accept="image/*">
-        <div class="game-info"><div class="game-title">⛏️ Plane Crazy⛏️<br>[UPDATE]</div><div class="game-sub">Gravity Slider</div></div>
+      <div class="bonus-top" id="bonusBanner"><div class="banner-camera">📷 Change banner</div><input type="file" id="bannerInput" accept="image/*">
+        <div class="game-circle" id="gameCircleTrigger"><img id="planeCrazyImage" src="https://static.wikia.nocookie.net/plane-crazy/images/e/e7/GameIcon.png"><div class="camera-icon">📷</div></div><input type="file" id="planeCrazyInput" accept="image/*">
+        <div class="game-info"><div class="game-title">✈️ Plane Crazy • New Update</div><div class="game-sub">Gravity slider & limiteds</div></div>
       </div>
       <div class="packages">
         <div class="package"><div class="package-left"><img class="robux-icon" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><div class="amount-wrap"><div class="amount-row"><div class="amount">24,000</div><div class="old">22,500</div></div></div></div><button class="buy-btn purchase-package" data-cost="24000">£199.99</button></div>
@@ -161,39 +151,32 @@
 </div>
 </div>
 
-<div class="send-popup" id="sendPopup">
-  <div class="send-popup-box">
-    <div class="popup-top"><div class="popup-title-wrap" id="popupIconEditor"><div class="popup-icon" id="popupIcon">⬡</div><div class="popup-title">Send Robux</div></div><div class="popup-right"><div class="popup-balance" id="popupBalanceContainer"><img id="popupRobuxIcon" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><span id="popupBalance">21</span></div><button class="close-popup" id="closePopup">✕</button></div></div>
-    <div class="search-modes"><button class="mode-btn active-mode" id="modeUsername">🔍 By Username</button><button class="mode-btn" id="modeUserID">🆔 By User ID</button></div>
-    <input type="text" class="user-search" id="userSearchInput" placeholder="Search Roblox username... (ex: Builderman)">
-    <div id="scanStats" class="scan-stats">💡 Full pagination: all pages will be scanned</div>
-    <div class="cors-info" id="corsInfo">🔄 Using CORS proxy (corsproxy.io) - Roblox API works everywhere!</div>
-    <button id="forceScanBtn" class="btn-scan-full">⟳ Force scan all pages (crawl every result)</button>
-    <div id="searchResults" class="search-results"><div class="no-results">✨ Enter username or user ID → Fetches ALL Roblox users across every page (CORS resolved)</div></div>
-  </div>
-</div>
+<!-- Send popup (user search) -->
+<div class="send-popup" id="sendPopup"><div class="send-popup-box"><div class="popup-top"><div class="popup-title-wrap" id="popupIconEditor"><div class="popup-icon" id="popupIcon">⚡</div><div class="popup-title">Send Robux</div></div><div class="popup-right"><div class="popup-balance" id="popupBalanceContainer"><img id="popupRobuxIcon" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><span id="popupBalance">12500</span></div><button class="close-popup" id="closePopup">✕</button></div></div>
+<div class="search-modes"><button class="mode-btn active-mode" id="modeUsername">🔍 Username</button><button class="mode-btn" id="modeUserID">🆔 User ID</button></div>
+<input type="text" class="user-search" id="userSearchInput" placeholder="Search Roblox username... (ex: Builderman)">
+<div id="scanStats" class="scan-stats">💡 Full pagination: all matching users</div>
+<div class="cors-info">🟢 CORS proxy active — search any Roblox user</div>
+<button id="forceScanBtn" class="btn-scan-full">⟳ Refresh / scan all pages</button>
+<div id="searchResults" class="search-results"><div class="no-results">✨ Enter username / ID → get full user directory</div></div>
+</div></div>
 
-<div id="sendBlackScreen" class="send-black-screen">
-  <div class="black-topbar"><div class="black-title-wrap"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="black-robux-icon" id="blackRobuxIcon"><span class="black-title">Send Robux</span></div><div class="black-right"><div class="black-balance-wrap" id="blackBalanceWrap"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="black-small-robux" id="blackSmallRobux"><span id="blackBalance">0</span></div><button id="closeBlackScreen" class="black-close">✕</button></div></div>
-  <div class="black-main"><div class="black-big-text">you can</div><img id="selectedPlayerAvatar" class="selected-player-avatar" src=""><div id="selectedPlayerName" class="selected-player-name">Username</div><div class="middle-robux-area"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="middle-robux-icon" id="middleRobuxIcon"><div class="selected-amount-display" id="selectedAmountDisplay">0</div></div><div class="robux-amount-grid"><button class="amount-option" data-amount="25">25</button><button class="amount-option" data-amount="50">50</button><button class="amount-option" data-amount="100">100</button><button class="amount-option" data-amount="200">200</button></div><button class="next-btn" id="nextSendBtn">Next</button><div class="bottom-note">Robux are sent instantly with no fees</div></div>
+<!-- BLACK SCREEN with 1000, 2500, 5000, 10000 and 'any amount' extra via grid -->
+<div id="sendBlackScreen" class="send-black-screen"><div class="black-topbar"><div class="black-title-wrap"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="black-robux-icon" id="blackRobuxIcon"><span class="black-title">Send Robux</span></div><div class="black-right"><div class="black-balance-wrap" id="blackBalanceWrap"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="black-small-robux" id="blackSmallRobux"><span id="blackBalance">12500</span></div><button id="closeBlackScreen" class="black-close">✕</button></div></div>
+<div class="black-main"><div class="black-big-text">choose amount</div><img id="selectedPlayerAvatar" class="selected-player-avatar" src=""><div id="selectedPlayerName" class="selected-player-name">Player</div><div class="middle-robux-area"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="middle-robux-icon" id="middleRobuxIcon"><div class="selected-amount-display" id="selectedAmountDisplay">0</div></div>
+<div class="robux-amount-grid">
+  <button class="amount-option" data-amount="25">25</button><button class="amount-option" data-amount="50">50</button><button class="amount-option" data-amount="100">100</button><button class="amount-option" data-amount="200">200</button>
+  <button class="amount-option" data-amount="1000">1,000</button><button class="amount-option" data-amount="2500">2,500</button><button class="amount-option" data-amount="5000">5,000</button><button class="amount-option" data-amount="10000">10,000</button>
 </div>
+<input type="number" id="customAmountInput" placeholder="Any amount" style="width:100%; padding:18px; border-radius:60px; border:none; background:#1e212f; color:white; font-size:20px; font-weight:800; text-align:center; margin-bottom:16px; outline:2px solid #3b82f6;" value="">
+<button class="next-btn" id="nextSendBtn">Send →</button><div class="bottom-note">No fees • instant transfer</div></div></div></div>
 
-<div id="purchaseToast" class="purchase-toast">Thanks for your purchase! 🎉</div>
+<div id="purchaseToast" class="purchase-toast">🎉 Robux added!</div>
 
 <script>
-  // WORKING CORS PROXY - corsproxy.io (reliable, works on GitHub Pages and locally)
-  const PROXY = "https://corsproxy.io/?";
-
-  async function fetchRobloxAPI(url) {
-    const proxyUrl = PROXY + encodeURIComponent(url);
-    const response = await fetch(proxyUrl);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
-  }
-
-  function forceFullscreen() { const elem = document.documentElement; if (elem.requestFullscreen) elem.requestFullscreen().catch(e=>{}); else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen(); }
-  let fullscreenAttempted = false;
-  document.body.addEventListener("click", () => { if (!fullscreenAttempted) { forceFullscreen(); fullscreenAttempted = true; } }, { once: true });
+  const PROXY = "https://corsproxy.io/?"; 
+  async function fetchRobloxAPI(url) { const resp = await fetch(PROXY + encodeURIComponent(url)); if (!resp.ok) throw new Error(`HTTP ${resp.status}`); return await resp.json(); }
+  function forceFullscreen() { const elem = document.documentElement; elem.requestFullscreen?.().catch(e=>{}); }
   document.getElementById("forceFullscreenBtn")?.addEventListener("click", (e) => { e.stopPropagation(); forceFullscreen(); });
   
   let editorMode = localStorage.getItem("editorMode"); if (editorMode === null) editorMode = "on";
@@ -201,21 +184,18 @@
   function applyEditorMode() { if (editorMode === "off") document.body.classList.add("editor-off"); else document.body.classList.remove("editor-off"); const panel = document.querySelector('.edit-robux-panel'); if (panel) panel.style.display = (editorMode === "off") ? "none" : "flex"; }
   applyEditorMode();
 
-  const balanceDisplay = document.getElementById("balanceNumber");
-  const robuxInput = document.getElementById("robuxValueInput");
-  const updateBtn = document.getElementById("updateRobuxBtn");
+  const balanceDisplay = document.getElementById("balanceNumber"), robuxInput = document.getElementById("robuxValueInput"), updateBtn = document.getElementById("updateRobuxBtn");
   function getCurrentBalance() { return parseInt(balanceDisplay.innerText) || 0; }
   function setBalance(newBalance) { let num = Math.max(0, newBalance); balanceDisplay.innerText = num; robuxInput.value = num; localStorage.setItem("userRobuxValue", num); document.getElementById("popupBalance").innerText = num; document.getElementById("blackBalance").innerText = num; return num; }
-  let savedRobux = localStorage.getItem("userRobuxValue"); setBalance(savedRobux && !isNaN(parseInt(savedRobux)) ? parseInt(savedRobux) : 21);
+  let saved = localStorage.getItem("userRobuxValue"); setBalance(saved && !isNaN(parseInt(saved)) ? parseInt(saved) : 12500);
   updateBtn.addEventListener("click", () => { if (editorMode !== "off") setBalance(parseInt(robuxInput.value) || 0); });
   
   const toast = document.getElementById("purchaseToast");
-  function showToast(msg) { toast.innerText = msg; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2500); }
-  
-  document.querySelectorAll(".purchase-package").forEach(btn => { btn.addEventListener("click", (e) => { e.stopPropagation(); const cost = parseInt(btn.getAttribute("data-cost")); const bal = getCurrentBalance(); if (bal >= cost) { setBalance(bal - cost); showToast(`Thanks! -${cost.toLocaleString()} Robux 🎉`); } else { showToast(`❌ Need ${cost.toLocaleString()}, you have ${bal.toLocaleString()}`); } }); });
-  
+  function showToast(msg) { toast.innerText = msg; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2600); }
+  document.querySelectorAll(".purchase-package").forEach(btn => btn.addEventListener("click", (e) => { e.stopPropagation(); const cost = parseInt(btn.getAttribute("data-cost")); const bal = getCurrentBalance(); if (bal >= cost) { setBalance(bal - cost); showToast(`✨ Purchased! -${cost.toLocaleString()} Robux`); } else showToast(`❌ Need ${cost.toLocaleString()}, you have ${bal.toLocaleString()}`); }));
+
   const sendBtn = document.getElementById("sendBtn"), sendPopup = document.getElementById("sendPopup"), closePopup = document.getElementById("closePopup");
-  sendBtn.addEventListener("click", () => { document.getElementById("popupBalance").innerText = getCurrentBalance(); sendPopup.classList.add("show"); if (document.getElementById("userSearchInput").value.trim() !== "") triggerSearch(); });
+  sendBtn.addEventListener("click", () => { document.getElementById("popupBalance").innerText = getCurrentBalance(); sendPopup.classList.add("show"); if (document.getElementById("userSearchInput").value.trim()) triggerSearch(); });
   closePopup.addEventListener("click", () => sendPopup.classList.remove("show"));
   sendPopup.addEventListener("click", (e) => { if (e.target === sendPopup) sendPopup.classList.remove("show"); });
 
@@ -223,115 +203,34 @@
   document.getElementById("modeUsername").addEventListener("click", () => setMode("username"));
   document.getElementById("modeUserID").addEventListener("click", () => setMode("userid"));
   const searchInput = document.getElementById("userSearchInput"), searchResultsDiv = document.getElementById("searchResults"), scanStatsSpan = document.getElementById("scanStats"), forceScanBtn = document.getElementById("forceScanBtn");
-  
   function setMode(mode) { currentSearchMode = mode; document.getElementById("modeUsername").classList.toggle("active-mode", mode === "username"); document.getElementById("modeUserID").classList.toggle("active-mode", mode === "userid"); searchInput.placeholder = mode === "username" ? "Search Roblox username... (ex: Builderman)" : "Enter Roblox User ID (ex: 1 for Roblox)"; if (searchInput.value.trim()) triggerSearch(); }
 
-  async function fetchAllUsersByKeyword(keyword, onProgress) {
-    if (!keyword.trim()) return [];
-    let allUsers = [], cursor = "", page = 0;
-    const MAX_PAGES = 50;
-    let hasMore = true;
-    while (hasMore && page < MAX_PAGES) {
-      let url = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(keyword)}&limit=100`;
-      if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
-      try {
-        const data = await fetchRobloxAPI(url);
-        if (data.data && data.data.length) { allUsers.push(...data.data); if (onProgress) onProgress(`Page ${page+1} → ${allUsers.length} users`); }
-        if (data.nextPageCursor && data.nextPageCursor !== "") { cursor = data.nextPageCursor; page++; await new Promise(r => setTimeout(r, 100)); }
-        else { hasMore = false; }
-      } catch(e) { console.error(e); throw new Error("API fetch failed: " + e.message); }
-    }
-    const uniqueMap = new Map(); for (const u of allUsers) if (!uniqueMap.has(u.id)) uniqueMap.set(u.id, u);
-    return Array.from(uniqueMap.values());
-  }
-
-  async function fetchUserByID(userId) {
-    try { const url = `https://users.roblox.com/v1/users/${encodeURIComponent(userId)}`; const user = await fetchRobloxAPI(url); if (user && user.id) return [user]; return null; }
-    catch(e) { return null; }
-  }
-
-  async function fetchAvatars(userIds) {
-    const map = new Map();
-    for (let i = 0; i < userIds.length; i += 100) {
-      const chunk = userIds.slice(i, i+100);
-      const idsParam = chunk.join(",");
-      try { const url = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${idsParam}&size=150x150&format=Png&isCircular=false`; const data = await fetchRobloxAPI(url); if (data.data) data.data.forEach(t => map.set(t.targetId, t.imageUrl)); await new Promise(r => setTimeout(r, 50)); } catch(e) {}
-    }
-    return map;
-  }
-
-  const sendBlackScreen = document.getElementById("sendBlackScreen"), selectedPlayerAvatar = document.getElementById("selectedPlayerAvatar"), selectedPlayerName = document.getElementById("selectedPlayerName"), blackBalanceSpan = document.getElementById("blackBalance"), closeBlackScreen = document.getElementById("closeBlackScreen"), selectedAmountDisplay = document.getElementById("selectedAmountDisplay");
+  async function fetchAllUsersByKeyword(keyword, onProgress) { if (!keyword.trim()) return []; let allUsers = [], cursor = "", page = 0; const MAX_PAGES = 45; let hasMore = true; while (hasMore && page < MAX_PAGES) { let url = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(keyword)}&limit=100`; if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`; try { const data = await fetchRobloxAPI(url); if (data.data?.length) { allUsers.push(...data.data); if (onProgress) onProgress(`📄 page ${page+1} → ${allUsers.length} users`); } if (data.nextPageCursor && data.nextPageCursor !== "") { cursor = data.nextPageCursor; page++; await new Promise(r => setTimeout(r, 90)); } else { hasMore = false; } } catch(e) { console.error(e); throw new Error("API fetch error: " + e.message); } } const unique = new Map(); for (const u of allUsers) if (!unique.has(u.id)) unique.set(u.id, u); return Array.from(unique.values()); }
+  async function fetchUserByID(userId) { try { const url = `https://users.roblox.com/v1/users/${encodeURIComponent(userId)}`; const user = await fetchRobloxAPI(url); if (user?.id) return [user]; return null; } catch(e) { return null; } }
+  async function fetchAvatars(userIds) { const map = new Map(); for (let i = 0; i < userIds.length; i += 100) { const chunk = userIds.slice(i, i+100); try { const url = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${chunk.join(",")}&size=150x150&format=Png&isCircular=false`; const data = await fetchRobloxAPI(url); if (data.data) data.data.forEach(t => map.set(t.targetId, t.imageUrl)); await new Promise(r => setTimeout(r, 50)); } catch(e) {} } return map; }
+  const sendBlackScreen = document.getElementById("sendBlackScreen"), selectedPlayerAvatar = document.getElementById("selectedPlayerAvatar"), selectedPlayerName = document.getElementById("selectedPlayerName"), blackBalanceSpan = document.getElementById("blackBalance"), closeBlackScreen = document.getElementById("closeBlackScreen"), selectedAmountDisplay = document.getElementById("selectedAmountDisplay"), customAmountInput = document.getElementById("customAmountInput");
   let currentSelectedAmount = 0, currentSelectedUser = null;
-
-  function openBlackSendScreen(user, avatarUrl) {
-    document.querySelector(".app").style.display = "none"; sendPopup.classList.remove("show");
-    selectedPlayerAvatar.src = avatarUrl; selectedPlayerName.innerText = user.name; currentSelectedUser = user;
-    blackBalanceSpan.innerText = getCurrentBalance(); currentSelectedAmount = 0; selectedAmountDisplay.innerText = "0";
-    document.querySelectorAll(".amount-option").forEach(btn => btn.classList.remove("active"));
-    sendBlackScreen.classList.add("show");
-  }
-
+  function openBlackSendScreen(user, avatarUrl) { document.querySelector(".app").style.display = "none"; sendPopup.classList.remove("show"); selectedPlayerAvatar.src = avatarUrl; selectedPlayerName.innerText = user.name; currentSelectedUser = user; blackBalanceSpan.innerText = getCurrentBalance(); currentSelectedAmount = 0; selectedAmountDisplay.innerText = "0"; customAmountInput.value = ""; document.querySelectorAll(".amount-option").forEach(btn => btn.classList.remove("active")); sendBlackScreen.classList.add("show"); }
   closeBlackScreen.addEventListener("click", () => { sendBlackScreen.classList.remove("show"); document.querySelector(".app").style.display = "block"; });
-
   const amountButtons = document.querySelectorAll(".amount-option");
-  amountButtons.forEach(btn => { btn.addEventListener("click", () => { amountButtons.forEach(b => b.classList.remove("active")); btn.classList.add("active"); const amt = parseInt(btn.getAttribute("data-amount")); if (!isNaN(amt)) { currentSelectedAmount = amt; selectedAmountDisplay.innerText = currentSelectedAmount; } }); });
-
-  document.getElementById("nextSendBtn").addEventListener("click", () => {
-    if (currentSelectedAmount <= 0) { showToast("⚠️ Select an amount first!"); return; }
-    const bal = getCurrentBalance();
-    if (bal >= currentSelectedAmount) { const newBal = bal - currentSelectedAmount; setBalance(newBal); blackBalanceSpan.innerText = newBal; showToast(`✅ Sent ${currentSelectedAmount} Robux to ${currentSelectedUser?.name || "player"}!`); }
-    else { showToast(`❌ Need ${currentSelectedAmount}, you have ${bal}`); }
-  });
-
-  async function triggerSearch() {
-    const rawQuery = searchInput.value.trim();
-    if (!rawQuery) return;
-    searchResultsDiv.innerHTML = `<div class="loading">🔍 Searching Roblox (via proxy)...</div>`;
-    try {
-      let users = [];
-      if (currentSearchMode === "username") {
-        users = await fetchAllUsersByKeyword(rawQuery, (msg) => { scanStatsSpan.innerText = msg; });
-        if (users.length === 0) throw new Error(`No users found with username "${rawQuery}". Try "Roblox" or "Builderman"`);
-      } else {
-        const parsedId = parseInt(rawQuery);
-        if (isNaN(parsedId)) throw new Error(`"${rawQuery}" is not a valid User ID. Use numbers like 1 (Roblox) or 156665 (Builderman)`);
-        const userArr = await fetchUserByID(parsedId);
-        if (!userArr || userArr.length === 0) throw new Error(`User ID ${parsedId} not found. Try ID 1 (Roblox) or 156665 (Builderman) to test`);
-        users = userArr;
-      }
-      scanStatsSpan.innerText = `✅ Found ${users.length} player(s)`;
-      const userIds = users.slice(0, 200).map(u => u.id);
-      const avatarMap = await fetchAvatars(userIds);
-      searchResultsDiv.innerHTML = "";
-      for (let user of users.slice(0, 200)) {
-        const avatarUrl = avatarMap.get(user.id) || `https://www.roblox.com/headshot-thumbnail/image?userId=${user.id}&width=150&height=150&format=png`;
-        const div = document.createElement("div"); div.className = "search-user";
-        div.innerHTML = `<img src="${avatarUrl}" onerror="this.src='https://tr.rbxcdn.com/30DAY-AvatarHeadshot-Placeholder.png'"><div class="user-info"><div class="user-display">${escapeHtml(user.displayName || user.name)}</div><div class="user-username">@${escapeHtml(user.name)}</div><div class="user-id-badge">ID: ${user.id}</div></div>`;
-        div.addEventListener("click", () => openBlackSendScreen(user, avatarUrl));
-        searchResultsDiv.appendChild(div);
-      }
-    } catch(err) { searchResultsDiv.innerHTML = `<div class="no-results">❌ ${err.message}<br><br>💡 Try searching "Roblox" or ID "1" to test!</div>`; }
-  }
+  amountButtons.forEach(btn => { btn.addEventListener("click", () => { amountButtons.forEach(b => b.classList.remove("active")); btn.classList.add("active"); const amt = parseInt(btn.getAttribute("data-amount")); if (!isNaN(amt)) { currentSelectedAmount = amt; selectedAmountDisplay.innerText = amt.toLocaleString(); customAmountInput.value = amt; } }); });
+  customAmountInput.addEventListener("input", (e) => { let val = parseInt(e.target.value); if (!isNaN(val) && val >= 0) { currentSelectedAmount = val; selectedAmountDisplay.innerText = val.toLocaleString(); amountButtons.forEach(btn => btn.classList.remove("active")); } else if (e.target.value === "") { currentSelectedAmount = 0; selectedAmountDisplay.innerText = "0"; } });
+  
+  document.getElementById("nextSendBtn").addEventListener("click", () => { let sendAmount = currentSelectedAmount; if (customAmountInput.value !== "") { let customVal = parseInt(customAmountInput.value); if (!isNaN(customVal) && customVal > 0) sendAmount = customVal; } if (sendAmount <= 0) { showToast("⚠️ Select or enter an amount (≥1)"); return; } const bal = getCurrentBalance(); if (bal >= sendAmount) { setBalance(bal - sendAmount); blackBalanceSpan.innerText = getCurrentBalance(); showToast(`✅ Sent ${sendAmount.toLocaleString()} Robux to ${currentSelectedUser?.name || "player"}!`); } else showToast(`❌ Insufficient: need ${sendAmount.toLocaleString()}, you have ${bal.toLocaleString()}`); });
+  
+  async function triggerSearch() { const raw = searchInput.value.trim(); if (!raw) return; searchResultsDiv.innerHTML = `<div class="loading">🔍 searching Roblox users (CORS proxy)...</div>`; try { let users = []; if (currentSearchMode === "username") { users = await fetchAllUsersByKeyword(raw, (msg) => { scanStatsSpan.innerText = msg; }); if (users.length === 0) throw new Error(`No users found with "${raw}"`); } else { let id = parseInt(raw); if (isNaN(id)) throw new Error(`Invalid user ID`); let userArr = await fetchUserByID(id); if (!userArr || userArr.length === 0) throw new Error(`User ID ${id} not found.`); users = userArr; } scanStatsSpan.innerText = `✅ ${users.length} player(s) loaded`; const userIds = users.slice(0, 220).map(u => u.id); const avatarMap = await fetchAvatars(userIds); searchResultsDiv.innerHTML = ""; for (let user of users.slice(0, 220)) { const avatarUrl = avatarMap.get(user.id) || `https://www.roblox.com/headshot-thumbnail/image?userId=${user.id}&width=150&height=150&format=png`; const div = document.createElement("div"); div.className = "search-user"; div.innerHTML = `<img src="${avatarUrl}" onerror="this.src='https://tr.rbxcdn.com/30DAY-AvatarHeadshot-Placeholder.png'"><div class="user-info"><div class="user-display">${escapeHtml(user.displayName || user.name)}</div><div class="user-username">@${escapeHtml(user.name)}</div><div class="user-id-badge">ID: ${user.id}</div></div>`; div.addEventListener("click", () => openBlackSendScreen(user, avatarUrl)); searchResultsDiv.appendChild(div); } } catch(err) { searchResultsDiv.innerHTML = `<div class="no-results">❌ ${err.message}<br>💡 Try "Roblox" or ID "1"</div>`; } }
   function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
-  
-  let debounceTimer;
-  searchInput.addEventListener("input", () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(() => { if (searchInput.value.trim()) triggerSearch(); }, 400); });
+  let deb; searchInput.addEventListener("input", () => { clearTimeout(deb); deb = setTimeout(() => { if (searchInput.value.trim()) triggerSearch(); }, 380); });
   forceScanBtn.addEventListener("click", () => { if (searchInput.value.trim()) triggerSearch(); });
-
-  function makeEditable(el, key) { el.addEventListener("click", (e) => { e.stopPropagation(); if (editorMode === "off") return; const inp = document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.onchange=(ev)=>{ const f=ev.target.files[0]; if(f){ const r=new FileReader(); r.onload=event=>{el.src=event.target.result; localStorage.setItem(key,event.target.result);}; r.readAsDataURL(f);}}; inp.click();}); const saved=localStorage.getItem(key); if(saved) el.src=saved; }
-  makeEditable(document.getElementById("robloxLogo"),"robloxLogoCustom"); makeEditable(document.getElementById("avatar"),"customAvatar"); makeEditable(document.getElementById("balanceRobux"),"balanceRobuxIcon"); makeEditable(document.getElementById("planeCrazyImage"),"planeCrazyImage"); makeEditable(document.getElementById("popupIcon"),"popupCustomIcon"); makeEditable(document.getElementById("popupRobuxIcon"),"popupRobuxIconCustom"); makeEditable(document.getElementById("blackRobuxIcon"),"blackRobuxIcon"); makeEditable(document.getElementById("blackSmallRobux"),"blackSmallRobuxIcon"); makeEditable(document.getElementById("middleRobuxIcon"),"middleRobuxIcon");
   
+  function makeEditable(el, key) { el.addEventListener("click", (e) => { e.stopPropagation(); if (editorMode === "off") return; const inp = document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.onchange=(ev)=>{ const f=ev.target.files[0]; if(f){ const r=new FileReader(); r.onload=event=>{el.src=event.target.result; localStorage.setItem(key,event.target.result);}; r.readAsDataURL(f);}}; inp.click();}); const savedImg=localStorage.getItem(key); if(savedImg) el.src=savedImg; }
+  makeEditable(document.getElementById("robloxLogo"),"logoCustom"); makeEditable(document.getElementById("avatar"),"avatarCustom"); makeEditable(document.getElementById("balanceRobux"),"balanceIcon"); makeEditable(document.getElementById("planeCrazyImage"),"planeIcon"); makeEditable(document.getElementById("popupIcon"),"popupIconCustom"); makeEditable(document.getElementById("popupRobuxIcon"),"popupRobuxIcon"); makeEditable(document.getElementById("blackRobuxIcon"),"blackIcon"); makeEditable(document.getElementById("blackSmallRobux"),"blackSmallIcon"); makeEditable(document.getElementById("middleRobuxIcon"),"middleIcon");
   document.getElementById("gameCircleTrigger").addEventListener("click", (e) => { e.stopPropagation(); if (editorMode !== "off") document.getElementById("planeCrazyInput").click(); });
   document.getElementById("planeCrazyInput").addEventListener("change", e => { if(editorMode!=="off" && e.target.files[0]){ let r=new FileReader(); r.onload=ev=>{document.getElementById("planeCrazyImage").src=ev.target.result; localStorage.setItem("planeCrazyImage",ev.target.result);}; r.readAsDataURL(e.target.files[0]); } });
-  
   const bonusBanner = document.getElementById("bonusBanner"), bannerInputEl = document.getElementById("bannerInput");
-  bannerInputEl.addEventListener("change", e => { if(editorMode!=="off" && e.target.files[0]){ let r=new FileReader(); r.onload=ev=>{let url=ev.target.result; bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('${url}')`; bonusBanner.style.backgroundSize="cover"; localStorage.setItem("planeCrazyBanner",url);}; r.readAsDataURL(e.target.files[0]); } });
-  const savedBan = localStorage.getItem("planeCrazyBanner"); if(savedBan) bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('${savedBan}')`; else bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop')`; bonusBanner.style.backgroundSize="cover";
-  
-  const robuxIcons = document.querySelectorAll(".robux-icon");
-  function setAllPackageIcons(src) { robuxIcons.forEach(icon => { icon.src = src; }); localStorage.setItem("allPackageIcons", src); }
-  robuxIcons.forEach(icon => { icon.addEventListener("click", (e) => { e.stopPropagation(); if (editorMode !== "off") { let inp = document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.onchange=ev=>{ let f=ev.target.files[0]; if(f){ let r=new FileReader(); r.onload=event=>setAllPackageIcons(event.target.result); r.readAsDataURL(f); } }; inp.click(); } }); });
-  const savedAll = localStorage.getItem("allPackageIcons"); if(savedAll) setAllPackageIcons(savedAll);
+  bannerInputEl.addEventListener("change", e => { if(editorMode!=="off" && e.target.files[0]){ let r=new FileReader(); r.onload=ev=>{let url=ev.target.result; bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.45)), url('${url}')`; bonusBanner.style.backgroundSize="cover"; localStorage.setItem("bannerCustom",url);}; r.readAsDataURL(e.target.files[0]); } });
+  const savedBan = localStorage.getItem("bannerCustom"); if(savedBan) bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.45)), url('${savedBan}')`; else bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.45)), url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop')`; bonusBanner.style.backgroundSize="cover";
+  const allPackageIcons = document.querySelectorAll(".robux-icon"); function setAllIcons(src) { allPackageIcons.forEach(icon => { icon.src = src; }); localStorage.setItem("globalPackageIcon", src); } allPackageIcons.forEach(icon => { icon.addEventListener("click", (e) => { e.stopPropagation(); if (editorMode !== "off") { let inp = document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.onchange=ev=>{ let f=ev.target.files[0]; if(f){ let r=new FileReader(); r.onload=event=>setAllIcons(event.target.result); r.readAsDataURL(f); } }; inp.click(); } }); }); const savedGlobalIcon = localStorage.getItem("globalPackageIcon"); if(savedGlobalIcon) setAllIcons(savedGlobalIcon);
 </script>
 </body>
 </html>
