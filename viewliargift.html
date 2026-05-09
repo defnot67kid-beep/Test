@@ -49,7 +49,6 @@
     flex: 1;
   }
 
-  /* TOPBAR */
   .topbar {
     height: 74px;
     background: white;
@@ -99,12 +98,6 @@
     overflow: hidden;
   }
 
-  .icon-btn img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
   .avatar {
     width: 38px;
     height: 38px;
@@ -114,7 +107,6 @@
     background: #ddd;
   }
 
-  /* NAV */
   .nav {
     display: flex;
     justify-content: space-around;
@@ -135,12 +127,11 @@
     font-weight: 800;
   }
 
-  /* BALANCE */
   .balance-bar {
     height: 88px;
     background: white;
     display: flex;
-    align-items: center;
+ align-items: center;
     justify-content: space-between;
     padding: 0 18px;
     border-bottom: 1px solid #ececec;
@@ -166,7 +157,6 @@
     color: #111827;
   }
 
-  /* EDITOR INPUT */
   .edit-robux-panel {
     display: flex;
     align-items: center;
@@ -222,7 +212,6 @@
     margin-top: -4px;
   }
 
-  /* MAIN */
   .main {
     padding: 22px 16px 50px;
   }
@@ -241,7 +230,6 @@
     margin-bottom: 18px;
   }
 
-  /* BONUS CARD */
   .bonus-card {
     background: white;
     border-radius: 24px;
@@ -339,7 +327,6 @@
     opacity: 0.9;
   }
 
-  /* PACKAGES */
   .packages {
     padding: 18px;
   }
@@ -444,7 +431,6 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  /* SEND POPUP */
   .send-popup {
     position: fixed;
     inset: 0;
@@ -889,7 +875,6 @@
     transform: scale(0.97);
   }
 
-  /* Custom amount input */
   .custom-amount-container {
     width: 100%;
     margin-bottom: 20px;
@@ -915,7 +900,6 @@
     font-weight: 600;
   }
 
-  /* Gift Button and Dropdown */
   .gift-container {
     position: relative;
     margin-bottom: 16px;
@@ -1036,7 +1020,6 @@
     margin-left: 8px;
   }
 
-  /* Processing animation */
   @keyframes pop {
     0% { transform: scale(0.5); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
@@ -1095,31 +1078,8 @@
 
 <div id="sendBlackScreen" class="send-black-screen">
   <div class="black-topbar"><div class="black-title-wrap"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="black-robux-icon" id="blackRobuxIcon"><span class="black-title">Send Robux</span></div><div class="black-right"><div class="black-balance-wrap" id="blackBalanceWrap"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="black-small-robux" id="blackSmallRobux"><span id="blackBalance">0</span></div><button id="closeBlackScreen" class="black-close">✕</button></div></div>
-  <div class="black-main">
-    <div class="black-big-text">you can</div>
-    <img id="selectedPlayerAvatar" class="selected-player-avatar" src="">
-    <div id="selectedPlayerName" class="selected-player-name">Username</div>
-    <div class="middle-robux-area"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="middle-robux-icon" id="middleRobuxIcon"><div class="selected-amount-display" id="selectedAmountDisplay">0</div></div>
-    <div class="robux-amount-grid">
-      <button class="amount-option" data-amount="25">25</button>
-      <button class="amount-option" data-amount="50">50</button>
-      <button class="amount-option" data-amount="100">100</button>
-      <button class="amount-option" data-amount="200">200</button>
-    </div>
-    <div class="custom-amount-container">
-      <input type="number" id="customAmountInput" class="custom-amount-input" placeholder="Or enter any amount...">
-    </div>
-    <div class="gift-container">
-      <button class="gift-button-send" id="giftBtn">🎁 Gift</button>
-      <div class="gift-dropdown" id="giftDropdown">
-        <div class="gift-option" data-gift="Any Gift"><span class="gift-option-emoji">🎁</span><div class="gift-option-text">Any Gift<div class="gift-option-desc">Send any Roblox gift</div></div></div>
-        <div class="gift-option" data-gift="Instant Follow"><span class="gift-option-emoji">⚡</span><div class="gift-option-text">Instant Follow<div class="gift-option-desc">Follow instantly</div></div></div>
-        <div class="gift-option" data-gift="7 Days"><span class="gift-option-emoji">📅</span><div class="gift-option-text">7 Days<div class="gift-option-desc">7 days premium access</div></div></div>
-        <div class="gift-option" data-gift="Other Priority"><span class="gift-option-emoji">⭐</span><div class="gift-option-text">Other Priority<div class="gift-option-desc">Get priority support</div></div></div>
-      </div>
-    </div>
-    <button class="next-btn" id="nextSendBtn">Next</button>
-    <div class="bottom-note">Robux are sent instantly with no fees</div>
+  <div class="black-main" id="blackMainContent">
+    <!-- Dynamic content goes here -->
   </div>
 </div>
 
@@ -1203,10 +1163,122 @@
     return map;
   }
 
-  const sendBlackScreen = document.getElementById("sendBlackScreen"), selectedPlayerAvatar = document.getElementById("selectedPlayerAvatar"), selectedPlayerName = document.getElementById("selectedPlayerName"), blackBalanceSpan = document.getElementById("blackBalance"), closeBlackScreen = document.getElementById("closeBlackScreen"), selectedAmountDisplay = document.getElementById("selectedAmountDisplay");
-  const customAmountInput = document.getElementById("customAmountInput");
+  const sendBlackScreen = document.getElementById("sendBlackScreen");
+  const blackBalanceSpan = document.getElementById("blackBalance");
+  const closeBlackScreen = document.getElementById("closeBlackScreen");
+  
   let currentSelectedAmount = 0, currentSelectedUser = null;
   let selectedGift = null;
+
+  function rebuildBlackScreenForm(user, avatarUrl) {
+    const blackMain = document.getElementById("blackMainContent");
+    blackMain.innerHTML = `
+      <div class="black-big-text">you can</div>
+      <img id="selectedPlayerAvatar" class="selected-player-avatar" src="${avatarUrl}">
+      <div id="selectedPlayerName" class="selected-player-name">${escapeHtml(user.name)}</div>
+      <div class="middle-robux-area"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="middle-robux-icon" id="middleRobuxIcon"><div class="selected-amount-display" id="selectedAmountDisplay">0</div></div>
+      <div class="robux-amount-grid">
+        <button class="amount-option" data-amount="25">25</button>
+        <button class="amount-option" data-amount="50">50</button>
+        <button class="amount-option" data-amount="100">100</button>
+        <button class="amount-option" data-amount="200">200</button>
+      </div>
+      <div class="custom-amount-container">
+        <input type="number" id="customAmountInput" class="custom-amount-input" placeholder="Or enter any amount...">
+      </div>
+      <div class="gift-container">
+        <button class="gift-button-send" id="giftBtn">🎁 Gift</button>
+        <div class="gift-dropdown" id="giftDropdown">
+          <div class="gift-option" data-gift="Any Gift"><span class="gift-option-emoji">🎁</span><div class="gift-option-text">Any Gift<div class="gift-option-desc">Send any Roblox gift</div></div></div>
+          <div class="gift-option" data-gift="Instant Follow"><span class="gift-option-emoji">⚡</span><div class="gift-option-text">Instant Follow<div class="gift-option-desc">Follow instantly</div></div></div>
+          <div class="gift-option" data-gift="7 Days"><span class="gift-option-emoji">📅</span><div class="gift-option-text">7 Days<div class="gift-option-desc">7 days premium access</div></div></div>
+          <div class="gift-option" data-gift="Other Priority"><span class="gift-option-emoji">⭐</span><div class="gift-option-text">Other Priority<div class="gift-option-desc">Get priority support</div></div></div>
+        </div>
+      </div>
+      <button class="next-btn" id="nextSendBtn">Next</button>
+      <div class="bottom-note">Robux are sent instantly with no fees</div>
+    `;
+    
+    // Re-attach event listeners
+    const amountOptions = blackMain.querySelectorAll(".amount-option");
+    const customAmtInput = blackMain.querySelector("#customAmountInput");
+    const amountDisplay = blackMain.querySelector("#selectedAmountDisplay");
+    const giftBtnNew = blackMain.querySelector("#giftBtn");
+    const giftDropdownNew = blackMain.querySelector("#giftDropdown");
+    const giftOptionsNew = blackMain.querySelectorAll(".gift-option");
+    const nextBtnNew = blackMain.querySelector("#nextSendBtn");
+    
+    let localAmount = 0;
+    let localGift = null;
+    
+    const updateDisplay = () => { if(amountDisplay) amountDisplay.innerText = localAmount; };
+    
+    amountOptions.forEach(btn => {
+      btn.addEventListener("click", () => {
+        amountOptions.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const amt = parseInt(btn.getAttribute("data-amount"));
+        if (!isNaN(amt)) { localAmount = amt; updateDisplay(); if(customAmtInput) customAmtInput.value = ""; }
+      });
+    });
+    
+    if(customAmtInput) {
+      customAmtInput.addEventListener("input", () => {
+        const val = parseInt(customAmtInput.value);
+        if (!isNaN(val) && val > 0) {
+          localAmount = val;
+          updateDisplay();
+          amountOptions.forEach(b => b.classList.remove("active"));
+        }
+      });
+    }
+    
+    if(giftBtnNew && giftDropdownNew) {
+      giftBtnNew.addEventListener("click", (e) => { e.stopPropagation(); giftDropdownNew.classList.toggle("show"); });
+      document.addEventListener("click", (e) => { if (!giftBtnNew.contains(e.target) && !giftDropdownNew.contains(e.target)) giftDropdownNew.classList.remove("show"); });
+      giftOptionsNew.forEach(opt => {
+        opt.addEventListener("click", () => {
+          localGift = opt.getAttribute("data-gift");
+          giftBtnNew.innerHTML = `🎁 ${localGift}`;
+          giftDropdownNew.classList.remove("show");
+          showToast(`Gift selected: ${localGift}`);
+        });
+      });
+    }
+    
+    if(nextBtnNew) {
+      nextBtnNew.addEventListener("click", () => {
+        if (localAmount <= 0) { showToast("⚠️ Select or enter an amount first!"); return; }
+        const bal = getCurrentBalance();
+        if (bal >= localAmount) {
+          nextBtnNew.disabled = true;
+          let dots = 0;
+          const originalText = nextBtnNew.innerHTML;
+          const interval = setInterval(() => { dots = (dots + 1) % 4; nextBtnNew.innerHTML = "Processing" + ".".repeat(dots); }, 400);
+          setTimeout(() => {
+            clearInterval(interval);
+            const newBal = bal - localAmount;
+            setBalance(newBal);
+            blackBalanceSpan.innerText = newBal;
+            let giftMessage = localGift ? `<div style="margin-top:20px;background:#f59e0b20;padding:14px;border-radius:60px;font-size:18px;">🎁 Gift: ${localGift}</div>` : "";
+            blackMain.innerHTML = `
+              <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;text-align:center;padding:20px;">
+                <div style="width:120px;height:120px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;font-size:70px;margin-bottom:30px;animation:pop .3s ease;">✓</div>
+                <div style="font-size:42px;font-weight:900;margin-bottom:14px;">Sent!</div>
+                <div style="font-size:24px;color:#9ca3af;margin-bottom:10px;">${localAmount.toLocaleString()} Robux sent to</div>
+                <div style="font-size:34px;font-weight:900;">${escapeHtml(user.name)}</div>
+                ${giftMessage}
+                <div style="margin-top:40px;background:#1f2937;padding:14px 28px;border-radius:999px;font-size:22px;font-weight:900;">Balance: ${newBal.toLocaleString()}</div>
+                <button id="homeButtonAfterSend" style="margin-top:40px;background:#3156f5;border:none;padding:16px 40px;border-radius:60px;color:white;font-size:22px;font-weight:800;cursor:pointer;">🏠 Back to Home</button>
+              </div>
+            `;
+            const homeBtn = document.getElementById("homeButtonAfterSend");
+            if(homeBtn) homeBtn.addEventListener("click", resetToHome);
+          }, 2500);
+        } else { showToast(`❌ Need ${localAmount}, you have ${bal}`); }
+      });
+    }
+  }
 
   function resetToHome() {
     sendBlackScreen.classList.remove("show");
@@ -1214,81 +1286,19 @@
     currentSelectedUser = null;
     currentSelectedAmount = 0;
     selectedGift = null;
-    if (customAmountInput) customAmountInput.value = "";
-    document.querySelectorAll(".amount-option").forEach(btn => btn.classList.remove("active"));
-    if (selectedAmountDisplay) selectedAmountDisplay.innerText = "0";
-    const giftBtnElem = document.getElementById("giftBtn");
-    if (giftBtnElem) giftBtnElem.innerHTML = "🎁 Gift";
     sendPopup.classList.remove("show");
   }
 
   function openBlackSendScreen(user, avatarUrl) {
-    document.querySelector(".app").style.display = "none"; sendPopup.classList.remove("show");
-    selectedPlayerAvatar.src = avatarUrl; selectedPlayerName.innerText = user.name; currentSelectedUser = user;
-    blackBalanceSpan.innerText = getCurrentBalance(); currentSelectedAmount = 0; selectedAmountDisplay.innerText = "0";
-    selectedGift = null;
-    document.getElementById("giftBtn").innerHTML = "🎁 Gift";
-    customAmountInput.value = "";
-    document.querySelectorAll(".amount-option").forEach(btn => btn.classList.remove("active"));
+    document.querySelector(".app").style.display = "none";
+    sendPopup.classList.remove("show");
+    currentSelectedUser = user;
+    blackBalanceSpan.innerText = getCurrentBalance();
+    rebuildBlackScreenForm(user, avatarUrl);
     sendBlackScreen.classList.add("show");
   }
 
   closeBlackScreen.addEventListener("click", resetToHome);
-
-  const amountButtons = document.querySelectorAll(".amount-option");
-  amountButtons.forEach(btn => { btn.addEventListener("click", () => { amountButtons.forEach(b => b.classList.remove("active")); btn.classList.add("active"); const amt = parseInt(btn.getAttribute("data-amount")); if (!isNaN(amt)) { currentSelectedAmount = amt; selectedAmountDisplay.innerText = currentSelectedAmount; customAmountInput.value = ""; } }); });
-
-  customAmountInput.addEventListener("input", () => {
-    const value = parseInt(customAmountInput.value);
-    if (!isNaN(value) && value > 0) {
-      currentSelectedAmount = value;
-      selectedAmountDisplay.innerText = currentSelectedAmount;
-      amountButtons.forEach(btn => btn.classList.remove("active"));
-    }
-  });
-
-  const giftBtn = document.getElementById("giftBtn");
-  const giftDropdown = document.getElementById("giftDropdown");
-  const giftOptions = document.querySelectorAll(".gift-option");
-
-  giftBtn.addEventListener("click", (e) => { e.stopPropagation(); giftDropdown.classList.toggle("show"); });
-  document.addEventListener("click", (e) => { if (!giftBtn.contains(e.target) && !giftDropdown.contains(e.target)) giftDropdown.classList.remove("show"); });
-  giftOptions.forEach(option => { option.addEventListener("click", () => { selectedGift = option.getAttribute("data-gift"); giftBtn.innerHTML = `🎁 ${selectedGift}`; giftDropdown.classList.remove("show"); showToast(`Gift selected: ${selectedGift}`); }); });
-
-  function fakeProcessing(callback) {
-    const nextBtn = document.getElementById("nextSendBtn");
-    const original = nextBtn.innerHTML;
-    nextBtn.disabled = true;
-    let dots = 0;
-    const interval = setInterval(() => { dots = (dots + 1) % 4; nextBtn.innerHTML = "Processing" + ".".repeat(dots); }, 400);
-    setTimeout(() => { clearInterval(interval); nextBtn.innerHTML = original; nextBtn.disabled = false; callback(); }, 2500);
-  }
-
-  document.getElementById("nextSendBtn").addEventListener("click", () => {
-    if (currentSelectedAmount <= 0) { showToast("⚠️ Select or enter an amount first!"); return; }
-    const bal = getCurrentBalance();
-    if (bal >= currentSelectedAmount) {
-      fakeProcessing(() => {
-        const newBal = bal - currentSelectedAmount;
-        setBalance(newBal);
-        blackBalanceSpan.innerText = newBal;
-        let giftMessage = selectedGift ? `<div style="margin-top:20px;background:#f59e0b20;padding:14px;border-radius:60px;font-size:18px;">🎁 Gift: ${selectedGift}</div>` : "";
-        sendBlackScreen.innerHTML = `
-          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;background:black;color:white;text-align:center;padding:20px;">
-            <div style="width:120px;height:120px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;font-size:70px;margin-bottom:30px;animation:pop .3s ease;">✓</div>
-            <div style="font-size:42px;font-weight:900;margin-bottom:14px;">Sent!</div>
-            <div style="font-size:24px;color:#9ca3af;margin-bottom:10px;">${currentSelectedAmount.toLocaleString()} Robux sent to</div>
-            <div style="font-size:34px;font-weight:900;">${currentSelectedUser?.name || "player"}</div>
-            ${giftMessage}
-            <div style="margin-top:40px;background:#1f2937;padding:14px 28px;border-radius:999px;font-size:22px;font-weight:900;">Balance: ${newBal.toLocaleString()}</div>
-            <button id="homeButtonAfterSend" style="margin-top:40px;background:#3156f5;border:none;padding:16px 40px;border-radius:60px;color:white;font-size:22px;font-weight:800;cursor:pointer;">🏠 Back to Home</button>
-          </div>
-        `;
-        const homeBtnAfterSend = document.getElementById("homeButtonAfterSend");
-        if (homeBtnAfterSend) homeBtnAfterSend.addEventListener("click", resetToHome);
-      });
-    } else { showToast(`❌ Need ${currentSelectedAmount}, you have ${bal}`); }
-  });
 
   async function triggerSearch() {
     const rawQuery = searchInput.value.trim();
@@ -1319,6 +1329,7 @@
       }
     } catch(err) { searchResultsDiv.innerHTML = `<div class="no-results">❌ ${err.message}<br><br>💡 Try searching "Roblox" or ID "1" to test!</div>`; }
   }
+  
   function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
   
   let debounceTimer;
