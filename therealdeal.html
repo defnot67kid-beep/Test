@@ -2,12 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RobloxPlus · Working Friends + Send</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>RobloxPlus · Send Robux (Complete Flow)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-body { background: #03030a; color: white; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+body {
+  background: #03030a;
+  overflow-x: hidden;
+  color: white;
+}
 body::before {
   content: "";
   position: fixed;
@@ -126,26 +135,9 @@ body::after {
 }
 .pack-left { display: flex; align-items: center; gap: 16px; }
 .robux-amount { font-size: 34px; font-weight: 900; }
-.old {
-  text-decoration: line-through;
-  color: #777;
-  font-size: 22px;
-}
-.more {
-  background: #1a1a1a;
-  padding: 8px 14px;
-  border-radius: 12px;
-  font-size: 15px;
-  color: #bbb;
-  font-weight: 700;
-}
-.price {
-  background: #1d1d1d;
-  padding: 16px 24px;
-  border-radius: 14px;
-  font-size: 24px;
-  font-weight: 900;
-}
+.old { text-decoration: line-through; color: #777; font-size: 22px; }
+.more { background: #1a1a1a; padding: 8px 14px; border-radius: 12px; font-size: 15px; color: #bbb; font-weight: 700; }
+.price { background: #1d1d1d; padding: 16px 24px; border-radius: 14px; font-size: 24px; font-weight: 900; }
 .sidebar {
   position: fixed;
   top: 0;
@@ -160,18 +152,9 @@ body::after {
 }
 .sidebar.open { left: 0; }
 .side-content { padding: 28px; }
-.side-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
+.side-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .side-title { font-size: 42px; font-weight: 900; }
-.close {
-  font-size: 34px;
-  cursor: pointer;
-  color: #999;
-}
+.close { font-size: 34px; cursor: pointer; color: #999; }
 .panel {
   background: #111;
   border-radius: 24px;
@@ -180,13 +163,7 @@ body::after {
   border: 1px solid rgba(255,255,255,.05);
 }
 .panel h2 { font-size: 34px; margin-bottom: 20px; }
-.label {
-  display: block;
-  color: #999;
-  margin-top: 16px;
-  margin-bottom: 10px;
-  font-weight: 700;
-}
+.label { display: block; color: #999; margin-top: 16px; margin-bottom: 10px; font-weight: 700; }
 .input {
   width: 100%;
   background: black;
@@ -209,10 +186,7 @@ body::after {
   font-weight: 900;
   cursor: pointer;
 }
-.friend-wrap {
-  display: flex;
-  gap: 12px;
-}
+.friend-wrap { display: flex; gap: 12px; }
 .add-btn {
   width: 120px;
   border: none;
@@ -318,12 +292,7 @@ body::after {
   background: #08080c;
   border-radius: 20px;
 }
-.friends-title {
-  margin-top: 28px;
-  margin-bottom: 16px;
-  font-size: 22px;
-  font-weight: 800;
-}
+.friends-title { margin-top: 28px; margin-bottom: 16px; font-size: 22px; font-weight: 800; }
 .picker-friends {
   display: flex;
   flex-direction: column;
@@ -358,96 +327,19 @@ body::after {
   padding: 20px;
 }
 .send-black-screen.show { display: flex; }
-.black-container { width: 100%; max-width: 500px; }
-.black-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-}
-.black-title { font-size: 26px; font-weight: 800; color: white; }
-.black-balance {
-  background: #1a1a24;
-  padding: 8px 16px;
-  border-radius: 60px;
-  color: white;
-  font-weight: 800;
-}
-.black-close {
-  background: none;
-  border: none;
-  color: #9ca3af;
-  font-size: 34px;
-  cursor: pointer;
-}
-.black-main {
-  text-align: center;
-  background: #0a0a0f;
-  border-radius: 30px;
-  padding: 30px 20px;
-}
-.selected-avatar-large {
-  width: 100px;
-  height: 100px;
+.black-container { width: 100%; max-width: 550px; }
+.loaderRing {
+  width: 92px;
+  height: 92px;
   border-radius: 50%;
-  border: 3px solid #5670ff;
-  margin-bottom: 15px;
+  border: 8px solid #1b1b26;
+  border-top: 8px solid #5670ff;
+  margin: auto;
+  animation: spin 1s linear infinite;
 }
-.selected-name-large {
-  font-size: 26px;
-  font-weight: 800;
-  margin-bottom: 25px;
-}
-.amount-middle {
-  background: #14141c;
-  padding: 15px;
-  border-radius: 60px;
-  margin-bottom: 25px;
-}
-.amount-display {
-  font-size: 48px;
-  font-weight: 900;
-  color: #ffd966;
-}
-.amount-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 20px;
-}
-.amount-option {
-  height: 55px;
-  border-radius: 14px;
-  border: none;
-  background: #1f1f2a;
-  color: white;
-  font-size: 18px;
-  font-weight: 800;
-  cursor: pointer;
-}
-.amount-option.active { background: #5670ff; }
-.custom-input-black {
-  width: 100%;
-  height: 55px;
-  border-radius: 14px;
-  border: 2px solid #5670ff;
-  background: #14141c;
-  color: white;
-  font-size: 18px;
-  text-align: center;
-  margin-bottom: 20px;
-  outline: none;
-}
-.next-btn-final {
-  width: 100%;
-  height: 60px;
-  border-radius: 16px;
-  border: none;
-  background: #5670ff;
-  color: white;
-  font-size: 22px;
-  font-weight: 800;
-  cursor: pointer;
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 </style>
 </head>
@@ -538,21 +430,16 @@ body::after {
 
 <!-- BLACK SEND SCREEN -->
 <div class="send-black-screen" id="blackSendScreen">
-  <div class="black-container">
-    <div class="black-header">
-      <div class="black-title">Send Robux</div>
-      <div class="black-balance">⏺ <span id="blackBalanceAmount">0</span></div>
-      <button class="black-close" id="closeBlackScreenBtn">✕</button>
-    </div>
-    <div class="black-main" id="blackMainContent"></div>
-  </div>
+  <div class="black-container" id="blackContainer"></div>
 </div>
 
 <script>
-// ========== WORKING API (SAME AS MANAGE SITE) ==========
+// ========== WORKING API ==========
 const PROXY = "https://corsproxy.io/?";
 let friends = [];
 let currentBalance = 1859403;
+let currentSelectedUser = null;
+let currentSelectedAvatar = "";
 
 async function fetchRobloxAPI(url) {
   try {
@@ -571,7 +458,6 @@ async function fetchAvatarUrl(userId) {
   return data.data?.[0]?.imageUrl || `https://tr.rbxcdn.com/avatar-${userId}.png`;
 }
 
-// ========== BALANCE ==========
 function updateBalanceUI() {
   document.getElementById("balanceText").innerText = currentBalance;
   document.getElementById("pickerBalance").innerText = currentBalance;
@@ -579,13 +465,11 @@ function updateBalanceUI() {
   localStorage.setItem("mainBalance", currentBalance);
 }
 
-// ========== PROFILE ==========
 async function updateProfile() {
   const username = document.getElementById("usernameInput").value.trim();
   const balance = parseInt(document.getElementById("balanceInput").value) || 0;
   currentBalance = balance;
   updateBalanceUI();
-  
   if(username) {
     document.getElementById("profileName").innerText = username;
     localStorage.setItem("mainUsername", username);
@@ -598,11 +482,7 @@ async function updateProfile() {
   }
 }
 
-// ========== FRIENDS (WORKS!) ==========
-function saveFriends() {
-  localStorage.setItem("friendsList", JSON.stringify(friends));
-}
-
+function saveFriends() { localStorage.setItem("friendsList", JSON.stringify(friends)); }
 function renderFriendsList() {
   const container = document.getElementById("friendList");
   if(!container) return;
@@ -612,37 +492,23 @@ function renderFriendsList() {
   });
   saveFriends();
 }
-
 function addFriend() {
   const input = document.getElementById("friendInput");
   const val = input.value.trim();
-  if(val && !friends.includes(val)) {
-    friends.push(val);
-    renderFriendsList();
-    renderPickerFriends();
-    input.value = "";
-  }
+  if(val && !friends.includes(val)) { friends.push(val); renderFriendsList(); renderPickerFriends(); input.value = ""; }
 }
+function removeFriend(idx) { friends.splice(idx, 1); renderFriendsList(); renderPickerFriends(); }
 
-function removeFriend(idx) {
-  friends.splice(idx, 1);
-  renderFriendsList();
-  renderPickerFriends();
-}
-
-// ========== RENDER FRIENDS IN PICKER (USES SAME API) ==========
 async function renderPickerFriends() {
   const container = document.getElementById("pickerFriendsList");
   if(!container) return;
   document.getElementById("friendCount").innerText = friends.length;
-  
   if(friends.length === 0) {
     container.innerHTML = `<div style="text-align:center;padding:32px;color:#6b6b7a;">No friends added yet.<br>Use "Manage Site" to add friends.</div>`;
     return;
   }
-  
   container.innerHTML = '<div style="padding:8px;color:#aaa;font-size:13px;">Loading friends...</div>';
-  
+  container.innerHTML = "";
   for(const username of friends) {
     const users = await fetchUserByUsername(username);
     if(users.length) {
@@ -657,29 +523,20 @@ async function renderPickerFriends() {
   }
 }
 
-// ========== SEARCH (USES SAME API) ==========
 let searchTimeout;
 const searchInput2 = document.getElementById("userSearch");
 const searchResultsDiv = document.getElementById("searchResultsList");
-
 if(searchInput2) {
   searchInput2.addEventListener("input", () => {
     clearTimeout(searchTimeout);
     const val = searchInput2.value.trim();
-    if(!val) {
-      searchResultsDiv.style.display = "none";
-      searchResultsDiv.innerHTML = "";
-      return;
-    }
+    if(!val) { searchResultsDiv.style.display = "none"; searchResultsDiv.innerHTML = ""; return; }
     searchTimeout = setTimeout(async () => {
       searchResultsDiv.style.display = "block";
       searchResultsDiv.innerHTML = '<div style="padding:20px;color:#aaa;">Searching...</div>';
       const users = await fetchUserByUsername(val);
       searchResultsDiv.innerHTML = "";
-      if(users.length === 0) {
-        searchResultsDiv.innerHTML = '<div style="padding:20px;color:#aaa;">No users found</div>';
-        return;
-      }
+      if(users.length === 0) { searchResultsDiv.innerHTML = '<div style="padding:20px;color:#aaa;">No users found</div>'; return; }
       for(const user of users.slice(0, 15)) {
         const avatar = await fetchAvatarUrl(user.id);
         const card = document.createElement("div");
@@ -692,33 +549,30 @@ if(searchInput2) {
   });
 }
 
-// ========== SELECT RECIPIENT ==========
-let currentSelectedUser = null;
+// ========== AMOUNT SELECTION UI ==========
+let selectedAmount = 500;
 
-async function selectRecipient(user, avatarUrl) {
-  currentSelectedUser = user;
-  document.getElementById("sendPickerModal").style.display = "none";
-  document.getElementById("blackBalanceAmount").innerText = currentBalance;
-  
-  const container = document.getElementById("blackMainContent");
-  let selectedAmount = 500;
-  
+function buildAmountSelectionUI(user, avatarUrl, container) {
   container.innerHTML = `
-    <img id="selectedAvatarLarge" class="selected-avatar-large" src="${avatarUrl}">
-    <div id="selectedNameLarge" class="selected-name-large">${escapeHtml(user.displayName || user.name)}</div>
-    <div class="amount-middle"><span id="amountDisplayLarge" class="amount-display">500</span></div>
-    <div class="amount-grid">
-      <button data-amt="25" class="amount-option">25</button>
-      <button data-amt="50" class="amount-option">50</button>
-      <button data-amt="100" class="amount-option">100</button>
-      <button data-amt="200" class="amount-option">200</button>
-      <button data-amt="500" class="amount-option active">500</button>
-      <button data-amt="1000" class="amount-option">1000</button>
-      <button data-amt="2000" class="amount-option">2000</button>
-      <button data-amt="5000" class="amount-option">5000</button>
+    <div style="background:#0b0b12;border-radius:28px;padding:30px 20px;border:1px solid rgba(255,255,255,.05);text-align:center;">
+      <img id="selectedAvatarLarge" src="${avatarUrl}" style="width:100px;height:100px;border-radius:50%;border:3px solid #5670ff;margin-bottom:15px;">
+      <div id="selectedNameLarge" style="font-size:26px;font-weight:800;margin-bottom:25px;">${escapeHtml(user.displayName || user.name)}</div>
+      <div class="amount-middle" style="background:#14141c;padding:15px;border-radius:60px;margin-bottom:25px;">
+        <span id="amountDisplayLarge" style="font-size:48px;font-weight:900;color:#ffd966;">500</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
+        <button data-amt="25" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">25</button>
+        <button data-amt="50" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">50</button>
+        <button data-amt="100" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">100</button>
+        <button data-amt="200" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">200</button>
+        <button data-amt="500" class="amount-option active" style="height:55px;border-radius:14px;border:none;background:#5670ff;color:white;font-size:18px;font-weight:800;cursor:pointer;">500</button>
+        <button data-amt="1000" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">1000</button>
+        <button data-amt="2000" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">2000</button>
+        <button data-amt="5000" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">5000</button>
+      </div>
+      <input type="number" id="customAmountBlack" placeholder="Custom amount" style="width:100%;height:55px;border-radius:14px;border:2px solid #5670ff;background:#14141c;color:white;font-size:18px;text-align:center;margin-bottom:20px;outline:none;">
+      <button id="nextToConfirmBtn" style="width:100%;height:60px;border-radius:16px;border:none;background:#5670ff;color:white;font-size:22px;font-weight:800;cursor:pointer;">Continue</button>
     </div>
-    <input type="number" id="customAmountBlack" class="custom-input-black" placeholder="Custom amount">
-    <button id="finalSendBtn" class="next-btn-final">Continue</button>
   `;
   
   const amountDisplay = document.getElementById("amountDisplayLarge");
@@ -737,6 +591,8 @@ async function selectRecipient(user, avatarUrl) {
       const amt = parseInt(btn.getAttribute("data-amt"));
       updateAmount(amt);
       btn.classList.add("active");
+      btn.style.background = "#5670ff";
+      amountBtns.forEach(b => { if(b !== btn) b.style.background = "#1f1f2a"; });
     });
   });
   
@@ -746,48 +602,127 @@ async function selectRecipient(user, avatarUrl) {
       if(!isNaN(val) && val > 0) {
         selectedAmount = val;
         amountDisplay.innerText = val;
-        amountBtns.forEach(btn => btn.classList.remove("active"));
+        amountBtns.forEach(btn => { btn.classList.remove("active"); btn.style.background = "#1f1f2a"; });
       }
     });
   }
   
-  document.getElementById("finalSendBtn").addEventListener("click", () => {
+  document.getElementById("nextToConfirmBtn").addEventListener("click", () => {
     if(selectedAmount <= 0) { alert("Select an amount"); return; }
-    if(currentBalance < selectedAmount) { alert(`Insufficient balance! Need ${selectedAmount}`); return; }
-    
-    currentBalance -= selectedAmount;
-    updateBalanceUI();
-    
-    container.innerHTML = `
-      <div style="text-align:center;padding:20px;">
-        <div style="width:80px;height:80px;background:#10b981;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:50px;margin:0 auto 20px;">✓</div>
-        <div style="font-size:36px;font-weight:900;">Sent!</div>
-        <div style="font-size:24px;color:#ffd966;margin:15px 0;">${selectedAmount.toLocaleString()} Robux</div>
-        <div style="font-size:18px;color:#aaa;">to ${escapeHtml(user.displayName || user.name)}</div>
-        <div style="background:#1a1a24;padding:12px;border-radius:30px;margin:20px 0;">Balance: ${currentBalance.toLocaleString()}</div>
-        <button id="successHomeBtn" style="background:#5670ff;border:none;padding:14px 30px;border-radius:40px;color:white;font-size:18px;font-weight:800;cursor:pointer;">🏠 Back</button>
-      </div>
-    `;
-    document.getElementById("successHomeBtn").addEventListener("click", () => {
-      document.getElementById("blackSendScreen").classList.remove("show");
-      document.getElementById("overlay").classList.remove("show");
-    });
+    if(currentBalance < selectedAmount) { alert(`Insufficient balance! Need ${selectedAmount.toLocaleString()} Robux`); return; }
+    showConfirmScreen(user, avatarUrl, container);
   });
-  
-  document.getElementById("blackSendScreen").classList.add("show");
-  document.getElementById("overlay").classList.add("show");
 }
 
-// ========== UI CONTROLS ==========
+// ========== CONFIRM SCREEN ==========
+function showConfirmScreen(user, avatarUrl, container) {
+  const senderUsername = document.getElementById("profileName").innerText;
+  const senderAvatar = document.getElementById("profileIcon").src;
+  const receiverUsername = user.name;
+  const receiverDisplay = user.displayName || user.name;
+  
+  container.innerHTML = `
+    <div style="background:#0b0b12;border-radius:28px;padding:28px;border:1px solid rgba(255,255,255,.05);">
+      <div style="display:flex;align-items:center;justify-content:center;gap:26px;margin-bottom:28px;">
+        <div style="text-align:center;">
+          <img src="${senderAvatar}" style="width:92px;height:92px;border-radius:50%;border:3px solid #1f1f2d;">
+          <div style="margin-top:10px;font-size:18px;font-weight:800;">Me</div>
+        </div>
+        <div style="font-size:56px;color:#5670ff;font-weight:900;">→</div>
+        <div style="text-align:center;">
+          <img src="${avatarUrl}" style="width:92px;height:92px;border-radius:50%;border:3px solid #1f1f2d;">
+          <div style="margin-top:10px;font-size:18px;font-weight:800;">${escapeHtml(receiverDisplay)}</div>
+        </div>
+      </div>
+      <div style="font-size:42px;font-weight:900;text-align:center;margin-bottom:18px;">Confirm Transaction</div>
+      <div style="text-align:center;color:#b8b8c7;font-size:20px;line-height:1.5;margin-bottom:14px;">
+        You are about to send
+        <span style="color:white;font-weight:900;">${selectedAmount.toLocaleString()} Robux</span>
+        to
+        <span style="color:white;font-weight:900;">@${escapeHtml(receiverUsername)}</span>
+      </div>
+      <div style="text-align:center;color:#ff5a5a;font-weight:800;margin-bottom:30px;font-size:16px;">This action is permanent and cannot be reversed.</div>
+      <div style="display:flex;gap:14px;">
+        <button id="confirmSendNow" style="flex:1;height:64px;border:none;border-radius:18px;background:#5670ff;color:white;font-size:22px;font-weight:900;cursor:pointer;">Confirm & Send</button>
+        <button id="editAmountBtn" style="flex:1;height:64px;border:none;border-radius:18px;background:#1b1b24;color:white;font-size:22px;font-weight:900;cursor:pointer;">Edit Amount</button>
+      </div>
+    </div>
+  `;
+  
+  document.getElementById("editAmountBtn").addEventListener("click", () => {
+    buildAmountSelectionUI(user, avatarUrl, container);
+  });
+  
+  document.getElementById("confirmSendNow").addEventListener("click", async () => {
+    await processTransaction(user, avatarUrl, container);
+  });
+}
+
+// ========== PROCESSING + SUCCESS ==========
+async function processTransaction(user, avatarUrl, container) {
+  const receiverUsername = user.name;
+  
+  container.innerHTML = `
+    <div style="background:#0b0b12;border-radius:28px;padding:40px 30px;text-align:center;border:1px solid rgba(255,255,255,.05);">
+      <div class="loaderRing"></div>
+      <div style="font-size:44px;font-weight:900;margin-top:28px;margin-bottom:10px;">Processing...</div>
+      <div style="color:#a5a5b8;font-size:20px;margin-bottom:34px;">Securing connection to Roblox servers</div>
+      <div style="width:100%;height:10px;background:#15151f;border-radius:999px;overflow:hidden;">
+        <div id="progressBar" style="width:0%;height:100%;background:#5670ff;transition:width .2s linear;"></div>
+      </div>
+    </div>
+  `;
+  
+  const progressBar = document.getElementById("progressBar");
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += Math.random() * 18;
+    if(progress >= 100) { progress = 100; clearInterval(interval); }
+    if(progressBar) progressBar.style.width = progress + "%";
+  }, 180);
+  
+  await new Promise(r => setTimeout(r, 3200));
+  
+  currentBalance -= selectedAmount;
+  updateBalanceUI();
+  
+  container.innerHTML = `
+    <div style="background:#0b0b12;border-radius:28px;padding:40px 30px;text-align:center;border:1px solid rgba(255,255,255,.05);">
+      <div style="width:110px;height:110px;border-radius:50%;background:#16a34a;display:flex;align-items:center;justify-content:center;margin:0 auto 26px;font-size:60px;color:white;font-weight:900;">✓</div>
+      <div style="font-size:48px;font-weight:900;margin-bottom:14px;">Transaction Complete</div>
+      <div style="color:#b8b8c7;font-size:22px;margin-bottom:32px;line-height:1.6;">
+        Successfully sent
+        <span style="color:white;font-weight:900;">${selectedAmount.toLocaleString()} Robux</span>
+        to
+        <span style="color:white;font-weight:900;">@${escapeHtml(receiverUsername)}</span>
+      </div>
+      <button id="doneTransactionBtn" style="width:100%;height:64px;border:none;border-radius:18px;background:#5670ff;color:white;font-size:24px;font-weight:900;cursor:pointer;">Done</button>
+    </div>
+  `;
+  
+  document.getElementById("doneTransactionBtn").addEventListener("click", () => {
+    document.getElementById("blackSendScreen").classList.remove("show");
+    document.getElementById("overlay").classList.remove("show");
+  });
+}
+
+// ========== SELECT RECIPIENT ==========
+async function selectRecipient(user, avatarUrl) {
+  currentSelectedUser = user;
+  currentSelectedAvatar = avatarUrl;
+  const container = document.getElementById("blackContainer");
+  document.getElementById("sendPickerModal").style.display = "none";
+  document.getElementById("blackSendScreen").classList.add("show");
+  document.getElementById("overlay").classList.add("show");
+  buildAmountSelectionUI(user, avatarUrl, container);
+}
+
 function openSendPicker() {
   document.getElementById("pickerBalance").innerText = currentBalance;
   renderPickerFriends();
   document.getElementById("sendPickerModal").style.display = "block";
   document.getElementById("overlay").classList.add("show");
-  if(searchResultsDiv) {
-    searchResultsDiv.style.display = "none";
-    searchResultsDiv.innerHTML = "";
-  }
+  if(searchResultsDiv) { searchResultsDiv.style.display = "none"; searchResultsDiv.innerHTML = ""; }
   if(searchInput2) searchInput2.value = "";
 }
 
@@ -797,39 +732,22 @@ function closeAllSendUI() {
   document.getElementById("overlay").classList.remove("show");
 }
 
-function openSidebar() {
-  document.getElementById("sidebar").classList.add("open");
-  document.getElementById("overlay").classList.add("show");
-}
+function openSidebar() { document.getElementById("sidebar").classList.add("open"); document.getElementById("overlay").classList.add("show"); }
+function closeSidebar() { document.getElementById("sidebar").classList.remove("open"); document.getElementById("overlay").classList.remove("show"); }
+function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
 
-function closeSidebar() {
-  document.getElementById("sidebar").classList.remove("open");
-  document.getElementById("overlay").classList.remove("show");
-}
-
-function escapeHtml(str) {
-  if(!str) return "";
-  return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;');
-}
-
-// ========== LOAD SAVED DATA ==========
 window.addEventListener("DOMContentLoaded", async () => {
   const savedFriends = localStorage.getItem("friendsList");
   friends = savedFriends ? JSON.parse(savedFriends) : ["builderman", "roblox"];
-  
   const savedBalance = localStorage.getItem("mainBalance");
   if(savedBalance) currentBalance = parseInt(savedBalance);
   updateBalanceUI();
-  
   const savedUsername = localStorage.getItem("mainUsername");
   if(savedUsername) document.getElementById("profileName").innerText = savedUsername;
   document.getElementById("usernameInput").value = savedUsername || "stickmasterluke";
-  
   renderFriendsList();
   await renderPickerFriends();
-  
   document.getElementById("overlay").onclick = () => { closeSidebar(); closeAllSendUI(); };
-  document.getElementById("closeBlackScreenBtn").onclick = closeAllSendUI;
   document.getElementById("mainSendBtn").onclick = openSendPicker;
   document.getElementById("heroSendBtn").onclick = openSendPicker;
 });
