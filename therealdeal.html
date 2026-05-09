@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>RobloxPlus · Send Robux (Complete Flow)</title>
+<title>RobloxPlus · Clickable Robux Icons</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 * {
@@ -74,9 +74,26 @@ body::after {
   border: 1px solid rgba(255,255,255,.05);
   border-radius: 999px;
   padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 24px;
   font-weight: 900;
 }
+.robux-icon-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: 0.1s;
+}
+.robux-icon-img:hover { transform: scale(1.05); }
+.robux-placeholder {
+  cursor: pointer;
+  font-size: 24px;
+  transition: 0.1s;
+}
+.robux-placeholder:hover { opacity: 0.7; }
 .send-btn {
   border: none;
   background: #111;
@@ -253,7 +270,7 @@ body::after {
 .send-balance {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 16px;
   font-weight: 800;
   background: #101015;
@@ -341,6 +358,28 @@ body::after {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+.amount-middle {
+  background: #14141c;
+  padding: 15px;
+  border-radius: 60px;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.amount-option {
+  height: 55px;
+  border-radius: 14px;
+  border: none;
+  background: #1f1f2a;
+  color: white;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.1s;
+}
+.amount-option.active { background: #5670ff; }
 </style>
 </head>
 <body>
@@ -384,7 +423,10 @@ body::after {
       <img id="profileIcon" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter">
       <div class="profile-name" id="profileName">stickmasterluke</div>
     </div>
-    <div class="robux-pill">⏺ <span id="balanceText">1859403</span></div>
+    <div class="robux-pill" id="robuxPill">
+      <span id="robuxIconContainer">⏺</span>
+      <span id="balanceText">1859403</span>
+    </div>
     <button class="send-btn" id="mainSendBtn">Send</button>
   </div>
 </div>
@@ -404,9 +446,33 @@ body::after {
           <div><div class="game-title">War Tycoon</div><div class="game-sub">2X CASH</div></div>
         </div>
       </div>
-      <div class="pack"><div class="pack-left"><div class="robux-amount">24,000</div><div class="old">22,500</div><div class="more">+1500 more</div></div><div class="price">$199.99</div></div>
-      <div class="pack"><div class="pack-left"><div class="robux-amount">11,000</div><div class="old">10,000</div><div class="more">+1000 more</div></div><div class="price">$99.99</div></div>
-      <div class="pack"><div class="pack-left"><div class="robux-amount">5,250</div><div class="old">4,500</div><div class="more">+750 more</div></div><div class="price">$49.99</div></div>
+      <div class="pack">
+        <div class="pack-left">
+          <span id="packageIcon1">⏺</span>
+          <div class="robux-amount">24,000</div>
+          <div class="old">22,500</div>
+          <div class="more">+1500 more</div>
+        </div>
+        <div class="price">$199.99</div>
+      </div>
+      <div class="pack">
+        <div class="pack-left">
+          <span id="packageIcon2">⏺</span>
+          <div class="robux-amount">11,000</div>
+          <div class="old">10,000</div>
+          <div class="more">+1000 more</div>
+        </div>
+        <div class="price">$99.99</div>
+      </div>
+      <div class="pack">
+        <div class="pack-left">
+          <span id="packageIcon3">⏺</span>
+          <div class="robux-amount">5,250</div>
+          <div class="old">4,500</div>
+          <div class="more">+750 more</div>
+        </div>
+        <div class="price">$49.99</div>
+      </div>
     </div>
   </div>
 </div>
@@ -416,7 +482,10 @@ body::after {
   <div class="send-top">
     <div class="send-title">Send Robux</div>
     <div class="send-top-right">
-      <div class="send-balance">⏺ <span id="pickerBalance">1859403</span></div>
+      <div class="send-balance" id="pickerBalanceContainer">
+        <span id="pickerIcon">⏺</span>
+        <span id="pickerBalance">1859403</span>
+      </div>
       <div class="send-close" onclick="closeAllSendUI()">×</div>
     </div>
   </div>
@@ -434,6 +503,113 @@ body::after {
 </div>
 
 <script>
+// ========== CLICKABLE ROBUX ICON SYSTEM ==========
+// Store custom Robux icon in localStorage
+let customRobuxIcon = localStorage.getItem("customRobuxIcon");
+
+// Function to replace a text placeholder with an image
+function replaceWithRobuxImage(element, iconUrl) {
+  if (!element) return;
+  const parent = element.parentNode;
+  const spanText = element.innerText;
+  
+  const img = document.createElement("img");
+  img.src = iconUrl;
+  img.className = "robux-icon-img";
+  img.style.width = "28px";
+  img.style.height = "28px";
+  img.style.objectFit = "contain";
+  img.style.cursor = "pointer";
+  img.style.display = "inline-block";
+  img.style.verticalAlign = "middle";
+  
+  // Make the new image also clickable to change icon
+  img.addEventListener("click", (e) => {
+    e.stopPropagation();
+    openIconPicker(img);
+  });
+  
+  parent.replaceChild(img, element);
+  return img;
+}
+
+// Function to open file picker for icon
+function openIconPicker(targetElement) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const imageUrl = event.target.result;
+        // Update the clicked element
+        if (targetElement.tagName === "IMG") {
+          targetElement.src = imageUrl;
+        } else if (targetElement.tagName === "SPAN") {
+          replaceWithRobuxImage(targetElement, imageUrl);
+        }
+        // Save to localStorage as global Robux icon preference
+        localStorage.setItem("customRobuxIcon", imageUrl);
+        customRobuxIcon = imageUrl;
+        // Sync all Robux icons on the page
+        syncAllRobuxIcons(imageUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  input.click();
+}
+
+// Sync all Robux icons on the page to use the same custom image
+function syncAllRobuxIcons(iconUrl) {
+  // Find all elements that currently display Robux icons (both placeholder spans and images)
+  const iconContainers = document.querySelectorAll("#robuxIconContainer, #pickerIcon, #packageIcon1, #packageIcon2, #packageIcon3");
+  iconContainers.forEach(container => {
+    if (container.tagName === "SPAN" && container.innerText === "⏺") {
+      replaceWithRobuxImage(container, iconUrl);
+    } else if (container.tagName === "IMG") {
+      container.src = iconUrl;
+    }
+  });
+  
+  // Also update any dynamically created icons in the black screen
+  const blackScreenIcons = document.querySelectorAll("#blackContainer .robux-icon-img, #blackContainer .robux-placeholder");
+  blackScreenIcons.forEach(icon => {
+    if (icon.tagName === "IMG") icon.src = iconUrl;
+  });
+}
+
+// Initialize clickable Robux icons on page load
+function initClickableRobuxIcons() {
+  const iconSpans = [
+    document.getElementById("robuxIconContainer"),
+    document.getElementById("pickerIcon"),
+    document.getElementById("packageIcon1"),
+    document.getElementById("packageIcon2"),
+    document.getElementById("packageIcon3")
+  ];
+  
+  iconSpans.forEach(span => {
+    if (span && span.innerText === "⏺") {
+      span.className = "robux-placeholder";
+      span.style.cursor = "pointer";
+      span.style.display = "inline-block";
+      span.style.fontSize = "24px";
+      span.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openIconPicker(span);
+      });
+    }
+  });
+  
+  // If there's a saved custom icon, apply it to all
+  if (customRobuxIcon) {
+    syncAllRobuxIcons(customRobuxIcon);
+  }
+}
+
 // ========== WORKING API ==========
 const PROXY = "https://corsproxy.io/?";
 let friends = [];
@@ -507,7 +683,6 @@ async function renderPickerFriends() {
     container.innerHTML = `<div style="text-align:center;padding:32px;color:#6b6b7a;">No friends added yet.<br>Use "Manage Site" to add friends.</div>`;
     return;
   }
-  container.innerHTML = '<div style="padding:8px;color:#aaa;font-size:13px;">Loading friends...</div>';
   container.innerHTML = "";
   for(const username of friends) {
     const users = await fetchUserByUsername(username);
@@ -553,27 +728,46 @@ if(searchInput2) {
 let selectedAmount = 500;
 
 function buildAmountSelectionUI(user, avatarUrl, container) {
+  const iconHtml = customRobuxIcon ? `<img src="${customRobuxIcon}" style="width:32px;height:32px;object-fit:contain;">` : "⏺";
+  
   container.innerHTML = `
     <div style="background:#0b0b12;border-radius:28px;padding:30px 20px;border:1px solid rgba(255,255,255,.05);text-align:center;">
       <img id="selectedAvatarLarge" src="${avatarUrl}" style="width:100px;height:100px;border-radius:50%;border:3px solid #5670ff;margin-bottom:15px;">
       <div id="selectedNameLarge" style="font-size:26px;font-weight:800;margin-bottom:25px;">${escapeHtml(user.displayName || user.name)}</div>
-      <div class="amount-middle" style="background:#14141c;padding:15px;border-radius:60px;margin-bottom:25px;">
+      <div class="amount-middle">
+        <span id="amountIcon" style="cursor:pointer;font-size:28px;">${iconHtml}</span>
         <span id="amountDisplayLarge" style="font-size:48px;font-weight:900;color:#ffd966;">500</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
-        <button data-amt="25" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">25</button>
-        <button data-amt="50" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">50</button>
-        <button data-amt="100" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">100</button>
-        <button data-amt="200" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">200</button>
-        <button data-amt="500" class="amount-option active" style="height:55px;border-radius:14px;border:none;background:#5670ff;color:white;font-size:18px;font-weight:800;cursor:pointer;">500</button>
-        <button data-amt="1000" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">1000</button>
-        <button data-amt="2000" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">2000</button>
-        <button data-amt="5000" class="amount-option" style="height:55px;border-radius:14px;border:none;background:#1f1f2a;color:white;font-size:18px;font-weight:800;cursor:pointer;">5000</button>
+        <button data-amt="25" class="amount-option">25</button>
+        <button data-amt="50" class="amount-option">50</button>
+        <button data-amt="100" class="amount-option">100</button>
+        <button data-amt="200" class="amount-option">200</button>
+        <button data-amt="500" class="amount-option active">500</button>
+        <button data-amt="1000" class="amount-option">1000</button>
+        <button data-amt="2000" class="amount-option">2000</button>
+        <button data-amt="5000" class="amount-option">5000</button>
       </div>
       <input type="number" id="customAmountBlack" placeholder="Custom amount" style="width:100%;height:55px;border-radius:14px;border:2px solid #5670ff;background:#14141c;color:white;font-size:18px;text-align:center;margin-bottom:20px;outline:none;">
       <button id="nextToConfirmBtn" style="width:100%;height:60px;border-radius:16px;border:none;background:#5670ff;color:white;font-size:22px;font-weight:800;cursor:pointer;">Continue</button>
     </div>
   `;
+  
+  // Make amount icon clickable
+  const amountIcon = document.getElementById("amountIcon");
+  if(amountIcon && amountIcon.tagName === "SPAN") {
+    amountIcon.style.cursor = "pointer";
+    amountIcon.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openIconPicker(amountIcon);
+    });
+  } else if(amountIcon && amountIcon.tagName === "IMG") {
+    amountIcon.style.cursor = "pointer";
+    amountIcon.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openIconPicker(amountIcon);
+    });
+  }
   
   const amountDisplay = document.getElementById("amountDisplayLarge");
   const customInput = document.getElementById("customAmountBlack");
@@ -591,8 +785,6 @@ function buildAmountSelectionUI(user, avatarUrl, container) {
       const amt = parseInt(btn.getAttribute("data-amt"));
       updateAmount(amt);
       btn.classList.add("active");
-      btn.style.background = "#5670ff";
-      amountBtns.forEach(b => { if(b !== btn) b.style.background = "#1f1f2a"; });
     });
   });
   
@@ -602,7 +794,7 @@ function buildAmountSelectionUI(user, avatarUrl, container) {
       if(!isNaN(val) && val > 0) {
         selectedAmount = val;
         amountDisplay.innerText = val;
-        amountBtns.forEach(btn => { btn.classList.remove("active"); btn.style.background = "#1f1f2a"; });
+        amountBtns.forEach(btn => btn.classList.remove("active"));
       }
     });
   }
@@ -620,6 +812,7 @@ function showConfirmScreen(user, avatarUrl, container) {
   const senderAvatar = document.getElementById("profileIcon").src;
   const receiverUsername = user.name;
   const receiverDisplay = user.displayName || user.name;
+  const iconHtml = customRobuxIcon ? `<img src="${customRobuxIcon}" style="width:36px;height:36px;object-fit:contain;vertical-align:middle;">` : "⏺";
   
   container.innerHTML = `
     <div style="background:#0b0b12;border-radius:28px;padding:28px;border:1px solid rgba(255,255,255,.05);">
@@ -636,7 +829,7 @@ function showConfirmScreen(user, avatarUrl, container) {
       </div>
       <div style="font-size:42px;font-weight:900;text-align:center;margin-bottom:18px;">Confirm Transaction</div>
       <div style="text-align:center;color:#b8b8c7;font-size:20px;line-height:1.5;margin-bottom:14px;">
-        You are about to send
+        You are about to send ${iconHtml}
         <span style="color:white;font-weight:900;">${selectedAmount.toLocaleString()} Robux</span>
         to
         <span style="color:white;font-weight:900;">@${escapeHtml(receiverUsername)}</span>
@@ -686,12 +879,14 @@ async function processTransaction(user, avatarUrl, container) {
   currentBalance -= selectedAmount;
   updateBalanceUI();
   
+  const iconHtml = customRobuxIcon ? `<img src="${customRobuxIcon}" style="width:36px;height:36px;object-fit:contain;vertical-align:middle;">` : "⏺";
+  
   container.innerHTML = `
     <div style="background:#0b0b12;border-radius:28px;padding:40px 30px;text-align:center;border:1px solid rgba(255,255,255,.05);">
       <div style="width:110px;height:110px;border-radius:50%;background:#16a34a;display:flex;align-items:center;justify-content:center;margin:0 auto 26px;font-size:60px;color:white;font-weight:900;">✓</div>
       <div style="font-size:48px;font-weight:900;margin-bottom:14px;">Transaction Complete</div>
       <div style="color:#b8b8c7;font-size:22px;margin-bottom:32px;line-height:1.6;">
-        Successfully sent
+        Successfully sent ${iconHtml}
         <span style="color:white;font-weight:900;">${selectedAmount.toLocaleString()} Robux</span>
         to
         <span style="color:white;font-weight:900;">@${escapeHtml(receiverUsername)}</span>
@@ -737,6 +932,9 @@ function closeSidebar() { document.getElementById("sidebar").classList.remove("o
 function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
 
 window.addEventListener("DOMContentLoaded", async () => {
+  // Initialize clickable Robux icons
+  initClickableRobuxIcons();
+  
   const savedFriends = localStorage.getItem("friendsList");
   friends = savedFriends ? JSON.parse(savedFriends) : ["builderman", "roblox"];
   const savedBalance = localStorage.getItem("mainBalance");
