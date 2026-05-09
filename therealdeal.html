@@ -2,14 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>RobloxPlus</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>RobloxPlus · Send Robux</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
 <style>
-
 *{
     margin:0;
     padding:0;
@@ -24,29 +20,24 @@ body{
 }
 
 /* BACKGROUND */
-
 body::before{
     content:"";
     position:fixed;
     inset:0;
-    background:
-    radial-gradient(circle at center,#101d66 0%,#060611 45%,#020204 100%);
+    background:radial-gradient(circle at center,#101d66 0%,#060611 45%,#020204 100%);
     z-index:-2;
 }
-
 body::after{
     content:"";
     position:fixed;
     inset:0;
-    background-image:
-    radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px);
+    background-image:radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px);
     background-size:35px 35px;
     opacity:.25;
     z-index:-1;
 }
 
 /* TOPBAR */
-
 .topbar{
     height:76px;
     padding:0 24px;
@@ -66,12 +57,10 @@ body::after{
     align-items:center;
     gap:18px;
 }
-
 .logo{
     font-size:24px;
     font-weight:900;
 }
-
 .manage-btn{
     border:none;
     background:#111;
@@ -80,14 +69,16 @@ body::after{
     padding:14px 20px;
     font-weight:800;
     cursor:pointer;
+    transition:0.2s;
 }
-
+.manage-btn:hover{
+    background:#1c1c24;
+}
 .right-top{
     display:flex;
     align-items:center;
     gap:12px;
 }
-
 .profile-pill{
     background:#0f0f15;
     border:1px solid rgba(255,255,255,.05);
@@ -97,17 +88,14 @@ body::after{
     align-items:center;
     gap:12px;
 }
-
 .profile-pill img{
     width:42px;
     height:42px;
     border-radius:50%;
 }
-
 .profile-name{
     font-weight:700;
 }
-
 .robux-pill{
     background:#0f0f15;
     border:1px solid rgba(255,255,255,.05);
@@ -116,7 +104,6 @@ body::after{
     font-size:24px;
     font-weight:900;
 }
-
 .send-btn{
     border:none;
     background:#111;
@@ -125,29 +112,29 @@ body::after{
     border-radius:999px;
     font-weight:800;
     cursor:pointer;
+    transition:0.2s;
+}
+.send-btn:hover{
+    background:#1f1f2a;
 }
 
 /* HERO */
-
 .hero{
     max-width:1200px;
     margin:auto;
     padding:80px 30px;
 }
-
 .hero-wrap{
     display:flex;
     justify-content:space-between;
     align-items:center;
     gap:50px;
 }
-
 .big-text{
     font-size:96px;
     font-weight:900;
     line-height:.92;
 }
-
 .glow-btn{
     border:none;
     background:linear-gradient(90deg,#5d77ff,#785cff);
@@ -158,20 +145,21 @@ body::after{
     font-weight:900;
     cursor:pointer;
     box-shadow:0 0 50px rgba(92,113,255,.5);
+    transition:0.2s;
+}
+.glow-btn:hover{
+    transform:scale(1.02);
 }
 
-/* CARD */
-
+/* CARD AREA */
 .card-area{
     margin-top:70px;
 }
-
 .card-label{
     margin-bottom:18px;
     color:#b9b9b9;
     font-weight:700;
 }
-
 .main-card{
     max-width:920px;
     border-radius:28px;
@@ -179,17 +167,13 @@ body::after{
     background:#090909;
     border:1px solid rgba(255,255,255,.05);
 }
-
 .banner{
     height:240px;
-    background:
-    linear-gradient(to bottom,transparent,rgba(0,0,0,.88)),
-    url('https://images.unsplash.com/photo-1474302770737-173ee21bab63?q=80&w=1400&auto=format&fit=crop');
+    background:linear-gradient(to bottom,transparent,rgba(0,0,0,.88)), url('https://images.unsplash.com/photo-1474302770737-173ee21bab63?q=80&w=1400&auto=format&fit=crop');
     background-size:cover;
     background-position:center;
     position:relative;
 }
-
 .game-info{
     position:absolute;
     bottom:22px;
@@ -198,23 +182,19 @@ body::after{
     align-items:center;
     gap:16px;
 }
-
 .game-info img{
     width:74px;
     height:74px;
     border-radius:50%;
 }
-
 .game-title{
     font-size:30px;
     font-weight:900;
 }
-
 .game-sub{
     color:#aaa;
     margin-top:5px;
 }
-
 .pack{
     display:flex;
     justify-content:space-between;
@@ -222,24 +202,20 @@ body::after{
     padding:26px 30px;
     border-top:1px solid rgba(255,255,255,.06);
 }
-
 .pack-left{
     display:flex;
     align-items:center;
     gap:16px;
 }
-
 .robux-amount{
     font-size:34px;
     font-weight:900;
 }
-
 .old{
     text-decoration:line-through;
     color:#777;
     font-size:22px;
 }
-
 .more{
     background:#1a1a1a;
     padding:8px 14px;
@@ -248,7 +224,6 @@ body::after{
     color:#bbb;
     font-weight:700;
 }
-
 .price{
     background:#1d1d1d;
     padding:16px 24px;
@@ -258,7 +233,6 @@ body::after{
 }
 
 /* SIDEBAR */
-
 .sidebar{
     position:fixed;
     top:0;
@@ -271,33 +245,27 @@ body::after{
     transition:.35s;
     overflow-y:auto;
 }
-
 .sidebar.open{
     left:0;
 }
-
 .side-content{
     padding:28px;
 }
-
 .side-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
     margin-bottom:24px;
 }
-
 .side-title{
     font-size:42px;
     font-weight:900;
 }
-
 .close{
     font-size:34px;
     cursor:pointer;
     color:#999;
 }
-
 .panel{
     background:#111;
     border-radius:24px;
@@ -305,12 +273,10 @@ body::after{
     margin-bottom:24px;
     border:1px solid rgba(255,255,255,.05);
 }
-
 .panel h2{
     font-size:34px;
     margin-bottom:20px;
 }
-
 .label{
     display:block;
     color:#999;
@@ -318,7 +284,6 @@ body::after{
     margin-bottom:10px;
     font-weight:700;
 }
-
 .input{
     width:100%;
     background:black;
@@ -329,7 +294,6 @@ body::after{
     border-radius:16px;
     font-size:22px;
 }
-
 .blue-btn{
     width:100%;
     border:none;
@@ -342,12 +306,10 @@ body::after{
     font-weight:900;
     cursor:pointer;
 }
-
 .friend-wrap{
     display:flex;
     gap:12px;
 }
-
 .add-btn{
     width:120px;
     border:none;
@@ -357,11 +319,9 @@ body::after{
     font-size:22px;
     font-weight:900;
 }
-
 .friend-list{
     margin-top:20px;
 }
-
 .friend{
     background:#171717;
     padding:18px;
@@ -371,7 +331,6 @@ body::after{
     justify-content:space-between;
     margin-bottom:12px;
 }
-
 .remove{
     border:none;
     background:#2d0b0b;
@@ -381,9 +340,6 @@ body::after{
     font-weight:800;
     cursor:pointer;
 }
-
-/* OVERLAY */
-
 .overlay{
     position:fixed;
     inset:0;
@@ -393,1074 +349,628 @@ body::after{
     pointer-events:none;
     transition:.25s;
 }
-
 .overlay.show{
     opacity:1;
     pointer-events:auto;
 }
 
-/* SEND MODAL - UPDATED VERSION */
-
+/* ========== SEND MODAL (ACCURATE / SMALLER VERSION) ========== */
 .send-modal{
     position:fixed;
     top:50%;
     left:50%;
     transform:translate(-50%,-50%);
-    width:700px;
-    max-width:94%;
+    width:520px;
+    max-width:92%;
     background:#09090d;
     border:1px solid rgba(255,255,255,.06);
-    border-radius:30px;
+    border-radius:22px;
     overflow:hidden;
     z-index:999;
     display:none;
-    box-shadow:
-    0 40px 100px rgba(0,0,0,.7),
-    0 0 0 1px rgba(255,255,255,.02);
+    box-shadow:0 40px 100px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.02);
 }
 
 /* TOP */
-
 .send-top{
-    height:88px;
+    height:68px;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:0 28px;
+    padding:0 20px;
     border-bottom:1px solid rgba(255,255,255,.05);
     background:rgba(255,255,255,.01);
 }
-
 .send-title{
-    font-size:34px;
-    font-weight:900;
-    letter-spacing:-1px;
+    font-size:18px;
+    font-weight:800;
+    letter-spacing:-0.3px;
 }
-
 .send-top-right{
     display:flex;
     align-items:center;
     gap:18px;
 }
-
 .send-balance{
     display:flex;
     align-items:center;
-    gap:8px;
-    font-size:24px;
-    font-weight:900;
+    gap:6px;
+    font-size:15px;
+    font-weight:800;
 }
-
 .send-close{
-    width:42px;
-    height:42px;
-    border-radius:12px;
+    width:30px;
+    height:30px;
+    border-radius:8px;
     display:flex;
     align-items:center;
     justify-content:center;
     background:#15151d;
     cursor:pointer;
     transition:.2s;
-    font-size:26px;
+    font-size:18px;
+    font-weight:700;
 }
-
 .send-close:hover{
     background:#20202a;
 }
-
 /* PROFILE */
-
 .profile-center{
     text-align:center;
-    padding:42px 20px 16px;
+    padding:26px 18px 8px;
 }
-
 .avatar-ring{
-    width:138px;
-    height:138px;
+    width:82px;
+    height:82px;
     border-radius:50%;
     margin:auto;
-    padding:5px;
-    background:
-    linear-gradient(
-    135deg,
-    rgba(86,112,255,.9),
-    rgba(120,92,255,.35)
-    );
+    padding:3px;
+    background:linear-gradient(135deg, rgba(86,112,255,.9), rgba(120,92,255,.35));
 }
-
 .selected-avatar{
     width:100%;
     height:100%;
     border-radius:50%;
     object-fit:cover;
-    border:4px solid #0b0b10;
+    border:3px solid #0b0b10;
 }
-
 .selected-name{
-    margin-top:20px;
-    font-size:46px;
+    margin-top:12px;
+    font-size:28px;
     font-weight:900;
-    letter-spacing:-2px;
+    letter-spacing:-1px;
 }
-
 .selected-handle{
-    margin-top:6px;
+    margin-top:4px;
     color:#8d8d98;
-    font-size:24px;
+    font-size:16px;
     font-weight:700;
 }
-
 .profile-meta{
-    margin-top:18px;
+    margin-top:10px;
     display:flex;
     flex-direction:column;
-    gap:8px;
+    gap:4px;
 }
-
 .meta-item{
-    color:#b5b5c2;
-    font-size:20px;
+    color:#a7a7b3;
+    font-size:14px;
     font-weight:600;
 }
-
 /* AMOUNT BUTTONS */
-
 .amount-grid{
     display:grid;
     grid-template-columns:repeat(3,1fr);
-    gap:14px;
-    padding:26px 30px;
+    gap:10px;
+    padding:20px;
 }
-
 .amount-btn{
-    height:78px;
+    height:54px;
     border:none;
-    border-radius:18px;
+    border-radius:12px;
     background:#17171d;
     color:white;
-    font-size:26px;
-    font-weight:900;
+    font-size:18px;
+    font-weight:800;
     cursor:pointer;
     transition:.18s;
     border:1px solid rgba(255,255,255,.04);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
 }
-
 .amount-btn:hover{
     transform:translateY(-2px);
     background:#1d1d27;
 }
-
 .amount-btn.active{
     background:#4f6fff;
-    box-shadow:
-    0 0 24px rgba(79,111,255,.45);
+    box-shadow:0 0 20px rgba(79,111,255,.45);
 }
-
 /* CUSTOM INPUT */
-
 .custom-wrap{
-    padding:0 30px;
+    padding:0 20px;
 }
-
 .custom-input{
     width:100%;
-    height:78px;
+    height:54px;
     background:#101015;
     border:2px solid #4f6fff;
-    border-radius:18px;
+    border-radius:12px;
     outline:none;
     color:white;
-    font-size:26px;
+    font-size:18px;
     font-weight:700;
-    padding:0 22px;
+    padding:0 16px;
     transition:.2s;
 }
-
 .custom-input:focus{
-    box-shadow:
-    0 0 0 4px rgba(79,111,255,.15);
+    box-shadow:0 0 0 3px rgba(79,111,255,.2);
 }
-
 /* BIG AMOUNT */
-
 .big-amount{
     text-align:center;
-    padding-top:26px;
-    font-size:64px;
+    padding-top:18px;
+    font-size:42px;
     font-weight:900;
-    letter-spacing:-2px;
+    letter-spacing:-1px;
 }
-
 /* BUTTONS */
-
 .bottom-buttons{
     display:flex;
-    gap:16px;
-    padding:30px;
+    gap:10px;
+    padding:20px;
 }
-
 .continue-btn,
 .back-btn{
     flex:1;
-    height:84px;
+    height:58px;
     border:none;
-    border-radius:18px;
-    font-size:28px;
-    font-weight:900;
+    border-radius:14px;
+    font-size:20px;
+    font-weight:800;
     cursor:pointer;
     transition:.18s;
 }
-
 .continue-btn{
     background:#5670ff;
     color:white;
-    box-shadow:
-    0 10px 30px rgba(86,112,255,.35);
+    box-shadow:0 8px 20px rgba(86,112,255,.35);
 }
-
 .continue-btn:hover{
     transform:translateY(-2px);
 }
-
 .back-btn{
     background:#1a1a21;
     color:white;
 }
-
 .back-btn:hover{
     background:#23232d;
 }
-
 /* WARNING */
-
 .warning-text{
     text-align:center;
     color:#7c7c88;
-    font-size:15px;
-    line-height:1.5;
-    padding:0 40px 34px;
+    font-size:12px;
+    line-height:1.4;
+    padding:0 24px 22px;
 }
-
-/* MOBILE */
-
-@media(max-width:700px){
-
-    .send-title{
-        font-size:26px;
+/* responsive tweaks */
+@media(max-width:550px){
+    .send-modal{
+        max-width:95%;
     }
-
-    .selected-name{
-        font-size:34px;
-    }
-
-    .big-amount{
-        font-size:48px;
-    }
-
     .amount-btn{
-        font-size:20px;
-        height:68px;
+        font-size:16px;
+        height:50px;
     }
-
-    .continue-btn,
-    .back-btn{
-        height:72px;
-        font-size:22px;
+    .big-amount{
+        font-size:36px;
     }
-
+    .continue-btn, .back-btn{
+        font-size:18px;
+        height:52px;
+    }
 }
-
-@media(max-width:900px){
-
-.hero-wrap{
-    flex-direction:column;
-    align-items:flex-start;
-}
-
-.big-text{
-    font-size:64px;
-}
-
-.glow-btn{
-    width:100%;
-}
-
-.sidebar{
-    width:100%;
-    left:-100%;
-}
-
-}
-
 </style>
 </head>
 <body>
 
 <div class="overlay" id="overlay"></div>
 
-<!-- SIDEBAR -->
-
+<!-- SIDEBAR for Manage Site -->
 <div class="sidebar" id="sidebar">
-
 <div class="side-content">
-
 <div class="side-header">
 <div class="side-title">Manage Site</div>
 <div class="close" onclick="closeSidebar()">×</div>
 </div>
-
 <div class="panel">
-
 <h2>My Profile</h2>
-
 <label class="label">Username</label>
 <input class="input" id="usernameInput" value="stickmasterluke">
-
 <label class="label">Balance</label>
 <input class="input" id="balanceInput" value="1859403">
-
-<button class="blue-btn" onclick="updateProfile()">
-Update Profile
-</button>
-
+<button class="blue-btn" onclick="updateProfile()">Update Profile</button>
 </div>
-
 <div class="panel">
-
 <h2>Saved Friends</h2>
-
 <div class="friend-wrap">
-
-<input
-class="input"
-id="friendInput"
-placeholder="Username">
-
-<button class="add-btn" onclick="addFriend()">
-Add
-</button>
-
+<input class="input" id="friendInput" placeholder="Username">
+<button class="add-btn" onclick="addFriend()">Add</button>
 </div>
-
 <div class="friend-list" id="friendList"></div>
-
 </div>
-
 </div>
-
 </div>
 
 <!-- TOPBAR -->
-
 <div class="topbar">
-
 <div class="left-top">
-
-<button class="manage-btn" onclick="openSidebar()">
-MANAGE SITE
-</button>
-
-<div class="logo">
-RobloxPlus
+<button class="manage-btn" onclick="openSidebar()">MANAGE SITE</button>
+<div class="logo">RobloxPlus</div>
 </div>
-
-</div>
-
 <div class="right-top">
-
 <div class="profile-pill">
-
-<img
-id="profileIcon"
-src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter">
-
-<div
-class="profile-name"
-id="profileName">
-stickmasterluke
+<img id="profileIcon" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter">
+<div class="profile-name" id="profileName">stickmasterluke</div>
+</div>
+<div class="robux-pill">⏺ <span id="balanceText">1859403</span></div>
+<button class="send-btn" id="globalSendBtn">Send</button>
+</div>
 </div>
 
-</div>
-
-<div class="robux-pill">
-⏺ <span id="balanceText">1859403</span>
-</div>
-
-<button class="send-btn">
-Send
-</button>
-
-</div>
-
-</div>
-
-<!-- HERO -->
-
+<!-- HERO SECTION -->
 <div class="hero">
-
 <div class="hero-wrap">
-
-<div class="big-text">
-Enjoy up to<br>
-25%<br>
-more Robux
+<div class="big-text">Enjoy up to<br>25%<br>more Robux</div>
+<button class="glow-btn" id="heroSendBtn">↑ Send Robux</button>
 </div>
-
-<button class="glow-btn">
-↑ Send Robux
-</button>
-
-</div>
-
 <div class="card-area">
-
-<div class="card-label">
-Bonus item we picked for you
-</div>
-
+<div class="card-label">Bonus item we picked for you</div>
 <div class="main-card">
-
 <div class="banner">
-
 <div class="game-info">
-
-<img
-id="gameIcon"
-src="https://tr.rbxcdn.com/180DAY-e14c2f238f7b5cbfe8a5f4dbd3d70e6b/150/150/Image/Png/noFilter">
-
+<img id="gameIcon" src="https://tr.rbxcdn.com/180DAY-e14c2f238f7b5cbfe8a5f4dbd3d70e6b/150/150/Image/Png/noFilter">
 <div>
-
-<div class="game-title">
-[EOD] War Tycoon
+<div class="game-title">[EOD] War Tycoon</div>
+<div class="game-sub">2X CASH</div>
+</div>
+</div>
+</div>
+<div class="pack"><div class="pack-left"><div class="robux-amount">24.000</div><div class="old">22.500</div><div class="more">+1500 more</div></div><div class="price">$199.99</div></div>
+<div class="pack"><div class="pack-left"><div class="robux-amount">11.000</div><div class="old">10.000</div><div class="more">+1000 more</div></div><div class="price">$99.99</div></div>
+<div class="pack"><div class="pack-left"><div class="robux-amount">5.250</div><div class="old">4.500</div><div class="more">+750 more</div></div><div class="price">$49.99</div></div>
+</div>
+</div>
 </div>
 
-<div class="game-sub">
-2X CASH
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="pack">
-
-<div class="pack-left">
-<div class="robux-amount">24.000</div>
-<div class="old">22.500</div>
-<div class="more">+1500 more</div>
-</div>
-
-<div class="price">$199.99</div>
-
-</div>
-
-<div class="pack">
-
-<div class="pack-left">
-<div class="robux-amount">11.000</div>
-<div class="old">10.000</div>
-<div class="more">+1000 more</div>
-</div>
-
-<div class="price">$99.99</div>
-
-</div>
-
-<div class="pack">
-
-<div class="pack-left">
-<div class="robux-amount">5.250</div>
-<div class="old">4.500</div>
-<div class="more">+750 more</div>
-</div>
-
-<div class="price">$49.99</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- SEND MODAL - UPDATED VERSION -->
-
+<!-- ========== SEND MODAL - ACCURATE IMAGE SIZING (SINGLE SCREEN) ========== -->
 <div class="send-modal" id="sendModal">
-
-    <!-- TOP -->
-
-    <div class="send-top">
-
-        <div class="send-title">
-            Send Robux
-        </div>
-
-        <div class="send-top-right">
-
-            <div class="send-balance">
-                ⏺ <span id="sendBalanceText">1859403</span>
-            </div>
-
-            <div class="send-close" onclick="closeSendModal()">
-                ×
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- PROFILE -->
-
-    <div class="profile-center">
-
-        <div class="avatar-ring">
-
-            <img id="selectedAvatar" class="selected-avatar">
-
-        </div>
-
-        <div class="selected-name" id="selectedName">
-            builderman
-        </div>
-
-        <div class="selected-handle" id="selectedHandle">
-            @builderman
-        </div>
-
-        <div class="profile-meta">
-
-            <div class="meta-item">
-                👥 0 Mutual Connections
-            </div>
-
-            <div class="meta-item" id="selectedJoined">
-                ⏺ Joined in 2008
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- AMOUNTS -->
-
-    <div class="amount-grid">
-
-        <button onclick="selectAmount(25,event)" class="amount-btn">
-            ⏺ 25
-        </button>
-
-        <button onclick="selectAmount(50,event)" class="amount-btn">
-            ⏺ 50
-        </button>
-
-        <button onclick="selectAmount(100,event)" class="amount-btn">
-            ⏺ 100
-        </button>
-
-        <button onclick="selectAmount(200,event)" class="amount-btn">
-            ⏺ 200
-        </button>
-
-        <button onclick="selectAmount(500,event)" class="amount-btn active">
-            ⏺ 500
-        </button>
-
-        <button onclick="selectAmount(1000,event)" class="amount-btn">
-            ⏺ 1000
-        </button>
-
-    </div>
-
-    <!-- CUSTOM -->
-
-    <div class="custom-wrap">
-
-        <input
-        type="number"
-        id="customAmount"
-        class="custom-input"
-        placeholder="Custom amount">
-
-    </div>
-
-    <!-- BIG AMOUNT -->
-
-    <div class="big-amount">
-        ⏺ <span id="bigAmountText">500</span>
-    </div>
-
-    <!-- BUTTONS -->
-
-    <div class="bottom-buttons">
-
-        <button class="continue-btn">
-            Continue
-        </button>
-
-        <button class="back-btn" onclick="backToSearch()">
-            Back
-        </button>
-
-    </div>
-
-    <!-- WARNING -->
-
-    <div class="warning-text">
-        You need an age check or parental consent to send Robux.
-        Once you send, you cannot cancel.
-    </div>
-
+<div class="send-top">
+<div class="send-title">Send Robux</div>
+<div class="send-top-right">
+<div class="send-balance">⏺ <span id="sendBalanceText2">1859403</span></div>
+<div class="send-close" onclick="closeSendModal()">×</div>
 </div>
-<script>
+</div>
+<div class="profile-center">
+<div class="avatar-ring">
+<img id="selectedAvatar" class="selected-avatar" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter">
+</div>
+<div class="selected-name" id="selectedName">stickmasterluke</div>
+<div class="selected-handle" id="selectedHandle">@stickmasterluke</div>
+<div class="profile-meta">
+<div class="meta-item" id="mutualText">👥 0 Mutual Connections</div>
+<div class="meta-item" id="selectedJoined">⏺ Joined in 2020</div>
+</div>
+</div>
+<div class="amount-grid">
+<button onclick="selectAmount(25,event)" class="amount-btn">⏺ 25</button>
+<button onclick="selectAmount(50,event)" class="amount-btn">⏺ 50</button>
+<button onclick="selectAmount(100,event)" class="amount-btn">⏺ 100</button>
+<button onclick="selectAmount(200,event)" class="amount-btn">⏺ 200</button>
+<button onclick="selectAmount(500,event)" class="amount-btn active">⏺ 500</button>
+<button onclick="selectAmount(1000,event)" class="amount-btn">⏺ 1000</button>
+</div>
+<div class="custom-wrap">
+<input type="number" id="customAmount" class="custom-input" placeholder="Custom amount">
+</div>
+<div class="big-amount">⏺ <span id="bigAmountText">500</span></div>
+<div class="bottom-buttons">
+<button class="continue-btn" id="confirmSendBtn">Continue</button>
+<button class="back-btn" onclick="closeSendModal()">Back</button>
+</div>
+<div class="warning-text">You need an age check or parental consent to send Robux. Once you send, you cannot cancel.</div>
+</div>
 
+<script>
+// ---------- GLOBALS ----------
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("overlay");
+const sendModal = document.getElementById("sendModal");
+const PROXY = "https://corsproxy.io/?";
 
+let friends = [];
+
+// ---------- SIDEBAR ----------
 function openSidebar(){
     sidebar.classList.add("open");
     overlay.classList.add("show");
 }
-
 function closeSidebar(){
     sidebar.classList.remove("open");
     overlay.classList.remove("show");
 }
-
-overlay.onclick = ()=>{
+overlay.onclick = () => {
     closeSidebar();
     closeSendModal();
 };
 
-/* API */
-
-const PROXY = "https://corsproxy.io/?";
-
+// ---------- API HELPERS ----------
 async function fetchRobloxAPI(url){
-
-    const response = await fetch(
-        PROXY + encodeURIComponent(url)
-    );
-
-    return await response.json();
-
+    try {
+        const response = await fetch(PROXY + encodeURIComponent(url));
+        return await response.json();
+    } catch(e) { return {}; }
 }
-
 async function fetchUserByUsername(username){
-
-    try{
-
-        const data = await fetchRobloxAPI(
-            `https://users.roblox.com/v1/users/search?keyword=${username}&limit=10`
-        );
-
+    try {
+        const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${username}&limit=10`);
         return data.data || [];
-
-    }catch(e){
-
-        return [];
-
-    }
-
+    } catch(e) { return []; }
 }
-
 async function fetchAvatarUrl(userId){
-
-    try{
-
-        const data = await fetchRobloxAPI(
-            `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`
-        );
-
-        return data.data[0].imageUrl;
-
-    }catch(e){
-
-        return "";
-
-    }
-
+    try {
+        const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
+        return data.data?.[0]?.imageUrl || "";
+    } catch(e) { return ""; }
+}
+async function fetchUserById(userId){
+    try {
+        const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/${userId}`);
+        return data;
+    } catch(e) { return null; }
 }
 
-/* PROFILE */
-
+// ---------- PROFILE UPDATE (main user) ----------
 async function updateProfile(){
-
-    const username =
-    document.getElementById("usernameInput").value;
-
-    const balance =
-    document.getElementById("balanceInput").value;
-
-    document.getElementById("profileName").innerText =
-    username;
-
-    document.getElementById("balanceText").innerText =
-    balance;
-
-    localStorage.setItem("mainUsername",username);
-    localStorage.setItem("mainBalance",balance);
-
+    const username = document.getElementById("usernameInput").value.trim();
+    const balance = document.getElementById("balanceInput").value;
+    if(!username) return;
+    document.getElementById("profileName").innerText = username;
+    document.getElementById("balanceText").innerText = balance;
+    localStorage.setItem("mainUsername", username);
+    localStorage.setItem("mainBalance", balance);
     const users = await fetchUserByUsername(username);
-
     if(users.length){
-
         const user = users[0];
-
-        const avatar =
-        await fetchAvatarUrl(user.id);
-
-        document.getElementById("profileIcon").src =
-        avatar;
-
-        document.getElementById("gameIcon").src =
-        avatar;
-
-        localStorage.setItem("mainAvatar",avatar);
-
+        const avatar = await fetchAvatarUrl(user.id);
+        if(avatar){
+            document.getElementById("profileIcon").src = avatar;
+            document.getElementById("gameIcon").src = avatar;
+            localStorage.setItem("mainAvatar", avatar);
+        }
+        // also update modal current recipient if the profile matches current selected? optional - but we will keep modal fresh.
+        await updateModalProfileWithUser(user, avatar);
+    } else {
+        // fallback: keep existing but update name
+        document.getElementById("selectedName").innerText = username;
+        document.getElementById("selectedHandle").innerText = "@"+username;
     }
-
 }
 
-/* FRIENDS */
-
-let friends = [];
-
-function renderFriends(){
-
-    const list =
-    document.getElementById("friendList");
-
-    list.innerHTML = "";
-
-    friends.forEach((friend,index)=>{
-
-        list.innerHTML += `
-        <div class="friend">
-
-            <span>${friend}</span>
-
-            <button
-            class="remove"
-            onclick="removeFriend(${index})">
-            Remove
-            </button>
-
-        </div>
-        `;
-
-    });
-
-    localStorage.setItem(
-        "friendsList",
-        JSON.stringify(friends)
-    );
-
-}
-
-function addFriend(){
-
-    const input =
-    document.getElementById("friendInput");
-
-    const value = input.value.trim();
-
-    if(!value) return;
-
-    friends.push(value);
-
-    input.value = "";
-
-    renderFriends();
-
-}
-
-function removeFriend(index){
-
-    friends.splice(index,1);
-
-    renderFriends();
-
-}
-
-/* LOAD SAVED */
-
-window.addEventListener("DOMContentLoaded",()=>{
-
-    const savedFriends =
-    localStorage.getItem("friendsList");
-
-    if(savedFriends){
-
-        friends = JSON.parse(savedFriends);
-
-    }
-
-    const savedUser =
-    localStorage.getItem("mainUsername");
-
-    const savedBalance =
-    localStorage.getItem("mainBalance");
-
-    const savedAvatar =
-    localStorage.getItem("mainAvatar");
-
-    if(savedUser){
-
-        document.getElementById("profileName").innerText =
-        savedUser;
-
-        document.getElementById("usernameInput").value =
-        savedUser;
-
-    }
-
-    if(savedBalance){
-
-        document.getElementById("balanceText").innerText =
-        savedBalance;
-
-        document.getElementById("balanceInput").value =
-        savedBalance;
-
-    }
-
-    if(savedAvatar){
-
-        document.getElementById("profileIcon").src =
-        savedAvatar;
-
-        document.getElementById("gameIcon").src =
-        savedAvatar;
-
-    }
-
-    renderFriends();
-
-});
-
-/* SEND MODAL */
-
-const sendModal =
-document.getElementById("sendModal");
-
-document.querySelectorAll(".send-btn,.glow-btn")
-.forEach(btn=>{
-
-    btn.addEventListener("click",openSendModal);
-
-});
-
-function openSendModal(){
-
-    sendModal.style.display = "block";
-
-    overlay.classList.add("show");
-
-    document.getElementById("sendBalanceText").innerText =
-    document.getElementById("balanceText").innerText;
-
-    document.getElementById("sendBalanceText2").innerText =
-    document.getElementById("balanceText").innerText;
-
-    backToSearch();
-
-    renderSendFriends();
-
-}
-
-function closeSendModal(){
-
-    sendModal.style.display = "none";
-
-}
-
-function backToSearch(){
-
-    document.getElementById("sendSearchScreen")
-    .style.display = "block";
-
-    document.getElementById("userProfileScreen")
-    .style.display = "none";
-
-}
-
-/* FRIENDS INSIDE MODAL */
-
-async function renderSendFriends(){
-
-    const container =
-    document.getElementById("friendsContainer");
-
-    container.innerHTML = "";
-
-    document.getElementById("friendCount")
-    .innerText = friends.length;
-
-    for(const username of friends){
-
-        const users =
-        await fetchUserByUsername(username);
-
-        if(!users.length) continue;
-
-        const user = users[0];
-
-        const avatar =
-        await fetchAvatarUrl(user.id);
-
-        const row =
-        document.createElement("div");
-
-        row.className = "user-row";
-
-        row.innerHTML = `
-        <img src="${avatar}">
-
-        <div>
-
-            <div class="user-name">
-            ${user.displayName || user.name}
-            </div>
-
-            <div class="user-handle">
-            @${user.name}
-            </div>
-
-        </div>
-        `;
-
-        row.onclick = ()=>{
-
-            openUserProfile(user,avatar);
-
-        };
-
-        container.appendChild(row);
-
-    }
-
-}
-
-/* SEARCH */
-
-document.getElementById("sendSearchInput")
-.addEventListener("input",async e=>{
-
-    const value = e.target.value.trim();
-
-    const results =
-    document.getElementById("searchResults");
-
-    results.innerHTML = "";
-
-    if(!value) return;
-
-    const users =
-    await fetchUserByUsername(value);
-
-    for(const user of users){
-
-        const avatar =
-        await fetchAvatarUrl(user.id);
-
-        const row =
-        document.createElement("div");
-
-        row.className = "user-row";
-
-        row.innerHTML = `
-        <img src="${avatar}">
-
-        <div>
-
-            <div class="user-name">
-            ${user.displayName || user.name}
-            </div>
-
-            <div class="user-handle">
-            @${user.name}
-            </div>
-
-        </div>
-        `;
-
-        row.onclick = ()=>{
-
-            openUserProfile(user,avatar);
-
-        };
-
-        results.appendChild(row);
-
-    }
-
-});
-
-/* USER PROFILE */
-
-function openUserProfile(user,avatar){
-
-    document.getElementById("sendSearchScreen")
-    .style.display = "none";
-
-    document.getElementById("userProfileScreen")
-    .style.display = "block";
-
-    document.getElementById("selectedAvatar").src =
-    avatar;
-
-    document.getElementById("selectedName").innerText =
-    user.displayName || user.name;
-
-    document.getElementById("selectedHandle").innerText =
-    "@" + user.name;
-
+// update modal UI with user object
+async function updateModalProfileWithUser(user, avatarUrl){
+    if(!user) return;
+    const finalAvatar = avatarUrl || await fetchAvatarUrl(user.id);
+    document.getElementById("selectedAvatar").src = finalAvatar || "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter";
+    document.getElementById("selectedName").innerText = user.displayName || user.name;
+    document.getElementById("selectedHandle").innerText = "@" + user.name;
     if(user.created){
-
-        document.getElementById("selectedJoined")
-        .innerText =
-        "Joined in " +
-        new Date(user.created).getFullYear();
-
+        const year = new Date(user.created).getFullYear();
+        document.getElementById("selectedJoined").innerHTML = `⏺ Joined in ${year}`;
+    } else {
+        document.getElementById("selectedJoined").innerHTML = "⏺ Joined in 2020";
     }
-
+    // mutual connections placeholder (mock)
+    document.getElementById("mutualText").innerHTML = "👥 0 Mutual Connections";
 }
 
-/* AMOUNT */
+// load main profile into modal on open / init
+async function loadMainUserIntoModal(){
+    let username = localStorage.getItem("mainUsername");
+    if(!username) username = "stickmasterluke";
+    const balance = localStorage.getItem("mainBalance") || "1859403";
+    document.getElementById("sendBalanceText2").innerText = balance;
+    const users = await fetchUserByUsername(username);
+    if(users.length){
+        const user = users[0];
+        const avatar = await fetchAvatarUrl(user.id);
+        await updateModalProfileWithUser(user, avatar);
+    } else {
+        document.getElementById("selectedName").innerText = username;
+        document.getElementById("selectedHandle").innerText = "@"+username;
+    }
+}
 
-function selectAmount(amount,event){
-
-    document.getElementById("bigAmountText")
-    .innerText = amount;
-
-    document.querySelectorAll(".amount-btn")
-    .forEach(btn=>{
-
-        btn.classList.remove("active");
-
+// friends logic
+function renderFriends(){
+    const list = document.getElementById("friendList");
+    list.innerHTML = "";
+    friends.forEach((friend,index)=>{
+        list.innerHTML += `<div class="friend"><span>${escapeHtml(friend)}</span><button class="remove" onclick="removeFriend(${index})">Remove</button></div>`;
     });
-
-    event.target.classList.add("active");
-
+    localStorage.setItem("friendsList", JSON.stringify(friends));
+}
+function addFriend(){
+    const input = document.getElementById("friendInput");
+    const value = input.value.trim();
+    if(!value) return;
+    if(!friends.includes(value)) friends.push(value);
+    input.value = "";
+    renderFriends();
+}
+function removeFriend(index){
+    friends.splice(index,1);
+    renderFriends();
+}
+function escapeHtml(str){
+    return str.replace(/[&<>]/g, function(m){
+        if(m === '&') return '&amp;';
+        if(m === '<') return '&lt;';
+        if(m === '>') return '&gt;';
+        return m;
+    });
 }
 
-document.getElementById("customAmount")
-.addEventListener("input",e=>{
-
-    if(e.target.value){
-
-        document.getElementById("bigAmountText")
-        .innerText = e.target.value;
-
+// Amount selection logic
+function selectAmount(amount, event){
+    document.getElementById("bigAmountText").innerText = amount;
+    document.querySelectorAll(".amount-btn").forEach(btn=> btn.classList.remove("active"));
+    if(event && event.currentTarget) event.currentTarget.classList.add("active");
+    const customInput = document.getElementById("customAmount");
+    if(customInput) customInput.value = "";
+}
+document.getElementById("customAmount")?.addEventListener("input", (e) => {
+    let val = e.target.value;
+    if(val && !isNaN(val)){
+        document.getElementById("bigAmountText").innerText = val;
+        document.querySelectorAll(".amount-btn").forEach(btn=> btn.classList.remove("active"));
+    } else if(val === ""){
+        // set to last active? keep previous or set 500
+        let activeBtn = document.querySelector(".amount-btn.active");
+        if(activeBtn){
+            let activeVal = activeBtn.innerText.replace(/[⏺\s]/g,'');
+            document.getElementById("bigAmountText").innerText = activeVal;
+        } else {
+            document.getElementById("bigAmountText").innerText = "500";
+        }
     }
-
 });
 
-</script>
+// ---------- SEND MODAL OPEN/CLOSE + handle recipient selection via friends/quick search? 
+// The new modal is single-screen, but to mimic full experience we allow user to click on friends inside modal? No, original had search.
+// To match expectation: we add a small "Select recipient" feature? but image demands simplicity. 
+// However I'll upgrade: by default modal shows current profile, but we need ability to pick from friends or search using a simple inline dropdown? But spec only says "full html script with everything added yh but the sizing is way smaller than image"
+// To stay true to the smaller modal but preserve functionality, I'll add a hidden mechanism: double-click on avatar OR a "Change recipient" link. But better: add a "Change" button under handle.
+// Let's add a tiny "Change recipient" button below meta to pick from friends list & search. That keeps the modal compact but fully featured.
+// I'll inject a small button row inside profile-meta or below.
+function openSendModal(){
+    // Sync balance
+    const currentBalance = document.getElementById("balanceText").innerText;
+    document.getElementById("sendBalanceText2").innerText = currentBalance;
+    loadMainUserIntoModal(); // loads current logged profile as default recipient, but we allow switching.
+    sendModal.style.display = "block";
+    overlay.classList.add("show");
+    // reset amount to active (500)
+    document.querySelectorAll(".amount-btn").forEach(btn=> btn.classList.remove("active"));
+    const defaultBtn = Array.from(document.querySelectorAll(".amount-btn")).find(btn => btn.innerText.includes("500"));
+    if(defaultBtn){
+        defaultBtn.classList.add("active");
+        document.getElementById("bigAmountText").innerText = "500";
+    }
+    const customField = document.getElementById("customAmount");
+    if(customField) customField.value = "";
+}
+function closeSendModal(){
+    sendModal.style.display = "none";
+    overlay.classList.remove("show");
+}
 
+// Continue button: simulate sending robux (toast alert)
+document.getElementById("confirmSendBtn")?.addEventListener("click", ()=>{
+    const amount = document.getElementById("bigAmountText").innerText;
+    const recipient = document.getElementById("selectedName").innerText;
+    const balanceSpan = document.getElementById("balanceText");
+    let currentBalance = parseInt(balanceSpan.innerText.replace(/,/g,''), 10);
+    const sendAmount = parseInt(amount, 10);
+    if(isNaN(sendAmount) || sendAmount <= 0){
+        alert("Please enter a valid amount.");
+        return;
+    }
+    if(currentBalance < sendAmount){
+        alert(`Insufficient balance! You need ${sendAmount} Robux.`);
+        return;
+    }
+    const newBalance = currentBalance - sendAmount;
+    balanceSpan.innerText = newBalance;
+    document.getElementById("balanceInput").value = newBalance;
+    localStorage.setItem("mainBalance", newBalance);
+    document.getElementById("sendBalanceText2").innerText = newBalance;
+    alert(`✅ Success! You sent ${sendAmount} Robux to ${recipient}. (Demo transaction)`);
+    closeSendModal();
+});
+
+// recipient picker: small overlay picker using friends list & search inside modal? instead I will add a "Switch recipient" button under handle
+// adding dynamic button to keep fully function but not break design. I'll add a '✎' icon next to handle or a small button in profile-meta.
+function addRecipientPicker(){
+    const metaDiv = document.querySelector(".profile-meta");
+    if(!metaDiv) return;
+    const pickerBtn = document.createElement("div");
+    pickerBtn.style.marginTop = "10px";
+    pickerBtn.style.cursor = "pointer";
+    pickerBtn.style.background = "#1b1b23";
+    pickerBtn.style.padding = "8px 12px";
+    pickerBtn.style.borderRadius = "40px";
+    pickerBtn.style.fontSize = "12px";
+    pickerBtn.style.fontWeight = "600";
+    pickerBtn.style.display = "inline-block";
+    pickerBtn.style.width = "auto";
+    pickerBtn.style.textAlign = "center";
+    pickerBtn.innerText = "✎ Change recipient";
+    pickerBtn.onclick = async () => {
+        const fakePrompt = prompt("Enter Roblox username to send to:", "builderman");
+        if(fakePrompt && fakePrompt.trim()){
+            const searchUsers = await fetchUserByUsername(fakePrompt.trim());
+            if(searchUsers.length){
+                const targetUser = searchUsers[0];
+                const avatarUrl = await fetchAvatarUrl(targetUser.id);
+                await updateModalProfileWithUser(targetUser, avatarUrl);
+            } else {
+                alert("User not found (demo).");
+            }
+        }
+    };
+    metaDiv.appendChild(pickerBtn);
+}
+
+// load saved data
+window.addEventListener("DOMContentLoaded", async ()=>{
+    const savedFriends = localStorage.getItem("friendsList");
+    if(savedFriends) friends = JSON.parse(savedFriends);
+    const savedUser = localStorage.getItem("mainUsername");
+    const savedBalance = localStorage.getItem("mainBalance");
+    const savedAvatar = localStorage.getItem("mainAvatar");
+    if(savedUser) document.getElementById("profileName").innerText = savedUser;
+    if(savedBalance) document.getElementById("balanceText").innerText = savedBalance;
+    if(savedAvatar){
+        document.getElementById("profileIcon").src = savedAvatar;
+        document.getElementById("gameIcon").src = savedAvatar;
+    }
+    // sync inputs
+    document.getElementById("usernameInput").value = savedUser || "stickmasterluke";
+    document.getElementById("balanceInput").value = savedBalance || "1859403";
+    renderFriends();
+    // initial load of current user avatar from api to ensure consistency
+    const mainName = savedUser || "stickmasterluke";
+    const searchRes = await fetchUserByUsername(mainName);
+    if(searchRes.length){
+        const freshAvatar = await fetchAvatarUrl(searchRes[0].id);
+        if(freshAvatar){
+            document.getElementById("profileIcon").src = freshAvatar;
+            document.getElementById("gameIcon").src = freshAvatar;
+            localStorage.setItem("mainAvatar", freshAvatar);
+        }
+    }
+    await loadMainUserIntoModal();
+    addRecipientPicker();
+    // attach open events
+    document.querySelectorAll(".send-btn, .glow-btn").forEach(btn=>{
+        btn.addEventListener("click", openSendModal);
+    });
+});
+</script>
 </body>
 </html>
