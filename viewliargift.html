@@ -1466,15 +1466,46 @@
         `;
         
         // Add return button event listener
-        const returnBtn = document.getElementById("returnToAppBtn");
-        if (returnBtn) {
-          returnBtn.addEventListener("click", () => {
-            // Completely rebuild the black screen with original UI
-            location.reload(); // One-time reload to restore original UI structure
-          });
-        }
-      });
-    } else { showToast(`❌ Need ${currentSelectedAmount}, you have ${bal}`); }
+// Add return button event listener
+const returnBtn = document.getElementById("returnToAppBtn");
+
+if (returnBtn) {
+  returnBtn.addEventListener("click", () => {
+
+    // hide success screen
+    sendBlackScreen.classList.remove("show");
+
+    // show main app again
+    document.querySelector(".app").style.display = "block";
+
+    // rebuild original send screen UI
+    sendBlackScreen.innerHTML = `
+      <div class="black-topbar">
+        <div class="black-title-wrap">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="black-robux-icon" id="blackRobuxIcon">
+          <span class="black-title">Send Robux</span>
+        </div>
+
+        <div class="black-right">
+          <div class="black-balance-wrap">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="black-small-robux">
+            <span id="blackBalance">${getCurrentBalance()}</span>
+          </div>
+
+          <button id="closeBlackScreen" class="black-close">✕</button>
+        </div>
+      </div>
+
+      <div class="black-main">
+      </div>
+    `;
+
+    // force fullscreen again
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(()=>{});
+    }
+  });
+} else { showToast(`❌ Need ${currentSelectedAmount}, you have ${bal}`); }
   });
 
   async function triggerSearch() {
