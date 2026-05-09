@@ -1,9 +1,1394 @@
-Understand this script bro <!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>Roblox Send — Full User Search + Black Send Screen</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #0a0c12;
+    overflow-x: hidden;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0c12;
+  }
+
+  .fullscreen-root {
+    width: 100%;
+    height: 100%;
+    background: #f2f4f5;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    background: #f2f4f5;
+    min-height: 100%;
+    flex: 1;
+  }
+
+  .topbar {
+    height: 74px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    border-bottom: 1px solid #ececec;
+  }
+
+  .left-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .menu {
+    font-size: 30px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .roblox-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .right-icons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    background: #ddd;
+  }
+
+  .nav {
+    display: flex;
+    justify-content: space-around;
+    background: white;
+    padding: 14px 0;
+    border-bottom: 1px solid #ececec;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .nav span {
+    opacity: .65;
+    cursor: pointer;
+  }
+
+  .nav .active {
+    opacity: 1;
+    font-weight: 800;
+  }
+
+  .balance-bar {
+    height: 88px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    border-bottom: 1px solid #ececec;
+  }
+
+  .balance-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .balance-robux {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    cursor: pointer;
+  }
+
+  .balance-number {
+    font-size: 28px;
+    font-weight: 900;
+    color: #111827;
+  }
+
+  .edit-robux-panel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f2f4f5;
+    padding: 4px 10px;
+    border-radius: 40px;
+  }
+
+  .robux-value-input {
+    width: 85px;
+    padding: 8px 10px;
+    font-size: 18px;
+    font-weight: 800;
+    border: 2px solid #3156f5;
+    border-radius: 40px;
+    text-align: center;
+    background: white;
+  }
+
+  .robux-enter-btn {
+    background: #3156f5;
+    border: none;
+    color: white;
+    font-weight: 800;
+    font-size: 14px;
+    padding: 6px 16px;
+    border-radius: 40px;
+    cursor: pointer;
+  }
+
+  .send-button {
+    height: 60px;
+    padding: 0 26px;
+    border: none;
+    border-radius: 18px;
+    background: #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 20px;
+    font-weight: 800;
+    cursor: pointer;
+    color: #111827;
+  }
+
+  .send-button:active {
+    transform: scale(.96);
+  }
+
+  .send-icon {
+    font-size: 28px;
+    margin-top: -4px;
+  }
+
+  .main {
+    padding: 22px 16px 50px;
+  }
+
+  .big-title {
+    font-size: clamp(32px, 8vw, 44px);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 28px;
+    letter-spacing: -2px;
+  }
+
+  .section-title {
+    font-size: 25px;
+    font-weight: 800;
+    margin-bottom: 18px;
+  }
+
+  .bonus-card {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 30px;
+  }
+
+  .bonus-top {
+    height: 190px;
+    position: relative;
+    padding: 20px;
+    display: flex;
+    align-items: flex-end;
+    cursor: pointer;
+    background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop');
+    background-size: cover !important;
+    background-position: center center !important;
+  }
+
+  .banner-camera {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(0,0,0,.65);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    backdrop-filter: blur(6px);
+    z-index: 5;
+  }
+
+  .game-circle {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(255,255,255,.9);
+    background: #1e1e2a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+  }
+
+  .game-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .camera-icon {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: rgba(0,0,0,0.7);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+    backdrop-filter: blur(4px);
+  }
+
+  #planeCrazyInput, #bannerInput {
+    display: none;
+  }
+
+  .game-info {
+    margin-left: 128px;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    z-index: 2;
+    position: relative;
+  }
+
+  .game-title {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .game-sub {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+
+  .packages {
+    padding: 18px;
+  }
+
+  .package {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .package-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .robux-icon {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    cursor: pointer;
+  }
+
+  .amount-wrap {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .amount-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .amount {
+    font-size: 23px;
+    font-weight: 800;
+  }
+
+  .old {
+    font-size: 16px;
+    text-decoration: line-through;
+    color: #6b7280;
+    font-weight: 700;
+  }
+
+  .popular {
+    margin-top: 7px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    font-size: 14px;
+    font-weight: 700;
+    width: max-content;
+  }
+
+  .buy-btn {
+    border: none;
+    width: 145px;
+    height: 72px;
+    border-radius: 18px;
+    background: #e5e7eb;
+    font-size: 21px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.1s;
+  }
+
+  .buy-btn.blue {
+    background: #3156f5;
+    color: white;
+  }
+
+  .buy-btn:active {
+    transform: scale(0.96);
+  }
+
+  .purchase-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #10b981;
+    color: white;
+    padding: 14px 24px;
+    border-radius: 60px;
+    font-weight: 700;
+    font-size: 18px;
+    z-index: 30000;
+    transition: transform 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    white-space: nowrap;
+  }
+
+  .purchase-toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .send-popup {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 9999;
+    padding-top: 20px;
+    overflow-y: auto;
+  }
+
+  .send-popup.show {
+    display: flex;
+  }
+
+  .send-popup-box {
+    width: 95%;
+    max-width: 520px;
+    background: #f2f4f5;
+    border-radius: 32px;
+    padding: 22px;
+    animation: popupAnim .15s ease;
+    box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  @keyframes popupAnim {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .popup-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .popup-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+
+  .popup-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e5e7eb;
+    border-radius: 50%;
+    font-size: 24px;
+    overflow: hidden;
+  }
+
+  .popup-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .popup-title {
+    font-size: 24px;
+    font-weight: 800;
+  }
+
+  .popup-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .popup-balance {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 20px;
+    font-weight: 800;
+    cursor: pointer;
+    background: #eef2ff;
+    padding: 6px 14px;
+    border-radius: 40px;
+  }
+
+  .popup-balance img {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+  }
+
+  .close-popup {
+    border: none;
+    background: none;
+    font-size: 32px;
+    cursor: pointer;
+    line-height: 1;
+    color: #4b5563;
+  }
+
+  .search-modes {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .mode-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 60px;
+    border: none;
+    background: white;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.1s;
+    border: 1px solid #e2e8f0;
+  }
+
+  .mode-btn.active-mode {
+    background: #3156f5;
+    color: white;
+    border-color: #3156f5;
+  }
+
+  .user-search {
+    width: 100%;
+    height: 70px;
+    border: 3px solid #3156f5;
+    border-radius: 50px;
+    padding: 0 22px;
+    font-size: 18px;
+    outline: none;
+    background: white;
+    font-weight: 500;
+  }
+
+  .cors-info {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    margin-top: 12px;
+    text-align: center;
+  }
+
+  .search-results {
+    margin-top: 16px;
+    background: white;
+    border-radius: 28px;
+    max-height: 440px;
+    overflow-y: auto;
+    padding: 8px 4px;
+  }
+
+  .search-user {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: 0.1s;
+    border-bottom: 1px solid #f0f2f5;
+  }
+
+  .search-user:hover {
+    background: #f5f9ff;
+  }
+
+  .search-user img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #ebeff5;
+  }
+
+  .user-info {
+    flex: 1;
+  }
+
+  .user-display {
+    font-weight: 800;
+    font-size: 17px;
+  }
+
+  .user-username {
+    font-size: 13px;
+    color: #5a6e8a;
+    margin-top: 3px;
+  }
+
+  .user-id-badge {
+    font-size: 10px;
+    background: #f1f4f9;
+    padding: 2px 8px;
+    border-radius: 40px;
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  .no-results {
+    padding: 30px;
+    text-align: center;
+    color: #6c7a96;
+    font-weight: 500;
+  }
+  .loading {
+    text-align: center;
+    padding: 30px;
+    font-weight: 600;
+  }
+  .btn-scan-full {
+    background: #00a2ff20;
+    border: 1px solid #3156f5;
+    border-radius: 40px;
+    padding: 8px;
+    font-size: 13px;
+    width: 100%;
+    margin-top: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  body:not(.editor-off) .banner-camera,
+  body:not(.editor-off) .camera-icon,
+  body:not(.editor-off) .game-circle,
+  body:not(.editor-off) .roblox-logo,
+  body:not(.editor-off) .avatar,
+  body:not(.editor-off) .balance-robux,
+  body:not(.editor-off) .robux-icon,
+  body:not(.editor-off) .popup-icon,
+  body:not(.editor-off) .popup-balance,
+  body:not(.editor-off) .icon-btn {
+    cursor: pointer;
+  }
+
+  body:not(.editor-off) .bonus-top {
+    outline: 2px dashed #3156f5;
+    outline-offset: 2px;
+  }
+  body:not(.editor-off) .game-circle {
+    outline: 2px solid #ffcc00;
+    outline-offset: 2px;
+  }
+  body.editor-off .banner-camera,
+  body.editor-off .camera-icon {
+    display: none;
+  }
+  body.editor-off .edit-robux-panel {
+    display: none !important;
+  }
+
+  #searchBtn, #cubeBtn, #settingsBtn {
+    display: none !important;
+  }
+
+  .send-black-screen {
+    position: fixed;
+    inset: 0;
+    background: #000000;
+    z-index: 20000;
+    display: none;
+    flex-direction: column;
+    padding: 20px 18px;
+    overflow-y: auto;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .send-black-screen.show {
+    display: flex;
+  }
+
+  .send-black-screen .black-topbar,
+  .send-black-screen .black-main {
+    width: 100%;
+    max-width: 550px;
+  }
+
+  .black-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    padding-top: 12px;
+    width: 100%;
+  }
+
+  .black-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .black-robux-icon {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+  }
+
+  .black-title {
+    color: white;
+    font-size: 26px;
+    font-weight: 800;
+  }
+
+  .black-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .black-balance-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #1f1f2a;
+    padding: 8px 16px;
+    border-radius: 60px;
+  }
+
+  .black-small-robux {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+
+  .black-balance-wrap span {
+    color: white;
+    font-weight: 800;
+    font-size: 22px;
+  }
+
+  .black-close {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 34px;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .black-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+  }
+
+  .black-big-text {
+    color: white;
+    font-size: clamp(36px, 8vw, 48px);
+    font-weight: 800;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .selected-player-avatar {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #3156f5;
+    margin-bottom: 14px;
+    pointer-events: none;
+  }
+
+  .selected-player-name {
+    color: white;
+    font-size: clamp(22px, 5vw, 30px);
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 35px;
+    pointer-events: none;
+    word-break: break-word;
+    max-width: 90%;
+  }
+
+  .middle-robux-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 45px;
+    background: #1a1c26;
+    padding: 16px 28px;
+    border-radius: 80px;
+    flex-wrap: wrap;
+  }
+
+  .middle-robux-icon {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    cursor: pointer;
+  }
+
+  .selected-amount-display {
+    color: #ffd966;
+    font-size: 48px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: #0f0f14;
+    padding: 6px 24px;
+    border-radius: 60px;
+    min-width: 130px;
+    text-align: center;
+  }
+
+  .robux-amount-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .amount-option {
+    height: 70px;
+    border-radius: 18px;
+    border: none;
+    background: #23252f;
+    color: white;
+    font-size: 24px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.1s;
+  }
+
+  .amount-option.active {
+    outline: 3px solid #3156f5;
+    background: #2c3570;
+    transform: scale(0.97);
+  }
+
+  .custom-amount-container {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .custom-amount-input {
+    width: 100%;
+    height: 60px;
+    border-radius: 18px;
+    border: 2px solid #3156f5;
+    background: #23252f;
+    color: white;
+    font-size: 24px;
+    font-weight: 900;
+    text-align: center;
+    padding: 0 20px;
+    outline: none;
+  }
+
+  .custom-amount-input::placeholder {
+    color: #6b7280;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .gift-container {
+    position: relative;
+    margin-bottom: 16px;
+    width: 100%;
+  }
+
+  .gift-button-send {
+    width: 100%;
+    height: 68px;
+    border-radius: 18px;
+    border: none;
+    background: #f59e0b;
+    color: white;
+    font-size: 24px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: .15s;
+  }
+
+  .gift-button-send:active {
+    transform: scale(.97);
+  }
+
+  .gift-dropdown {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background: #1f2937;
+    border-radius: 18px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: .2s ease;
+    z-index: 100;
+  }
+
+  .gift-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .gift-option {
+    padding: 16px 20px;
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    border-bottom: 1px solid #374151;
+    transition: .1s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .gift-option:last-child {
+    border-bottom: none;
+  }
+
+  .gift-option:hover {
+    background: #374151;
+  }
+
+  .gift-option-emoji {
+    font-size: 24px;
+  }
+
+  .gift-option-text {
+    flex: 1;
+  }
+
+  .gift-option-desc {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 2px;
+  }
+
+  .next-btn {
+    width: 100%;
+    height: 68px;
+    border-radius: 18px;
+    border: none;
+    background: #3156f5;
+    color: white;
+    font-size: 26px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.1s;
+  }
+
+  .next-btn:active {
+    transform: scale(0.97);
+  }
+
+  .bottom-note {
+    color: #a0a5b5;
+    margin-top: 22px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .fullscreen-btn {
+    background: #3156f5;
+    border: none;
+    color: white;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 8px;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="fullscreen-root" id="fullscreenRoot">
+<div class="app">
+  <div class="topbar">
+    <div class="left-top"><div class="menu">☰</div><img class="roblox-logo" id="robloxLogo" src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Roblox_Logo_2022.jpg"></div>
+    <div class="right-icons">
+      <img class="avatar" id="avatar" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3108E34E89B5C5179D8C2B7D1E3E6E2F-Png/150/150/AvatarHeadshot/Png/noFilter">
+      <div class="icon-btn" id="searchBtn">🔍</div><div class="icon-btn" id="cubeBtn">⬡</div><div class="icon-btn" id="settingsBtn">⚙️</div>
+      <button class="fullscreen-btn" id="forceFullscreenBtn">⛶ Full</button>
+    </div>
+  </div>
+  <div class="nav"><span id="homeBtn">Home</span><span>Charts</span><span>Marketplace</span><span>Create</span><span class="active">Robux</span></div>
+  <div class="balance-bar">
+    <div class="balance-left"><img class="balance-robux" id="balanceRobux" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><div class="edit-robux-panel"><input type="number" id="robuxValueInput" class="robux-value-input" value="21" step="1"><button id="updateRobuxBtn" class="robux-enter-btn">Enter</button></div><span class="balance-number" id="balanceNumber">21</span></div>
+    <button class="send-button" id="sendBtn"><span class="send-icon">↥</span>Send</button>
+  </div>
+  <div class="main">
+    <div class="big-title">Enjoy up to 25%<br>more Robux</div>
+    <div class="section-title">Bonus item we picked for you</div>
+    <div class="bonus-card">
+      <div class="bonus-top" id="bonusBanner">
+        <div class="banner-camera">📷 Change Banner</div><input type="file" id="bannerInput" accept="image/*">
+        <div class="game-circle" id="gameCircleTrigger"><img id="planeCrazyImage" src="https://static.wikia.nocookie.net/plane-crazy/images/e/e7/GameIcon.png"><div class="camera-icon">📷</div></div>
+        <input type="file" id="planeCrazyInput" accept="image/*">
+        <div class="game-info"><div class="game-title">⛏️ Plane Crazy⛏️<br>[UPDATE]</div><div class="game-sub">Gravity Slider</div></div>
+      </div>
+      <div class="packages">
+        <div class="package"><div class="package-left"><img class="robux-icon" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><div class="amount-wrap"><div class="amount-row"><div class="amount">24,000</div><div class="old">22,500</div></div></div></div><button class="buy-btn purchase-package" data-cost="24000">£199.99</button></div>
+        <div class="package"><div class="package-left"><img class="robux-icon" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><div class="amount-wrap"><div class="amount-row"><div class="amount">11,000</div><div class="old">10,000</div></div></div></div><button class="buy-btn purchase-package" data-cost="11000">£99.99</button></div>
+        <div class="package"><div class="package-left"><img class="robux-icon" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><div class="amount-wrap"><div class="amount-row"><div class="amount">5,250</div><div class="old">4,500</div></div></div></div><button class="buy-btn purchase-package" data-cost="5250">£49.99</button></div>
+        <div class="package"><div class="package-left"><img class="robux-icon" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><div class="amount-wrap"><div class="amount-row"><div class="amount">3,625</div><div class="old">3,150</div></div></div></div><button class="buy-btn purchase-package" data-cost="3625">£34.99</button></div>
+        <div class="package"><div class="package-left"><img class="robux-icon" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><div class="amount-wrap"><div class="amount-row"><div class="amount">2,000</div><div class="old">1,700</div></div><div class="popular">🔥 Popular</div></div></div><button class="buy-btn blue purchase-package" data-cost="2000">£19.99</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="send-popup" id="sendPopup">
+  <div class="send-popup-box">
+    <div class="popup-top"><div class="popup-title-wrap" id="popupIconEditor"><div class="popup-icon" id="popupIcon">⬡</div><div class="popup-title">Send Robux</div></div><div class="popup-right"><div class="popup-balance" id="popupBalanceContainer"><img id="popupRobuxIcon" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><span id="popupBalance">21</span></div><button class="close-popup" id="closePopup">✕</button></div></div>
+    <div class="search-modes"><button class="mode-btn active-mode" id="modeUsername">🔍 By Username</button><button class="mode-btn" id="modeUserID">🆔 By User ID</button></div>
+    <input type="text" class="user-search" id="userSearchInput" placeholder="Search Roblox username... (ex: Builderman)">
+    <div id="scanStats" class="scan-stats">💡 Full pagination: all pages will be scanned</div>
+    <div class="cors-info" id="corsInfo">🔄 Using CORS proxy (corsproxy.io) - Roblox API works everywhere!</div>
+    <button id="forceScanBtn" class="btn-scan-full">⟳ Force scan all pages (crawl every result)</button>
+    <div id="searchResults" class="search-results"><div class="no-results">✨ Enter username or user ID → Fetches ALL Roblox users across every page (CORS resolved)</div></div>
+  </div>
+</div>
+
+<div id="sendBlackScreen" class="send-black-screen">
+  <div class="black-topbar"><div class="black-title-wrap"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="black-robux-icon" id="blackRobuxIcon"><span class="black-title">Send Robux</span></div><div class="black-right"><div class="black-balance-wrap" id="blackBalanceWrap"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="black-small-robux" id="blackSmallRobux"><span id="blackBalance">0</span></div><button id="closeBlackScreen" class="black-close">✕</button></div></div>
+  <div class="black-main" id="blackMainContent">
+    <!-- Content will be dynamically built -->
+  </div>
+</div>
+
+<div id="purchaseToast" class="purchase-toast">Thanks for your purchase! 🎉</div>
+
+<script>
+  const PROXY = "https://corsproxy.io/?";
+  async function fetchRobloxAPI(url) {
+    const proxyUrl = PROXY + encodeURIComponent(url);
+    const response = await fetch(proxyUrl);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  }
+
+  function forceFullscreen() { const elem = document.documentElement; if (elem.requestFullscreen) elem.requestFullscreen().catch(e=>{}); else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen(); }
+  let fullscreenAttempted = false;
+  document.body.addEventListener("click", () => { if (!fullscreenAttempted) { forceFullscreen(); fullscreenAttempted = true; } }, { once: true });
+  document.getElementById("forceFullscreenBtn")?.addEventListener("click", (e) => { e.stopPropagation(); forceFullscreen(); });
+  
+  let editorMode = localStorage.getItem("editorMode"); if (editorMode === null) editorMode = "on";
+  document.getElementById("homeBtn").addEventListener("click", () => { editorMode = (editorMode === "off") ? "on" : "off"; localStorage.setItem("editorMode", editorMode); applyEditorMode(); });
+  function applyEditorMode() { if (editorMode === "off") document.body.classList.add("editor-off"); else document.body.classList.remove("editor-off"); const panel = document.querySelector('.edit-robux-panel'); if (panel) panel.style.display = (editorMode === "off") ? "none" : "flex"; }
+  applyEditorMode();
+
+  const balanceDisplay = document.getElementById("balanceNumber");
+  const robuxInput = document.getElementById("robuxValueInput");
+  const updateBtn = document.getElementById("updateRobuxBtn");
+  function getCurrentBalance() { return parseInt(balanceDisplay.innerText) || 0; }
+  function setBalance(newBalance) { let num = Math.max(0, newBalance); balanceDisplay.innerText = num; robuxInput.value = num; localStorage.setItem("userRobuxValue", num); document.getElementById("popupBalance").innerText = num; document.getElementById("blackBalance").innerText = num; return num; }
+  let savedRobux = localStorage.getItem("userRobuxValue"); setBalance(savedRobux && !isNaN(parseInt(savedRobux)) ? parseInt(savedRobux) : 21);
+  updateBtn.addEventListener("click", () => { if (editorMode !== "off") setBalance(parseInt(robuxInput.value) || 0); });
+  
+  const toast = document.getElementById("purchaseToast");
+  function showToast(msg) { toast.innerText = msg; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2500); }
+  
+  document.querySelectorAll(".purchase-package").forEach(btn => { btn.addEventListener("click", (e) => { e.stopPropagation(); const cost = parseInt(btn.getAttribute("data-cost")); const bal = getCurrentBalance(); if (bal >= cost) { setBalance(bal - cost); showToast(`Thanks! -${cost.toLocaleString()} Robux 🎉`); } else { showToast(`❌ Need ${cost.toLocaleString()}, you have ${bal.toLocaleString()}`); } }); });
+  
+  const sendBtn = document.getElementById("sendBtn"), sendPopup = document.getElementById("sendPopup"), closePopup = document.getElementById("closePopup");
+  sendBtn.addEventListener("click", () => { document.getElementById("popupBalance").innerText = getCurrentBalance(); sendPopup.classList.add("show"); if (document.getElementById("userSearchInput").value.trim() !== "") triggerSearch(); });
+  closePopup.addEventListener("click", () => sendPopup.classList.remove("show"));
+  sendPopup.addEventListener("click", (e) => { if (e.target === sendPopup) sendPopup.classList.remove("show"); });
+
+  let currentSearchMode = "username";
+  document.getElementById("modeUsername").addEventListener("click", () => setMode("username"));
+  document.getElementById("modeUserID").addEventListener("click", () => setMode("userid"));
+  const searchInput = document.getElementById("userSearchInput"), searchResultsDiv = document.getElementById("searchResults"), scanStatsSpan = document.getElementById("scanStats"), forceScanBtn = document.getElementById("forceScanBtn");
+  
+  function setMode(mode) { currentSearchMode = mode; document.getElementById("modeUsername").classList.toggle("active-mode", mode === "username"); document.getElementById("modeUserID").classList.toggle("active-mode", mode === "userid"); searchInput.placeholder = mode === "username" ? "Search Roblox username... (ex: Builderman)" : "Enter Roblox User ID (ex: 1 for Roblox)"; if (searchInput.value.trim()) triggerSearch(); }
+
+  async function fetchAllUsersByKeyword(keyword, onProgress) {
+    if (!keyword.trim()) return [];
+    let allUsers = [], cursor = "", page = 0;
+    const MAX_PAGES = 50;
+    let hasMore = true;
+    while (hasMore && page < MAX_PAGES) {
+      let url = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(keyword)}&limit=100`;
+      if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
+      try {
+        const data = await fetchRobloxAPI(url);
+        if (data.data && data.data.length) { allUsers.push(...data.data); if (onProgress) onProgress(`Page ${page+1} → ${allUsers.length} users`); }
+        if (data.nextPageCursor && data.nextPageCursor !== "") { cursor = data.nextPageCursor; page++; await new Promise(r => setTimeout(r, 100)); }
+        else { hasMore = false; }
+      } catch(e) { console.error(e); throw new Error("API fetch failed: " + e.message); }
+    }
+    const uniqueMap = new Map(); for (const u of allUsers) if (!uniqueMap.has(u.id)) uniqueMap.set(u.id, u);
+    return Array.from(uniqueMap.values());
+  }
+
+  async function fetchUserByID(userId) {
+    try { const url = `https://users.roblox.com/v1/users/${encodeURIComponent(userId)}`; const user = await fetchRobloxAPI(url); if (user && user.id) return [user]; return null; }
+    catch(e) { return null; }
+  }
+
+  async function fetchAvatars(userIds) {
+    const map = new Map();
+    for (let i = 0; i < userIds.length; i += 100) {
+      const chunk = userIds.slice(i, i+100);
+      const idsParam = chunk.join(",");
+      try { const url = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${idsParam}&size=150x150&format=Png&isCircular=false`; const data = await fetchRobloxAPI(url); if (data.data) data.data.forEach(t => map.set(t.targetId, t.imageUrl)); await new Promise(r => setTimeout(r, 50)); } catch(e) {}
+    }
+    return map;
+  }
+
+  const sendBlackScreen = document.getElementById("sendBlackScreen");
+  const blackBalanceSpan = document.getElementById("blackBalance");
+  const closeBlackScreen = document.getElementById("closeBlackScreen");
+  
+  let currentSelectedUser = null;
+
+  function resetToHome() {
+    sendBlackScreen.classList.remove("show");
+    document.querySelector(".app").style.display = "block";
+    currentSelectedUser = null;
+    sendPopup.classList.remove("show");
+  }
+
+  function rebuildBlackScreenForm(user, avatarUrl) {
+    const blackMain = document.getElementById("blackMainContent");
+    blackMain.innerHTML = `
+      <div class="black-big-text">you can</div>
+      <img id="selectedPlayerAvatar" class="selected-player-avatar" src="${avatarUrl}">
+      <div id="selectedPlayerName" class="selected-player-name">${escapeHtml(user.name)}</div>
+      <div class="middle-robux-area"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="middle-robux-icon" id="middleRobuxIcon"><div class="selected-amount-display" id="selectedAmountDisplay">0</div></div>
+      <div class="robux-amount-grid">
+        <button class="amount-option" data-amount="25">25</button>
+        <button class="amount-option" data-amount="50">50</button>
+        <button class="amount-option" data-amount="100">100</button>
+        <button class="amount-option" data-amount="200">200</button>
+      </div>
+      <div class="custom-amount-container">
+        <input type="number" id="customAmountInput" class="custom-amount-input" placeholder="Or enter any amount...">
+      </div>
+      <div class="gift-container">
+        <button class="gift-button-send" id="giftBtn">🎁 Gift</button>
+        <div class="gift-dropdown" id="giftDropdown">
+          <div class="gift-option" data-gift="Any Gift"><span class="gift-option-emoji">🎁</span><div class="gift-option-text">Any Gift<div class="gift-option-desc">Send any Roblox gift</div></div></div>
+          <div class="gift-option" data-gift="Instant Follow"><span class="gift-option-emoji">⚡</span><div class="gift-option-text">Instant Follow<div class="gift-option-desc">Follow instantly</div></div></div>
+          <div class="gift-option" data-gift="7 Days"><span class="gift-option-emoji">📅</span><div class="gift-option-text">7 Days<div class="gift-option-desc">7 days premium access</div></div></div>
+          <div class="gift-option" data-gift="Other Priority"><span class="gift-option-emoji">⭐</span><div class="gift-option-text">Other Priority<div class="gift-option-desc">Get priority support</div></div></div>
+        </div>
+      </div>
+      <button class="next-btn" id="nextSendBtn">Next</button>
+      <div class="bottom-note">Robux are sent instantly with no fees</div>
+    `;
+    
+    // Restore middleRobuxIcon saved image
+    const middleIcon = blackMain.querySelector("#middleRobuxIcon");
+    const savedMiddleIcon = localStorage.getItem("middleRobuxIcon");
+    if(savedMiddleIcon && middleIcon) middleIcon.src = savedMiddleIcon;
+    
+    let localAmount = 0;
+    let localGift = null;
+    
+    const amountOptions = blackMain.querySelectorAll(".amount-option");
+    const customAmtInput = blackMain.querySelector("#customAmountInput");
+    const amountDisplay = blackMain.querySelector("#selectedAmountDisplay");
+    const giftBtnNew = blackMain.querySelector("#giftBtn");
+    const giftDropdownNew = blackMain.querySelector("#giftDropdown");
+    const giftOptionsNew = blackMain.querySelectorAll(".gift-option");
+    const nextBtnNew = blackMain.querySelector("#nextSendBtn");
+    
+    const updateDisplay = () => { if(amountDisplay) amountDisplay.innerText = localAmount; };
+    
+    amountOptions.forEach(btn => {
+      btn.addEventListener("click", () => {
+        amountOptions.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const amt = parseInt(btn.getAttribute("data-amount"));
+        if (!isNaN(amt)) { localAmount = amt; updateDisplay(); if(customAmtInput) customAmtInput.value = ""; }
+      });
+    });
+    
+    if(customAmtInput) {
+      customAmtInput.addEventListener("input", () => {
+        const val = parseInt(customAmtInput.value);
+        if (!isNaN(val) && val > 0) {
+          localAmount = val;
+          updateDisplay();
+          amountOptions.forEach(b => b.classList.remove("active"));
+        }
+      });
+    }
+    
+    if(giftBtnNew && giftDropdownNew) {
+      giftBtnNew.addEventListener("click", (e) => { e.stopPropagation(); giftDropdownNew.classList.toggle("show"); });
+      document.addEventListener("click", (e) => { if (!giftBtnNew.contains(e.target) && !giftDropdownNew.contains(e.target)) giftDropdownNew.classList.remove("show"); });
+      giftOptionsNew.forEach(opt => {
+        opt.addEventListener("click", () => {
+          localGift = opt.getAttribute("data-gift");
+          giftBtnNew.innerHTML = `🎁 ${localGift}`;
+          giftDropdownNew.classList.remove("show");
+          showToast(`Gift selected: ${localGift}`);
+        });
+      });
+    }
+    
+    if(nextBtnNew) {
+      nextBtnNew.addEventListener("click", () => {
+        if (localAmount <= 0) { showToast("⚠️ Select or enter an amount first!"); return; }
+        const bal = getCurrentBalance();
+        if (bal >= localAmount) {
+          nextBtnNew.disabled = true;
+          let dots = 0;
+          const originalText = nextBtnNew.innerHTML;
+          const interval = setInterval(() => { dots = (dots + 1) % 4; nextBtnNew.innerHTML = "Processing" + ".".repeat(dots); }, 400);
+          setTimeout(() => {
+            clearInterval(interval);
+            const newBal = bal - localAmount;
+            setBalance(newBal);
+            blackBalanceSpan.innerText = newBal;
+            let giftMessage = localGift ? `<div style="margin-top:20px;background:#f59e0b20;padding:14px;border-radius:60px;font-size:18px;">🎁 Gift: ${localGift}</div>` : "";
+            blackMain.innerHTML = `
+              <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;text-align:center;padding:20px;">
+                <div style="width:120px;height:120px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;font-size:70px;margin-bottom:30px;animation:pop .3s ease;">✓</div>
+                <div style="font-size:42px;font-weight:900;margin-bottom:14px;">Sent!</div>
+                <div style="font-size:24px;color:#9ca3af;margin-bottom:10px;">${localAmount.toLocaleString()} Robux sent to</div>
+                <div style="font-size:34px;font-weight:900;">${escapeHtml(user.name)}</div>
+                ${giftMessage}
+                <div style="margin-top:40px;background:#1f2937;padding:14px 28px;border-radius:999px;font-size:22px;font-weight:900;">Balance: ${newBal.toLocaleString()}</div>
+                <button id="homeButtonAfterSend" style="margin-top:40px;background:#3156f5;border:none;padding:16px 40px;border-radius:60px;color:white;font-size:22px;font-weight:800;cursor:pointer;">🏠 Back to Home</button>
+              </div>
+            `;
+            const homeBtn = document.getElementById("homeButtonAfterSend");
+            if(homeBtn) homeBtn.addEventListener("click", resetToHome);
+          }, 2500);
+        } else { showToast(`❌ Need ${localAmount}, you have ${bal}`); }
+      });
+    }
+  }
+
+  function openBlackSendScreen(user, avatarUrl) {
+    document.querySelector(".app").style.display = "none";
+    sendPopup.classList.remove("show");
+    currentSelectedUser = user;
+    blackBalanceSpan.innerText = getCurrentBalance();
+    rebuildBlackScreenForm(user, avatarUrl);
+    sendBlackScreen.classList.add("show");
+  }
+
+  closeBlackScreen.addEventListener("click", resetToHome);
+
+  async function triggerSearch() {
+    const rawQuery = searchInput.value.trim();
+    if (!rawQuery) return;
+    searchResultsDiv.innerHTML = `<div class="loading">🔍 Searching Roblox (via proxy)...</div>`;
+    try {
+      let users = [];
+      if (currentSearchMode === "username") {
+        users = await fetchAllUsersByKeyword(rawQuery, (msg) => { scanStatsSpan.innerText = msg; });
+        if (users.length === 0) throw new Error(`No users found with username "${rawQuery}". Try "Roblox" or "Builderman"`);
+      } else {
+        const parsedId = parseInt(rawQuery);
+        if (isNaN(parsedId)) throw new Error(`"${rawQuery}" is not a valid User ID. Use numbers like 1 (Roblox) or 156665 (Builderman)`);
+        const userArr = await fetchUserByID(parsedId);
+        if (!userArr || userArr.length === 0) throw new Error(`User ID ${parsedId} not found. Try ID 1 (Roblox) or 156665 (Builderman) to test`);
+        users = userArr;
+      }
+      scanStatsSpan.innerText = `✅ Found ${users.length} player(s)`;
+      const userIds = users.slice(0, 200).map(u => u.id);
+      const avatarMap = await fetchAvatars(userIds);
+      searchResultsDiv.innerHTML = "";
+      for (let user of users.slice(0, 200)) {
+        const avatarUrl = avatarMap.get(user.id) || `https://www.roblox.com/headshot-thumbnail/image?userId=${user.id}&width=150&height=150&format=png`;
+        const div = document.createElement("div"); div.className = "search-user";
+        div.innerHTML = `<img src="${avatarUrl}" onerror="this.src='https://tr.rbxcdn.com/30DAY-AvatarHeadshot-Placeholder.png'"><div class="user-info"><div class="user-display">${escapeHtml(user.displayName || user.name)}</div><div class="user-username">@${escapeHtml(user.name)}</div><div class="user-id-badge">ID: ${user.id}</div></div>`;
+        div.addEventListener("click", () => openBlackSendScreen(user, avatarUrl));
+        searchResultsDiv.appendChild(div);
+      }
+    } catch(err) { searchResultsDiv.innerHTML = `<div class="no-results">❌ ${err.message}<br><br>💡 Try searching "Roblox" or ID "1" to test!</div>`; }
+  }
+  
+  function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+  
+  let debounceTimer;
+  searchInput.addEventListener("input", () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(() => { if (searchInput.value.trim()) triggerSearch(); }, 400); });
+  forceScanBtn.addEventListener("click", () => { if (searchInput.value.trim()) triggerSearch(); });
+
+  // Saved images functionality - ALL working
+  function makeEditable(el, key) { 
+    if(!el) return;
+    el.addEventListener("click", (e) => { 
+      e.stopPropagation(); 
+      if (editorMode === "off") return; 
+      const inp = document.createElement("input"); 
+      inp.type="file"; 
+      inp.accept="image/*"; 
+      inp.onchange=(ev)=>{ 
+        const f=ev.target.files[0]; 
+        if(f){ 
+          const r=new FileReader(); 
+          r.onload=event=>{el.src=event.target.result; localStorage.setItem(key,event.target.result);}; 
+          r.readAsDataURL(f);
+        }
+      }; 
+      inp.click();
+    }); 
+    const saved=localStorage.getItem(key); 
+    if(saved && el) el.src=saved; 
+  }
+  
+  makeEditable(document.getElementById("robloxLogo"),"robloxLogoCustom");
+  makeEditable(document.getElementById("avatar"),"customAvatar");
+  makeEditable(document.getElementById("balanceRobux"),"balanceRobuxIcon");
+  makeEditable(document.getElementById("planeCrazyImage"),"planeCrazyImage");
+  makeEditable(document.getElementById("popupIcon"),"popupCustomIcon");
+  makeEditable(document.getElementById("popupRobuxIcon"),"popupRobuxIconCustom");
+  makeEditable(document.getElementById("blackRobuxIcon"),"blackRobuxIcon");
+  makeEditable(document.getElementById("blackSmallRobux"),"blackSmallRobuxIcon");
+  makeEditable(document.getElementById("middleRobuxIcon"),"middleRobuxIcon");
+  
+  document.getElementById("gameCircleTrigger").addEventListener("click", (e) => { e.stopPropagation(); if (editorMode !== "off") document.getElementById("planeCrazyInput").click(); });
+  document.getElementById("planeCrazyInput").addEventListener("change", e => { if(editorMode!=="off" && e.target.files[0]){ let r=new FileReader(); r.onload=ev=>{document.getElementById("planeCrazyImage").src=ev.target.result; localStorage.setItem("planeCrazyImage",ev.target.result);}; r.readAsDataURL(e.target.files[0]); } });
+  
+  const bonusBanner = document.getElementById("bonusBanner"), bannerInputEl = document.getElementById("bannerInput");
+  bannerInputEl.addEventListener("change", e => { if(editorMode!=="off" && e.target.files[0]){ let r=new FileReader(); r.onload=ev=>{let url=ev.target.result; bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('${url}')`; bonusBanner.style.backgroundSize="cover"; localStorage.setItem("planeCrazyBanner",url);}; r.readAsDataURL(e.target.files[0]); } });
+  const savedBan = localStorage.getItem("planeCrazyBanner"); if(savedBan) bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('${savedBan}')`; else bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop')`; bonusBanner.style.backgroundSize="cover";
+  
+  const robuxIcons = document.querySelectorAll(".robux-icon");
+  function setAllPackageIcons(src) { robuxIcons.forEach(icon => { if(icon) icon.src = src; }); localStorage.setItem("allPackageIcons", src); }
+  robuxIcons.forEach(icon => { if(icon) { icon.addEventListener("click", (e) => { e.stopPropagation(); if (editorMode !== "off") { let inp = document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.onchange=ev=>{ let f=ev.target.files[0]; if(f){ let r=new FileReader(); r.onload=event=>setAllPackageIcons(event.target.result); r.readAsDataURL(f); } }; inp.click(); } }); } });
+  const savedAll = localStorage.getItem("allPackageIcons"); if(savedAll) setAllPackageIcons(savedAll);
+</script>
+</body>
+</html> with every api added it worked so why doesnt this script work. <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Roblox Plus</title>
+<title>Roblox Plus - Auto Avatar</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -474,6 +1859,45 @@ body::after{
 }
 
 }
+
+/* LOADING SPINNER */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.6s linear infinite;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.update-status {
+    font-size: 12px;
+    margin-top: 8px;
+    padding: 6px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.update-status.success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.update-status.error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.update-status.loading {
+    background: rgba(86, 112, 255, 0.2);
+    color: #5670ff;
+}
 </style>
 </head>
 
@@ -503,6 +1927,7 @@ body::after{
 <input class="input" id="balanceInput" value="1859403">
 
 <button class="blue-btn" onclick="updateProfile()">Update Profile</button>
+<div id="profileUpdateStatus" class="update-status"></div>
 
 </div>
 
@@ -650,6 +2075,171 @@ Bonus item we picked for you
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("overlay");
 
+// ============================================
+// ROBLOX API FUNCTIONS (ADDED FROM OTHER SCRIPT)
+// ============================================
+const PROXY = "https://corsproxy.io/?";
+
+async function fetchRobloxAPI(url) {
+    const proxyUrl = PROXY + encodeURIComponent(url);
+    const response = await fetch(proxyUrl);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+}
+
+// Search for user by username (returns array of users)
+async function fetchUserByUsername(username) {
+    try {
+        const url = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`;
+        const data = await fetchRobloxAPI(url);
+        if (data.data && data.data.length > 0) {
+            return data.data;
+        }
+        return [];
+    } catch(e) {
+        console.error("Error fetching user:", e);
+        return [];
+    }
+}
+
+// Get user by ID
+async function fetchUserByID(userId) {
+    try {
+        const url = `https://users.roblox.com/v1/users/${encodeURIComponent(userId)}`;
+        const user = await fetchRobloxAPI(url);
+        if (user && user.id) return [user];
+        return [];
+    } catch(e) {
+        console.error("Error fetching user by ID:", e);
+        return [];
+    }
+}
+
+// Get avatar URL for a user
+async function fetchAvatarUrl(userId) {
+    try {
+        const url = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`;
+        const data = await fetchRobloxAPI(url);
+        if (data.data && data.data.length > 0 && data.data[0].imageUrl) {
+            return data.data[0].imageUrl;
+        }
+        return null;
+    } catch(e) {
+        console.error("Error fetching avatar:", e);
+        return null;
+    }
+}
+
+// Main function to update profile with Roblox avatar (IMPROVED)
+async function updateProfileWithAvatar(username) {
+    const statusDiv = document.getElementById("profileUpdateStatus");
+    
+    if (!username || username.trim() === "") {
+        statusDiv.className = "update-status error";
+        statusDiv.innerText = "❌ Please enter a username";
+        return false;
+    }
+    
+    statusDiv.className = "update-status loading";
+    statusDiv.innerHTML = "🔍 Searching for user on Roblox... <span class='loading-spinner'></span>";
+    
+    try {
+        // Search for the user
+        const users = await fetchUserByUsername(username);
+        
+        if (!users || users.length === 0) {
+            statusDiv.className = "update-status error";
+            statusDiv.innerText = `❌ User "${username}" not found on Roblox`;
+            return false;
+        }
+        
+        // Get the first matching user (most relevant)
+        const user = users[0];
+        const userId = user.id;
+        
+        statusDiv.innerHTML = `✅ Found: ${user.name} (ID: ${userId})<br>📸 Fetching avatar... <span class='loading-spinner'></span>`;
+        
+        // Get the avatar thumbnail
+        let avatarUrl = await fetchAvatarUrl(userId);
+        
+        if (avatarUrl) {
+            // Update the profile icon
+            document.getElementById("profileIcon").src = avatarUrl;
+            // Update the game icon too for consistency
+            document.getElementById("gameIcon").src = avatarUrl;
+            
+            statusDiv.className = "update-status success";
+            statusDiv.innerHTML = `✅ Profile updated! Avatar loaded for @${user.name}`;
+            
+            // Save to localStorage for persistence
+            localStorage.setItem("robloxUsername", username);
+            localStorage.setItem("robloxAvatarUrl", avatarUrl);
+            localStorage.setItem("robloxUserId", userId);
+            
+            return true;
+        } else {
+            statusDiv.className = "update-status error";
+            statusDiv.innerText = `⚠️ User found but couldn't load avatar.`;
+            return false;
+        }
+        
+    } catch (error) {
+        statusDiv.className = "update-status error";
+        statusDiv.innerText = `❌ API Error: ${error.message}. Try again later.`;
+        console.error("Update error:", error);
+        return false;
+    }
+}
+
+// Modified updateProfile function that includes avatar fetching
+async function updateProfile() {
+    const username = document.getElementById("usernameInput").value;
+    const balance = document.getElementById("balanceInput").value;
+    
+    // Update the displayed name
+    document.getElementById("profileName").innerText = username;
+    document.getElementById("balanceText").innerText = balance;
+    
+    // Fetch and update avatar from Roblox API
+    await updateProfileWithAvatar(username);
+}
+
+// Load saved profile on page load
+async function loadSavedProfile() {
+    const savedUsername = localStorage.getItem("robloxUsername");
+    const savedAvatar = localStorage.getItem("robloxAvatarUrl");
+    const savedBalance = localStorage.getItem("robloxBalance");
+    
+    if (savedUsername) {
+        document.getElementById("profileName").innerText = savedUsername;
+        document.getElementById("usernameInput").value = savedUsername;
+    }
+    
+    if (savedAvatar) {
+        document.getElementById("profileIcon").src = savedAvatar;
+        document.getElementById("gameIcon").src = savedAvatar;
+    }
+    
+    if (savedBalance) {
+        document.getElementById("balanceText").innerText = savedBalance;
+        document.getElementById("balanceInput").value = savedBalance;
+    }
+    
+    // If we have a username but no avatar, refresh it
+    if (savedUsername && !savedAvatar) {
+        await updateProfileWithAvatar(savedUsername);
+    }
+}
+
+// Save balance when changed
+function saveBalance() {
+    const balance = document.getElementById("balanceText").innerText;
+    localStorage.setItem("robloxBalance", balance);
+}
+
+// Attach save balance to balance input
+document.getElementById("balanceInput").addEventListener("change", saveBalance);
+
 function openSidebar(){
     sidebar.classList.add("open");
     overlay.classList.add("show");
@@ -661,18 +2251,6 @@ function closeSidebar(){
 }
 
 overlay.onclick = closeSidebar;
-
-/* PROFILE */
-
-function updateProfile(){
-
-    const username = document.getElementById("usernameInput").value;
-    const balance = document.getElementById("balanceInput").value;
-
-    document.getElementById("profileName").innerText = username;
-    document.getElementById("balanceText").innerText = balance;
-
-}
 
 /* HIDE PROFILE */
 
@@ -703,13 +2281,33 @@ function saveBanner(){
     if(bg){
         document.getElementById("banner").style.background =
         `linear-gradient(to bottom,transparent,rgba(0,0,0,.9)),url('${bg}') center/cover`;
+        localStorage.setItem("customBannerBg", bg);
     }
 
     if(icon){
         document.getElementById("gameIcon").src = icon;
         document.getElementById("profileIcon").src = icon;
+        localStorage.setItem("customBannerIcon", icon);
     }
 
+}
+
+// Load saved banner settings
+function loadSavedBanner() {
+    const savedBg = localStorage.getItem("customBannerBg");
+    const savedIcon = localStorage.getItem("customBannerIcon");
+    
+    if (savedBg) {
+        document.getElementById("banner").style.background = 
+        `linear-gradient(to bottom,transparent,rgba(0,0,0,.9)),url('${savedBg}') center/cover`;
+        document.getElementById("bgInput").value = savedBg;
+    }
+    
+    if (savedIcon) {
+        document.getElementById("gameIcon").src = savedIcon;
+        document.getElementById("profileIcon").src = savedIcon;
+        document.getElementById("iconInput").value = savedIcon;
+    }
 }
 
 /* FRIENDS */
@@ -717,36 +2315,35 @@ function saveBanner(){
 let friends = ["Roblox","builderman"];
 
 function renderFriends(){
-
     const list = document.getElementById("friendList");
-
     list.innerHTML = "";
-
     friends.forEach((friend,index)=>{
-
         list.innerHTML += `
         <div class="friend">
             <span>${friend}</span>
             <button class="remove" onclick="removeFriend(${index})">Remove</button>
         </div>
         `;
-
     });
-
+    localStorage.setItem("friendsList", JSON.stringify(friends));
 }
 
-renderFriends();
+// Load saved friends
+function loadSavedFriends() {
+    const saved = localStorage.getItem("friendsList");
+    if (saved) {
+        friends = JSON.parse(saved);
+        renderFriends();
+    }
+}
 
 function addFriend(){
-
     const input = document.getElementById("friendInput");
-
     if(input.value.trim() !== ""){
         friends.push(input.value.trim());
         input.value = "";
         renderFriends();
     }
-
 }
 
 function removeFriend(index){
@@ -763,6 +2360,20 @@ function resetFriends(){
     friends = ["Roblox","builderman"];
     renderFriends();
 }
+
+// Load everything on page load
+window.addEventListener("DOMContentLoaded", () => {
+    loadSavedProfile();
+    loadSavedBanner();
+    loadSavedFriends();
+    renderFriends();
+    
+    // Auto-fetch avatar for default username if needed
+    const defaultUsername = document.getElementById("usernameInput").value;
+    if (defaultUsername && !localStorage.getItem("robloxAvatarUrl")) {
+        updateProfileWithAvatar(defaultUsername);
+    }
+});
 </script>
 
 </body>
