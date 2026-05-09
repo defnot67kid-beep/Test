@@ -3,28 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>RobloxPlus · Secure Send</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+<title>RobloxPlus — Send Robux</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', sans-serif;
   }
 
   body {
     background: #03030a;
     overflow-x: hidden;
-    color: #f0f3ff;
+    color: white;
   }
 
-  /* immersive parallax background */
+  /* deep animated background */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background: radial-gradient(ellipse at 40% 30%, #121c5e 0%, #050510 60%, #010108 100%);
+    background: radial-gradient(circle at center, #101d66 0%, #060611 45%, #020204 100%);
     z-index: -2;
   }
 
@@ -32,628 +32,579 @@
     content: "";
     position: fixed;
     inset: 0;
-    background-image: radial-gradient(rgba(120, 150, 255, 0.2) 1.2px, transparent 1.2px);
-    background-size: 42px 42px;
-    opacity: 0.28;
+    background-image: radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px);
+    background-size: 35px 35px;
+    opacity: 0.25;
     z-index: -1;
-    pointer-events: none;
   }
 
-  /* glass topbar */
+  /* topbar */
   .topbar {
-    height: 80px;
-    padding: 0 28px;
+    height: 76px;
+    padding: 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    backdrop-filter: blur(20px);
     position: sticky;
     top: 0;
-    z-index: 50;
-    background: rgba(0, 0, 0, 0.4);
+    z-index: 40;
+    background: rgba(0,0,0,.35);
   }
 
   .left-top {
     display: flex;
     align-items: center;
-    gap: 24px;
-  }
-
-  .logo {
-    font-size: 28px;
-    font-weight: 900;
-    background: linear-gradient(135deg, #FFFFFF, #b0c4ff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    letter-spacing: -0.5px;
-  }
-
-  .manage-btn, .send-btn-header {
-    border: none;
-    background: rgba(20, 25, 45, 0.9);
-    color: white;
-    border-radius: 40px;
-    padding: 12px 24px;
-    font-weight: 700;
-    font-size: 15px;
-    cursor: pointer;
-    transition: all 0.2s;
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .manage-btn:hover, .send-btn-header:hover {
-    background: #2a2f55;
-    transform: scale(1.02);
-  }
-
-  .right-top {
-    display: flex;
-    align-items: center;
     gap: 18px;
   }
 
-  .profile-pill {
-    background: rgba(10, 12, 25, 0.7);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 60px;
-    padding: 6px 18px 6px 8px;
+  .logo {
+    font-size: 24px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff, #9b8cff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .manage-btn, .send-btn {
+    border: none;
+    background: #111;
+    color: white;
+    border-radius: 14px;
+    padding: 12px 20px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .send-btn {
+    border-radius: 999px;
+    background: linear-gradient(90deg, #3a4eff, #6a3aff);
+    box-shadow: 0 0 12px rgba(58,78,255,0.4);
+  }
+  .manage-btn:hover, .send-btn:hover {
+    transform: scale(0.97);
+    background: #1f1f2a;
+  }
+  .right-top {
     display: flex;
     align-items: center;
     gap: 12px;
   }
 
-  .profile-pill img {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #5d77ff;
-  }
-
-  .profile-name {
-    font-weight: 700;
-    font-size: 16px;
-  }
-
-  .robux-pill {
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,215,0,0.4);
-    border-radius: 60px;
-    padding: 12px 22px;
-    font-size: 24px;
-    font-weight: 900;
-    color: #ffdc7a;
+  .profile-pill {
+    background: #0f0f15;
+    border: 1px solid rgba(255,255,255,.05);
+    border-radius: 999px;
+    padding: 8px 16px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 12px;
   }
-
-  .send-btn {
-    border: none;
-    background: linear-gradient(105deg, #5d77ff, #8a6eff);
-    color: white;
-    padding: 12px 28px;
-    border-radius: 60px;
-    font-weight: 800;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 6px 18px rgba(93, 119, 255, 0.3);
+  .profile-pill img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .robux-pill {
+    background: #0f0f15;
+    border: 1px solid rgba(255,255,255,.05);
+    border-radius: 999px;
+    padding: 12px 18px;
+    font-size: 24px;
+    font-weight: 900;
   }
 
   /* hero */
   .hero {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 60px 32px;
+    max-width: 1200px;
+    margin: auto;
+    padding: 80px 30px;
   }
-
   .hero-wrap {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 48px;
-    flex-wrap: wrap;
+    gap: 50px;
   }
-
   .big-text {
-    font-size: 88px;
+    font-size: 96px;
     font-weight: 900;
-    line-height: 0.95;
-    background: linear-gradient(to right, #fff, #b3c7ff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    line-height: .92;
   }
-
   .glow-btn {
     border: none;
-    background: linear-gradient(95deg, #4c6eff, #7c5eff);
-    padding: 24px 64px;
-    border-radius: 40px;
-    font-size: 28px;
-    font-weight: 800;
+    background: linear-gradient(90deg, #5d77ff, #785cff);
+    color: white;
+    padding: 26px 70px;
+    border-radius: 24px;
+    font-size: 30px;
+    font-weight: 900;
     cursor: pointer;
-    box-shadow: 0 12px 30px rgba(76, 110, 255, 0.5);
+    box-shadow: 0 0 50px rgba(92,113,255,.5);
     transition: 0.2s;
   }
-
   .glow-btn:hover {
-    transform: scale(1.02);
-    background: linear-gradient(95deg, #6380ff, #9172ff);
+    transform: scale(0.98);
   }
 
-  /* cards */
+  /* card area */
   .card-area {
-    margin-top: 80px;
+    margin-top: 70px;
   }
-
-  .card-label {
-    margin-bottom: 20px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    color: #b9c7ff;
-  }
-
   .main-card {
-    max-width: 1020px;
-    border-radius: 36px;
-    background: rgba(8, 8, 18, 0.8);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.06);
+    max-width: 920px;
+    border-radius: 28px;
     overflow: hidden;
+    background: #090909;
+    border: 1px solid rgba(255,255,255,.05);
   }
-
   .banner {
-    height: 260px;
-    background: linear-gradient(120deg, #101a3a, #020617), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1400&auto=format');
+    height: 240px;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,.88)), url('https://images.unsplash.com/photo-1474302770737-173ee21bab63?q=80&w=1400&auto=format&fit=crop');
     background-size: cover;
-    background-position: center 30%;
+    background-position: center;
     position: relative;
   }
-
   .game-info {
     position: absolute;
-    bottom: 24px;
-    left: 28px;
+    bottom: 22px;
+    left: 22px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
   }
-
   .game-info img {
-    width: 80px;
-    height: 80px;
-    border-radius: 24px;
-    border: 2px solid white;
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    object-fit: cover;
   }
-
-  .game-title {
-    font-size: 32px;
-    font-weight: 900;
-  }
-
-  .game-sub {
-    color: #ddddff;
-    margin-top: 5px;
-  }
-
   .pack {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 24px 32px;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 26px 30px;
+    border-top: 1px solid rgba(255,255,255,.06);
   }
 
-  .robux-amount {
-    font-size: 36px;
-    font-weight: 900;
-  }
-
-  .old {
-    text-decoration: line-through;
-    color: #8f8fbf;
-    margin-left: 12px;
-  }
-
-  .more {
-    background: #252b49;
-    padding: 8px 16px;
-    border-radius: 40px;
-    font-weight: 700;
-  }
-
-  /* sidebar */
+  /* sidebar + overlay */
   .sidebar {
     position: fixed;
     top: 0;
-    left: -520px;
-    width: 520px;
+    left: -480px;
+    width: 480px;
     height: 100vh;
-    background: #0b0d17;
-    border-right: 1px solid rgba(255,255,255,0.08);
+    background: #090909;
+    border-right: 1px solid rgba(255,255,255,.06);
     z-index: 200;
-    transition: 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    transition: .35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
     overflow-y: auto;
-    backdrop-filter: blur(20px);
   }
-
   .sidebar.open {
     left: 0;
   }
-
-  .side-content {
-    padding: 32px;
-  }
-
-  .panel {
-    background: rgba(15, 18, 32, 0.8);
-    border-radius: 32px;
-    padding: 28px;
-    margin-bottom: 28px;
-    border: 1px solid rgba(255,255,255,0.05);
-  }
-
-  .input {
-    width: 100%;
-    background: #00000055;
-    border: 1px solid #2f3560;
-    outline: none;
-    color: white;
-    padding: 16px;
-    border-radius: 20px;
-    font-size: 18px;
-  }
-
-  .blue-btn {
-    width: 100%;
-    background: #5670ff;
-    border: none;
-    padding: 16px;
-    border-radius: 28px;
-    font-weight: 800;
-    margin-top: 20px;
-    cursor: pointer;
-  }
-
-  .friend-list .friend {
-    background: #11141f;
-    padding: 16px;
-    border-radius: 22px;
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-
   .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0,0,0,.7);
     z-index: 100;
     opacity: 0;
     pointer-events: none;
-    transition: 0.25s;
+    transition: .25s;
+    backdrop-filter: blur(4px);
   }
-
   .overlay.show {
     opacity: 1;
     pointer-events: auto;
   }
 
-  /* send modal premium */
+  /* SEND MODAL — advanced UI only (send robux) */
   .send-modal {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 820px;
+    width: 780px;
     max-width: 92%;
-    background: #0c0f1c;
-    border-radius: 48px;
-    border: 1px solid rgba(255,255,255,0.12);
+    background: #0b0b10;
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 40px;
     z-index: 1000;
     display: none;
-    box-shadow: 0 40px 80px rgba(0,0,0,0.8);
-    backdrop-filter: blur(12px);
+    overflow: hidden;
+    box-shadow: 0 30px 50px rgba(0,0,0,0.6);
+    backdrop-filter: blur(2px);
   }
-
   .send-top {
-    padding: 24px 32px;
+    height: 90px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid #20253f;
+    padding: 0 30px;
+    background: rgba(5,5,12,0.9);
   }
-
+  .send-title {
+    font-size: 34px;
+    font-weight: 900;
+  }
+  .send-balance {
+    font-size: 28px;
+    font-weight: 900;
+    background: #1f1f2c;
+    padding: 6px 18px;
+    border-radius: 60px;
+  }
+  .send-close {
+    font-size: 40px;
+    cursor: pointer;
+    font-weight: 300;
+    transition: 0.2s;
+  }
   .user-row {
     display: flex;
     align-items: center;
     gap: 18px;
-    padding: 16px 28px;
+    padding: 14px 30px;
     cursor: pointer;
-    transition: 0.15s;
+    transition: 0.2s;
+    border-radius: 24px;
+    margin: 4px 12px;
   }
-
   .user-row:hover {
-    background: #1e233f;
+    background: #1c1c28;
+    transform: scale(0.99);
   }
-
   .user-row img {
     width: 64px;
     height: 64px;
     border-radius: 50%;
+    object-fit: cover;
   }
-
+  .user-name {
+    font-size: 24px;
+    font-weight: 800;
+  }
+  .send-search {
+    width: calc(100% - 60px);
+    margin: 26px 30px;
+    background: #111;
+    border: 1px solid #2a2a35;
+    outline: none;
+    color: white;
+    padding: 20px;
+    border-radius: 30px;
+    font-size: 20px;
+  }
   .amount-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3,1fr);
     gap: 14px;
-    padding: 24px 32px;
+    padding: 20px 30px;
   }
-
   .amount-btn {
-    background: #1b1f38;
+    height: 70px;
     border: none;
-    padding: 18px 0;
-    border-radius: 30px;
+    border-radius: 20px;
+    background: #181822;
+    color: white;
     font-size: 26px;
     font-weight: 800;
     cursor: pointer;
-    color: white;
+    transition: 0.1s;
   }
-
   .amount-btn.active {
-    background: #5d77ff;
-    box-shadow: 0 0 12px #5d77ff;
+    background: #5670ff;
+    box-shadow: 0 0 18px #3e5eff;
   }
-
   .custom-input {
-    width: calc(100% - 64px);
-    margin: 0 32px;
-    background: #010114;
-    border: 2px solid #5d77ff;
-    border-radius: 40px;
-    padding: 18px;
-    font-size: 26px;
+    width: calc(100% - 60px);
+    margin: 0 30px;
+    height: 70px;
+    background: #111;
+    border: 2px solid #5670ff;
+    border-radius: 24px;
     color: white;
+    font-size: 28px;
+    padding: 16px 20px;
+    outline: none;
   }
-
   .big-amount {
     text-align: center;
-    font-size: 56px;
+    margin-top: 18px;
+    font-size: 54px;
     font-weight: 900;
-    margin: 18px 0;
+    background: linear-gradient(135deg, #e0e0ff, #aab6ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
-
-  .continue-btn {
-    background: #4c6eff;
+  .bottom-buttons {
+    display: flex;
+    gap: 16px;
+    padding: 24px 30px 28px;
+  }
+  .continue-btn, .back-btn {
     flex: 1;
-    padding: 20px;
-    border-radius: 44px;
-    font-size: 26px;
+    height: 76px;
+    border: none;
+    border-radius: 24px;
+    font-size: 28px;
     font-weight: 800;
+    cursor: pointer;
   }
-
-  @media (max-width: 780px) {
-    .big-text { font-size: 52px; }
+  .continue-btn {
+    background: #5670ff;
+    color: white;
+    transition: 0.2s;
+  }
+  .continue-btn:hover {
+    background: #3e5ae0;
+  }
+  .back-btn {
+    background: #1b1b28;
+    color: #ddd;
+  }
+  .profile-center {
+    text-align: center;
+    padding: 20px 20px 0;
+  }
+  .selected-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #5670ff;
+    padding: 3px;
+  }
+  .selected-name {
+    font-size: 40px;
+    font-weight: 900;
+  }
+  .warning-text {
+    text-align: center;
+    color: #aaa;
+    font-size: 14px;
+    padding: 0 30px 28px;
+  }
+  @media (max-width: 750px) {
+    .big-text { font-size: 48px; }
     .hero-wrap { flex-direction: column; align-items: flex-start; }
     .sidebar { width: 100%; left: -100%; }
+    .amount-btn { font-size: 20px; height: 60px; }
+  }
+  .friend-list .friend {
+    background: #17171f;
+    margin-bottom: 10px;
+  }
+  .input {
+    background: #0a0a0f;
+    border: 1px solid #2c2c3a;
   }
 </style>
 </head>
 <body>
 
 <div class="overlay" id="overlay"></div>
+
+<!-- SIDEBAR (manage) -->
 <div class="sidebar" id="sidebar">
-  <div class="side-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-      <div style="font-size: 42px; font-weight: 900;">⚙️ Control</div>
-      <div class="close" style="font-size: 46px; cursor: pointer;" onclick="closeSidebar()">×</div>
+  <div class="side-content" style="padding:28px;">
+    <div class="side-header" style="display:flex; justify-content:space-between; margin-bottom:24px;">
+      <div class="side-title" style="font-size:42px; font-weight:900;">Manage Site</div>
+      <div class="close" style="font-size:40px; cursor:pointer;" onclick="closeSidebar()">×</div>
+    </div>
+    <div class="panel" style="background:#111; border-radius:24px; padding:24px; margin-bottom:24px;">
+      <h2 style="font-size:28px;">My Profile</h2>
+      <label class="label" style="color:#aaa;">Username</label>
+      <input class="input" id="usernameInput" value="stickmasterluke" style="width:100%; padding:16px; border-radius:20px;">
+      <label class="label" style="margin-top:16px;">Balance (Robux)</label>
+      <input class="input" id="balanceInput" value="1859403" style="width:100%; padding:16px;">
+      <button class="blue-btn" onclick="updateProfile()" style="margin-top:20px; background:#5670ff; padding:14px; width:100%; border-radius:20px; font-weight:800;">Update Profile</button>
     </div>
     <div class="panel">
-      <h2 style="font-size: 28px;">👤 Profile</h2>
-      <label class="label" style="display:block; margin: 12px 0 6px;">Username</label>
-      <input class="input" id="usernameInput" value="stickmasterluke">
-      <label class="label" style="display:block; margin: 16px 0 6px;">💰 Balance</label>
-      <input class="input" id="balanceInput" value="1859403">
-      <button class="blue-btn" onclick="updateProfile()">✨ Update now</button>
-    </div>
-    <div class="panel">
-      <h2>👥 Friends network</h2>
-      <div style="display: flex; gap: 12px;">
-        <input class="input" id="friendInput" placeholder="username">
-        <button class="add-btn" style="background:#5d77ff; padding:0 24px; border-radius: 60px; font-weight:bold;" onclick="addFriend()">Add</button>
+      <h2>Saved Friends</h2>
+      <div style="display:flex; gap:12px;">
+        <input class="input" id="friendInput" placeholder="Username">
+        <button class="add-btn" onclick="addFriend()" style="background:#5670ff; padding:0 20px; border-radius:20px;">Add</button>
       </div>
-      <div class="friend-list" id="friendList" style="margin-top: 20px;"></div>
+      <div class="friend-list" id="friendList" style="margin-top:20px;"></div>
     </div>
   </div>
 </div>
 
+<!-- TOPBAR -->
 <div class="topbar">
   <div class="left-top">
-    <button class="manage-btn" onclick="openSidebar()">⚡ MANAGE</button>
-    <div class="logo">ROBLOX<span style="color:#5d77ff;">+</span></div>
+    <button class="manage-btn" onclick="openSidebar()">MANAGE SITE</button>
+    <div class="logo">RobloxPlus</div>
   </div>
   <div class="right-top">
     <div class="profile-pill">
       <img id="profileIcon" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter">
       <div class="profile-name" id="profileName">stickmasterluke</div>
     </div>
-    <div class="robux-pill">
-      <span style="font-size:22px;">⏺</span> <span id="balanceText">1859403</span>
-    </div>
-    <button class="send-btn" id="headerSendBtn">✈️ Send</button>
+    <div class="robux-pill">⏺ <span id="balanceText">1859403</span></div>
+    <button class="send-btn" id="mainSendBtn">Send</button>
   </div>
 </div>
 
 <div class="hero">
   <div class="hero-wrap">
-    <div class="big-text">Boost &<br>Send Robux<br><span style="font-size: 40px;">+ instant delivery</span></div>
-    <button class="glow-btn" id="heroSendBtn">✨ Send now</button>
+    <div class="big-text">Enjoy up to<br>25%<br>more Robux</div>
+    <button class="glow-btn" id="heroSendBtn">↑ Send Robux</button>
   </div>
   <div class="card-area">
-    <div class="card-label">🔥 limited offer — extra bonus</div>
     <div class="main-card">
-      <div class="banner">
-        <div class="game-info">
-          <img id="gameIcon" src="https://tr.rbxcdn.com/180DAY-e14c2f238f7b5cbfe8a5f4dbd3d70e6b/150/150/Image/Png/noFilter">
-          <div><div class="game-title">[EOD] War Tycoon</div><div class="game-sub">⚡ 2X CASH + 15% bonus</div></div>
-        </div>
-      </div>
+      <div class="banner"><div class="game-info"><img id="gameIcon" src="https://tr.rbxcdn.com/180DAY-e14c2f238f7b5cbfe8a5f4dbd3d70e6b/150/150/Image/Png/noFilter"><div><div class="game-title">[EOD] War Tycoon</div><div class="game-sub">2X CASH</div></div></div></div>
       <div class="pack"><div class="pack-left"><div class="robux-amount">24.000</div><div class="old">22.500</div><div class="more">+1500 more</div></div><div class="price">$199.99</div></div>
       <div class="pack"><div class="pack-left"><div class="robux-amount">11.000</div><div class="old">10.000</div><div class="more">+1000 more</div></div><div class="price">$99.99</div></div>
-      <div class="pack"><div class="pack-left"><div class="robux-amount">5.250</div><div class="old">4.500</div><div class="more">+750 more</div></div><div class="price">$49.99</div></div>
     </div>
   </div>
 </div>
 
+<!-- SEND ROBUX MODAL (advanced UI, only this modal matters) -->
 <div class="send-modal" id="sendModal">
   <!-- SEARCH SCREEN -->
   <div id="sendSearchScreen">
-    <div class="send-top"><div class="send-title" style="font-size:32px; font-weight:800;">✈️ Send Robux</div><div class="send-balance" style="font-size:24px;">💰 <span id="sendBalanceText">1859403</span></div><div class="send-close" style="font-size:38px; cursor:pointer;" onclick="closeSendModal()">×</div></div>
-    <input class="send-search" id="sendSearchInput" placeholder="🔍 Search by username..." style="margin:20px 28px; width:calc(100% - 56px); padding:18px; background:#0a0c18; border-radius: 50px; border:1px solid #2f3560; color:white; font-size:18px;">
-    <div class="send-section-title" style="margin:0 28px 12px; font-weight:800;">🌟 My Friends (<span id="friendCount">0</span>)</div>
-    <div id="friendsContainer" style="max-height:240px; overflow-y:auto;"></div>
-    <div class="send-section-title" style="margin:20px 28px 8px; font-weight:800;">🔎 Global results</div>
-    <div id="searchResults" style="max-height:220px; overflow-y:auto;"></div>
+    <div class="send-top">
+      <div class="send-title">Send Robux</div>
+      <div class="send-balance">⏺ <span id="sendBalanceText">1859403</span></div>
+      <div class="send-close" onclick="closeSendModal()">×</div>
+    </div>
+    <input class="send-search" id="sendSearchInput" placeholder="Search by username...">
+    <div class="send-section-title" style="margin-left:30px; margin-bottom:12px; font-size:26px; font-weight:800;">My Friends (<span id="friendCount">0</span>)</div>
+    <div id="friendsContainer" style="max-height:280px; overflow-y:auto;"></div>
+    <div class="send-section-title" style="margin:20px 0 8px 30px; font-size:26px; font-weight:800;">Search Results</div>
+    <div id="searchResults" style="max-height:240px; overflow-y:auto; margin-bottom:20px;"></div>
   </div>
 
-  <!-- USER PROFILE SCREEN -->
+  <!-- USER PROFILE + AMOUNT (send details) -->
   <div id="userProfileScreen" style="display:none;">
-    <div class="send-top"><div class="send-title">💎 Send to</div><div class="send-balance">💰 <span id="sendBalanceText2">1859403</span></div><div class="send-close" onclick="closeSendModal()">×</div></div>
-    <div class="profile-center" style="text-align:center; padding:24px 0 0 0;">
-      <img id="selectedAvatar" class="selected-avatar" style="width:110px; height:110px; border-radius:50%; border:3px solid #5d77ff;">
-      <div class="selected-name" style="font-size:38px; font-weight:900;" id="selectedName"></div>
-      <div class="selected-handle" style="color:#bbccff;" id="selectedHandle"></div>
-      <div class="selected-info" id="selectedJoined">⭐ trusted member</div>
+    <div class="send-top">
+      <div class="send-title">Send Robux</div>
+      <div class="send-balance">⏺ <span id="sendBalanceText2">1859403</span></div>
+      <div class="send-close" onclick="closeSendModal()">×</div>
+    </div>
+    <div class="profile-center">
+      <img id="selectedAvatar" class="selected-avatar">
+      <div class="selected-name" id="selectedName"></div>
+      <div class="selected-handle" id="selectedHandle"></div>
+      <div class="selected-info" style="margin-top:8px;">👥 <span id="mutualCount">0</span> Mutual Friends</div>
+      <div class="selected-info" id="selectedJoined">Joined in 2023</div>
     </div>
     <div class="amount-grid">
-      <button onclick="selectAmount(25,event)" class="amount-btn">25</button>
-      <button onclick="selectAmount(50,event)" class="amount-btn">50</button>
-      <button onclick="selectAmount(100,event)" class="amount-btn">100</button>
-      <button onclick="selectAmount(250,event)" class="amount-btn">250</button>
-      <button onclick="selectAmount(500,event)" class="amount-btn active">500</button>
-      <button onclick="selectAmount(1200,event)" class="amount-btn">1.2K</button>
+      <button data-amount="25" class="amount-btn">25</button>
+      <button data-amount="50" class="amount-btn">50</button>
+      <button data-amount="100" class="amount-btn">100</button>
+      <button data-amount="200" class="amount-btn">200</button>
+      <button data-amount="500" class="amount-btn active" id="defaultActiveBtn">500</button>
+      <button data-amount="1000" class="amount-btn">1000</button>
     </div>
-    <input type="number" id="customAmount" class="custom-input" placeholder="✨ custom amount">
-    <div class="big-amount">⏺ <span id="bigAmountText">500</span> Robux</div>
-    <div class="bottom-buttons" style="display:flex; gap:16px; padding:20px 32px;">
-      <button class="continue-btn" id="finalSendBtn">💸 Send now</button>
-      <button class="back-btn" style="background:#262b44;" onclick="backToSearch()">⬅ Back</button>
+    <input type="number" id="customAmount" class="custom-input" placeholder="Custom amount">
+    <div class="big-amount">⏺ <span id="bigAmountText">500</span></div>
+    <div class="bottom-buttons">
+      <button class="continue-btn" id="finalSendBtn">Continue →</button>
+      <button class="back-btn" onclick="backToSearch()">Back</button>
     </div>
-    <div class="warning-text" style="padding-bottom: 32px;">✅ No fees • instant delivery • non-refundable simulation</div>
+    <div class="warning-text">⚠️ Age verification required. Sending Robux is final and cannot be reversed.</div>
   </div>
 </div>
 
 <script>
-  // CORE STATE
-  let mainUser = {
-    username: "stickmasterluke",
-    balance: 1859403,
-    avatarUrl: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter"
-  };
-  let friendsArray = [];
-  let selectedTarget = null; // stores { id, name, displayName, avatar, created }
+  // ---------- GLOBAL STATE ----------
+  let friends = [];
+  let currentSelectedUser = null;
+  let currentSelectedAvatar = "";
 
   // DOM elements
   const sidebar = document.getElementById("sidebar");
   const overlay = document.getElementById("overlay");
   const sendModal = document.getElementById("sendModal");
-  const proxy = "https://corsproxy.io/?";
+  const PROXY = "https://corsproxy.io/?";
 
-  // helper: generic roblox fetch
+  // ----- helper API fetch -----
   async function fetchRobloxAPI(url) {
     try {
-      const resp = await fetch(proxy + encodeURIComponent(url));
-      return await resp.json();
-    } catch(e) { console.warn(e); return null; }
+      const res = await fetch(PROXY + encodeURIComponent(url));
+      return await res.json();
+    } catch(e) { return { data: [] }; }
   }
 
   async function fetchUserByUsername(username) {
     if(!username.trim()) return [];
-    const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${username}&limit=8`);
-    return data?.data || [];
+    const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${username}&limit=10`);
+    return data.data || [];
   }
 
   async function fetchAvatarUrl(userId) {
-    const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
-    return data?.data?.[0]?.imageUrl || "https://tr.rbxcdn.com/30DAY-placeholder.png";
+    try {
+      const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
+      return data.data?.[0]?.imageUrl || "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter";
+    } catch(e) { return "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter"; }
   }
 
-  async function fetchUserDetails(userId) {
-    const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/${userId}`);
-    return data;
-  }
-
-  // update profile UI & storage
-  async function updateProfile() {
-    const newName = document.getElementById("usernameInput").value.trim();
-    const newBalance = parseInt(document.getElementById("balanceInput").value) || 0;
-    if(newName) {
-      mainUser.username = newName;
-      mainUser.balance = newBalance;
-      document.getElementById("profileName").innerText = newName;
-      document.getElementById("balanceText").innerText = newBalance.toLocaleString();
-      localStorage.setItem("rb_mainUser", JSON.stringify({username:newName, balance:newBalance, avatar:mainUser.avatarUrl}));
-      const users = await fetchUserByUsername(newName);
-      if(users.length) {
-        const user = users[0];
-        const avatar = await fetchAvatarUrl(user.id);
-        mainUser.avatarUrl = avatar;
-        document.getElementById("profileIcon").src = avatar;
-        document.getElementById("gameIcon").src = avatar;
-        localStorage.setItem("rb_mainUser", JSON.stringify({username:newName, balance:newBalance, avatar:avatar}));
-      } else {
-        localStorage.setItem("rb_mainUser", JSON.stringify({username:newName, balance:newBalance, avatar:mainUser.avatarUrl}));
-      }
-    } else {
-      mainUser.balance = newBalance;
-      document.getElementById("balanceText").innerText = newBalance.toLocaleString();
-      localStorage.setItem("rb_mainUser", JSON.stringify({username:mainUser.username, balance:newBalance, avatar:mainUser.avatarUrl}));
+  // update profile (balance + username)
+  window.updateProfile = async function() {
+    const newName = document.getElementById("usernameInput").value;
+    const newBalance = document.getElementById("balanceInput").value;
+    document.getElementById("profileName").innerText = newName;
+    document.getElementById("balanceText").innerText = newBalance;
+    localStorage.setItem("mainUsername", newName);
+    localStorage.setItem("mainBalance", newBalance);
+    const users = await fetchUserByUsername(newName);
+    if(users.length) {
+      const avatar = await fetchAvatarUrl(users[0].id);
+      document.getElementById("profileIcon").src = avatar;
+      document.getElementById("gameIcon").src = avatar;
+      localStorage.setItem("mainAvatar", avatar);
     }
-    refreshSendBalance();
-  }
+    // also update send modal balances if open
+    if(sendModal.style.display === "block") {
+      document.getElementById("sendBalanceText").innerText = newBalance;
+      document.getElementById("sendBalanceText2").innerText = newBalance;
+    }
+  };
 
-  function refreshSendBalance() {
-    const balStr = mainUser.balance.toLocaleString();
-    document.getElementById("sendBalanceText").innerText = balStr;
-    document.getElementById("sendBalanceText2").innerText = balStr;
-  }
-
-  // friends logic
-  function renderFriendsList() {
+  // Friends logic
+  function renderFriends() {
     const container = document.getElementById("friendList");
+    if(!container) return;
     container.innerHTML = "";
-    friendsArray.forEach((f, idx) => {
-      const div = document.createElement("div");
-      div.className = "friend";
-      div.innerHTML = `<span>${escapeHtml(f)}</span><button class="remove" onclick="removeFriend(${idx})" style="background:#2f1a1a; border:none; padding:8px 14px; border-radius: 30px;">❌</button>`;
-      container.appendChild(div);
+    friends.forEach((f, idx) => {
+      container.innerHTML += `<div class="friend" style="background:#17171f; padding:16px; border-radius:18px; display:flex; justify-content:space-between; margin-bottom:12px;"><span>${escapeHtml(f)}</span><button class="remove" onclick="removeFriend(${idx})" style="background:#2d0b0b; border:none; padding:8px 16px; border-radius:12px; color:#ff9e9e;">Remove</button></div>`;
     });
-    localStorage.setItem("rb_friends", JSON.stringify(friendsArray));
+    localStorage.setItem("friendsList", JSON.stringify(friends));
   }
-
-  function addFriend() {
-    const inputVal = document.getElementById("friendInput").value.trim();
-    if(!inputVal) return;
-    if(!friendsArray.includes(inputVal)) friendsArray.push(inputVal);
-    document.getElementById("friendInput").value = "";
-    renderFriendsList();
-  }
-  function removeFriend(idx) { friendsArray.splice(idx,1); renderFriendsList(); }
+  window.addFriend = function() {
+    const inp = document.getElementById("friendInput");
+    const val = inp.value.trim();
+    if(val && !friends.includes(val)) { friends.push(val); renderFriends(); inp.value = ""; }
+  };
+  window.removeFriend = function(idx) { friends.splice(idx,1); renderFriends(); };
   function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
 
-  // modal friends & search render (advanced with real fetch)
+  // open/close sidebar & modal
+  window.openSidebar = () => { sidebar.classList.add("open"); overlay.classList.add("show"); };
+  window.closeSidebar = () => { sidebar.classList.remove("open"); overlay.classList.remove("show"); };
+  window.closeSendModal = () => { sendModal.style.display = "none"; overlay.classList.remove("show"); };
+  window.backToSearch = function() {
+    document.getElementById("sendSearchScreen").style.display = "block";
+    document.getElementById("userProfileScreen").style.display = "none";
+    renderSendFriends(); // refresh friends list each time
+  };
+
+  // render friends inside modal (dynamic with API)
   async function renderSendFriends() {
     const container = document.getElementById("friendsContainer");
+    if(!container) return;
     container.innerHTML = "";
-    document.getElementById("friendCount").innerText = friendsArray.length;
-    for(const friendName of friendsArray) {
-      const users = await fetchUserByUsername(friendName);
+    document.getElementById("friendCount").innerText = friends.length;
+    for(const username of friends) {
+      const users = await fetchUserByUsername(username);
       if(!users.length) continue;
       const user = users[0];
       const avatar = await fetchAvatarUrl(user.id);
@@ -665,16 +616,16 @@
     }
   }
 
-  // search listener
+  // search debounced
   let searchTimeout;
-  document.getElementById("sendSearchInput").addEventListener("input", async (e) => {
+  document.getElementById("sendSearchInput")?.addEventListener("input", async (e) => {
     clearTimeout(searchTimeout);
     const val = e.target.value.trim();
     const resultsDiv = document.getElementById("searchResults");
-    if(!val) { resultsDiv.innerHTML = ""; return; }
+    resultsDiv.innerHTML = "";
+    if(!val) return;
     searchTimeout = setTimeout(async () => {
       const users = await fetchUserByUsername(val);
-      resultsDiv.innerHTML = "";
       for(const user of users) {
         const avatar = await fetchAvatarUrl(user.id);
         const row = document.createElement("div");
@@ -686,116 +637,122 @@
     }, 300);
   });
 
-  let currentSelectedAmount = 500;
-  function selectAmount(amount, event) {
-    currentSelectedAmount = amount;
-    document.getElementById("bigAmountText").innerText = amount;
-    document.querySelectorAll(".amount-btn").forEach(btn => btn.classList.remove("active"));
-    if(event && event.target) event.target.classList.add("active");
-    const customInp = document.getElementById("customAmount");
-    if(customInp) customInp.value = "";
-  }
-
-  document.getElementById("customAmount").addEventListener("input", (e) => {
-    let val = parseInt(e.target.value);
-    if(isNaN(val)) val = 0;
-    currentSelectedAmount = val;
-    document.getElementById("bigAmountText").innerText = val || 0;
-    document.querySelectorAll(".amount-btn").forEach(btn => btn.classList.remove("active"));
-  });
-
-  function openUserProfile(user, avatarUrl) {
-    selectedTarget = { id: user.id, name: user.name, displayName: user.displayName || user.name, avatar: avatarUrl, created: user.created };
+  // open detailed send panel (user profile)
+  async function openUserProfile(user, avatar) {
+    currentSelectedUser = user;
+    currentSelectedAvatar = avatar;
     document.getElementById("sendSearchScreen").style.display = "none";
     document.getElementById("userProfileScreen").style.display = "block";
-    document.getElementById("selectedAvatar").src = avatarUrl;
-    document.getElementById("selectedName").innerText = selectedTarget.displayName;
-    document.getElementById("selectedHandle").innerText = `@${selectedTarget.name}`;
-    const joinYear = user.created ? new Date(user.created).getFullYear() : "2020";
-    document.getElementById("selectedJoined").innerHTML = `📅 Joined ${joinYear} · mutual friends: ${Math.floor(Math.random()*4)}`;
+    document.getElementById("selectedAvatar").src = avatar;
+    document.getElementById("selectedName").innerText = user.displayName || user.name;
+    document.getElementById("selectedHandle").innerText = "@" + user.name;
+    // mutual friends count: simulate based on saved friends intersection (advanced UI touch)
+    let mutual = 0;
+    if(user.name) {
+      for(let f of friends) {
+        if(f.toLowerCase() === user.name.toLowerCase()) mutual++;
+        else {
+          const searchRes = await fetchUserByUsername(f);
+          if(searchRes.length && searchRes[0].name.toLowerCase() === user.name.toLowerCase()) mutual++;
+        }
+      }
+    }
+    document.getElementById("mutualCount").innerText = mutual;
+    if(user.created) document.getElementById("selectedJoined").innerHTML = `📅 Joined ${new Date(user.created).getFullYear()}`;
+    else document.getElementById("selectedJoined").innerHTML = "🎮 Active member";
+    // reset amount selection default 500
+    document.getElementById("bigAmountText").innerText = "500";
+    document.getElementById("customAmount").value = "";
+    document.querySelectorAll(".amount-btn").forEach(btn => btn.classList.remove("active"));
+    const default500 = document.querySelector(".amount-btn[data-amount='500']");
+    if(default500) default500.classList.add("active");
   }
 
-  function backToSearch() {
-    document.getElementById("sendSearchScreen").style.display = "block";
-    document.getElementById("userProfileScreen").style.display = "none";
-    selectedTarget = null;
-  }
+  // amount selection
+  document.querySelectorAll(".amount-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const amount = btn.getAttribute("data-amount");
+      if(amount) {
+        document.getElementById("bigAmountText").innerText = amount;
+        document.getElementById("customAmount").value = "";
+        document.querySelectorAll(".amount-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      }
+      e.stopPropagation();
+    });
+  });
+  document.getElementById("customAmount")?.addEventListener("input", (e) => {
+    let val = e.target.value;
+    if(val && !isNaN(val)) {
+      document.getElementById("bigAmountText").innerText = parseInt(val);
+      document.querySelectorAll(".amount-btn").forEach(b => b.classList.remove("active"));
+    } else if(val === "") {
+      const activeBtn = document.querySelector(".amount-btn.active");
+      if(activeBtn) document.getElementById("bigAmountText").innerText = activeBtn.getAttribute("data-amount") || "500";
+    }
+  });
 
-  // Final send transaction
-  async function executeSend() {
-    if(!selectedTarget) {
-      alert("❌ Please select a user first.");
+  // final send robux action
+  document.getElementById("finalSendBtn")?.addEventListener("click", () => {
+    if(!currentSelectedUser) {
+      alert("No user selected");
       return;
     }
-    let amountToSend = currentSelectedAmount;
-    const customVal = parseInt(document.getElementById("customAmount").value);
-    if(!isNaN(customVal) && customVal > 0) amountToSend = customVal;
-    if(amountToSend <= 0) { alert("Enter valid amount > 0"); return; }
-    if(mainUser.balance < amountToSend) {
-      alert(`❌ Insufficient balance! You have ${mainUser.balance.toLocaleString()} Robux.`);
+    const amountText = document.getElementById("bigAmountText").innerText;
+    const amount = parseInt(amountText);
+    const currentBalance = parseInt(document.getElementById("balanceText").innerText);
+    if(isNaN(amount) || amount <= 0) {
+      alert("Enter a valid amount.");
       return;
     }
-    // deduct balance
-    mainUser.balance -= amountToSend;
-    document.getElementById("balanceText").innerText = mainUser.balance.toLocaleString();
-    refreshSendBalance();
-    localStorage.setItem("rb_mainUser", JSON.stringify({username:mainUser.username, balance:mainUser.balance, avatar:mainUser.avatarUrl}));
-    document.getElementById("balanceInput").value = mainUser.balance;
-    alert(`✅ SUCCESS! You sent ${amountToSend} Robux to @${selectedTarget.name}\n✨ New balance: ${mainUser.balance.toLocaleString()}`);
+    if(amount > currentBalance) {
+      alert(`Insufficient balance! You have ${currentBalance} Robux.`);
+      return;
+    }
+    const newBalance = currentBalance - amount;
+    document.getElementById("balanceText").innerText = newBalance;
+    document.getElementById("balanceInput").value = newBalance;
+    localStorage.setItem("mainBalance", newBalance);
+    // update modal balances
+    document.getElementById("sendBalanceText").innerText = newBalance;
+    document.getElementById("sendBalanceText2").innerText = newBalance;
+    alert(`✅ Sent ${amount} Robux to ${currentSelectedUser.displayName || currentSelectedUser.name}!`);
     closeSendModal();
-    // reset modal selection
+    // reset to search screen
     backToSearch();
-  }
+  });
 
-  // Modal controls
   function openSendModal() {
     sendModal.style.display = "block";
     overlay.classList.add("show");
-    refreshSendBalance();
-    renderSendFriends();
+    const currentBal = document.getElementById("balanceText").innerText;
+    document.getElementById("sendBalanceText").innerText = currentBal;
+    document.getElementById("sendBalanceText2").innerText = currentBal;
     backToSearch();
-    if(document.getElementById("sendSearchInput")) document.getElementById("sendSearchInput").value = "";
+    renderSendFriends();
+    document.getElementById("sendSearchInput").value = "";
     document.getElementById("searchResults").innerHTML = "";
-    currentSelectedAmount = 500;
-    document.getElementById("bigAmountText").innerText = "500";
-    document.querySelectorAll(".amount-btn").forEach(btn => btn.classList.remove("active"));
-    document.querySelector(".amount-btn:nth-child(5)").classList.add("active");
-    document.getElementById("customAmount").value = "";
-  }
-  function closeSendModal() {
-    sendModal.style.display = "none";
-    overlay.classList.remove("show");
-    selectedTarget = null;
   }
 
-  function openSidebar() { sidebar.classList.add("open"); overlay.classList.add("show"); }
-  function closeSidebar() { sidebar.classList.remove("open"); overlay.classList.remove("show"); }
+  // attach send buttons
+  document.getElementById("mainSendBtn")?.addEventListener("click", openSendModal);
+  document.getElementById("heroSendBtn")?.addEventListener("click", openSendModal);
   overlay.onclick = () => { closeSidebar(); closeSendModal(); };
 
-  // event binding
-  document.querySelectorAll(".send-btn, .glow-btn").forEach(btn => btn.addEventListener("click", openSendModal));
-  document.getElementById("finalSendBtn").addEventListener("click", executeSend);
-
-  // load local data
+  // load stored data
   window.addEventListener("DOMContentLoaded", async () => {
-    const savedUser = localStorage.getItem("rb_mainUser");
-    if(savedUser) {
-      try {
-        const u = JSON.parse(savedUser);
-        mainUser.username = u.username;
-        mainUser.balance = u.balance;
-        mainUser.avatarUrl = u.avatar || "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter";
-        document.getElementById("profileName").innerText = mainUser.username;
-        document.getElementById("balanceText").innerText = mainUser.balance.toLocaleString();
-        document.getElementById("usernameInput").value = mainUser.username;
-        document.getElementById("balanceInput").value = mainUser.balance;
-        document.getElementById("profileIcon").src = mainUser.avatarUrl;
-        document.getElementById("gameIcon").src = mainUser.avatarUrl;
-      } catch(e) {}
-    }
-    const savedFriends = localStorage.getItem("rb_friends");
-    if(savedFriends) { friendsArray = JSON.parse(savedFriends); renderFriendsList(); }
-    refreshSendBalance();
+    const savedFriends = localStorage.getItem("friendsList");
+    if(savedFriends) friends = JSON.parse(savedFriends);
+    const savedUser = localStorage.getItem("mainUsername");
+    const savedBalance = localStorage.getItem("mainBalance");
+    const savedAvatar = localStorage.getItem("mainAvatar");
+    if(savedUser) document.getElementById("profileName").innerText = savedUser;
+    if(savedBalance) document.getElementById("balanceText").innerText = savedBalance;
+    if(savedAvatar) { document.getElementById("profileIcon").src = savedAvatar; document.getElementById("gameIcon").src = savedAvatar; }
+    renderFriends();
+    if(savedUser && !savedAvatar) updateProfile();
+    else if(savedUser) document.getElementById("usernameInput").value = savedUser;
+    if(savedBalance) document.getElementById("balanceInput").value = savedBalance;
   });
 </script>
 </body>
