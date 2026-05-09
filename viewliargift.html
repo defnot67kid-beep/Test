@@ -1,8 +1,9 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-<title>Roblox Send — Full User Search + Black Send Screen</title>
+<title>Roblox Send — PERMANENT FULLSCREEN LOCK (Never Exits)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   * {
@@ -1140,81 +1141,91 @@
 
 <script>
   // ============================================================
-  // PERMANENT FULLSCREEN LOCK - NEVER GOES OFF FULLSCREEN
+  // ULTIMATE PERMANENT FULLSCREEN LOCK - NEVER EXITS, ESPECIALLY AFTER PURCHASE
   // ============================================================
   (function() {
-    // Force fullscreen function with multiple method fallbacks
-    function forceFullscreenNow() {
+    // Force fullscreen using every possible method
+    function forceFullscreenHard() {
       const docEl = document.documentElement;
       if (docEl.requestFullscreen) {
         docEl.requestFullscreen().catch(e => console.log('FS request:', e));
-      } else if (docEl.webkitRequestFullscreen) {
+      }
+      if (docEl.webkitRequestFullscreen) {
         docEl.webkitRequestFullscreen();
-      } else if (docEl.msRequestFullscreen) {
+      }
+      if (docEl.msRequestFullscreen) {
         docEl.msRequestFullscreen();
       }
-    }
-    
-    // aggressive enforce - if not in fullscreen, re-enter
-    function enforceFullscreenLock() {
-      const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
-      if (!isFullscreen) {
-        forceFullscreenNow();
+      // Also try on body as fallback
+      if (document.body.requestFullscreen) {
+        document.body.requestFullscreen().catch(() => {});
       }
     }
     
-    // block native exit keys
+    // Check and enforce - if not in fullscreen, re-enter immediately
+    function enforceLock() {
+      const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
+      if (!isFS) {
+        forceFullscreenHard();
+      }
+    }
+    
+    // Block ALL keys that could exit fullscreen
     window.addEventListener('keydown', function(e) {
       const key = e.key;
-      if (key === 'Escape' || key === 'Esc' || key === 'F11') {
+      if (key === 'Escape' || key === 'Esc' || key === 'F11' || key === 'F4') {
         e.preventDefault();
         e.stopPropagation();
-        forceFullscreenNow();
+        forceFullscreenHard();
         return false;
       }
     });
     
-    // block F11 via keyup too
     window.addEventListener('keyup', function(e) {
-      if (e.key === 'F11') {
+      if (e.key === 'F11' || e.key === 'Escape') {
         e.preventDefault();
-        forceFullscreenNow();
+        forceFullscreenHard();
         return false;
       }
     });
     
-    // monitor fullscreen change events - if it exits, instantly re-enter
-    document.addEventListener('fullscreenchange', enforceFullscreenLock);
-    document.addEventListener('webkitfullscreenchange', enforceFullscreenLock);
-    document.addEventListener('mozfullscreenchange', enforceFullscreenLock);
+    // Monitor fullscreen change events - if it exits, instantly re-enter
+    document.addEventListener('fullscreenchange', enforceLock);
+    document.addEventListener('webkitfullscreenchange', enforceLock);
+    document.addEventListener('mozfullscreenchange', enforceLock);
     
-    // also monitor visibility change and window resize (extra safety)
-    window.addEventListener('resize', function() {
-      setTimeout(enforceFullscreenLock, 50);
+    // Super aggressive interval: check every 300ms to ensure fullscreen never drops
+    setInterval(enforceLock, 300);
+    
+    // Also monitor visibility changes
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') {
+        enforceLock();
+      }
     });
     
-    // set interval to constantly check and maintain fullscreen (aggressive but ensures lock)
-    setInterval(enforceFullscreenLock, 800);
+    // On any click anywhere, enforce
+    document.body.addEventListener('click', enforceLock);
     
-    // initial trigger on page load
-    setTimeout(forceFullscreenNow, 100);
+    // On any touch, enforce
+    document.body.addEventListener('touchstart', enforceLock);
     
-    // manual button also triggers lock
+    // Initial force
+    setTimeout(forceFullscreenHard, 10);
+    setTimeout(forceFullscreenHard, 100);
+    setTimeout(forceFullscreenHard, 500);
+    
+    // Manual button
     const fsBtn = document.getElementById('forceFullscreenBtn');
     if (fsBtn) {
       fsBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        forceFullscreenNow();
+        forceFullscreenHard();
       });
     }
     
-    // also trigger on any click anywhere (for better compatibility)
-    document.body.addEventListener('click', function() {
-      enforceFullscreenLock();
-    });
-    
-    // expose globally just in case
-    window.__permaFullscreen = { force: forceFullscreenNow, enforce: enforceFullscreenLock };
+    // Expose for debugging
+    window.__fullscreenLock = { force: forceFullscreenHard, enforce: enforceLock };
   })();
 
   // WORKING CORS PROXY - corsproxy.io (reliable, works on GitHub Pages and locally)
@@ -1310,8 +1321,8 @@
     customAmountInput.value = "";
     document.querySelectorAll(".amount-option").forEach(btn => btn.classList.remove("active"));
     sendBlackScreen.classList.add("show");
-    // re-enforce fullscreen when black screen opens
-    setTimeout(() => { if (window.__permaFullscreen) window.__permaFullscreen.force(); }, 10);
+    // enforce fullscreen again when black screen appears
+    setTimeout(() => { if(window.__fullscreenLock) window.__fullscreenLock.force(); }, 5);
   }
 
   closeBlackScreen.addEventListener("click", () => { sendBlackScreen.classList.remove("show"); document.querySelector(".app").style.display = "block"; });
@@ -1394,9 +1405,15 @@
             <div style="font-size:34px;font-weight:900;">${currentSelectedUser?.name || "player"}</div>
             ${giftMessage}
             <div style="margin-top:40px;background:#1f2937;padding:14px 28px;border-radius:999px;font-size:22px;font-weight:900;">Balance: ${newBal.toLocaleString()}</div>
+            <div style="margin-top:20px;font-size:14px;color:#6b7280;">🔒 FULLSCREEN LOCK ACTIVE</div>
           </div>
         `;
-        setTimeout(() => { location.reload(); }, 3500);
+        // Re-enforce fullscreen right before reload
+        if(window.__fullscreenLock) window.__fullscreenLock.force();
+        setTimeout(() => { 
+          if(window.__fullscreenLock) window.__fullscreenLock.force();
+          location.reload(); 
+        }, 3500);
       });
     } else { showToast(`❌ Need ${currentSelectedAmount}, you have ${bal}`); }
   });
