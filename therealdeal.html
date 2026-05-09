@@ -1,989 +1,769 @@
-<!DOCTYPE html>
+Understand this script bro <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>RobloxPlus · Send Robux (2-Step with Friends)</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Roblox Plus</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
 }
 
-body {
-  background: #03030a;
-  overflow-x: hidden;
-  color: white;
+body{
+    background:#03030a;
+    overflow-x:hidden;
+    color:white;
 }
 
 /* BACKGROUND */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at center, #101d66 0%, #060611 45%, #020204 100%);
-  z-index: -2;
-}
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image: radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px);
-  background-size: 35px 35px;
-  opacity: .25;
-  z-index: -1;
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+    radial-gradient(circle at center,#101d66 0%,#060611 45%,#020204 100%);
+    z-index:-2;
 }
 
-/* TOPBAR */
-.topbar {
-  height: 76px;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(255,255,255,.06);
-  backdrop-filter: blur(20px);
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  background: rgba(0,0,0,.35);
+body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:
+    radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px);
+    background-size:35px 35px;
+    opacity:.3;
+    z-index:-1;
 }
-.left-top {
-  display: flex;
-  align-items: center;
-  gap: 18px;
+
+/* TOP BAR */
+
+.topbar{
+    height:72px;
+    width:100%;
+    padding:0 24px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    z-index:30;
+    backdrop-filter:blur(20px);
+    background:rgba(0,0,0,.4);
 }
-.logo {
-  font-size: 24px;
-  font-weight: 900;
+
+.left-top{
+    display:flex;
+    align-items:center;
+    gap:20px;
 }
-.manage-btn {
-  border: none;
-  background: #111;
-  color: white;
-  border-radius: 14px;
-  padding: 14px 20px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 0.2s;
+
+.manage-btn{
+    background:#111;
+    color:white;
+    border:none;
+    border-radius:12px;
+    padding:13px 18px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
 }
-.manage-btn:hover { background: #1c1c24; }
-.right-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+
+.manage-btn:hover{
+    background:#1d1d1d;
 }
-.profile-pill {
-  background: #0f0f15;
-  border: 1px solid rgba(255,255,255,.05);
-  border-radius: 999px;
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+
+.logo{
+    font-size:22px;
+    font-weight:800;
 }
-.profile-pill img {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
+
+.right-top{
+    display:flex;
+    align-items:center;
+    gap:12px;
 }
-.profile-name { font-weight: 700; }
-.robux-pill {
-  background: #0f0f15;
-  border: 1px solid rgba(255,255,255,.05);
-  border-radius: 999px;
-  padding: 12px 18px;
-  font-size: 24px;
-  font-weight: 900;
+
+.profile-pill{
+    background:#0d0d14;
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:999px;
+    padding:8px 16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
 }
-.send-btn {
-  border: none;
-  background: #111;
-  color: white;
-  padding: 12px 22px;
-  border-radius: 999px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 0.2s;
+
+.profile-pill img{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    object-fit:cover;
 }
-.send-btn:hover { background: #1f1f2a; }
+
+.profile-name{
+    font-weight:600;
+}
+
+.robux-pill{
+    background:#0d0d14;
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:999px;
+    padding:12px 18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:800;
+    font-size:28px;
+}
+
+.send-btn{
+    background:#111;
+    border:none;
+    color:white;
+    border-radius:999px;
+    padding:12px 24px;
+    font-weight:700;
+    cursor:pointer;
+}
 
 /* HERO */
-.hero {
-  max-width: 1200px;
-  margin: auto;
-  padding: 80px 30px;
+
+.hero{
+    max-width:1200px;
+    margin:auto;
+    padding:70px 30px;
 }
-.hero-wrap {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 50px;
+
+.hero-wrap{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:40px;
 }
-.big-text {
-  font-size: 96px;
-  font-weight: 900;
-  line-height: .92;
+
+.big-text{
+    font-size:92px;
+    font-weight:900;
+    line-height:0.95;
+    max-width:600px;
 }
-.glow-btn {
-  border: none;
-  background: linear-gradient(90deg, #5d77ff, #785cff);
-  color: white;
-  padding: 26px 70px;
-  border-radius: 24px;
-  font-size: 30px;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 0 50px rgba(92,113,255,.5);
+
+.glow-btn{
+    border:none;
+    background:linear-gradient(90deg,#5a76ff,#855bff);
+    color:white;
+    padding:26px 70px;
+    border-radius:20px;
+    font-size:30px;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow:0 0 40px rgba(96,113,255,.5);
 }
-.card-area { margin-top: 70px; }
-.card-label {
-  margin-bottom: 18px;
-  color: #b9b9b9;
-  font-weight: 700;
+
+/* CARD */
+
+.card-area{
+    margin-top:70px;
 }
-.main-card {
-  max-width: 920px;
-  border-radius: 28px;
-  overflow: hidden;
-  background: #090909;
-  border: 1px solid rgba(255,255,255,.05);
+
+.card-label{
+    margin-bottom:16px;
+    color:#bbb;
+    font-weight:600;
 }
-.banner {
-  height: 240px;
-  background: linear-gradient(to bottom, transparent, rgba(0,0,0,.88)), url('https://images.unsplash.com/photo-1474302770737-173ee21bab63?q=80&w=1400&auto=format&fit=crop');
-  background-size: cover;
-  background-position: center;
-  position: relative;
+
+.main-card{
+    width:100%;
+    max-width:900px;
+    background:#090909;
+    border-radius:28px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.05);
 }
-.game-info {
-  position: absolute;
-  bottom: 22px;
-  left: 22px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
+
+.banner{
+    height:230px;
+    background:
+    linear-gradient(to bottom,transparent,rgba(0,0,0,.9)),
+    url('https://images.unsplash.com/photo-1474302770737-173ee21bab63?q=80&w=1400&auto=format&fit=crop');
+    background-size:cover;
+    background-position:center;
+    position:relative;
 }
-.game-info img {
-  width: 74px;
-  height: 74px;
-  border-radius: 50%;
+
+.game-info{
+    position:absolute;
+    bottom:22px;
+    left:22px;
+    display:flex;
+    align-items:center;
+    gap:16px;
 }
-.game-title { font-size: 30px; font-weight: 900; }
-.game-sub { color: #aaa; margin-top: 5px; }
-.pack {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 26px 30px;
-  border-top: 1px solid rgba(255,255,255,.06);
+
+.game-info img{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    border:3px solid rgba(255,255,255,.15);
 }
-.pack-left { display: flex; align-items: center; gap: 16px; }
-.robux-amount { font-size: 34px; font-weight: 900; }
-.old {
-  text-decoration: line-through;
-  color: #777;
-  font-size: 22px;
+
+.game-title{
+    font-size:30px;
+    font-weight:800;
 }
-.more {
-  background: #1a1a1a;
-  padding: 8px 14px;
-  border-radius: 12px;
-  font-size: 15px;
-  color: #bbb;
-  font-weight: 700;
+
+.game-sub{
+    margin-top:6px;
+    color:#aaa;
+    font-weight:600;
 }
-.price {
-  background: #1d1d1d;
-  padding: 16px 24px;
-  border-radius: 14px;
-  font-size: 24px;
-  font-weight: 900;
+
+.pack{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:26px 32px;
+    border-top:1px solid rgba(255,255,255,.06);
+}
+
+.pack-left{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.robux-amount{
+    font-size:34px;
+    font-weight:900;
+}
+
+.old{
+    text-decoration:line-through;
+    color:#777;
+    font-size:22px;
+}
+
+.more{
+    background:#191919;
+    padding:8px 14px;
+    border-radius:10px;
+    color:#bbb;
+    font-size:15px;
+    font-weight:700;
+}
+
+.price{
+    background:#222;
+    padding:18px 26px;
+    border-radius:14px;
+    font-size:24px;
+    font-weight:800;
 }
 
 /* SIDEBAR */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: -480px;
-  width: 480px;
-  height: 100vh;
-  background: #090909;
-  border-right: 1px solid rgba(255,255,255,.06);
-  z-index: 200;
-  transition: .35s;
-  overflow-y: auto;
-}
-.sidebar.open { left: 0; }
-.side-content { padding: 28px; }
-.side-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-.side-title { font-size: 42px; font-weight: 900; }
-.close {
-  font-size: 34px;
-  cursor: pointer;
-  color: #999;
-}
-.panel {
-  background: #111;
-  border-radius: 24px;
-  padding: 24px;
-  margin-bottom: 24px;
-  border: 1px solid rgba(255,255,255,.05);
-}
-.panel h2 { font-size: 34px; margin-bottom: 20px; }
-.label {
-  display: block;
-  color: #999;
-  margin-top: 16px;
-  margin-bottom: 10px;
-  font-weight: 700;
-}
-.input {
-  width: 100%;
-  background: black;
-  border: none;
-  outline: none;
-  color: white;
-  padding: 20px;
-  border-radius: 16px;
-  font-size: 22px;
-}
-.blue-btn {
-  width: 100%;
-  border: none;
-  background: #5670ff;
-  color: white;
-  padding: 20px;
-  border-radius: 18px;
-  margin-top: 24px;
-  font-size: 24px;
-  font-weight: 900;
-  cursor: pointer;
-}
-.friend-wrap {
-  display: flex;
-  gap: 12px;
-}
-.add-btn {
-  width: 120px;
-  border: none;
-  background: #5670ff;
-  color: white;
-  border-radius: 16px;
-  font-size: 22px;
-  font-weight: 900;
-  cursor: pointer;
-}
-.friend-list { margin-top: 20px; }
-.friend {
-  background: #171717;
-  padding: 18px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-.remove {
-  border: none;
-  background: #2d0b0b;
-  color: #ff6a6a;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-weight: 800;
-  cursor: pointer;
-}
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.6);
-  z-index: 100;
-  opacity: 0;
-  pointer-events: none;
-  transition: .25s;
-}
-.overlay.show {
-  opacity: 1;
-  pointer-events: auto;
+
+.sidebar{
+    position:fixed;
+    top:0;
+    left:-470px;
+    width:470px;
+    height:100vh;
+    background:#090909;
+    border-right:1px solid rgba(255,255,255,.08);
+    transition:.35s;
+    z-index:100;
+    overflow-y:auto;
 }
 
-/* STEP 1: FRIEND PICKER MODAL */
-.send-picker-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 520px;
-  max-width: 92%;
-  background: #0b0b12;
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 26px;
-  overflow: hidden;
-  z-index: 999;
-  display: none;
-  box-shadow: 0 40px 100px rgba(0,0,0,.7);
-}
-.send-top {
-  height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 22px;
-  border-bottom: 1px solid rgba(255,255,255,.05);
-  background: rgba(0,0,0,.3);
-}
-.send-title {
-  font-size: 20px;
-  font-weight: 800;
-}
-.send-top-right {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
-.send-balance {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 16px;
-  font-weight: 800;
-  background: #101015;
-  padding: 6px 12px;
-  border-radius: 40px;
-}
-.send-close {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #15151d;
-  cursor: pointer;
-  font-size: 20px;
-  font-weight: 700;
-}
-.picker-content { padding: 24px 20px 28px; }
-.picker-search {
-  width: 100%;
-  height: 58px;
-  background: #0c0c14;
-  border: 1px solid rgba(255,255,255,.05);
-  outline: none;
-  border-radius: 20px;
-  padding: 0 20px;
-  color: white;
-  font-size: 18px;
-}
-.picker-search:focus { border-color: #5670ff; }
-.search-results {
-  margin-top: 12px;
-  max-height: 280px;
-  overflow-y: auto;
-  display: none;
-  background: #08080c;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,.04);
-}
-.friends-title {
-  margin-top: 28px;
-  margin-bottom: 16px;
-  font-size: 22px;
-  font-weight: 800;
-}
-.picker-friends {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-height: 320px;
-  overflow-y: auto;
-}
-.user-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
-  border-radius: 20px;
-  background: #111118;
-  cursor: pointer;
-  transition: .18s;
-}
-.user-card:hover {
-  background: #1a1a28;
-  transform: translateX(2px);
-}
-.user-card img {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-.user-info {
-  display: flex;
-  flex-direction: column;
-}
-.user-display { font-size: 17px; font-weight: 800; }
-.user-handle {
-  color: #8b8b98;
-  font-size: 13px;
-  margin-top: 4px;
-  font-weight: 600;
-}
-.empty-friends {
-  text-align: center;
-  padding: 32px;
-  color: #6b6b7a;
-  background: #0f0f16;
-  border-radius: 20px;
-  font-size: 14px;
+.sidebar.open{
+    left:0;
 }
 
-/* STEP 2: BLACK SEND SCREEN */
-.send-black-screen {
-  position: fixed;
-  inset: 0;
-  background: #000000;
-  z-index: 10000;
-  display: none;
-  flex-direction: column;
-  padding: 20px 18px;
-  overflow-y: auto;
-  align-items: center;
-  justify-content: center;
+.side-content{
+    padding:28px;
 }
-.send-black-screen.show { display: flex; }
-.send-black-screen .black-container {
-  width: 100%;
-  max-width: 520px;
+
+.side-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:24px;
 }
-.black-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 40px;
-  padding-top: 12px;
+
+.side-title{
+    font-size:42px;
+    font-weight:800;
 }
-.black-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+
+.close{
+    font-size:34px;
+    cursor:pointer;
+    color:#888;
 }
-.black-title {
-  color: white;
-  font-size: 26px;
-  font-weight: 800;
+
+.panel{
+    background:#111;
+    border-radius:24px;
+    padding:26px;
+    margin-bottom:26px;
+    border:1px solid rgba(255,255,255,.05);
 }
-.black-right {
-  display: flex;
-  align-items: center;
-  gap: 18px;
+
+.panel h2{
+    font-size:34px;
+    margin-bottom:22px;
 }
-.black-balance {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #1a1a24;
-  padding: 8px 16px;
-  border-radius: 60px;
+
+.label{
+    display:block;
+    color:#999;
+    margin-bottom:10px;
+    font-weight:600;
+    margin-top:16px;
 }
-.black-balance span {
-  color: white;
-  font-weight: 800;
-  font-size: 20px;
+
+.input{
+    width:100%;
+    background:black;
+    border:none;
+    outline:none;
+    color:white;
+    font-size:24px;
+    padding:20px;
+    border-radius:16px;
 }
-.black-close {
-  background: none;
-  border: none;
-  color: #9ca3af;
-  font-size: 34px;
-  cursor: pointer;
+
+.blue-btn{
+    width:100%;
+    border:none;
+    margin-top:24px;
+    background:#5670ff;
+    color:white;
+    font-size:24px;
+    font-weight:800;
+    padding:20px;
+    border-radius:18px;
+    cursor:pointer;
 }
-.black-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+
+.check-wrap{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom:28px;
+    font-size:28px;
+    font-weight:700;
 }
-.selected-avatar-large {
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid #5670ff;
-  margin-bottom: 16px;
+
+.checkbox{
+    width:34px;
+    height:34px;
 }
-.selected-name-large {
-  color: white;
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 30px;
+
+.friend-wrap{
+    display:flex;
+    gap:12px;
 }
-.amount-middle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  background: #14141c;
-  padding: 16px 28px;
-  border-radius: 80px;
-  margin-bottom: 30px;
+
+.add-btn{
+    width:120px;
+    border:none;
+    background:#5670ff;
+    color:white;
+    border-radius:16px;
+    font-size:24px;
+    font-weight:800;
 }
-.amount-middle img { width: 42px; height: 42px; }
-.amount-display {
-  color: #ffd966;
-  font-size: 48px;
-  font-weight: 900;
+
+.friend-buttons{
+    display:flex;
+    gap:12px;
+    margin-top:18px;
 }
-.amount-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  width: 100%;
-  margin-bottom: 20px;
+
+.dark-btn{
+    flex:1;
+    border:none;
+    background:#181818;
+    color:white;
+    padding:18px;
+    border-radius:16px;
+    font-size:20px;
+    font-weight:700;
 }
-.amount-option {
-  height: 65px;
-  border-radius: 16px;
-  border: none;
-  background: #1f1f2a;
-  color: white;
-  font-size: 22px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 0.1s;
+
+.friend-list{
+    margin-top:20px;
 }
-.amount-option.active {
-  background: #5670ff;
-  box-shadow: 0 0 15px rgba(86,112,255,.5);
+
+.friend{
+    background:#171717;
+    padding:18px;
+    border-radius:16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
+    font-size:24px;
+    font-weight:700;
 }
-.custom-input-black {
-  width: 100%;
-  height: 60px;
-  border-radius: 16px;
-  border: 2px solid #5670ff;
-  background: #14141c;
-  color: white;
-  font-size: 24px;
-  font-weight: 800;
-  text-align: center;
-  padding: 0 20px;
-  outline: none;
-  margin-bottom: 20px;
+
+.remove{
+    background:#290909;
+    color:#ff5757;
+    border:none;
+    padding:10px 14px;
+    border-radius:10px;
+    font-weight:800;
 }
-.next-btn-final {
-  width: 100%;
-  height: 68px;
-  border-radius: 18px;
-  border: none;
-  background: #5670ff;
-  color: white;
-  font-size: 26px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 0.1s;
+
+/* OVERLAY */
+
+.overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    opacity:0;
+    pointer-events:none;
+    transition:.3s;
+    z-index:50;
 }
-.next-btn-final:active { transform: scale(0.97); }
-.bottom-note {
-  color: #7c7c88;
-  margin-top: 20px;
-  font-size: 13px;
+
+.overlay.show{
+    opacity:1;
+    pointer-events:auto;
 }
-.success-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 20px;
+
+/* MOBILE */
+
+@media(max-width:900px){
+
+.big-text{
+    font-size:62px;
 }
-.success-check {
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
-  background: #10b981;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 60px;
-  margin-bottom: 30px;
-  animation: pop 0.3s ease;
+
+.hero-wrap{
+    flex-direction:column;
+    align-items:flex-start;
 }
-@keyframes pop {
-  0% { transform: scale(0.5); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+
+.glow-btn{
+    width:100%;
 }
-.success-title { font-size: 42px; font-weight: 900; margin-bottom: 16px; }
-.success-amount { font-size: 28px; color: #ffd966; font-weight: 800; margin: 12px 0; }
-.home-btn {
-  margin-top: 40px;
-  background: #5670ff;
-  border: none;
-  padding: 16px 40px;
-  border-radius: 60px;
-  color: white;
-  font-size: 22px;
-  font-weight: 800;
-  cursor: pointer;
+
+.sidebar{
+    width:100%;
+    left:-100%;
+}
+
+.profile-name{
+    display:none;
+}
+
+.robux-pill{
+    font-size:18px;
+}
+
 }
 </style>
 </head>
+
 <body>
 
 <div class="overlay" id="overlay"></div>
 
 <!-- SIDEBAR -->
+
 <div class="sidebar" id="sidebar">
-  <div class="side-content">
-    <div class="side-header">
-      <div class="side-title">Manage Site</div>
-      <div class="close" onclick="closeSidebar()">×</div>
-    </div>
-    <div class="panel">
-      <h2>My Profile</h2>
-      <label class="label">Username</label>
-      <input class="input" id="usernameInput" value="stickmasterluke">
-      <label class="label">Balance (Robux)</label>
-      <input class="input" id="balanceInput" value="1859403">
-      <button class="blue-btn" onclick="updateProfile()">Update Profile</button>
-    </div>
-    <div class="panel">
-      <h2>Saved Friends</h2>
-      <div class="friend-wrap">
-        <input class="input" id="friendInput" placeholder="Username">
-        <button class="add-btn" onclick="addFriend()">Add</button>
-      </div>
-      <div class="friend-list" id="friendList"></div>
-    </div>
-  </div>
+
+<div class="side-content">
+
+<div class="side-header">
+<div class="side-title">Manage Site</div>
+<div class="close" onclick="closeSidebar()">×</div>
 </div>
 
-<!-- TOPBAR -->
+<div class="panel">
+
+<h2>My Profile Settings</h2>
+
+<label class="label">My Username</label>
+<input class="input" id="usernameInput" value="stickmasterluke">
+
+<label class="label">My Balance</label>
+<input class="input" id="balanceInput" value="1859403">
+
+<button class="blue-btn" onclick="updateProfile()">Update Profile</button>
+
+</div>
+
+<div class="check-wrap">
+<input type="checkbox" class="checkbox" id="hideCheck">
+<span id="hideText">Hide profile in header</span>
+</div>
+
+<div class="panel">
+
+<h2>Bonus banner</h2>
+
+<label class="label">Background Image URL (gradient overlay unchanged)</label>
+<input class="input" id="bgInput">
+
+<label class="label">Banner icon URL (square-ish image)</label>
+<input class="input" id="iconInput">
+
+<button class="blue-btn" onclick="saveBanner()">Save banner & icon</button>
+
+</div>
+
+<div class="panel">
+
+<h2>Saved friends (search username)</h2>
+
+<div class="friend-wrap">
+<input class="input" id="friendInput" placeholder="Exact username, Enter or Add...">
+<button class="add-btn" onclick="addFriend()">Add</button>
+</div>
+
+<div class="friend-buttons">
+<button class="dark-btn" onclick="removeAll()">Remove all saved friends</button>
+<button class="dark-btn" onclick="resetFriends()">Reset all friends</button>
+</div>
+
+<div class="friend-list" id="friendList"></div>
+
+</div>
+
+</div>
+</div>
+
+<!-- TOP -->
+
 <div class="topbar">
-  <div class="left-top">
-    <button class="manage-btn" onclick="openSidebar()">MANAGE SITE</button>
-    <div class="logo">RobloxPlus</div>
-  </div>
-  <div class="right-top">
-    <div class="profile-pill">
-      <img id="profileIcon" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter">
-      <div class="profile-name" id="profileName">stickmasterluke</div>
-    </div>
-    <div class="robux-pill">⏺ <span id="balanceText">1859403</span></div>
-    <button class="send-btn" id="mainSendBtn">Send</button>
-  </div>
+
+<div class="left-top">
+<button class="manage-btn" onclick="openSidebar()">MANAGE SITE</button>
+<div class="logo">RobloxPlus</div>
+</div>
+
+<div class="right-top">
+
+<div class="profile-pill" id="profileHeader">
+<img id="profileIcon" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter">
+<div class="profile-name" id="profileName">Stickmasterluke</div>
+</div>
+
+<div class="robux-pill">
+⏺ <span id="balanceText">1859403</span>
+</div>
+
+<button class="send-btn">Send</button>
+
+</div>
+
 </div>
 
 <!-- HERO -->
+
 <div class="hero">
-  <div class="hero-wrap">
-    <div class="big-text">Enjoy up to<br>25%<br>more Robux</div>
-    <button class="glow-btn" id="heroSendBtn">↑ Send Robux</button>
-  </div>
-  <div class="card-area">
-    <div class="card-label">Bonus item we picked for you</div>
-    <div class="main-card">
-      <div class="banner">
-        <div class="game-info">
-          <img id="gameIcon" src="https://tr.rbxcdn.com/180DAY-e14c2f238f7b5cbfe8a5f4dbd3d70e6b/150/150/Image/Png/noFilter">
-          <div><div class="game-title">[EOD] War Tycoon</div><div class="game-sub">2X CASH</div></div>
-        </div>
-      </div>
-      <div class="pack"><div class="pack-left"><div class="robux-amount">24.000</div><div class="old">22.500</div><div class="more">+1500 more</div></div><div class="price">$199.99</div></div>
-      <div class="pack"><div class="pack-left"><div class="robux-amount">11.000</div><div class="old">10.000</div><div class="more">+1000 more</div></div><div class="price">$99.99</div></div>
-      <div class="pack"><div class="pack-left"><div class="robux-amount">5.250</div><div class="old">4.500</div><div class="more">+750 more</div></div><div class="price">$49.99</div></div>
-    </div>
-  </div>
+
+<div class="hero-wrap">
+
+<div class="big-text">
+Enjoy up to<br>
+25%<br>
+more Robux
 </div>
 
-<!-- STEP 1: PICKER MODAL -->
-<div class="send-picker-modal" id="sendPickerModal">
-  <div class="send-top">
-    <div class="send-title">Send Robux</div>
-    <div class="send-top-right">
-      <div class="send-balance">⏺ <span id="pickerBalance">1859403</span></div>
-      <div class="send-close" onclick="closeAllSendUI()">×</div>
-    </div>
-  </div>
-  <div class="picker-content">
-    <input type="text" id="userSearch" class="picker-search" placeholder="Search by username" autocomplete="off">
-    <div class="search-results" id="searchResultsList"></div>
-    <div class="friends-title">My Friends (<span id="friendCount">0</span>)</div>
-    <div class="picker-friends" id="pickerFriendsList"></div>
-  </div>
+<button class="glow-btn">↑ Send Robux</button>
+
 </div>
 
-<!-- STEP 2: BLACK SEND SCREEN -->
-<div class="send-black-screen" id="blackSendScreen">
-  <div class="black-container">
-    <div class="black-header">
-      <div class="black-title-wrap">
-        <span class="black-title">Send Robux</span>
-      </div>
-      <div class="black-right">
-        <div class="black-balance"><span id="blackBalanceAmount">0</span></div>
-        <button class="black-close" id="closeBlackScreenBtn">✕</button>
-      </div>
-    </div>
-    <div class="black-main" id="blackMainContent"></div>
-  </div>
+<div class="card-area">
+
+<div class="card-label">
+Bonus item we picked for you
+</div>
+
+<div class="main-card">
+
+<div class="banner" id="banner">
+
+<div class="game-info">
+<img id="gameIcon" src="https://tr.rbxcdn.com/180DAY-e14c2f238f7b5cbfe8a5f4dbd3d70e6b/150/150/Image/Png/noFilter">
+
+<div>
+<div class="game-title">[EOD] War Tycoon</div>
+<div class="game-sub">2X CASH</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="pack">
+<div class="pack-left">
+<div class="robux-amount">24.000</div>
+<div class="old">22.500</div>
+<div class="more">+ 1500 more</div>
+</div>
+
+<div class="price">$199,99</div>
+</div>
+
+<div class="pack">
+<div class="pack-left">
+<div class="robux-amount">11.000</div>
+<div class="old">10.000</div>
+<div class="more">+ 1000 more</div>
+</div>
+
+<div class="price">$99,99</div>
+</div>
+
+<div class="pack">
+<div class="pack-left">
+<div class="robux-amount">5.250</div>
+<div class="old">4.500</div>
+<div class="more">+ 750 more</div>
+</div>
+
+<div class="price">$49,99</div>
+</div>
+
+</div>
+
+</div>
+
 </div>
 
 <script>
-// ---------- CONFIG ----------
-const PROXY = "https://corsproxy.io/?";
-let friends = JSON.parse(localStorage.getItem("friendsList") || '["builderman","roblox"]');
-let currentSelectedUser = null;
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
 
-// Helper functions
-async function fetchRobloxAPI(url) {
-  try {
-    const res = await fetch(PROXY + encodeURIComponent(url));
-    return await res.json();
-  } catch(e) { return {}; }
+function openSidebar(){
+    sidebar.classList.add("open");
+    overlay.classList.add("show");
 }
-async function fetchUserByUsername(username) {
-  try {
-    const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=20`);
-    return data.data || [];
-  } catch(e) { return []; }
-}
-async function fetchAvatarUrl(userId) {
-  try {
-    const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
-    return data.data?.[0]?.imageUrl || "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-Placeholder.png";
-  } catch(e) { return "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-Placeholder.png"; }
-}
-function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
 
-// Balance management
-let currentBalance = parseInt(localStorage.getItem("mainBalance") || "1859403");
-function updateBalanceUI() {
-  document.getElementById("balanceText").innerText = currentBalance;
-  document.getElementById("pickerBalance").innerText = currentBalance;
-  document.getElementById("balanceInput").value = currentBalance;
-  if(document.getElementById("blackBalanceAmount")) document.getElementById("blackBalanceAmount").innerText = currentBalance;
-  localStorage.setItem("mainBalance", currentBalance);
+function closeSidebar(){
+    sidebar.classList.remove("open");
+    overlay.classList.remove("show");
 }
-function setBalance(newVal) { currentBalance = Math.max(0, newVal); updateBalanceUI(); }
 
-// Profile update
-async function updateProfile() {
-  const username = document.getElementById("usernameInput").value.trim();
-  const balance = parseInt(document.getElementById("balanceInput").value) || 0;
-  setBalance(balance);
-  if(username) {
+overlay.onclick = closeSidebar;
+
+/* PROFILE */
+
+function updateProfile(){
+
+    const username = document.getElementById("usernameInput").value;
+    const balance = document.getElementById("balanceInput").value;
+
     document.getElementById("profileName").innerText = username;
-    localStorage.setItem("mainUsername", username);
-    const users = await fetchUserByUsername(username);
-    if(users.length) {
-      const avatar = await fetchAvatarUrl(users[0].id);
-      if(avatar) {
-        document.getElementById("profileIcon").src = avatar;
-        document.getElementById("gameIcon").src = avatar;
-        localStorage.setItem("mainAvatar", avatar);
-      }
+    document.getElementById("balanceText").innerText = balance;
+
+}
+
+/* HIDE PROFILE */
+
+const hideCheck = document.getElementById("hideCheck");
+
+hideCheck.addEventListener("change", ()=>{
+
+    const profile = document.getElementById("profileHeader");
+    const text = document.getElementById("hideText");
+
+    if(hideCheck.checked){
+        profile.style.display = "none";
+        text.innerText = "Profile hidden";
+    }else{
+        profile.style.display = "flex";
+        text.innerText = "Hide profile in header";
     }
-  }
-}
 
-// Friends management
-function saveFriends() { localStorage.setItem("friendsList", JSON.stringify(friends)); }
-function renderFriendsList() {
-  const container = document.getElementById("friendList");
-  if(!container) return;
-  container.innerHTML = "";
-  friends.forEach((f, idx) => {
-    container.innerHTML += `<div class="friend"><span>${escapeHtml(f)}</span><button class="remove" onclick="removeFriend(${idx})">Remove</button></div>`;
-  });
-  saveFriends();
-}
-function addFriend() {
-  const input = document.getElementById("friendInput");
-  const val = input.value.trim();
-  if(val && !friends.includes(val)) { friends.push(val); renderFriendsList(); renderPickerFriends(); input.value = ""; }
-}
-function removeFriend(idx) { friends.splice(idx,1); renderFriendsList(); renderPickerFriends(); }
-
-// Render friends inside picker modal
-async function renderPickerFriends() {
-  const container = document.getElementById("pickerFriendsList");
-  if(!container) return;
-  document.getElementById("friendCount").innerText = friends.length;
-  if(friends.length === 0) {
-    container.innerHTML = `<div class="empty-friends">✨ No friends added yet.<br>Use "Manage Site" to add friends.</div>`;
-    return;
-  }
-  container.innerHTML = "";
-  for(const username of friends) {
-    const users = await fetchUserByUsername(username);
-    if(!users.length) continue;
-    const user = users[0];
-    const avatar = await fetchAvatarUrl(user.id);
-    const card = document.createElement("div");
-    card.className = "user-card";
-    card.innerHTML = `<img src="${avatar}"><div class="user-info"><div class="user-display">${escapeHtml(user.displayName || user.name)}</div><div class="user-handle">@${escapeHtml(user.name)}</div></div>`;
-    card.onclick = () => selectRecipient(user, avatar);
-    container.appendChild(card);
-  }
-}
-
-// Search functionality
-let searchTimeout;
-const searchInput = document.getElementById("userSearch");
-const searchResultsDiv = document.getElementById("searchResultsList");
-if(searchInput) {
-  searchInput.addEventListener("input", () => {
-    clearTimeout(searchTimeout);
-    const val = searchInput.value.trim();
-    if(!val) { searchResultsDiv.style.display = "none"; searchResultsDiv.innerHTML = ""; return; }
-    searchTimeout = setTimeout(async () => {
-      const users = await fetchUserByUsername(val);
-      searchResultsDiv.style.display = "block";
-      searchResultsDiv.innerHTML = "";
-      if(users.length === 0) { searchResultsDiv.innerHTML = `<div class="empty-friends">No users found</div>`; return; }
-      for(const user of users.slice(0,15)) {
-        const avatar = await fetchAvatarUrl(user.id);
-        const card = document.createElement("div");
-        card.className = "user-card";
-        card.innerHTML = `<img src="${avatar}"><div class="user-info"><div class="user-display">${escapeHtml(user.displayName || user.name)}</div><div class="user-handle">@${escapeHtml(user.name)}</div></div>`;
-        card.onclick = () => selectRecipient(user, avatar);
-        searchResultsDiv.appendChild(card);
-      }
-    }, 300);
-  });
-}
-
-// Select recipient -> open black send screen
-async function selectRecipient(user, avatarUrl) {
-  currentSelectedUser = user;
-  const finalAvatar = avatarUrl || await fetchAvatarUrl(user.id);
-  document.getElementById("sendPickerModal").style.display = "none";
-  document.getElementById("blackBalanceAmount").innerText = currentBalance;
-  buildBlackSendScreen(user, finalAvatar);
-  document.getElementById("blackSendScreen").classList.add("show");
-  document.getElementById("overlay").classList.add("show");
-}
-
-function buildBlackSendScreen(user, avatarUrl) {
-  const container = document.getElementById("blackMainContent");
-  let selectedAmount = 500;
-  container.innerHTML = `
-    <img id="selectedAvatarLarge" class="selected-avatar-large" src="${avatarUrl}">
-    <div id="selectedNameLarge" class="selected-name-large">${escapeHtml(user.displayName || user.name)}</div>
-    <div class="amount-middle"><span>⏺</span><span id="amountDisplayLarge" class="amount-display">500</span></div>
-    <div class="amount-grid">
-      <button data-amt="25" class="amount-option">25</button>
-      <button data-amt="50" class="amount-option">50</button>
-      <button data-amt="100" class="amount-option">100</button>
-      <button data-amt="200" class="amount-option">200</button>
-      <button data-amt="500" class="amount-option active">500</button>
-      <button data-amt="750" class="amount-option">750</button>
-      <button data-amt="1000" class="amount-option">1000</button>
-      <button data-amt="2000" class="amount-option">2000</button>
-    </div>
-    <input type="number" id="customAmountBlack" class="custom-input-black" placeholder="Custom amount">
-    <button id="finalSendBtn" class="next-btn-final">Continue</button>
-    <div class="bottom-note">You need an age check or parental consent to send Robux. Once you send, you cannot cancel.</div>
-  `;
-  
-  const amountDisplay = document.getElementById("amountDisplayLarge");
-  const customInput = document.getElementById("customAmountBlack");
-  const amountBtns = document.querySelectorAll(".amount-option");
-  
-  function updateAmountDisplay(val) {
-    selectedAmount = val;
-    amountDisplay.innerText = val;
-    amountBtns.forEach(btn => btn.classList.remove("active"));
-    if(customInput) customInput.value = "";
-  }
-  
-  amountBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const amt = parseInt(btn.getAttribute("data-amt"));
-      updateAmountDisplay(amt);
-      btn.classList.add("active");
-    });
-  });
-  
-  if(customInput) {
-    customInput.addEventListener("input", (e) => {
-      let val = parseInt(e.target.value);
-      if(!isNaN(val) && val > 0) {
-        selectedAmount = val;
-        amountDisplay.innerText = val;
-        amountBtns.forEach(btn => btn.classList.remove("active"));
-      }
-    });
-  }
-  
-  document.getElementById("finalSendBtn").addEventListener("click", () => {
-    if(selectedAmount <= 0) { alert("Please select an amount"); return; }
-    if(currentBalance < selectedAmount) { alert(`Insufficient balance! Need ${selectedAmount}, you have ${currentBalance}`); return; }
-    // Process transaction
-    const newBalance = currentBalance - selectedAmount;
-    setBalance(newBalance);
-    // Show success screen
-    container.innerHTML = `
-      <div class="success-screen">
-        <div class="success-check">✓</div>
-        <div class="success-title">Sent!</div>
-        <div class="success-amount">${selectedAmount.toLocaleString()} Robux</div>
-        <div style="font-size: 24px; color: #ccc; margin: 10px 0;">to ${escapeHtml(user.displayName || user.name)}</div>
-        <div style="background: #1a1a24; padding: 12px 24px; border-radius: 60px; margin-top: 20px;">Balance: ${newBalance.toLocaleString()}</div>
-        <button id="successHomeBtn" class="home-btn">🏠 Back to Home</button>
-      </div>
-    `;
-    document.getElementById("successHomeBtn").addEventListener("click", () => {
-      document.getElementById("blackSendScreen").classList.remove("show");
-      document.getElementById("overlay").classList.remove("show");
-      document.querySelector(".send-picker-modal").style.display = "none";
-    });
-  });
-}
-
-// Modal controls
-function openSendPicker() {
-  document.getElementById("pickerBalance").innerText = currentBalance;
-  renderPickerFriends();
-  document.getElementById("sendPickerModal").style.display = "block";
-  document.getElementById("overlay").classList.add("show");
-  if(searchResultsDiv) { searchResultsDiv.style.display = "none"; searchResultsDiv.innerHTML = ""; }
-  if(searchInput) searchInput.value = "";
-}
-function closeAllSendUI() {
-  document.getElementById("sendPickerModal").style.display = "none";
-  document.getElementById("blackSendScreen").classList.remove("show");
-  document.getElementById("overlay").classList.remove("show");
-}
-function openSidebar() { document.getElementById("sidebar").classList.add("open"); document.getElementById("overlay").classList.add("show"); }
-function closeSidebar() { document.getElementById("sidebar").classList.remove("open"); document.getElementById("overlay").classList.remove("show"); }
-document.getElementById("overlay").onclick = () => { closeSidebar(); closeAllSendUI(); };
-document.getElementById("closeBlackScreenBtn")?.addEventListener("click", closeAllSendUI);
-
-// Attach send buttons
-document.getElementById("mainSendBtn")?.addEventListener("click", openSendPicker);
-document.getElementById("heroSendBtn")?.addEventListener("click", openSendPicker);
-
-// Load saved data
-window.addEventListener("DOMContentLoaded", async () => {
-  const savedName = localStorage.getItem("mainUsername");
-  const savedBal = localStorage.getItem("mainBalance");
-  const savedAvatar = localStorage.getItem("mainAvatar");
-  if(savedName) document.getElementById("profileName").innerText = savedName;
-  if(savedBal) currentBalance = parseInt(savedBal);
-  if(savedAvatar) { document.getElementById("profileIcon").src = savedAvatar; document.getElementById("gameIcon").src = savedAvatar; }
-  document.getElementById("usernameInput").value = savedName || "stickmasterluke";
-  updateBalanceUI();
-  renderFriendsList();
-  await renderPickerFriends();
 });
+
+/* BANNER */
+
+function saveBanner(){
+
+    const bg = document.getElementById("bgInput").value;
+    const icon = document.getElementById("iconInput").value;
+
+    if(bg){
+        document.getElementById("banner").style.background =
+        `linear-gradient(to bottom,transparent,rgba(0,0,0,.9)),url('${bg}') center/cover`;
+    }
+
+    if(icon){
+        document.getElementById("gameIcon").src = icon;
+        document.getElementById("profileIcon").src = icon;
+    }
+
+}
+
+/* FRIENDS */
+
+let friends = ["Roblox","builderman"];
+
+function renderFriends(){
+
+    const list = document.getElementById("friendList");
+
+    list.innerHTML = "";
+
+    friends.forEach((friend,index)=>{
+
+        list.innerHTML += `
+        <div class="friend">
+            <span>${friend}</span>
+            <button class="remove" onclick="removeFriend(${index})">Remove</button>
+        </div>
+        `;
+
+    });
+
+}
+
+renderFriends();
+
+function addFriend(){
+
+    const input = document.getElementById("friendInput");
+
+    if(input.value.trim() !== ""){
+        friends.push(input.value.trim());
+        input.value = "";
+        renderFriends();
+    }
+
+}
+
+function removeFriend(index){
+    friends.splice(index,1);
+    renderFriends();
+}
+
+function removeAll(){
+    friends = [];
+    renderFriends();
+}
+
+function resetFriends(){
+    friends = ["Roblox","builderman"];
+    renderFriends();
+}
 </script>
+
 </body>
 </html>
