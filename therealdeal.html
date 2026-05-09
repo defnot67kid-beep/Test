@@ -690,7 +690,9 @@ Bonus item we picked for you
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("overlay");
 
-// CORS Proxy for Roblox API
+// ============================================
+// ROBLOX API FUNCTIONS (ADDED FROM OTHER SCRIPT)
+// ============================================
 const PROXY = "https://corsproxy.io/?";
 
 async function fetchRobloxAPI(url) {
@@ -700,53 +702,50 @@ async function fetchRobloxAPI(url) {
     return await response.json();
 }
 
-// Get user ID from username
-async function getUserIdFromUsername(username) {
+// Search for user by username (returns array of users)
+async function fetchUserByUsername(username) {
     try {
-        const url = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=1`;
+        const url = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`;
         const data = await fetchRobloxAPI(url);
         if (data.data && data.data.length > 0) {
-            return data.data[0].id;
+            return data.data;
         }
-        return null;
-    } catch (error) {
-        console.error("Error fetching user ID:", error);
-        return null;
+        return [];
+    } catch(e) {
+        console.error("Error fetching user:", e);
+        return [];
     }
 }
 
-// Get avatar thumbnail using Roblox Thumbnails API (the camera endpoint)
-async function getAvatarThumbnail(userId) {
+// Get user by ID
+async function fetchUserByID(userId) {
     try {
-        // Using the avatar-headshot endpoint - this is the "camera" view Roblox uses
+        const url = `https://users.roblox.com/v1/users/${encodeURIComponent(userId)}`;
+        const user = await fetchRobloxAPI(url);
+        if (user && user.id) return [user];
+        return [];
+    } catch(e) {
+        console.error("Error fetching user by ID:", e);
+        return [];
+    }
+}
+
+// Get avatar URL for a user
+async function fetchAvatarUrl(userId) {
+    try {
         const url = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`;
         const data = await fetchRobloxAPI(url);
         if (data.data && data.data.length > 0 && data.data[0].imageUrl) {
             return data.data[0].imageUrl;
         }
         return null;
-    } catch (error) {
-        console.error("Error fetching avatar thumbnail:", error);
+    } catch(e) {
+        console.error("Error fetching avatar:", e);
         return null;
     }
 }
 
-// Alternative: Get avatar bust (full body render)
-async function getAvatarBust(userId) {
-    try {
-        const url = `https://thumbnails.roblox.com/v1/users/avatar-bust?userIds=${userId}&size=150x150&format=Png&isCircular=false`;
-        const data = await fetchRobloxAPI(url);
-        if (data.data && data.data.length > 0 && data.data[0].imageUrl) {
-            return data.data[0].imageUrl;
-        }
-        return null;
-    } catch (error) {
-        console.error("Error fetching avatar bust:", error);
-        return null;
-    }
-}
-
-// Main function to update profile with Roblox avatar
+// Main function to update profile with Roblox avatar (IMPROVED)
 async function updateProfileWithAvatar(username) {
     const statusDiv = document.getElementById("profileUpdateStatus");
     
@@ -760,24 +759,23 @@ async function updateProfileWithAvatar(username) {
     statusDiv.innerHTML = "🔍 Searching for user on Roblox... <span class='loading-spinner'></span>";
     
     try {
-        // First, get the user ID from the username
-        const userId = await getUserIdFromUsername(username);
+        // Search for the user
+        const users = await fetchUserByUsername(username);
         
-        if (!userId) {
+        if (!users || users.length === 0) {
             statusDiv.className = "update-status error";
             statusDiv.innerText = `❌ User "${username}" not found on Roblox`;
             return false;
         }
         
-        statusDiv.innerHTML = `✅ Found user ID: ${userId}<br>📸 Fetching avatar from Roblox camera... <span class='loading-spinner'></span>`;
+        // Get the first matching user (most relevant)
+        const user = users[0];
+        const userId = user.id;
         
-        // Get the avatar thumbnail (the camera view)
-        let avatarUrl = await getAvatarThumbnail(userId);
+        statusDiv.innerHTML = `✅ Found: ${user.name} (ID: ${userId})<br>📸 Fetching avatar... <span class='loading-spinner'></span>`;
         
-        // If headshot fails, try bust
-        if (!avatarUrl) {
-            avatarUrl = await getAvatarBust(userId);
-        }
+        // Get the avatar thumbnail
+        let avatarUrl = await fetchAvatarUrl(userId);
         
         if (avatarUrl) {
             // Update the profile icon
@@ -786,7 +784,7 @@ async function updateProfileWithAvatar(username) {
             document.getElementById("gameIcon").src = avatarUrl;
             
             statusDiv.className = "update-status success";
-            statusDiv.innerHTML = `✅ Profile updated! Avatar loaded for @${username}<br>📷 Roblox thumbnail camera: ${avatarUrl.substring(0, 60)}...`;
+            statusDiv.innerHTML = `✅ Profile updated! Avatar loaded for @${user.name}`;
             
             // Save to localStorage for persistence
             localStorage.setItem("robloxUsername", username);
@@ -796,7 +794,7 @@ async function updateProfileWithAvatar(username) {
             return true;
         } else {
             statusDiv.className = "update-status error";
-            statusDiv.innerText = `⚠️ User found but couldn't load avatar. Using default.`;
+            statusDiv.innerText = `⚠️ User found but couldn't load avatar.`;
             return false;
         }
         
@@ -842,7 +840,7 @@ async function loadSavedProfile() {
         document.getElementById("balanceInput").value = savedBalance;
     }
     
-    // If we have a username but no avatar (or avatar expired), refresh it
+    // If we have a username but no avatar, refresh it
     if (savedUsername && !savedAvatar) {
         await updateProfileWithAvatar(savedUsername);
     }
@@ -853,13 +851,6 @@ function saveBalance() {
     const balance = document.getElementById("balanceText").innerText;
     localStorage.setItem("robloxBalance", balance);
 }
-
-// Override balance update to save
-const originalSetBalance = () => {
-    const balance = document.getElementById("balanceInput").value;
-    document.getElementById("balanceText").innerText = balance;
-    saveBalance();
-};
 
 // Attach save balance to balance input
 document.getElementById("balanceInput").addEventListener("change", saveBalance);
