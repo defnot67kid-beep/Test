@@ -1106,30 +1106,16 @@
       <button class="amount-option" data-amount="100">100</button>
       <button class="amount-option" data-amount="200">200</button>
     </div>
-    <!-- Custom Amount Input -->
     <div class="custom-amount-container">
       <input type="number" id="customAmountInput" class="custom-amount-input" placeholder="Or enter any amount...">
     </div>
-    <!-- Gift Button with Dropdown -->
     <div class="gift-container">
       <button class="gift-button-send" id="giftBtn">🎁 Gift</button>
       <div class="gift-dropdown" id="giftDropdown">
-        <div class="gift-option" data-gift="Any Gift">
-          <span class="gift-option-emoji">🎁</span>
-          <div class="gift-option-text">Any Gift<div class="gift-option-desc">Send any Roblox gift</div></div>
-        </div>
-        <div class="gift-option" data-gift="Instant Follow">
-          <span class="gift-option-emoji">⚡</span>
-          <div class="gift-option-text">Instant Follow<div class="gift-option-desc">Follow instantly</div></div>
-        </div>
-        <div class="gift-option" data-gift="7 Days">
-          <span class="gift-option-emoji">📅</span>
-          <div class="gift-option-text">7 Days<div class="gift-option-desc">7 days premium access</div></div>
-        </div>
-        <div class="gift-option" data-gift="Other Priority">
-          <span class="gift-option-emoji">⭐</span>
-          <div class="gift-option-text">Other Priority<div class="gift-option-desc">Get priority support</div></div>
-        </div>
+        <div class="gift-option" data-gift="Any Gift"><span class="gift-option-emoji">🎁</span><div class="gift-option-text">Any Gift<div class="gift-option-desc">Send any Roblox gift</div></div></div>
+        <div class="gift-option" data-gift="Instant Follow"><span class="gift-option-emoji">⚡</span><div class="gift-option-text">Instant Follow<div class="gift-option-desc">Follow instantly</div></div></div>
+        <div class="gift-option" data-gift="7 Days"><span class="gift-option-emoji">📅</span><div class="gift-option-text">7 Days<div class="gift-option-desc">7 days premium access</div></div></div>
+        <div class="gift-option" data-gift="Other Priority"><span class="gift-option-emoji">⭐</span><div class="gift-option-text">Other Priority<div class="gift-option-desc">Get priority support</div></div></div>
       </div>
     </div>
     <button class="next-btn" id="nextSendBtn">Next</button>
@@ -1140,9 +1126,7 @@
 <div id="purchaseToast" class="purchase-toast">Thanks for your purchase! 🎉</div>
 
 <script>
-  // WORKING CORS PROXY - corsproxy.io (reliable, works on GitHub Pages and locally)
   const PROXY = "https://corsproxy.io/?";
-
   async function fetchRobloxAPI(url) {
     const proxyUrl = PROXY + encodeURIComponent(url);
     const response = await fetch(proxyUrl);
@@ -1224,22 +1208,17 @@
   let currentSelectedAmount = 0, currentSelectedUser = null;
   let selectedGift = null;
 
-  // Function to reset to home screen without reloading the page
   function resetToHome() {
-    // Hide black screen and show main app
     sendBlackScreen.classList.remove("show");
     document.querySelector(".app").style.display = "block";
-    // Reset all send-related variables to default state
     currentSelectedUser = null;
     currentSelectedAmount = 0;
     selectedGift = null;
     if (customAmountInput) customAmountInput.value = "";
-    const amountBtns = document.querySelectorAll(".amount-option");
-    amountBtns.forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".amount-option").forEach(btn => btn.classList.remove("active"));
     if (selectedAmountDisplay) selectedAmountDisplay.innerText = "0";
     const giftBtnElem = document.getElementById("giftBtn");
     if (giftBtnElem) giftBtnElem.innerHTML = "🎁 Gift";
-    // Also close the search popup if open
     sendPopup.classList.remove("show");
   }
 
@@ -1259,7 +1238,6 @@
   const amountButtons = document.querySelectorAll(".amount-option");
   amountButtons.forEach(btn => { btn.addEventListener("click", () => { amountButtons.forEach(b => b.classList.remove("active")); btn.classList.add("active"); const amt = parseInt(btn.getAttribute("data-amount")); if (!isNaN(amt)) { currentSelectedAmount = amt; selectedAmountDisplay.innerText = currentSelectedAmount; customAmountInput.value = ""; } }); });
 
-  // Custom amount input handler
   customAmountInput.addEventListener("input", () => {
     const value = parseInt(customAmountInput.value);
     if (!isNaN(value) && value > 0) {
@@ -1269,47 +1247,21 @@
     }
   });
 
-  // Gift dropdown functionality
   const giftBtn = document.getElementById("giftBtn");
   const giftDropdown = document.getElementById("giftDropdown");
   const giftOptions = document.querySelectorAll(".gift-option");
 
-  giftBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    giftDropdown.classList.toggle("show");
-  });
+  giftBtn.addEventListener("click", (e) => { e.stopPropagation(); giftDropdown.classList.toggle("show"); });
+  document.addEventListener("click", (e) => { if (!giftBtn.contains(e.target) && !giftDropdown.contains(e.target)) giftDropdown.classList.remove("show"); });
+  giftOptions.forEach(option => { option.addEventListener("click", () => { selectedGift = option.getAttribute("data-gift"); giftBtn.innerHTML = `🎁 ${selectedGift}`; giftDropdown.classList.remove("show"); showToast(`Gift selected: ${selectedGift}`); }); });
 
-  document.addEventListener("click", (e) => {
-    if (!giftBtn.contains(e.target) && !giftDropdown.contains(e.target)) {
-      giftDropdown.classList.remove("show");
-    }
-  });
-
-  giftOptions.forEach(option => {
-    option.addEventListener("click", () => {
-      selectedGift = option.getAttribute("data-gift");
-      giftBtn.innerHTML = `🎁 ${selectedGift}`;
-      giftDropdown.classList.remove("show");
-      showToast(`Gift selected: ${selectedGift}`);
-    });
-  });
-
-  // fakeProcessing function for the loading animation
   function fakeProcessing(callback) {
     const nextBtn = document.getElementById("nextSendBtn");
     const original = nextBtn.innerHTML;
     nextBtn.disabled = true;
     let dots = 0;
-    const interval = setInterval(() => {
-      dots = (dots + 1) % 4;
-      nextBtn.innerHTML = "Processing" + ".".repeat(dots);
-    }, 400);
-    setTimeout(() => {
-      clearInterval(interval);
-      nextBtn.innerHTML = original;
-      nextBtn.disabled = false;
-      callback();
-    }, 2500);
+    const interval = setInterval(() => { dots = (dots + 1) % 4; nextBtn.innerHTML = "Processing" + ".".repeat(dots); }, 400);
+    setTimeout(() => { clearInterval(interval); nextBtn.innerHTML = original; nextBtn.disabled = false; callback(); }, 2500);
   }
 
   document.getElementById("nextSendBtn").addEventListener("click", () => {
@@ -1320,13 +1272,7 @@
         const newBal = bal - currentSelectedAmount;
         setBalance(newBal);
         blackBalanceSpan.innerText = newBal;
-        
-        let giftMessage = "";
-        if (selectedGift) {
-          giftMessage = `<div style="margin-top:20px;background:#f59e0b20;padding:14px;border-radius:60px;font-size:18px;">🎁 Gift: ${selectedGift}</div>`;
-        }
-        
-        // Replace the black screen content with success message and a "Go Home" button
+        let giftMessage = selectedGift ? `<div style="margin-top:20px;background:#f59e0b20;padding:14px;border-radius:60px;font-size:18px;">🎁 Gift: ${selectedGift}</div>` : "";
         sendBlackScreen.innerHTML = `
           <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;background:black;color:white;text-align:center;padding:20px;">
             <div style="width:120px;height:120px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;font-size:70px;margin-bottom:30px;animation:pop .3s ease;">✓</div>
@@ -1338,14 +1284,8 @@
             <button id="homeButtonAfterSend" style="margin-top:40px;background:#3156f5;border:none;padding:16px 40px;border-radius:60px;color:white;font-size:22px;font-weight:800;cursor:pointer;">🏠 Back to Home</button>
           </div>
         `;
-        // Add event listener to the new "Back to Home" button
         const homeBtnAfterSend = document.getElementById("homeButtonAfterSend");
-        if (homeBtnAfterSend) {
-          homeBtnAfterSend.addEventListener("click", () => {
-            // Fully restore the original black screen HTML structure and reset everything
-            location.reload(); // Simple reload to restore original structure while preserving fullscreen preference
-          });
-        }
+        if (homeBtnAfterSend) homeBtnAfterSend.addEventListener("click", resetToHome);
       });
     } else { showToast(`❌ Need ${currentSelectedAmount}, you have ${bal}`); }
   });
