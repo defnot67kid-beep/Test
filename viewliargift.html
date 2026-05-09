@@ -131,7 +131,7 @@
     height: 88px;
     background: white;
     display: flex;
- align-items: center;
+    align-items: center;
     justify-content: space-between;
     padding: 0 18px;
     border-bottom: 1px solid #ececec;
@@ -1079,7 +1079,7 @@
 <div id="sendBlackScreen" class="send-black-screen">
   <div class="black-topbar"><div class="black-title-wrap"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="black-robux-icon" id="blackRobuxIcon"><span class="black-title">Send Robux</span></div><div class="black-right"><div class="black-balance-wrap" id="blackBalanceWrap"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg" class="black-small-robux" id="blackSmallRobux"><span id="blackBalance">0</span></div><button id="closeBlackScreen" class="black-close">✕</button></div></div>
   <div class="black-main" id="blackMainContent">
-    <!-- Dynamic content goes here -->
+    <!-- Content will be dynamically built -->
   </div>
 </div>
 
@@ -1167,8 +1167,14 @@
   const blackBalanceSpan = document.getElementById("blackBalance");
   const closeBlackScreen = document.getElementById("closeBlackScreen");
   
-  let currentSelectedAmount = 0, currentSelectedUser = null;
-  let selectedGift = null;
+  let currentSelectedUser = null;
+
+  function resetToHome() {
+    sendBlackScreen.classList.remove("show");
+    document.querySelector(".app").style.display = "block";
+    currentSelectedUser = null;
+    sendPopup.classList.remove("show");
+  }
 
   function rebuildBlackScreenForm(user, avatarUrl) {
     const blackMain = document.getElementById("blackMainContent");
@@ -1199,7 +1205,14 @@
       <div class="bottom-note">Robux are sent instantly with no fees</div>
     `;
     
-    // Re-attach event listeners
+    // Restore middleRobuxIcon saved image
+    const middleIcon = blackMain.querySelector("#middleRobuxIcon");
+    const savedMiddleIcon = localStorage.getItem("middleRobuxIcon");
+    if(savedMiddleIcon && middleIcon) middleIcon.src = savedMiddleIcon;
+    
+    let localAmount = 0;
+    let localGift = null;
+    
     const amountOptions = blackMain.querySelectorAll(".amount-option");
     const customAmtInput = blackMain.querySelector("#customAmountInput");
     const amountDisplay = blackMain.querySelector("#selectedAmountDisplay");
@@ -1207,9 +1220,6 @@
     const giftDropdownNew = blackMain.querySelector("#giftDropdown");
     const giftOptionsNew = blackMain.querySelectorAll(".gift-option");
     const nextBtnNew = blackMain.querySelector("#nextSendBtn");
-    
-    let localAmount = 0;
-    let localGift = null;
     
     const updateDisplay = () => { if(amountDisplay) amountDisplay.innerText = localAmount; };
     
@@ -1280,15 +1290,6 @@
     }
   }
 
-  function resetToHome() {
-    sendBlackScreen.classList.remove("show");
-    document.querySelector(".app").style.display = "block";
-    currentSelectedUser = null;
-    currentSelectedAmount = 0;
-    selectedGift = null;
-    sendPopup.classList.remove("show");
-  }
-
   function openBlackSendScreen(user, avatarUrl) {
     document.querySelector(".app").style.display = "none";
     sendPopup.classList.remove("show");
@@ -1336,8 +1337,38 @@
   searchInput.addEventListener("input", () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(() => { if (searchInput.value.trim()) triggerSearch(); }, 400); });
   forceScanBtn.addEventListener("click", () => { if (searchInput.value.trim()) triggerSearch(); });
 
-  function makeEditable(el, key) { el.addEventListener("click", (e) => { e.stopPropagation(); if (editorMode === "off") return; const inp = document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.onchange=(ev)=>{ const f=ev.target.files[0]; if(f){ const r=new FileReader(); r.onload=event=>{el.src=event.target.result; localStorage.setItem(key,event.target.result);}; r.readAsDataURL(f);}}; inp.click();}); const saved=localStorage.getItem(key); if(saved) el.src=saved; }
-  makeEditable(document.getElementById("robloxLogo"),"robloxLogoCustom"); makeEditable(document.getElementById("avatar"),"customAvatar"); makeEditable(document.getElementById("balanceRobux"),"balanceRobuxIcon"); makeEditable(document.getElementById("planeCrazyImage"),"planeCrazyImage"); makeEditable(document.getElementById("popupIcon"),"popupCustomIcon"); makeEditable(document.getElementById("popupRobuxIcon"),"popupRobuxIconCustom"); makeEditable(document.getElementById("blackRobuxIcon"),"blackRobuxIcon"); makeEditable(document.getElementById("blackSmallRobux"),"blackSmallRobuxIcon"); makeEditable(document.getElementById("middleRobuxIcon"),"middleRobuxIcon");
+  // Saved images functionality - ALL working
+  function makeEditable(el, key) { 
+    if(!el) return;
+    el.addEventListener("click", (e) => { 
+      e.stopPropagation(); 
+      if (editorMode === "off") return; 
+      const inp = document.createElement("input"); 
+      inp.type="file"; 
+      inp.accept="image/*"; 
+      inp.onchange=(ev)=>{ 
+        const f=ev.target.files[0]; 
+        if(f){ 
+          const r=new FileReader(); 
+          r.onload=event=>{el.src=event.target.result; localStorage.setItem(key,event.target.result);}; 
+          r.readAsDataURL(f);
+        }
+      }; 
+      inp.click();
+    }); 
+    const saved=localStorage.getItem(key); 
+    if(saved && el) el.src=saved; 
+  }
+  
+  makeEditable(document.getElementById("robloxLogo"),"robloxLogoCustom");
+  makeEditable(document.getElementById("avatar"),"customAvatar");
+  makeEditable(document.getElementById("balanceRobux"),"balanceRobuxIcon");
+  makeEditable(document.getElementById("planeCrazyImage"),"planeCrazyImage");
+  makeEditable(document.getElementById("popupIcon"),"popupCustomIcon");
+  makeEditable(document.getElementById("popupRobuxIcon"),"popupRobuxIconCustom");
+  makeEditable(document.getElementById("blackRobuxIcon"),"blackRobuxIcon");
+  makeEditable(document.getElementById("blackSmallRobux"),"blackSmallRobuxIcon");
+  makeEditable(document.getElementById("middleRobuxIcon"),"middleRobuxIcon");
   
   document.getElementById("gameCircleTrigger").addEventListener("click", (e) => { e.stopPropagation(); if (editorMode !== "off") document.getElementById("planeCrazyInput").click(); });
   document.getElementById("planeCrazyInput").addEventListener("change", e => { if(editorMode!=="off" && e.target.files[0]){ let r=new FileReader(); r.onload=ev=>{document.getElementById("planeCrazyImage").src=ev.target.result; localStorage.setItem("planeCrazyImage",ev.target.result);}; r.readAsDataURL(e.target.files[0]); } });
@@ -1347,8 +1378,8 @@
   const savedBan = localStorage.getItem("planeCrazyBanner"); if(savedBan) bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('${savedBan}')`; else bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop')`; bonusBanner.style.backgroundSize="cover";
   
   const robuxIcons = document.querySelectorAll(".robux-icon");
-  function setAllPackageIcons(src) { robuxIcons.forEach(icon => { icon.src = src; }); localStorage.setItem("allPackageIcons", src); }
-  robuxIcons.forEach(icon => { icon.addEventListener("click", (e) => { e.stopPropagation(); if (editorMode !== "off") { let inp = document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.onchange=ev=>{ let f=ev.target.files[0]; if(f){ let r=new FileReader(); r.onload=event=>setAllPackageIcons(event.target.result); r.readAsDataURL(f); } }; inp.click(); } }); });
+  function setAllPackageIcons(src) { robuxIcons.forEach(icon => { if(icon) icon.src = src; }); localStorage.setItem("allPackageIcons", src); }
+  robuxIcons.forEach(icon => { if(icon) { icon.addEventListener("click", (e) => { e.stopPropagation(); if (editorMode !== "off") { let inp = document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.onchange=ev=>{ let f=ev.target.files[0]; if(f){ let r=new FileReader(); r.onload=event=>setAllPackageIcons(event.target.result); r.readAsDataURL(f); } }; inp.click(); } }); } });
   const savedAll = localStorage.getItem("allPackageIcons"); if(savedAll) setAllPackageIcons(savedAll);
 </script>
 </body>
