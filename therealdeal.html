@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>RobloxPlus · Send Robux</title>
+<title>RobloxPlus · Send Robux (2-Step)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{
@@ -51,7 +51,6 @@ body::after{
     z-index:40;
     background:rgba(0,0,0,.35);
 }
-
 .left-top{
     display:flex;
     align-items:center;
@@ -354,7 +353,150 @@ body::after{
     pointer-events:auto;
 }
 
-/* ========== SEND MODAL (ACCURATE / SMALLER VERSION) ========== */
+/* ===============================
+   SEND PICKER (STEP 1)
+================================== */
+.send-picker-modal{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:520px;
+    max-width:92%;
+    background:#09090d;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:26px;
+    overflow:hidden;
+    z-index:999;
+    display:none;
+    box-shadow:0 40px 100px rgba(0,0,0,.7);
+}
+
+.send-top{
+    height:72px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 22px;
+    border-bottom:1px solid rgba(255,255,255,.05);
+    background:rgba(0,0,0,.2);
+}
+.send-title{
+    font-size:20px;
+    font-weight:800;
+    letter-spacing:-0.3px;
+}
+.send-top-right{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+.send-balance{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:16px;
+    font-weight:800;
+    background:#101015;
+    padding:6px 12px;
+    border-radius:40px;
+}
+.send-close{
+    width:32px;
+    height:32px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#15151d;
+    cursor:pointer;
+    transition:.2s;
+    font-size:20px;
+    font-weight:700;
+}
+.send-close:hover{
+    background:#20202a;
+}
+
+.picker-content{
+    padding:24px 20px 28px;
+}
+.picker-search{
+    width:100%;
+    height:58px;
+    background:#0c0c12;
+    border:1px solid rgba(255,255,255,.05);
+    outline:none;
+    border-radius:20px;
+    padding:0 20px;
+    color:white;
+    font-size:18px;
+    font-weight:500;
+}
+.picker-search:focus{
+    border-color:#4f6fff;
+}
+.search-results{
+    margin-top:12px;
+    max-height:280px;
+    overflow-y:auto;
+    display:none;
+    background:#08080c;
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,.04);
+}
+.friends-title{
+    margin-top:28px;
+    margin-bottom:16px;
+    font-size:22px;
+    font-weight:800;
+    letter-spacing:-0.5px;
+}
+.picker-friends{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    max-height:320px;
+    overflow-y:auto;
+}
+.user-card{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:12px 14px;
+    border-radius:20px;
+    background:#111118;
+    cursor:pointer;
+    transition:.18s;
+}
+.user-card:hover{
+    background:#1a1a28;
+    transform:translateX(2px);
+}
+.user-card img{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    object-fit:cover;
+}
+.user-info{
+    display:flex;
+    flex-direction:column;
+}
+.user-display{
+    font-size:17px;
+    font-weight:800;
+}
+.user-handle{
+    color:#8b8b98;
+    font-size:13px;
+    margin-top:4px;
+    font-weight:600;
+}
+
+/* ===============================
+   SEND MODAL (STEP 2) - COMPACT
+================================== */
 .send-modal{
     position:fixed;
     top:50%;
@@ -368,56 +510,12 @@ body::after{
     overflow:hidden;
     z-index:999;
     display:none;
-    box-shadow:0 40px 100px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.02);
+    box-shadow:0 40px 100px rgba(0,0,0,.7);
 }
 
-/* TOP */
-.send-top{
-    height:68px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 20px;
-    border-bottom:1px solid rgba(255,255,255,.05);
-    background:rgba(255,255,255,.01);
-}
-.send-title{
-    font-size:18px;
-    font-weight:800;
-    letter-spacing:-0.3px;
-}
-.send-top-right{
-    display:flex;
-    align-items:center;
-    gap:18px;
-}
-.send-balance{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    font-size:15px;
-    font-weight:800;
-}
-.send-close{
-    width:30px;
-    height:30px;
-    border-radius:8px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#15151d;
-    cursor:pointer;
-    transition:.2s;
-    font-size:18px;
-    font-weight:700;
-}
-.send-close:hover{
-    background:#20202a;
-}
-/* PROFILE */
 .profile-center{
     text-align:center;
-    padding:26px 18px 8px;
+    padding:24px 18px 8px;
 }
 .avatar-ring{
     width:82px;
@@ -425,7 +523,7 @@ body::after{
     border-radius:50%;
     margin:auto;
     padding:3px;
-    background:linear-gradient(135deg, rgba(86,112,255,.9), rgba(120,92,255,.35));
+    background:linear-gradient(135deg, rgba(86,112,255,.9), rgba(120,92,255,.4));
 }
 .selected-avatar{
     width:100%;
@@ -454,10 +552,9 @@ body::after{
 }
 .meta-item{
     color:#a7a7b3;
-    font-size:14px;
+    font-size:13px;
     font-weight:600;
 }
-/* AMOUNT BUTTONS */
 .amount-grid{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -467,14 +564,13 @@ body::after{
 .amount-btn{
     height:54px;
     border:none;
-    border-radius:12px;
+    border-radius:14px;
     background:#17171d;
     color:white;
     font-size:18px;
     font-weight:800;
     cursor:pointer;
     transition:.18s;
-    border:1px solid rgba(255,255,255,.04);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -482,13 +578,12 @@ body::after{
 }
 .amount-btn:hover{
     transform:translateY(-2px);
-    background:#1d1d27;
+    background:#1f1f29;
 }
 .amount-btn.active{
     background:#4f6fff;
-    box-shadow:0 0 20px rgba(79,111,255,.45);
+    box-shadow:0 0 18px rgba(79,111,255,.45);
 }
-/* CUSTOM INPUT */
 .custom-wrap{
     padding:0 20px;
 }
@@ -497,26 +592,23 @@ body::after{
     height:54px;
     background:#101015;
     border:2px solid #4f6fff;
-    border-radius:12px;
+    border-radius:14px;
     outline:none;
     color:white;
     font-size:18px;
     font-weight:700;
     padding:0 16px;
-    transition:.2s;
 }
 .custom-input:focus{
     box-shadow:0 0 0 3px rgba(79,111,255,.2);
 }
-/* BIG AMOUNT */
 .big-amount{
     text-align:center;
     padding-top:18px;
-    font-size:42px;
+    font-size:44px;
     font-weight:900;
     letter-spacing:-1px;
 }
-/* BUTTONS */
 .bottom-buttons{
     display:flex;
     gap:10px;
@@ -525,10 +617,10 @@ body::after{
 .continue-btn,
 .back-btn{
     flex:1;
-    height:58px;
+    height:56px;
     border:none;
-    border-radius:14px;
-    font-size:20px;
+    border-radius:16px;
+    font-size:18px;
     font-weight:800;
     cursor:pointer;
     transition:.18s;
@@ -536,7 +628,7 @@ body::after{
 .continue-btn{
     background:#5670ff;
     color:white;
-    box-shadow:0 8px 20px rgba(86,112,255,.35);
+    box-shadow:0 8px 18px rgba(86,112,255,.3);
 }
 .continue-btn:hover{
     transform:translateY(-2px);
@@ -548,17 +640,15 @@ body::after{
 .back-btn:hover{
     background:#23232d;
 }
-/* WARNING */
 .warning-text{
     text-align:center;
     color:#7c7c88;
-    font-size:12px;
+    font-size:11px;
     line-height:1.4;
-    padding:0 24px 22px;
+    padding:0 24px 24px;
 }
-/* responsive tweaks */
 @media(max-width:550px){
-    .send-modal{
+    .send-modal, .send-picker-modal{
         max-width:95%;
     }
     .amount-btn{
@@ -567,10 +657,6 @@ body::after{
     }
     .big-amount{
         font-size:36px;
-    }
-    .continue-btn, .back-btn{
-        font-size:18px;
-        height:52px;
     }
 }
 </style>
@@ -646,19 +732,34 @@ body::after{
 </div>
 </div>
 
-<!-- ========== SEND MODAL - ACCURATE IMAGE SIZING (SINGLE SCREEN) ========== -->
+<!-- STEP 1: FRIEND PICKER MODAL -->
+<div class="send-picker-modal" id="sendPickerModal">
+<div class="send-top">
+<div class="send-title">Send Robux</div>
+<div class="send-top-right">
+<div class="send-balance">⏺ <span id="sendBalanceText">1859403</span></div>
+<div class="send-close" onclick="closeAllSendUI()">×</div>
+</div>
+</div>
+<div class="picker-content">
+<input type="text" id="userSearch" class="picker-search" placeholder="Search by username" autocomplete="off">
+<div class="search-results" id="searchResults"></div>
+<div class="friends-title">My Friends (<span id="friendCount">0</span>)</div>
+<div class="picker-friends" id="pickerFriends"></div>
+</div>
+</div>
+
+<!-- STEP 2: SEND MODAL (compact) -->
 <div class="send-modal" id="sendModal">
 <div class="send-top">
 <div class="send-title">Send Robux</div>
 <div class="send-top-right">
 <div class="send-balance">⏺ <span id="sendBalanceText2">1859403</span></div>
-<div class="send-close" onclick="closeSendModal()">×</div>
+<div class="send-close" onclick="closeAllSendUI()">×</div>
 </div>
 </div>
 <div class="profile-center">
-<div class="avatar-ring">
-<img id="selectedAvatar" class="selected-avatar" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter">
-</div>
+<div class="avatar-ring"><img id="selectedAvatar" class="selected-avatar" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter"></div>
 <div class="selected-name" id="selectedName">stickmasterluke</div>
 <div class="selected-handle" id="selectedHandle">@stickmasterluke</div>
 <div class="profile-meta">
@@ -674,13 +775,11 @@ body::after{
 <button onclick="selectAmount(500,event)" class="amount-btn active">⏺ 500</button>
 <button onclick="selectAmount(1000,event)" class="amount-btn">⏺ 1000</button>
 </div>
-<div class="custom-wrap">
-<input type="number" id="customAmount" class="custom-input" placeholder="Custom amount">
-</div>
+<div class="custom-wrap"><input type="number" id="customAmount" class="custom-input" placeholder="Custom amount"></div>
 <div class="big-amount">⏺ <span id="bigAmountText">500</span></div>
 <div class="bottom-buttons">
 <button class="continue-btn" id="confirmSendBtn">Continue</button>
-<button class="back-btn" onclick="closeSendModal()">Back</button>
+<button class="back-btn" onclick="backToPicker()">Back</button>
 </div>
 <div class="warning-text">You need an age check or parental consent to send Robux. Once you send, you cannot cancel.</div>
 </div>
@@ -689,52 +788,33 @@ body::after{
 // ---------- GLOBALS ----------
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("overlay");
+const sendPickerModal = document.getElementById("sendPickerModal");
 const sendModal = document.getElementById("sendModal");
 const PROXY = "https://corsproxy.io/?";
 
 let friends = [];
+let selectedRecipientUser = null;
 
 // ---------- SIDEBAR ----------
-function openSidebar(){
-    sidebar.classList.add("open");
-    overlay.classList.add("show");
-}
-function closeSidebar(){
-    sidebar.classList.remove("open");
-    overlay.classList.remove("show");
-}
-overlay.onclick = () => {
-    closeSidebar();
-    closeSendModal();
-};
+function openSidebar(){ sidebar.classList.add("open"); overlay.classList.add("show"); }
+function closeSidebar(){ sidebar.classList.remove("open"); overlay.classList.remove("show"); }
+overlay.onclick = () => { closeSidebar(); closeAllSendUI(); };
 
 // ---------- API HELPERS ----------
 async function fetchRobloxAPI(url){
-    try {
-        const response = await fetch(PROXY + encodeURIComponent(url));
-        return await response.json();
-    } catch(e) { return {}; }
+    try { const res = await fetch(PROXY + encodeURIComponent(url)); return await res.json(); } catch(e){ return {}; }
 }
 async function fetchUserByUsername(username){
-    try {
-        const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${username}&limit=10`);
-        return data.data || [];
-    } catch(e) { return []; }
+    try { const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${username}&limit=20`); return data.data || []; } catch(e){ return []; }
 }
 async function fetchAvatarUrl(userId){
-    try {
-        const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
-        return data.data?.[0]?.imageUrl || "";
-    } catch(e) { return ""; }
+    try { const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`); return data.data?.[0]?.imageUrl || ""; } catch(e){ return ""; }
 }
 async function fetchUserById(userId){
-    try {
-        const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/${userId}`);
-        return data;
-    } catch(e) { return null; }
+    try { return await fetchRobloxAPI(`https://users.roblox.com/v1/users/${userId}`); } catch(e){ return null; }
 }
 
-// ---------- PROFILE UPDATE (main user) ----------
+// ---------- PROFILE UPDATE ----------
 async function updateProfile(){
     const username = document.getElementById("usernameInput").value.trim();
     const balance = document.getElementById("balanceInput").value;
@@ -752,50 +832,10 @@ async function updateProfile(){
             document.getElementById("gameIcon").src = avatar;
             localStorage.setItem("mainAvatar", avatar);
         }
-        // also update modal current recipient if the profile matches current selected? optional - but we will keep modal fresh.
-        await updateModalProfileWithUser(user, avatar);
-    } else {
-        // fallback: keep existing but update name
-        document.getElementById("selectedName").innerText = username;
-        document.getElementById("selectedHandle").innerText = "@"+username;
     }
 }
 
-// update modal UI with user object
-async function updateModalProfileWithUser(user, avatarUrl){
-    if(!user) return;
-    const finalAvatar = avatarUrl || await fetchAvatarUrl(user.id);
-    document.getElementById("selectedAvatar").src = finalAvatar || "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter";
-    document.getElementById("selectedName").innerText = user.displayName || user.name;
-    document.getElementById("selectedHandle").innerText = "@" + user.name;
-    if(user.created){
-        const year = new Date(user.created).getFullYear();
-        document.getElementById("selectedJoined").innerHTML = `⏺ Joined in ${year}`;
-    } else {
-        document.getElementById("selectedJoined").innerHTML = "⏺ Joined in 2020";
-    }
-    // mutual connections placeholder (mock)
-    document.getElementById("mutualText").innerHTML = "👥 0 Mutual Connections";
-}
-
-// load main profile into modal on open / init
-async function loadMainUserIntoModal(){
-    let username = localStorage.getItem("mainUsername");
-    if(!username) username = "stickmasterluke";
-    const balance = localStorage.getItem("mainBalance") || "1859403";
-    document.getElementById("sendBalanceText2").innerText = balance;
-    const users = await fetchUserByUsername(username);
-    if(users.length){
-        const user = users[0];
-        const avatar = await fetchAvatarUrl(user.id);
-        await updateModalProfileWithUser(user, avatar);
-    } else {
-        document.getElementById("selectedName").innerText = username;
-        document.getElementById("selectedHandle").innerText = "@"+username;
-    }
-}
-
-// friends logic
+// ---------- FRIENDS LOGIC ----------
 function renderFriends(){
     const list = document.getElementById("friendList");
     list.innerHTML = "";
@@ -807,25 +847,15 @@ function renderFriends(){
 function addFriend(){
     const input = document.getElementById("friendInput");
     const value = input.value.trim();
-    if(!value) return;
-    if(!friends.includes(value)) friends.push(value);
+    if(!value || friends.includes(value)) return;
+    friends.push(value);
     input.value = "";
     renderFriends();
 }
-function removeFriend(index){
-    friends.splice(index,1);
-    renderFriends();
-}
-function escapeHtml(str){
-    return str.replace(/[&<>]/g, function(m){
-        if(m === '&') return '&amp;';
-        if(m === '<') return '&lt;';
-        if(m === '>') return '&gt;';
-        return m;
-    });
-}
+function removeFriend(index){ friends.splice(index,1); renderFriends(); }
+function escapeHtml(str){ return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
 
-// Amount selection logic
+// ---------- AMOUNT SELECTION ----------
 function selectAmount(amount, event){
     document.getElementById("bigAmountText").innerText = amount;
     document.querySelectorAll(".amount-btn").forEach(btn=> btn.classList.remove("active"));
@@ -835,109 +865,151 @@ function selectAmount(amount, event){
 }
 document.getElementById("customAmount")?.addEventListener("input", (e) => {
     let val = e.target.value;
-    if(val && !isNaN(val)){
+    if(val && !isNaN(val) && val !== ""){
         document.getElementById("bigAmountText").innerText = val;
         document.querySelectorAll(".amount-btn").forEach(btn=> btn.classList.remove("active"));
-    } else if(val === ""){
-        // set to last active? keep previous or set 500
-        let activeBtn = document.querySelector(".amount-btn.active");
-        if(activeBtn){
-            let activeVal = activeBtn.innerText.replace(/[⏺\s]/g,'');
-            document.getElementById("bigAmountText").innerText = activeVal;
-        } else {
-            document.getElementById("bigAmountText").innerText = "500";
-        }
     }
 });
 
-// ---------- SEND MODAL OPEN/CLOSE + handle recipient selection via friends/quick search? 
-// The new modal is single-screen, but to mimic full experience we allow user to click on friends inside modal? No, original had search.
-// To match expectation: we add a small "Select recipient" feature? but image demands simplicity. 
-// However I'll upgrade: by default modal shows current profile, but we need ability to pick from friends or search using a simple inline dropdown? But spec only says "full html script with everything added yh but the sizing is way smaller than image"
-// To stay true to the smaller modal but preserve functionality, I'll add a hidden mechanism: double-click on avatar OR a "Change recipient" link. But better: add a "Change" button under handle.
-// Let's add a tiny "Change recipient" button below meta to pick from friends list & search. That keeps the modal compact but fully featured.
-// I'll inject a small button row inside profile-meta or below.
-function openSendModal(){
-    // Sync balance
-    const currentBalance = document.getElementById("balanceText").innerText;
-    document.getElementById("sendBalanceText2").innerText = currentBalance;
-    loadMainUserIntoModal(); // loads current logged profile as default recipient, but we allow switching.
-    sendModal.style.display = "block";
-    overlay.classList.add("show");
-    // reset amount to active (500)
-    document.querySelectorAll(".amount-btn").forEach(btn=> btn.classList.remove("active"));
-    const defaultBtn = Array.from(document.querySelectorAll(".amount-btn")).find(btn => btn.innerText.includes("500"));
-    if(defaultBtn){
-        defaultBtn.classList.add("active");
-        document.getElementById("bigAmountText").innerText = "500";
+// ---------- RENDER FRIENDS INSIDE PICKER ----------
+async function renderPickerFriends(){
+    const wrap = document.getElementById("pickerFriends");
+    if(!wrap) return;
+    wrap.innerHTML = "";
+    document.getElementById("friendCount").innerText = friends.length;
+    if(friends.length === 0){
+        wrap.innerHTML = `<div style="padding:20px;text-align:center;color:#777;font-size:14px;">No friends added yet.<br>Use "Manage Site" to add friends.</div>`;
+        return;
     }
-    const customField = document.getElementById("customAmount");
-    if(customField) customField.value = "";
+    for(const username of friends){
+        const users = await fetchUserByUsername(username);
+        if(!users.length) continue;
+        const user = users[0];
+        const avatar = await fetchAvatarUrl(user.id);
+        const card = document.createElement("div");
+        card.className = "user-card";
+        card.setAttribute("data-user", JSON.stringify(user));
+        card.innerHTML = `<img src="${avatar || 'https://www.roblox.com/headshot-thumbnail/placeholder'}"><div class="user-info"><div class="user-display">${escapeHtml(user.displayName || user.name)}</div><div class="user-handle">@${escapeHtml(user.name)}</div></div>`;
+        card.onclick = (function(u){ return function(){ selectRecipient(u); }; })(user);
+        wrap.appendChild(card);
+    }
 }
-function closeSendModal(){
+
+// ---------- SEARCH FUNCTIONALITY ----------
+let searchTimeout;
+const searchInput = document.getElementById("userSearch");
+const searchResultsDiv = document.getElementById("searchResults");
+if(searchInput){
+    searchInput.addEventListener("input", () => {
+        clearTimeout(searchTimeout);
+        const value = searchInput.value.trim();
+        if(!value){
+            searchResultsDiv.style.display = "none";
+            searchResultsDiv.innerHTML = "";
+            return;
+        }
+        searchTimeout = setTimeout(async () => {
+            const users = await fetchUserByUsername(value);
+            searchResultsDiv.style.display = "block";
+            searchResultsDiv.innerHTML = "";
+            if(users.length === 0){
+                searchResultsDiv.innerHTML = `<div style="padding:16px;text-align:center;color:#aaa;">No users found</div>`;
+                return;
+            }
+            for(const user of users.slice(0,12)){
+                const avatar = await fetchAvatarUrl(user.id);
+                const card = document.createElement("div");
+                card.className = "user-card";
+                card.innerHTML = `<img src="${avatar || ''}"><div class="user-info"><div class="user-display">${escapeHtml(user.displayName || user.name)}</div><div class="user-handle">@${escapeHtml(user.name)}</div></div>`;
+                card.onclick = (function(u){ return function(){ selectRecipient(u); }; })(user);
+                searchResultsDiv.appendChild(card);
+            }
+        }, 280);
+    });
+}
+
+// ---------- SELECT RECIPIENT (STEP1 -> STEP2) ----------
+async function selectRecipient(user){
+    selectedRecipientUser = user;
+    const avatar = await fetchAvatarUrl(user.id);
+    document.getElementById("selectedAvatar").src = avatar || "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter";
+    document.getElementById("selectedName").innerText = user.displayName || user.name;
+    document.getElementById("selectedHandle").innerText = "@" + user.name;
+    if(user.created){
+        const year = new Date(user.created).getFullYear();
+        document.getElementById("selectedJoined").innerHTML = `⏺ Joined in ${year}`;
+    } else {
+        document.getElementById("selectedJoined").innerHTML = "⏺ Joined in 2020";
+    }
+    document.getElementById("mutualText").innerHTML = "👥 0 Mutual Connections";
+    // update balance in send modal
+    const balanceNow = document.getElementById("balanceText").innerText;
+    document.getElementById("sendBalanceText2").innerText = balanceNow;
+    // switch to send modal
+    sendPickerModal.style.display = "none";
+    sendModal.style.display = "block";
+}
+
+// ---------- MODAL CONTROLS ----------
+function openSendPicker(){
+    const freshBalance = document.getElementById("balanceText").innerText;
+    document.getElementById("sendBalanceText").innerText = freshBalance;
+    document.getElementById("sendBalanceText2").innerText = freshBalance;
+    renderPickerFriends();
+    sendPickerModal.style.display = "block";
+    sendModal.style.display = "none";
+    overlay.classList.add("show");
+    if(searchInput) searchInput.value = "";
+    if(searchResultsDiv){
+        searchResultsDiv.style.display = "none";
+        searchResultsDiv.innerHTML = "";
+    }
+}
+function closeAllSendUI(){
+    sendPickerModal.style.display = "none";
     sendModal.style.display = "none";
     overlay.classList.remove("show");
 }
-
-// Continue button: simulate sending robux (toast alert)
-document.getElementById("confirmSendBtn")?.addEventListener("click", ()=>{
-    const amount = document.getElementById("bigAmountText").innerText;
-    const recipient = document.getElementById("selectedName").innerText;
-    const balanceSpan = document.getElementById("balanceText");
-    let currentBalance = parseInt(balanceSpan.innerText.replace(/,/g,''), 10);
-    const sendAmount = parseInt(amount, 10);
-    if(isNaN(sendAmount) || sendAmount <= 0){
-        alert("Please enter a valid amount.");
-        return;
-    }
-    if(currentBalance < sendAmount){
-        alert(`Insufficient balance! You need ${sendAmount} Robux.`);
-        return;
-    }
-    const newBalance = currentBalance - sendAmount;
-    balanceSpan.innerText = newBalance;
-    document.getElementById("balanceInput").value = newBalance;
-    localStorage.setItem("mainBalance", newBalance);
-    document.getElementById("sendBalanceText2").innerText = newBalance;
-    alert(`✅ Success! You sent ${sendAmount} Robux to ${recipient}. (Demo transaction)`);
-    closeSendModal();
-});
-
-// recipient picker: small overlay picker using friends list & search inside modal? instead I will add a "Switch recipient" button under handle
-// adding dynamic button to keep fully function but not break design. I'll add a '✎' icon next to handle or a small button in profile-meta.
-function addRecipientPicker(){
-    const metaDiv = document.querySelector(".profile-meta");
-    if(!metaDiv) return;
-    const pickerBtn = document.createElement("div");
-    pickerBtn.style.marginTop = "10px";
-    pickerBtn.style.cursor = "pointer";
-    pickerBtn.style.background = "#1b1b23";
-    pickerBtn.style.padding = "8px 12px";
-    pickerBtn.style.borderRadius = "40px";
-    pickerBtn.style.fontSize = "12px";
-    pickerBtn.style.fontWeight = "600";
-    pickerBtn.style.display = "inline-block";
-    pickerBtn.style.width = "auto";
-    pickerBtn.style.textAlign = "center";
-    pickerBtn.innerText = "✎ Change recipient";
-    pickerBtn.onclick = async () => {
-        const fakePrompt = prompt("Enter Roblox username to send to:", "builderman");
-        if(fakePrompt && fakePrompt.trim()){
-            const searchUsers = await fetchUserByUsername(fakePrompt.trim());
-            if(searchUsers.length){
-                const targetUser = searchUsers[0];
-                const avatarUrl = await fetchAvatarUrl(targetUser.id);
-                await updateModalProfileWithUser(targetUser, avatarUrl);
-            } else {
-                alert("User not found (demo).");
-            }
-        }
-    };
-    metaDiv.appendChild(pickerBtn);
+function backToPicker(){
+    sendModal.style.display = "none";
+    sendPickerModal.style.display = "block";
 }
 
-// load saved data
-window.addEventListener("DOMContentLoaded", async ()=>{
+// Continue button: process transaction
+document.getElementById("confirmSendBtn")?.addEventListener("click", ()=>{
+    if(!selectedRecipientUser){
+        alert("Please select a recipient first.");
+        backToPicker();
+        return;
+    }
+    const amountSpan = document.getElementById("bigAmountText");
+    let amount = parseInt(amountSpan.innerText, 10);
+    const customVal = document.getElementById("customAmount").value;
+    if(customVal && !isNaN(parseInt(customVal,10))) amount = parseInt(customVal,10);
+    if(isNaN(amount) || amount <= 0){
+        alert("Enter a valid amount.");
+        return;
+    }
+    let currentBalance = parseInt(document.getElementById("balanceText").innerText.replace(/,/g,''), 10);
+    if(currentBalance < amount){
+        alert(`Insufficient balance! You need ${amount} Robux.`);
+        return;
+    }
+    const newBalance = currentBalance - amount;
+    document.getElementById("balanceText").innerText = newBalance;
+    document.getElementById("balanceInput").value = newBalance;
+    localStorage.setItem("mainBalance", newBalance);
+    alert(`✅ Sent ${amount} Robux to @${selectedRecipientUser.name} (Demo).`);
+    closeAllSendUI();
+});
+
+// Attach send buttons
+document.querySelectorAll(".send-btn, .glow-btn").forEach(btn => {
+    btn.addEventListener("click", openSendPicker);
+});
+
+// INIT LOAD
+window.addEventListener("DOMContentLoaded", async () => {
     const savedFriends = localStorage.getItem("friendsList");
     if(savedFriends) friends = JSON.parse(savedFriends);
     const savedUser = localStorage.getItem("mainUsername");
@@ -949,28 +1021,12 @@ window.addEventListener("DOMContentLoaded", async ()=>{
         document.getElementById("profileIcon").src = savedAvatar;
         document.getElementById("gameIcon").src = savedAvatar;
     }
-    // sync inputs
     document.getElementById("usernameInput").value = savedUser || "stickmasterluke";
     document.getElementById("balanceInput").value = savedBalance || "1859403";
     renderFriends();
-    // initial load of current user avatar from api to ensure consistency
-    const mainName = savedUser || "stickmasterluke";
-    const searchRes = await fetchUserByUsername(mainName);
-    if(searchRes.length){
-        const freshAvatar = await fetchAvatarUrl(searchRes[0].id);
-        if(freshAvatar){
-            document.getElementById("profileIcon").src = freshAvatar;
-            document.getElementById("gameIcon").src = freshAvatar;
-            localStorage.setItem("mainAvatar", freshAvatar);
-        }
-    }
-    await loadMainUserIntoModal();
-    addRecipientPicker();
-    // attach open events
-    document.querySelectorAll(".send-btn, .glow-btn").forEach(btn=>{
-        btn.addEventListener("click", openSendModal);
-    });
+    await renderPickerFriends();
 });
 </script>
+
 </body>
 </html>
