@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Roblox Plus - Auto Avatar</title>
+<title>Roblox Plus — Bonus Item Manager | War Tycoon</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
 *{
@@ -21,14 +21,13 @@ body{
     color:white;
 }
 
-/* BACKGROUND */
-
+/* DYNAMIC FLOATING BACKGROUND */
 body::before{
     content:"";
     position:fixed;
     inset:0;
     background:
-    radial-gradient(circle at center,#101d66 0%,#060611 45%,#020204 100%);
+    radial-gradient(circle at 70% 20%, #101d66 0%, #060611 55%, #010103 100%);
     z-index:-2;
 }
 
@@ -37,959 +36,893 @@ body::after{
     position:fixed;
     inset:0;
     background-image:
-    radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px);
-    background-size:35px 35px;
+    radial-gradient(rgba(255,255,255,.1) 1.2px, transparent 1.2px);
+    background-size:42px 42px;
     opacity:.3;
     z-index:-1;
+    pointer-events:none;
 }
 
-/* TOP BAR */
-
+/* TOP BAR (glass) */
 .topbar{
-    height:72px;
+    height:76px;
     width:100%;
-    padding:0 24px;
-    border-bottom:1px solid rgba(255,255,255,.06);
+    padding:0 28px;
+    border-bottom:1px solid rgba(255,255,255,.08);
     display:flex;
     align-items:center;
     justify-content:space-between;
     position:sticky;
     top:0;
     z-index:30;
-    backdrop-filter:blur(20px);
-    background:rgba(0,0,0,.4);
+    backdrop-filter:blur(24px);
+    background:rgba(0,0,0,.5);
 }
 
 .left-top{
     display:flex;
     align-items:center;
-    gap:20px;
+    gap:24px;
 }
 
 .manage-btn{
-    background:#111;
+    background:#0f0f14;
     color:white;
     border:none;
-    border-radius:12px;
-    padding:13px 18px;
+    border-radius:40px;
+    padding:12px 24px;
     font-weight:700;
+    font-size:15px;
+    letter-spacing:0.3px;
     cursor:pointer;
-    transition:.2s;
+    transition:0.2s;
+    border:1px solid rgba(255,255,255,.05);
 }
-
 .manage-btn:hover{
-    background:#1d1d1d;
+    background:#1e1e28;
+    transform:scale(0.97);
 }
 
 .logo{
-    font-size:22px;
+    font-size:26px;
     font-weight:800;
+    background:linear-gradient(135deg,#FFF, #b7c9ff);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
 }
 
 .right-top{
     display:flex;
     align-items:center;
-    gap:12px;
+    gap:18px;
 }
 
 .profile-pill{
-    background:#0d0d14;
-    border:1px solid rgba(255,255,255,.06);
-    border-radius:999px;
-    padding:8px 16px;
+    background:#0b0b12;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:100px;
+    padding:6px 16px 6px 8px;
     display:flex;
     align-items:center;
     gap:10px;
+    backdrop-filter:blur(4px);
 }
 
 .profile-pill img{
-    width:38px;
-    height:38px;
+    width:44px;
+    height:44px;
     border-radius:50%;
     object-fit:cover;
+    border:1.5px solid #5e7eff;
 }
 
 .profile-name{
-    font-weight:600;
+    font-weight:700;
+    font-size:15px;
 }
 
 .robux-pill{
-    background:#0d0d14;
-    border:1px solid rgba(255,255,255,.06);
-    border-radius:999px;
-    padding:12px 18px;
+    background:#0b0b12;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:100px;
+    padding:10px 22px;
     display:flex;
     align-items:center;
-    gap:10px;
+    gap:12px;
     font-weight:800;
     font-size:28px;
+    letter-spacing:-0.5px;
+}
+.robux-pill span{
+    font-size:26px;
 }
 
 .send-btn{
-    background:#111;
+    background:linear-gradient(95deg,#3b56f5,#764eff);
     border:none;
     color:white;
-    border-radius:999px;
-    padding:12px 24px;
-    font-weight:700;
+    border-radius:40px;
+    padding:12px 28px;
+    font-weight:800;
+    font-size:16px;
     cursor:pointer;
+    transition:0.2s;
+    box-shadow:0 4px 12px rgba(90,118,255,0.3);
+}
+.send-btn:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.05);
 }
 
-/* HERO */
-
+/* HERO + CARD LAYOUT */
 .hero{
-    max-width:1200px;
+    max-width:1300px;
     margin:auto;
-    padding:70px 30px;
+    padding:60px 32px 80px;
 }
 
 .hero-wrap{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    gap:40px;
+    gap:50px;
+    flex-wrap:wrap;
 }
 
 .big-text{
-    font-size:92px;
+    font-size:86px;
     font-weight:900;
-    line-height:0.95;
-    max-width:600px;
+    line-height:0.96;
+    background:linear-gradient(to right,#ffffff,#c0ceff);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    max-width:550px;
 }
 
 .glow-btn{
     border:none;
-    background:linear-gradient(90deg,#5a76ff,#855bff);
+    background:linear-gradient(100deg,#5a76ff,#a855ff);
     color:white;
-    padding:26px 70px;
-    border-radius:20px;
-    font-size:30px;
+    padding:24px 64px;
+    border-radius:38px;
+    font-size:32px;
     font-weight:800;
     cursor:pointer;
-    box-shadow:0 0 40px rgba(96,113,255,.5);
+    transition:transform 0.15s, box-shadow 0.2s;
+    box-shadow:0 0 22px rgba(96,113,255,0.6);
+}
+.glow-btn:hover{
+    transform:scale(1.02);
+    box-shadow:0 0 38px #5a76ff;
 }
 
-/* CARD */
-
+/* BONUS CARD */
 .card-area{
-    margin-top:70px;
+    margin-top:80px;
 }
-
 .card-label{
     margin-bottom:16px;
-    color:#bbb;
-    font-weight:600;
+    font-weight:700;
+    font-size:20px;
+    letter-spacing:-0.2px;
+    color:#bcbcff;
+    border-left:4px solid #5a6eff;
+    padding-left:18px;
 }
 
 .main-card{
     width:100%;
-    max-width:900px;
-    background:#090909;
-    border-radius:28px;
+    max-width:980px;
+    background:#0c0c10e6;
+    backdrop-filter:blur(8px);
+    border-radius:44px;
     overflow:hidden;
-    border:1px solid rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.12);
+    transition:0.25s;
+}
+.main-card:hover{
+    border-color:#3f51ff40;
 }
 
 .banner{
-    height:230px;
+    height:260px;
     background:
-    linear-gradient(to bottom,transparent,rgba(0,0,0,.9)),
-    url('https://images.unsplash.com/photo-1474302770737-173ee21bab63?q=80&w=1400&auto=format&fit=crop');
+    linear-gradient(to bottom,transparent 30%,rgba(0,0,0,0.85)),
+    url('https://images.unsplash.com/photo-1580234811497-9df7fd2f6b5a?q=80&w=1400&auto=format&fit=crop');
     background-size:cover;
-    background-position:center;
+    background-position:center 30%;
     position:relative;
 }
 
 .game-info{
     position:absolute;
     bottom:22px;
-    left:22px;
+    left:26px;
     display:flex;
     align-items:center;
-    gap:16px;
+    gap:20px;
 }
 
 .game-info img{
-    width:70px;
-    height:70px;
-    border-radius:50%;
-    border:3px solid rgba(255,255,255,.15);
+    width:78px;
+    height:78px;
+    border-radius:28px;
+    object-fit:cover;
+    border:2px solid rgba(255,215,0,0.5);
+    background:#0f0f1c;
+    box-shadow:0 8px 20px rgba(0,0,0,0.5);
 }
 
 .game-title{
-    font-size:30px;
+    font-size:34px;
     font-weight:800;
+    letter-spacing:-0.5px;
 }
-
 .game-sub{
-    margin-top:6px;
-    color:#aaa;
-    font-weight:600;
+    margin-top:8px;
+    background:#ffd96620;
+    display:inline-block;
+    padding:6px 14px;
+    border-radius:40px;
+    font-weight:700;
+    font-size:20px;
+    backdrop-filter:blur(12px);
 }
 
 .pack{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:26px 32px;
-    border-top:1px solid rgba(255,255,255,.06);
+    padding:24px 36px;
+    border-bottom:1px solid rgba(255,255,255,.05);
 }
-
+.pack:last-child{
+    border-bottom:none;
+}
 .pack-left{
     display:flex;
     align-items:center;
-    gap:18px;
+    gap:22px;
+    flex-wrap:wrap;
 }
-
 .robux-amount{
-    font-size:34px;
+    font-size:32px;
     font-weight:900;
+    color:#ffde9e;
 }
-
 .old{
     text-decoration:line-through;
-    color:#777;
+    color:#8e8eaa;
     font-size:22px;
+    font-weight:500;
 }
-
 .more{
-    background:#191919;
-    padding:8px 14px;
-    border-radius:10px;
-    color:#bbb;
-    font-size:15px;
-    font-weight:700;
-}
-
-.price{
-    background:#222;
-    padding:18px 26px;
-    border-radius:14px;
-    font-size:24px;
+    background:#2a2a3a;
+    padding:6px 16px;
+    border-radius:50px;
+    color:#bdbdff;
     font-weight:800;
+    font-size:15px;
+}
+.price{
+    background:#1f1f2c;
+    padding:14px 28px;
+    border-radius:60px;
+    font-size:26px;
+    font-weight:800;
+    letter-spacing:-0.3px;
 }
 
-/* SIDEBAR */
-
+/* SIDEBAR MANAGEMENT */
 .sidebar{
     position:fixed;
     top:0;
-    left:-470px;
-    width:470px;
+    left:-500px;
+    width:500px;
     height:100vh;
-    background:#090909;
-    border-right:1px solid rgba(255,255,255,.08);
-    transition:.35s;
-    z-index:100;
+    background:#050508e6;
+    backdrop-filter:blur(32px);
+    border-right:1px solid rgba(255,255,255,.1);
+    transition:.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    z-index:200;
     overflow-y:auto;
 }
-
 .sidebar.open{
     left:0;
 }
-
 .side-content{
-    padding:28px;
+    padding:30px 28px;
 }
-
 .side-header{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    margin-bottom:24px;
+    margin-bottom:28px;
 }
-
 .side-title{
-    font-size:42px;
+    font-size:44px;
     font-weight:800;
+    background:linear-gradient(135deg,#fff,#9ab3ff);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
 }
-
 .close{
-    font-size:34px;
+    font-size:42px;
     cursor:pointer;
-    color:#888;
+    transition:0.2s;
 }
-
+.close:hover{
+    color:#ff8a7a;
+}
 .panel{
-    background:#111;
-    border-radius:24px;
-    padding:26px;
-    margin-bottom:26px;
-    border:1px solid rgba(255,255,255,.05);
+    background:#111118cc;
+    border-radius:32px;
+    padding:28px;
+    margin-bottom:30px;
+    border:1px solid rgba(255,255,255,.06);
 }
-
 .panel h2{
-    font-size:34px;
-    margin-bottom:22px;
+    font-size:28px;
+    margin-bottom:20px;
+    font-weight:700;
 }
-
 .label{
     display:block;
-    color:#999;
-    margin-bottom:10px;
+    color:#bcbce6;
+    margin-bottom:12px;
     font-weight:600;
-    margin-top:16px;
+    font-size:15px;
+    margin-top:18px;
 }
-
 .input{
     width:100%;
-    background:black;
-    border:none;
+    background:#030308;
+    border:1px solid #2a2a3c;
     outline:none;
     color:white;
-    font-size:24px;
-    padding:20px;
-    border-radius:16px;
+    font-size:20px;
+    padding:16px 18px;
+    border-radius:24px;
+    transition:0.2s;
 }
-
+.input:focus{
+    border-color:#5f7aff;
+}
 .blue-btn{
     width:100%;
     border:none;
-    margin-top:24px;
-    background:#5670ff;
+    margin-top:28px;
+    background:#4f6bff;
     color:white;
-    font-size:24px;
+    font-size:20px;
     font-weight:800;
-    padding:20px;
-    border-radius:18px;
+    padding:18px;
+    border-radius:32px;
     cursor:pointer;
+    transition:0.15s;
+}
+.blue-btn:hover{
+    background:#6c84ff;
+    transform:scale(0.98);
 }
 
 .check-wrap{
     display:flex;
     align-items:center;
-    gap:16px;
-    margin-bottom:28px;
-    font-size:28px;
+    gap:20px;
+    margin-bottom:32px;
+    font-size:24px;
     font-weight:700;
+    background:#0c0c14;
+    padding:18px 24px;
+    border-radius:60px;
 }
-
 .checkbox{
-    width:34px;
-    height:34px;
+    width:28px;
+    height:28px;
+    accent-color:#5f7aff;
 }
-
 .friend-wrap{
     display:flex;
-    gap:12px;
+    gap:14px;
+    margin:20px 0 16px;
 }
-
 .add-btn{
-    width:120px;
+    width:110px;
     border:none;
-    background:#5670ff;
+    background:#5f7aff;
     color:white;
-    border-radius:16px;
-    font-size:24px;
+    border-radius:28px;
+    font-size:20px;
     font-weight:800;
 }
-
 .friend-buttons{
     display:flex;
-    gap:12px;
-    margin-top:18px;
+    gap:14px;
+    margin:20px 0;
 }
-
 .dark-btn{
     flex:1;
+    background:#1f1e2a;
     border:none;
-    background:#181818;
-    color:white;
-    padding:18px;
-    border-radius:16px;
-    font-size:20px;
+    color:#cdcdff;
+    padding:14px;
+    border-radius:32px;
     font-weight:700;
+    font-size:16px;
+    cursor:pointer;
 }
-
 .friend-list{
-    margin-top:20px;
+    margin-top:18px;
 }
-
 .friend{
-    background:#171717;
-    padding:18px;
-    border-radius:16px;
+    background:#15151f;
+    padding:16px 20px;
+    border-radius:28px;
     display:flex;
     justify-content:space-between;
     align-items:center;
     margin-bottom:12px;
-    font-size:24px;
     font-weight:700;
+    font-size:20px;
 }
-
 .remove{
-    background:#290909;
-    color:#ff5757;
+    background:#2f151f;
+    color:#ff8070;
     border:none;
-    padding:10px 14px;
-    border-radius:10px;
+    padding:8px 18px;
+    border-radius:40px;
     font-weight:800;
+    cursor:pointer;
 }
-
-/* OVERLAY */
 
 .overlay{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,.55);
+    background:rgba(0,0,0,0.65);
     opacity:0;
     pointer-events:none;
     transition:.3s;
-    z-index:50;
+    z-index:100;
 }
-
 .overlay.show{
     opacity:1;
     pointer-events:auto;
 }
 
-/* MOBILE */
-
-@media(max-width:900px){
-
-.big-text{
-    font-size:62px;
+/* small utilities */
+.update-status {
+    font-size: 13px;
+    margin-top: 14px;
+    padding: 9px 12px;
+    border-radius: 28px;
+    text-align: center;
+    background: #1a1a26;
 }
-
-.hero-wrap{
-    flex-direction:column;
-    align-items:flex-start;
-}
-
-.glow-btn{
-    width:100%;
-}
-
-.sidebar{
-    width:100%;
-    left:-100%;
-}
-
-.profile-name{
-    display:none;
-}
-
-.robux-pill{
-    font-size:18px;
-}
-
-}
-
-/* LOADING SPINNER */
 .loading-spinner {
     display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(255,255,255,.3);
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ffffff50;
     border-radius: 50%;
     border-top-color: white;
     animation: spin 0.6s linear infinite;
-    margin-left: 10px;
+    margin-left: 8px;
+    vertical-align: middle;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.update-status {
-    font-size: 12px;
-    margin-top: 8px;
-    padding: 6px;
-    border-radius: 8px;
-    text-align: center;
-}
-
-.update-status.success {
-    background: rgba(16, 185, 129, 0.2);
-    color: #10b981;
-}
-
-.update-status.error {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
-}
-
-.update-status.loading {
-    background: rgba(86, 112, 255, 0.2);
-    color: #5670ff;
+@media(max-width:800px){
+    .big-text{font-size:48px;}
+    .glow-btn{font-size:24px; padding:18px 40px;}
+    .sidebar{width:100%; left:-100%;}
+    .robux-pill span{font-size:20px;}
+    .profile-name{display:none;}
 }
 </style>
 </head>
-
 <body>
 
 <div class="overlay" id="overlay"></div>
 
-<!-- SIDEBAR -->
-
+<!-- SIDEBAR (Manage Site) -->
 <div class="sidebar" id="sidebar">
-
 <div class="side-content">
 
 <div class="side-header">
-<div class="side-title">Manage Site</div>
-<div class="close" onclick="closeSidebar()">×</div>
+<div class="side-title">✧ MANAGE SITE</div>
+<div class="close" onclick="closeSidebar()">✕</div>
 </div>
 
 <div class="panel">
+<h2>👤 Profile & Roblox Avatar</h2>
+<label class="label">Roblox Username (Sync avatar)</label>
+<input class="input" id="usernameInput" placeholder="e.g., stickmasterluke" value="stickmasterluke">
 
-<h2>My Profile Settings</h2>
+<label class="label">Balance (Robux)</label>
+<input class="input" id="balanceInput" value="1859403" type="number">
 
-<label class="label">My Username</label>
-<input class="input" id="usernameInput" value="stickmasterluke">
-
-<label class="label">My Balance</label>
-<input class="input" id="balanceInput" value="1859403">
-
-<button class="blue-btn" onclick="updateProfile()">Update Profile</button>
+<button class="blue-btn" onclick="updateProfile()">⟳ Update Profile & Avatar</button>
 <div id="profileUpdateStatus" class="update-status"></div>
-
 </div>
 
 <div class="check-wrap">
 <input type="checkbox" class="checkbox" id="hideCheck">
-<span id="hideText">Hide profile in header</span>
+<span id="hideText">🙈 Hide profile from top bar</span>
 </div>
 
 <div class="panel">
+<h2>🎴 BONUS BANNER EDITOR</h2>
+<label class="label">Background Image URL (for War Tycoon card)</label>
+<input class="input" id="bgInput" placeholder="https://... image">
 
-<h2>Bonus banner</h2>
+<label class="label">Bonus Icon / Game Icon (square)</label>
+<input class="input" id="iconInput" placeholder="Avatar / custom icon">
 
-<label class="label">Background Image URL (gradient overlay unchanged)</label>
-<input class="input" id="bgInput">
-
-<label class="label">Banner icon URL (square-ish image)</label>
-<input class="input" id="iconInput">
-
-<button class="blue-btn" onclick="saveBanner()">Save banner & icon</button>
-
+<button class="blue-btn" onclick="saveBanner()">⚡ Apply Banner & Icon</button>
+<p style="font-size:12px; margin-top:12px; opacity:0.6;">✨ The "Bonus item we picked for you" card will reflect your changes instantly</p>
 </div>
 
 <div class="panel">
-
-<h2>Saved friends (search username)</h2>
-
+<h2>👥 Saved Friends (showcase)</h2>
 <div class="friend-wrap">
-<input class="input" id="friendInput" placeholder="Exact username, Enter or Add...">
-<button class="add-btn" onclick="addFriend()">Add</button>
+<input class="input" id="friendInput" placeholder="Exact username">
+<button class="add-btn" onclick="addFriend()">+ Add</button>
 </div>
-
 <div class="friend-buttons">
-<button class="dark-btn" onclick="removeAll()">Remove all saved friends</button>
-<button class="dark-btn" onclick="resetFriends()">Reset all friends</button>
+<button class="dark-btn" onclick="removeAll()">🗑 Remove all</button>
+<button class="dark-btn" onclick="resetFriends()">⟳ Reset</button>
 </div>
-
 <div class="friend-list" id="friendList"></div>
-
-</div>
-
 </div>
 </div>
+</div>
 
-<!-- TOP -->
-
+<!-- TOPBAR -->
 <div class="topbar">
-
 <div class="left-top">
-<button class="manage-btn" onclick="openSidebar()">MANAGE SITE</button>
-<div class="logo">RobloxPlus</div>
+<button class="manage-btn" onclick="openSidebar()">⚙️ MANAGE SITE</button>
+<div class="logo">ROBLOX<span style="font-weight:400">+</span> STUDIO</div>
 </div>
-
 <div class="right-top">
-
 <div class="profile-pill" id="profileHeader">
 <img id="profileIcon" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter">
 <div class="profile-name" id="profileName">Stickmasterluke</div>
 </div>
-
 <div class="robux-pill">
-⏺ <span id="balanceText">1859403</span>
+💰 <span id="balanceText">1859403</span>
+</div>
+<button class="send-btn">🚀 Send</button>
+</div>
 </div>
 
-<button class="send-btn">Send</button>
-
-</div>
-
-</div>
-
-<!-- HERO -->
-
+<!-- HERO SECTION: Bonus item card -->
 <div class="hero">
-
 <div class="hero-wrap">
-
 <div class="big-text">
-Enjoy up to<br>
-25%<br>
-more Robux
+Boost your <br>
+arsenal with<br>
+<span style="color:#ffe1a0;">2X CASH</span>
 </div>
-
-<button class="glow-btn">↑ Send Robux</button>
-
+<button class="glow-btn">⚡ CLAIM BONUS</button>
 </div>
 
 <div class="card-area">
-
 <div class="card-label">
-Bonus item we picked for you
+🌟 BONUS ITEM WE PICKED FOR YOU
 </div>
-
 <div class="main-card">
-
-<div class="banner" id="banner">
-
+<div class="banner" id="bannerDynamic">
 <div class="game-info">
-<img id="gameIcon" src="https://tr.rbxcdn.com/180DAY-e14c2f238f7b5cbfe8a5f4dbd3d70e6b/150/150/Image/Png/noFilter">
-
+<img id="gameIconDynamic" src="https://tr.rbxcdn.com/180DAY-e14c2f238f7b5cbfe8a5f4dbd3d70e6b/150/150/Image/Png/noFilter">
 <div>
 <div class="game-title">[EOD] War Tycoon</div>
-<div class="game-sub">2X CASH</div>
+<div class="game-sub">🔥 2X CASH EVENT 🔥</div>
 </div>
-
 </div>
-
 </div>
-
 <div class="pack">
 <div class="pack-left">
 <div class="robux-amount">24.000</div>
 <div class="old">22.500</div>
-<div class="more">+ 1500 more</div>
+<div class="more">+ 1500 BONUS</div>
 </div>
-
 <div class="price">$199,99</div>
 </div>
-
 <div class="pack">
 <div class="pack-left">
 <div class="robux-amount">11.000</div>
 <div class="old">10.000</div>
-<div class="more">+ 1000 more</div>
+<div class="more">+ 1000 EXTRA</div>
 </div>
-
 <div class="price">$99,99</div>
 </div>
-
 <div class="pack">
 <div class="pack-left">
 <div class="robux-amount">5.250</div>
 <div class="old">4.500</div>
-<div class="more">+ 750 more</div>
+<div class="more">+ 750 DOUBLE</div>
 </div>
-
 <div class="price">$49,99</div>
 </div>
-
 </div>
-
 </div>
-
 </div>
 
 <script>
+// ---- GLOBAL REFERENCES ----
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("overlay");
+const bannerElement = document.getElementById("bannerDynamic");
+const gameIconElem = document.getElementById("gameIconDynamic");
+const profileIconElem = document.getElementById("profileIcon");
+const profileNameSpan = document.getElementById("profileName");
+const balanceSpan = document.getElementById("balanceText");
 
-// ============================================
-// ROBLOX API FUNCTIONS (ADDED FROM OTHER SCRIPT)
-// ============================================
+// ---------- ROBLOX API (corsproxy) ----------
 const PROXY = "https://corsproxy.io/?";
 
 async function fetchRobloxAPI(url) {
     const proxyUrl = PROXY + encodeURIComponent(url);
-    const response = await fetch(proxyUrl);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
+    const res = await fetch(proxyUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
 }
 
-// Search for user by username (returns array of users)
 async function fetchUserByUsername(username) {
     try {
         const url = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`;
         const data = await fetchRobloxAPI(url);
-        if (data.data && data.data.length > 0) {
-            return data.data;
-        }
-        return [];
+        return data.data || [];
     } catch(e) {
-        console.error("Error fetching user:", e);
+        console.warn("search error", e);
         return [];
     }
 }
 
-// Get user by ID
-async function fetchUserByID(userId) {
-    try {
-        const url = `https://users.roblox.com/v1/users/${encodeURIComponent(userId)}`;
-        const user = await fetchRobloxAPI(url);
-        if (user && user.id) return [user];
-        return [];
-    } catch(e) {
-        console.error("Error fetching user by ID:", e);
-        return [];
-    }
-}
-
-// Get avatar URL for a user
 async function fetchAvatarUrl(userId) {
     try {
         const url = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`;
         const data = await fetchRobloxAPI(url);
-        if (data.data && data.data.length > 0 && data.data[0].imageUrl) {
-            return data.data[0].imageUrl;
-        }
+        if (data.data && data.data[0]?.imageUrl) return data.data[0].imageUrl;
         return null;
     } catch(e) {
-        console.error("Error fetching avatar:", e);
         return null;
     }
 }
 
-// Main function to update profile with Roblox avatar (IMPROVED)
-async function updateProfileWithAvatar(username) {
+// update avatar using Roblox API (full integration)
+async function syncRobloxAvatar(username) {
     const statusDiv = document.getElementById("profileUpdateStatus");
-    
     if (!username || username.trim() === "") {
         statusDiv.className = "update-status error";
-        statusDiv.innerText = "❌ Please enter a username";
+        statusDiv.innerText = "❌ Enter a username";
         return false;
     }
-    
     statusDiv.className = "update-status loading";
-    statusDiv.innerHTML = "🔍 Searching for user on Roblox... <span class='loading-spinner'></span>";
-    
+    statusDiv.innerHTML = `🔍 searching Roblox for ${username}... <span class='loading-spinner'></span>`;
     try {
-        // Search for the user
         const users = await fetchUserByUsername(username);
-        
-        if (!users || users.length === 0) {
+        if (!users.length) {
             statusDiv.className = "update-status error";
-            statusDiv.innerText = `❌ User "${username}" not found on Roblox`;
+            statusDiv.innerText = `❌ User "${username}" not found`;
             return false;
         }
-        
-        // Get the first matching user (most relevant)
         const user = users[0];
         const userId = user.id;
-        
-        statusDiv.innerHTML = `✅ Found: ${user.name} (ID: ${userId})<br>📸 Fetching avatar... <span class='loading-spinner'></span>`;
-        
-        // Get the avatar thumbnail
-        let avatarUrl = await fetchAvatarUrl(userId);
-        
+        statusDiv.innerHTML = `✅ found: ${user.name} (ID:${userId})<br>📸 loading avatar...`;
+        const avatarUrl = await fetchAvatarUrl(userId);
         if (avatarUrl) {
-            // Update the profile icon
-            document.getElementById("profileIcon").src = avatarUrl;
-            // Update the game icon too for consistency
-            document.getElementById("gameIcon").src = avatarUrl;
-            
+            profileIconElem.src = avatarUrl;
+            gameIconElem.src = avatarUrl;
             statusDiv.className = "update-status success";
-            statusDiv.innerHTML = `✅ Profile updated! Avatar loaded for @${user.name}`;
-            
-            // Save to localStorage for persistence
-            localStorage.setItem("robloxUsername", username);
+            statusDiv.innerHTML = `🎉 Avatar synced for @${user.name}!`;
+            localStorage.setItem("robloxUsername", user.name);
             localStorage.setItem("robloxAvatarUrl", avatarUrl);
             localStorage.setItem("robloxUserId", userId);
-            
             return true;
         } else {
             statusDiv.className = "update-status error";
-            statusDiv.innerText = `⚠️ User found but couldn't load avatar.`;
+            statusDiv.innerText = `⚠️ user found but avatar missing.`;
             return false;
         }
-        
-    } catch (error) {
+    } catch(err) {
         statusDiv.className = "update-status error";
-        statusDiv.innerText = `❌ API Error: ${error.message}. Try again later.`;
-        console.error("Update error:", error);
+        statusDiv.innerText = `❌ API error: ${err.message}`;
         return false;
     }
 }
 
-// Modified updateProfile function that includes avatar fetching
+// Update full profile (username, balance, avatar)
 async function updateProfile() {
-    const username = document.getElementById("usernameInput").value;
+    const username = document.getElementById("usernameInput").value.trim();
     const balance = document.getElementById("balanceInput").value;
-    
-    // Update the displayed name
-    document.getElementById("profileName").innerText = username;
-    document.getElementById("balanceText").innerText = balance;
-    
-    // Fetch and update avatar from Roblox API
-    await updateProfileWithAvatar(username);
+    if (username) profileNameSpan.innerText = username;
+    balanceSpan.innerText = balance;
+    localStorage.setItem("robloxBalance", balance);
+    // sync avatar via API
+    await syncRobloxAvatar(username);
+    // also force profile name display
+    if (username) profileNameSpan.innerText = username;
+    document.getElementById("usernameInput").value = username;
 }
 
-// Load saved profile on page load
+// Load saved profile data from localstorage
 async function loadSavedProfile() {
-    const savedUsername = localStorage.getItem("robloxUsername");
+    const savedName = localStorage.getItem("robloxUsername");
     const savedAvatar = localStorage.getItem("robloxAvatarUrl");
     const savedBalance = localStorage.getItem("robloxBalance");
-    
-    if (savedUsername) {
-        document.getElementById("profileName").innerText = savedUsername;
-        document.getElementById("usernameInput").value = savedUsername;
+    if (savedName) {
+        profileNameSpan.innerText = savedName;
+        document.getElementById("usernameInput").value = savedName;
     }
-    
     if (savedAvatar) {
-        document.getElementById("profileIcon").src = savedAvatar;
-        document.getElementById("gameIcon").src = savedAvatar;
+        profileIconElem.src = savedAvatar;
+        gameIconElem.src = savedAvatar;
     }
-    
     if (savedBalance) {
-        document.getElementById("balanceText").innerText = savedBalance;
+        balanceSpan.innerText = savedBalance;
         document.getElementById("balanceInput").value = savedBalance;
     }
+    // if username exists but no avatar OR re-validate
+    if (savedName && !savedAvatar) {
+        await syncRobloxAvatar(savedName);
+    } else if (savedName && savedAvatar) {
+        // optional: still re-fetch? we keep offline cached.
+    }
+}
+
+// ----- BANNER CUSTOMIZATION (Bonus item picker image)
+function saveBanner() {
+    const bgUrl = document.getElementById("bgInput").value.trim();
+    const iconUrl = document.getElementById("iconInput").value.trim();
     
-    // If we have a username but no avatar, refresh it
-    if (savedUsername && !savedAvatar) {
-        await updateProfileWithAvatar(savedUsername);
+    if (bgUrl) {
+        bannerElement.style.background = `linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.9)), url('${bgUrl}') center/cover`;
+        localStorage.setItem("customBannerBg", bgUrl);
+    }
+    if (iconUrl) {
+        gameIconElem.src = iconUrl;
+        profileIconElem.src = iconUrl;
+        localStorage.setItem("customBannerIcon", iconUrl);
+    }
+    // success visual feedback without alert
+    const statusDiv = document.getElementById("profileUpdateStatus");
+    if (statusDiv) {
+        statusDiv.className = "update-status success";
+        statusDiv.innerText = "🎨 Bonus card image updated!";
+        setTimeout(() => {
+            if(statusDiv.innerText.includes("Bonus card")) statusDiv.innerText = "";
+        }, 2000);
     }
 }
 
-// Save balance when changed
-function saveBalance() {
-    const balance = document.getElementById("balanceText").innerText;
-    localStorage.setItem("robloxBalance", balance);
-}
-
-// Attach save balance to balance input
-document.getElementById("balanceInput").addEventListener("change", saveBalance);
-
-function openSidebar(){
-    sidebar.classList.add("open");
-    overlay.classList.add("show");
-}
-
-function closeSidebar(){
-    sidebar.classList.remove("open");
-    overlay.classList.remove("show");
-}
-
-overlay.onclick = closeSidebar;
-
-/* HIDE PROFILE */
-
-const hideCheck = document.getElementById("hideCheck");
-
-hideCheck.addEventListener("change", ()=>{
-
-    const profile = document.getElementById("profileHeader");
-    const text = document.getElementById("hideText");
-
-    if(hideCheck.checked){
-        profile.style.display = "none";
-        text.innerText = "Profile hidden";
-    }else{
-        profile.style.display = "flex";
-        text.innerText = "Hide profile in header";
-    }
-
-});
-
-/* BANNER */
-
-function saveBanner(){
-
-    const bg = document.getElementById("bgInput").value;
-    const icon = document.getElementById("iconInput").value;
-
-    if(bg){
-        document.getElementById("banner").style.background =
-        `linear-gradient(to bottom,transparent,rgba(0,0,0,.9)),url('${bg}') center/cover`;
-        localStorage.setItem("customBannerBg", bg);
-    }
-
-    if(icon){
-        document.getElementById("gameIcon").src = icon;
-        document.getElementById("profileIcon").src = icon;
-        localStorage.setItem("customBannerIcon", icon);
-    }
-
-}
-
-// Load saved banner settings
 function loadSavedBanner() {
     const savedBg = localStorage.getItem("customBannerBg");
     const savedIcon = localStorage.getItem("customBannerIcon");
-    
     if (savedBg) {
-        document.getElementById("banner").style.background = 
-        `linear-gradient(to bottom,transparent,rgba(0,0,0,.9)),url('${savedBg}') center/cover`;
+        bannerElement.style.background = `linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.9)), url('${savedBg}') center/cover`;
         document.getElementById("bgInput").value = savedBg;
     }
-    
     if (savedIcon) {
-        document.getElementById("gameIcon").src = savedIcon;
-        document.getElementById("profileIcon").src = savedIcon;
+        gameIconElem.src = savedIcon;
+        profileIconElem.src = savedIcon;
         document.getElementById("iconInput").value = savedIcon;
     }
 }
 
-/* FRIENDS */
+// ------- FRIENDS MANAGER (demo social) -------
+let friends = ["Roblox", "builderman"];
 
-let friends = ["Roblox","builderman"];
-
-function renderFriends(){
-    const list = document.getElementById("friendList");
-    list.innerHTML = "";
-    friends.forEach((friend,index)=>{
-        list.innerHTML += `
-        <div class="friend">
-            <span>${friend}</span>
-            <button class="remove" onclick="removeFriend(${index})">Remove</button>
-        </div>
-        `;
+function renderFriends() {
+    const container = document.getElementById("friendList");
+    if (!container) return;
+    container.innerHTML = "";
+    friends.forEach((f, idx) => {
+        const div = document.createElement("div");
+        div.className = "friend";
+        div.innerHTML = `<span>⭐ ${f}</span><button class="remove" data-index="${idx}">Remove</button>`;
+        container.appendChild(div);
+    });
+    document.querySelectorAll(".remove").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const idx = parseInt(btn.getAttribute("data-index"));
+            if (!isNaN(idx)) {
+                friends.splice(idx, 1);
+                renderFriends();
+                localStorage.setItem("friendsList", JSON.stringify(friends));
+            }
+        });
     });
     localStorage.setItem("friendsList", JSON.stringify(friends));
 }
 
-// Load saved friends
+function addFriend() {
+    const inp = document.getElementById("friendInput");
+    if (inp.value.trim() !== "") {
+        friends.push(inp.value.trim());
+        inp.value = "";
+        renderFriends();
+    }
+}
+function removeAll() { friends = []; renderFriends(); }
+function resetFriends() { friends = ["Roblox", "builderman"]; renderFriends(); }
 function loadSavedFriends() {
     const saved = localStorage.getItem("friendsList");
     if (saved) {
         friends = JSON.parse(saved);
         renderFriends();
-    }
-}
-
-function addFriend(){
-    const input = document.getElementById("friendInput");
-    if(input.value.trim() !== ""){
-        friends.push(input.value.trim());
-        input.value = "";
+    } else {
         renderFriends();
     }
 }
 
-function removeFriend(index){
-    friends.splice(index,1);
-    renderFriends();
+// Hide profile toggle
+const hideCheck = document.getElementById("hideCheck");
+const profileHeader = document.getElementById("profileHeader");
+const hideSpan = document.getElementById("hideText");
+if (hideCheck) {
+    hideCheck.addEventListener("change", () => {
+        if (hideCheck.checked) {
+            profileHeader.style.display = "none";
+            hideSpan.innerText = "🙈 Profile hidden";
+        } else {
+            profileHeader.style.display = "flex";
+            hideSpan.innerText = "Show profile in header";
+        }
+        localStorage.setItem("hideProfile", hideCheck.checked ? "true" : "false");
+    });
+    const storedHide = localStorage.getItem("hideProfile");
+    if (storedHide === "true") {
+        hideCheck.checked = true;
+        profileHeader.style.display = "none";
+        hideSpan.innerText = "🙈 Profile hidden";
+    }
 }
 
-function removeAll(){
-    friends = [];
-    renderFriends();
-}
+// Sidebar handling
+function openSidebar() { sidebar.classList.add("open"); overlay.classList.add("show"); }
+function closeSidebar() { sidebar.classList.remove("open"); overlay.classList.remove("show"); }
+overlay.onclick = closeSidebar;
+window.closeSidebar = closeSidebar;
+window.openSidebar = openSidebar;
+window.saveBanner = saveBanner;
+window.updateProfile = updateProfile;
+window.addFriend = addFriend;
+window.removeAll = removeAll;
+window.resetFriends = resetFriends;
 
-function resetFriends(){
-    friends = ["Roblox","builderman"];
-    renderFriends();
-}
+// Attach global for balance listener
+document.getElementById("balanceInput")?.addEventListener("change", () => {
+    const bal = document.getElementById("balanceInput").value;
+    balanceSpan.innerText = bal;
+    localStorage.setItem("robloxBalance", bal);
+});
 
-// Load everything on page load
-window.addEventListener("DOMContentLoaded", () => {
+// initialization (load everything)
+window.addEventListener("DOMContentLoaded", async () => {
     loadSavedProfile();
     loadSavedBanner();
     loadSavedFriends();
-    renderFriends();
-    
-    // Auto-fetch avatar for default username if needed
-    const defaultUsername = document.getElementById("usernameInput").value;
-    if (defaultUsername && !localStorage.getItem("robloxAvatarUrl")) {
-        updateProfileWithAvatar(defaultUsername);
+    // ensure fallback for default banner gradient if no custom saved
+    if (!localStorage.getItem("customBannerBg")) {
+        bannerElement.style.background = `linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1580234811497-9df7fd2f6b5a?q=80&w=1400&auto=format&fit=crop') center/cover`;
+    }
+    // default icon if none saved
+    if(!localStorage.getItem("customBannerIcon") && !localStorage.getItem("robloxAvatarUrl")){
+        const defIcon = "https://tr.rbxcdn.com/180DAY-e14c2f238f7b5cbfe8a5f4dbd3d70e6b/150/150/Image/Png/noFilter";
+        gameIconElem.src = defIcon;
+        profileIconElem.src = defIcon;
+    }
+    // In case username exists but avatar not yet: tries to sync
+    const usernameField = document.getElementById("usernameInput").value;
+    if(usernameField && !localStorage.getItem("robloxAvatarUrl")){
+        await syncRobloxAvatar(usernameField);
     }
 });
 </script>
-
 </body>
 </html>
