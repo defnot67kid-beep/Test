@@ -2,24 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>RobloxPlus · Send Robux (2-Step with Friends)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RobloxPlus · Working Friends + Send</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
-}
-
-body {
-  background: #03030a;
-  overflow-x: hidden;
-  color: white;
-}
-
-/* BACKGROUND */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background: #03030a; color: white; }
 body::before {
   content: "";
   position: fixed;
@@ -36,8 +24,6 @@ body::after {
   opacity: .25;
   z-index: -1;
 }
-
-/* TOPBAR */
 .topbar {
   height: 76px;
   padding: 0 24px;
@@ -51,15 +37,8 @@ body::after {
   z-index: 40;
   background: rgba(0,0,0,.35);
 }
-.left-top {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
-.logo {
-  font-size: 24px;
-  font-weight: 900;
-}
+.left-top { display: flex; align-items: center; gap: 18px; }
+.logo { font-size: 24px; font-weight: 900; }
 .manage-btn {
   border: none;
   background: #111;
@@ -68,14 +47,8 @@ body::after {
   padding: 14px 20px;
   font-weight: 800;
   cursor: pointer;
-  transition: 0.2s;
 }
-.manage-btn:hover { background: #1c1c24; }
-.right-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.right-top { display: flex; align-items: center; gap: 12px; }
 .profile-pill {
   background: #0f0f15;
   border: 1px solid rgba(255,255,255,.05);
@@ -85,11 +58,7 @@ body::after {
   align-items: center;
   gap: 12px;
 }
-.profile-pill img {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-}
+.profile-pill img { width: 42px; height: 42px; border-radius: 50%; }
 .profile-name { font-weight: 700; }
 .robux-pill {
   background: #0f0f15;
@@ -107,27 +76,10 @@ body::after {
   border-radius: 999px;
   font-weight: 800;
   cursor: pointer;
-  transition: 0.2s;
 }
-.send-btn:hover { background: #1f1f2a; }
-
-/* HERO */
-.hero {
-  max-width: 1200px;
-  margin: auto;
-  padding: 80px 30px;
-}
-.hero-wrap {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 50px;
-}
-.big-text {
-  font-size: 96px;
-  font-weight: 900;
-  line-height: .92;
-}
+.hero { max-width: 1200px; margin: auto; padding: 80px 30px; }
+.hero-wrap { display: flex; justify-content: space-between; align-items: center; gap: 50px; }
+.big-text { font-size: 96px; font-weight: 900; line-height: .92; }
 .glow-btn {
   border: none;
   background: linear-gradient(90deg, #5d77ff, #785cff);
@@ -140,11 +92,7 @@ body::after {
   box-shadow: 0 0 50px rgba(92,113,255,.5);
 }
 .card-area { margin-top: 70px; }
-.card-label {
-  margin-bottom: 18px;
-  color: #b9b9b9;
-  font-weight: 700;
-}
+.card-label { margin-bottom: 18px; color: #b9b9b9; font-weight: 700; }
 .main-card {
   max-width: 920px;
   border-radius: 28px;
@@ -154,9 +102,8 @@ body::after {
 }
 .banner {
   height: 240px;
-  background: linear-gradient(to bottom, transparent, rgba(0,0,0,.88)), url('https://images.unsplash.com/photo-1474302770737-173ee21bab63?q=80&w=1400&auto=format&fit=crop');
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,.88)), url('https://images.unsplash.com/photo-1474302770737-173ee21bab63?q=80&w=1400');
   background-size: cover;
-  background-position: center;
   position: relative;
 }
 .game-info {
@@ -167,11 +114,7 @@ body::after {
   align-items: center;
   gap: 16px;
 }
-.game-info img {
-  width: 74px;
-  height: 74px;
-  border-radius: 50%;
-}
+.game-info img { width: 74px; height: 74px; border-radius: 50%; }
 .game-title { font-size: 30px; font-weight: 900; }
 .game-sub { color: #aaa; margin-top: 5px; }
 .pack {
@@ -203,8 +146,6 @@ body::after {
   font-size: 24px;
   font-weight: 900;
 }
-
-/* SIDEBAR */
 .sidebar {
   position: fixed;
   top: 0;
@@ -310,12 +251,7 @@ body::after {
   pointer-events: none;
   transition: .25s;
 }
-.overlay.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* STEP 1: FRIEND PICKER MODAL */
+.overlay.show { opacity: 1; pointer-events: auto; }
 .send-picker-modal {
   position: fixed;
   top: 50%;
@@ -326,7 +262,6 @@ body::after {
   background: #0b0b12;
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 26px;
-  overflow: hidden;
   z-index: 999;
   display: none;
   box-shadow: 0 40px 100px rgba(0,0,0,.7);
@@ -338,17 +273,9 @@ body::after {
   justify-content: space-between;
   padding: 0 22px;
   border-bottom: 1px solid rgba(255,255,255,.05);
-  background: rgba(0,0,0,.3);
 }
-.send-title {
-  font-size: 20px;
-  font-weight: 800;
-}
-.send-top-right {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
+.send-title { font-size: 20px; font-weight: 800; }
+.send-top-right { display: flex; align-items: center; gap: 18px; }
 .send-balance {
   display: flex;
   align-items: center;
@@ -369,7 +296,6 @@ body::after {
   background: #15151d;
   cursor: pointer;
   font-size: 20px;
-  font-weight: 700;
 }
 .picker-content { padding: 24px 20px 28px; }
 .picker-search {
@@ -377,11 +303,11 @@ body::after {
   height: 58px;
   background: #0c0c14;
   border: 1px solid rgba(255,255,255,.05);
-  outline: none;
   border-radius: 20px;
   padding: 0 20px;
   color: white;
   font-size: 18px;
+  outline: none;
 }
 .picker-search:focus { border-color: #5670ff; }
 .search-results {
@@ -391,7 +317,6 @@ body::after {
   display: none;
   background: #08080c;
   border-radius: 20px;
-  border: 1px solid rgba(255,255,255,.04);
 }
 .friends-title {
   margin-top: 28px;
@@ -416,88 +341,37 @@ body::after {
   cursor: pointer;
   transition: .18s;
 }
-.user-card:hover {
-  background: #1a1a28;
-  transform: translateX(2px);
-}
-.user-card img {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-.user-info {
-  display: flex;
-  flex-direction: column;
-}
+.user-card:hover { background: #1a1a28; }
+.user-card img { width: 52px; height: 52px; border-radius: 50%; }
+.user-info { display: flex; flex-direction: column; }
 .user-display { font-size: 17px; font-weight: 800; }
-.user-handle {
-  color: #8b8b98;
-  font-size: 13px;
-  margin-top: 4px;
-  font-weight: 600;
-}
-.empty-friends {
-  text-align: center;
-  padding: 32px;
-  color: #6b6b7a;
-  background: #0f0f16;
-  border-radius: 20px;
-  font-size: 14px;
-}
-
-/* STEP 2: BLACK SEND SCREEN */
+.user-handle { color: #8b8b98; font-size: 13px; margin-top: 4px; }
 .send-black-screen {
   position: fixed;
   inset: 0;
-  background: #000000;
+  background: #000;
   z-index: 10000;
   display: none;
   flex-direction: column;
-  padding: 20px 18px;
-  overflow-y: auto;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 .send-black-screen.show { display: flex; }
-.send-black-screen .black-container {
-  width: 100%;
-  max-width: 520px;
-}
+.black-container { width: 100%; max-width: 500px; }
 .black-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: 40px;
-  padding-top: 12px;
-}
-.black-title-wrap {
-  display: flex;
   align-items: center;
-  gap: 12px;
+  margin-bottom: 30px;
 }
-.black-title {
-  color: white;
-  font-size: 26px;
-  font-weight: 800;
-}
-.black-right {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
+.black-title { font-size: 26px; font-weight: 800; color: white; }
 .black-balance {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   background: #1a1a24;
   padding: 8px 16px;
   border-radius: 60px;
-}
-.black-balance span {
   color: white;
   font-weight: 800;
-  font-size: 20px;
 }
 .black-close {
   background: none;
@@ -507,126 +381,69 @@ body::after {
   cursor: pointer;
 }
 .black-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   text-align: center;
+  background: #0a0a0f;
+  border-radius: 30px;
+  padding: 30px 20px;
 }
 .selected-avatar-large {
-  width: 110px;
-  height: 110px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid #5670ff;
-  margin-bottom: 16px;
+  border: 3px solid #5670ff;
+  margin-bottom: 15px;
 }
 .selected-name-large {
-  color: white;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
 }
 .amount-middle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
   background: #14141c;
-  padding: 16px 28px;
-  border-radius: 80px;
-  margin-bottom: 30px;
+  padding: 15px;
+  border-radius: 60px;
+  margin-bottom: 25px;
 }
-.amount-middle img { width: 42px; height: 42px; }
 .amount-display {
-  color: #ffd966;
   font-size: 48px;
   font-weight: 900;
+  color: #ffd966;
 }
 .amount-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  width: 100%;
+  gap: 10px;
   margin-bottom: 20px;
 }
 .amount-option {
-  height: 65px;
-  border-radius: 16px;
+  height: 55px;
+  border-radius: 14px;
   border: none;
   background: #1f1f2a;
   color: white;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
   cursor: pointer;
-  transition: 0.1s;
 }
-.amount-option.active {
-  background: #5670ff;
-  box-shadow: 0 0 15px rgba(86,112,255,.5);
-}
+.amount-option.active { background: #5670ff; }
 .custom-input-black {
   width: 100%;
-  height: 60px;
-  border-radius: 16px;
+  height: 55px;
+  border-radius: 14px;
   border: 2px solid #5670ff;
   background: #14141c;
   color: white;
-  font-size: 24px;
-  font-weight: 800;
+  font-size: 18px;
   text-align: center;
-  padding: 0 20px;
-  outline: none;
   margin-bottom: 20px;
+  outline: none;
 }
 .next-btn-final {
   width: 100%;
-  height: 68px;
-  border-radius: 18px;
+  height: 60px;
+  border-radius: 16px;
   border: none;
   background: #5670ff;
-  color: white;
-  font-size: 26px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 0.1s;
-}
-.next-btn-final:active { transform: scale(0.97); }
-.bottom-note {
-  color: #7c7c88;
-  margin-top: 20px;
-  font-size: 13px;
-}
-.success-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 20px;
-}
-.success-check {
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
-  background: #10b981;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 60px;
-  margin-bottom: 30px;
-  animation: pop 0.3s ease;
-}
-@keyframes pop {
-  0% { transform: scale(0.5); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-.success-title { font-size: 42px; font-weight: 900; margin-bottom: 16px; }
-.success-amount { font-size: 28px; color: #ffd966; font-weight: 800; margin: 12px 0; }
-.home-btn {
-  margin-top: 40px;
-  background: #5670ff;
-  border: none;
-  padding: 16px 40px;
-  border-radius: 60px;
   color: white;
   font-size: 22px;
   font-weight: 800;
@@ -692,17 +509,17 @@ body::after {
       <div class="banner">
         <div class="game-info">
           <img id="gameIcon" src="https://tr.rbxcdn.com/180DAY-e14c2f238f7b5cbfe8a5f4dbd3d70e6b/150/150/Image/Png/noFilter">
-          <div><div class="game-title">[EOD] War Tycoon</div><div class="game-sub">2X CASH</div></div>
+          <div><div class="game-title">War Tycoon</div><div class="game-sub">2X CASH</div></div>
         </div>
       </div>
-      <div class="pack"><div class="pack-left"><div class="robux-amount">24.000</div><div class="old">22.500</div><div class="more">+1500 more</div></div><div class="price">$199.99</div></div>
-      <div class="pack"><div class="pack-left"><div class="robux-amount">11.000</div><div class="old">10.000</div><div class="more">+1000 more</div></div><div class="price">$99.99</div></div>
-      <div class="pack"><div class="pack-left"><div class="robux-amount">5.250</div><div class="old">4.500</div><div class="more">+750 more</div></div><div class="price">$49.99</div></div>
+      <div class="pack"><div class="pack-left"><div class="robux-amount">24,000</div><div class="old">22,500</div><div class="more">+1500 more</div></div><div class="price">$199.99</div></div>
+      <div class="pack"><div class="pack-left"><div class="robux-amount">11,000</div><div class="old">10,000</div><div class="more">+1000 more</div></div><div class="price">$99.99</div></div>
+      <div class="pack"><div class="pack-left"><div class="robux-amount">5,250</div><div class="old">4,500</div><div class="more">+750 more</div></div><div class="price">$49.99</div></div>
     </div>
   </div>
 </div>
 
-<!-- STEP 1: PICKER MODAL -->
+<!-- PICKER MODAL -->
 <div class="send-picker-modal" id="sendPickerModal">
   <div class="send-top">
     <div class="send-title">Send Robux</div>
@@ -712,89 +529,80 @@ body::after {
     </div>
   </div>
   <div class="picker-content">
-    <input type="text" id="userSearch" class="picker-search" placeholder="Search by username" autocomplete="off">
+    <input type="text" id="userSearch" class="picker-search" placeholder="Search by username">
     <div class="search-results" id="searchResultsList"></div>
     <div class="friends-title">My Friends (<span id="friendCount">0</span>)</div>
     <div class="picker-friends" id="pickerFriendsList"></div>
   </div>
 </div>
 
-<!-- STEP 2: BLACK SEND SCREEN -->
+<!-- BLACK SEND SCREEN -->
 <div class="send-black-screen" id="blackSendScreen">
   <div class="black-container">
     <div class="black-header">
-      <div class="black-title-wrap">
-        <span class="black-title">Send Robux</span>
-      </div>
-      <div class="black-right">
-        <div class="black-balance"><span id="blackBalanceAmount">0</span></div>
-        <button class="black-close" id="closeBlackScreenBtn">✕</button>
-      </div>
+      <div class="black-title">Send Robux</div>
+      <div class="black-balance">⏺ <span id="blackBalanceAmount">0</span></div>
+      <button class="black-close" id="closeBlackScreenBtn">✕</button>
     </div>
     <div class="black-main" id="blackMainContent"></div>
   </div>
 </div>
 
 <script>
-// ---------- CONFIG ----------
+// ========== WORKING API (SAME AS MANAGE SITE) ==========
 const PROXY = "https://corsproxy.io/?";
-let friends = JSON.parse(localStorage.getItem("friendsList") || '["builderman","roblox"]');
-let currentSelectedUser = null;
+let friends = [];
+let currentBalance = 1859403;
 
-// Helper functions
 async function fetchRobloxAPI(url) {
   try {
     const res = await fetch(PROXY + encodeURIComponent(url));
     return await res.json();
   } catch(e) { return {}; }
 }
-async function fetchUserByUsername(username) {
-  try {
-    const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=20`);
-    return data.data || [];
-  } catch(e) { return []; }
-}
-async function fetchAvatarUrl(userId) {
-  try {
-    const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
-    return data.data?.[0]?.imageUrl || "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-Placeholder.png";
-  } catch(e) { return "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-Placeholder.png"; }
-}
-function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
 
-// Balance management
-let currentBalance = parseInt(localStorage.getItem("mainBalance") || "1859403");
+async function fetchUserByUsername(username) {
+  const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=50`);
+  return data.data || [];
+}
+
+async function fetchAvatarUrl(userId) {
+  const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
+  return data.data?.[0]?.imageUrl || `https://tr.rbxcdn.com/avatar-${userId}.png`;
+}
+
+// ========== BALANCE ==========
 function updateBalanceUI() {
   document.getElementById("balanceText").innerText = currentBalance;
   document.getElementById("pickerBalance").innerText = currentBalance;
   document.getElementById("balanceInput").value = currentBalance;
-  if(document.getElementById("blackBalanceAmount")) document.getElementById("blackBalanceAmount").innerText = currentBalance;
   localStorage.setItem("mainBalance", currentBalance);
 }
-function setBalance(newVal) { currentBalance = Math.max(0, newVal); updateBalanceUI(); }
 
-// Profile update
+// ========== PROFILE ==========
 async function updateProfile() {
   const username = document.getElementById("usernameInput").value.trim();
   const balance = parseInt(document.getElementById("balanceInput").value) || 0;
-  setBalance(balance);
+  currentBalance = balance;
+  updateBalanceUI();
+  
   if(username) {
     document.getElementById("profileName").innerText = username;
     localStorage.setItem("mainUsername", username);
     const users = await fetchUserByUsername(username);
     if(users.length) {
       const avatar = await fetchAvatarUrl(users[0].id);
-      if(avatar) {
-        document.getElementById("profileIcon").src = avatar;
-        document.getElementById("gameIcon").src = avatar;
-        localStorage.setItem("mainAvatar", avatar);
-      }
+      document.getElementById("profileIcon").src = avatar;
+      document.getElementById("gameIcon").src = avatar;
     }
   }
 }
 
-// Friends management
-function saveFriends() { localStorage.setItem("friendsList", JSON.stringify(friends)); }
+// ========== FRIENDS (WORKS!) ==========
+function saveFriends() {
+  localStorage.setItem("friendsList", JSON.stringify(friends));
+}
+
 function renderFriendsList() {
   const container = document.getElementById("friendList");
   if(!container) return;
@@ -804,51 +612,75 @@ function renderFriendsList() {
   });
   saveFriends();
 }
+
 function addFriend() {
   const input = document.getElementById("friendInput");
   const val = input.value.trim();
-  if(val && !friends.includes(val)) { friends.push(val); renderFriendsList(); renderPickerFriends(); input.value = ""; }
+  if(val && !friends.includes(val)) {
+    friends.push(val);
+    renderFriendsList();
+    renderPickerFriends();
+    input.value = "";
+  }
 }
-function removeFriend(idx) { friends.splice(idx,1); renderFriendsList(); renderPickerFriends(); }
 
-// Render friends inside picker modal
+function removeFriend(idx) {
+  friends.splice(idx, 1);
+  renderFriendsList();
+  renderPickerFriends();
+}
+
+// ========== RENDER FRIENDS IN PICKER (USES SAME API) ==========
 async function renderPickerFriends() {
   const container = document.getElementById("pickerFriendsList");
   if(!container) return;
   document.getElementById("friendCount").innerText = friends.length;
+  
   if(friends.length === 0) {
-    container.innerHTML = `<div class="empty-friends">✨ No friends added yet.<br>Use "Manage Site" to add friends.</div>`;
+    container.innerHTML = `<div style="text-align:center;padding:32px;color:#6b6b7a;">No friends added yet.<br>Use "Manage Site" to add friends.</div>`;
     return;
   }
-  container.innerHTML = "";
+  
+  container.innerHTML = '<div style="padding:8px;color:#aaa;font-size:13px;">Loading friends...</div>';
+  
   for(const username of friends) {
     const users = await fetchUserByUsername(username);
-    if(!users.length) continue;
-    const user = users[0];
-    const avatar = await fetchAvatarUrl(user.id);
-    const card = document.createElement("div");
-    card.className = "user-card";
-    card.innerHTML = `<img src="${avatar}"><div class="user-info"><div class="user-display">${escapeHtml(user.displayName || user.name)}</div><div class="user-handle">@${escapeHtml(user.name)}</div></div>`;
-    card.onclick = () => selectRecipient(user, avatar);
-    container.appendChild(card);
+    if(users.length) {
+      const user = users[0];
+      const avatar = await fetchAvatarUrl(user.id);
+      const card = document.createElement("div");
+      card.className = "user-card";
+      card.innerHTML = `<img src="${avatar}"><div class="user-info"><div class="user-display">${escapeHtml(user.displayName || user.name)}</div><div class="user-handle">@${escapeHtml(user.name)}</div></div>`;
+      card.onclick = () => selectRecipient(user, avatar);
+      container.appendChild(card);
+    }
   }
 }
 
-// Search functionality
+// ========== SEARCH (USES SAME API) ==========
 let searchTimeout;
-const searchInput = document.getElementById("userSearch");
+const searchInput2 = document.getElementById("userSearch");
 const searchResultsDiv = document.getElementById("searchResultsList");
-if(searchInput) {
-  searchInput.addEventListener("input", () => {
+
+if(searchInput2) {
+  searchInput2.addEventListener("input", () => {
     clearTimeout(searchTimeout);
-    const val = searchInput.value.trim();
-    if(!val) { searchResultsDiv.style.display = "none"; searchResultsDiv.innerHTML = ""; return; }
-    searchTimeout = setTimeout(async () => {
-      const users = await fetchUserByUsername(val);
-      searchResultsDiv.style.display = "block";
+    const val = searchInput2.value.trim();
+    if(!val) {
+      searchResultsDiv.style.display = "none";
       searchResultsDiv.innerHTML = "";
-      if(users.length === 0) { searchResultsDiv.innerHTML = `<div class="empty-friends">No users found</div>`; return; }
-      for(const user of users.slice(0,15)) {
+      return;
+    }
+    searchTimeout = setTimeout(async () => {
+      searchResultsDiv.style.display = "block";
+      searchResultsDiv.innerHTML = '<div style="padding:20px;color:#aaa;">Searching...</div>';
+      const users = await fetchUserByUsername(val);
+      searchResultsDiv.innerHTML = "";
+      if(users.length === 0) {
+        searchResultsDiv.innerHTML = '<div style="padding:20px;color:#aaa;">No users found</div>';
+        return;
+      }
+      for(const user of users.slice(0, 15)) {
         const avatar = await fetchAvatarUrl(user.id);
         const card = document.createElement("div");
         card.className = "user-card";
@@ -856,48 +688,44 @@ if(searchInput) {
         card.onclick = () => selectRecipient(user, avatar);
         searchResultsDiv.appendChild(card);
       }
-    }, 300);
+    }, 400);
   });
 }
 
-// Select recipient -> open black send screen
+// ========== SELECT RECIPIENT ==========
+let currentSelectedUser = null;
+
 async function selectRecipient(user, avatarUrl) {
   currentSelectedUser = user;
-  const finalAvatar = avatarUrl || await fetchAvatarUrl(user.id);
   document.getElementById("sendPickerModal").style.display = "none";
   document.getElementById("blackBalanceAmount").innerText = currentBalance;
-  buildBlackSendScreen(user, finalAvatar);
-  document.getElementById("blackSendScreen").classList.add("show");
-  document.getElementById("overlay").classList.add("show");
-}
-
-function buildBlackSendScreen(user, avatarUrl) {
+  
   const container = document.getElementById("blackMainContent");
   let selectedAmount = 500;
+  
   container.innerHTML = `
     <img id="selectedAvatarLarge" class="selected-avatar-large" src="${avatarUrl}">
     <div id="selectedNameLarge" class="selected-name-large">${escapeHtml(user.displayName || user.name)}</div>
-    <div class="amount-middle"><span>⏺</span><span id="amountDisplayLarge" class="amount-display">500</span></div>
+    <div class="amount-middle"><span id="amountDisplayLarge" class="amount-display">500</span></div>
     <div class="amount-grid">
       <button data-amt="25" class="amount-option">25</button>
       <button data-amt="50" class="amount-option">50</button>
       <button data-amt="100" class="amount-option">100</button>
       <button data-amt="200" class="amount-option">200</button>
       <button data-amt="500" class="amount-option active">500</button>
-      <button data-amt="750" class="amount-option">750</button>
       <button data-amt="1000" class="amount-option">1000</button>
       <button data-amt="2000" class="amount-option">2000</button>
+      <button data-amt="5000" class="amount-option">5000</button>
     </div>
     <input type="number" id="customAmountBlack" class="custom-input-black" placeholder="Custom amount">
     <button id="finalSendBtn" class="next-btn-final">Continue</button>
-    <div class="bottom-note">You need an age check or parental consent to send Robux. Once you send, you cannot cancel.</div>
   `;
   
   const amountDisplay = document.getElementById("amountDisplayLarge");
   const customInput = document.getElementById("customAmountBlack");
   const amountBtns = document.querySelectorAll(".amount-option");
   
-  function updateAmountDisplay(val) {
+  function updateAmount(val) {
     selectedAmount = val;
     amountDisplay.innerText = val;
     amountBtns.forEach(btn => btn.classList.remove("active"));
@@ -907,7 +735,7 @@ function buildBlackSendScreen(user, avatarUrl) {
   amountBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       const amt = parseInt(btn.getAttribute("data-amt"));
-      updateAmountDisplay(amt);
+      updateAmount(amt);
       btn.classList.add("active");
     });
   });
@@ -924,65 +752,86 @@ function buildBlackSendScreen(user, avatarUrl) {
   }
   
   document.getElementById("finalSendBtn").addEventListener("click", () => {
-    if(selectedAmount <= 0) { alert("Please select an amount"); return; }
-    if(currentBalance < selectedAmount) { alert(`Insufficient balance! Need ${selectedAmount}, you have ${currentBalance}`); return; }
-    // Process transaction
-    const newBalance = currentBalance - selectedAmount;
-    setBalance(newBalance);
-    // Show success screen
+    if(selectedAmount <= 0) { alert("Select an amount"); return; }
+    if(currentBalance < selectedAmount) { alert(`Insufficient balance! Need ${selectedAmount}`); return; }
+    
+    currentBalance -= selectedAmount;
+    updateBalanceUI();
+    
     container.innerHTML = `
-      <div class="success-screen">
-        <div class="success-check">✓</div>
-        <div class="success-title">Sent!</div>
-        <div class="success-amount">${selectedAmount.toLocaleString()} Robux</div>
-        <div style="font-size: 24px; color: #ccc; margin: 10px 0;">to ${escapeHtml(user.displayName || user.name)}</div>
-        <div style="background: #1a1a24; padding: 12px 24px; border-radius: 60px; margin-top: 20px;">Balance: ${newBalance.toLocaleString()}</div>
-        <button id="successHomeBtn" class="home-btn">🏠 Back to Home</button>
+      <div style="text-align:center;padding:20px;">
+        <div style="width:80px;height:80px;background:#10b981;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:50px;margin:0 auto 20px;">✓</div>
+        <div style="font-size:36px;font-weight:900;">Sent!</div>
+        <div style="font-size:24px;color:#ffd966;margin:15px 0;">${selectedAmount.toLocaleString()} Robux</div>
+        <div style="font-size:18px;color:#aaa;">to ${escapeHtml(user.displayName || user.name)}</div>
+        <div style="background:#1a1a24;padding:12px;border-radius:30px;margin:20px 0;">Balance: ${currentBalance.toLocaleString()}</div>
+        <button id="successHomeBtn" style="background:#5670ff;border:none;padding:14px 30px;border-radius:40px;color:white;font-size:18px;font-weight:800;cursor:pointer;">🏠 Back</button>
       </div>
     `;
     document.getElementById("successHomeBtn").addEventListener("click", () => {
       document.getElementById("blackSendScreen").classList.remove("show");
       document.getElementById("overlay").classList.remove("show");
-      document.querySelector(".send-picker-modal").style.display = "none";
     });
   });
+  
+  document.getElementById("blackSendScreen").classList.add("show");
+  document.getElementById("overlay").classList.add("show");
 }
 
-// Modal controls
+// ========== UI CONTROLS ==========
 function openSendPicker() {
   document.getElementById("pickerBalance").innerText = currentBalance;
   renderPickerFriends();
   document.getElementById("sendPickerModal").style.display = "block";
   document.getElementById("overlay").classList.add("show");
-  if(searchResultsDiv) { searchResultsDiv.style.display = "none"; searchResultsDiv.innerHTML = ""; }
-  if(searchInput) searchInput.value = "";
+  if(searchResultsDiv) {
+    searchResultsDiv.style.display = "none";
+    searchResultsDiv.innerHTML = "";
+  }
+  if(searchInput2) searchInput2.value = "";
 }
+
 function closeAllSendUI() {
   document.getElementById("sendPickerModal").style.display = "none";
   document.getElementById("blackSendScreen").classList.remove("show");
   document.getElementById("overlay").classList.remove("show");
 }
-function openSidebar() { document.getElementById("sidebar").classList.add("open"); document.getElementById("overlay").classList.add("show"); }
-function closeSidebar() { document.getElementById("sidebar").classList.remove("open"); document.getElementById("overlay").classList.remove("show"); }
-document.getElementById("overlay").onclick = () => { closeSidebar(); closeAllSendUI(); };
-document.getElementById("closeBlackScreenBtn")?.addEventListener("click", closeAllSendUI);
 
-// Attach send buttons
-document.getElementById("mainSendBtn")?.addEventListener("click", openSendPicker);
-document.getElementById("heroSendBtn")?.addEventListener("click", openSendPicker);
+function openSidebar() {
+  document.getElementById("sidebar").classList.add("open");
+  document.getElementById("overlay").classList.add("show");
+}
 
-// Load saved data
+function closeSidebar() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("overlay").classList.remove("show");
+}
+
+function escapeHtml(str) {
+  if(!str) return "";
+  return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;');
+}
+
+// ========== LOAD SAVED DATA ==========
 window.addEventListener("DOMContentLoaded", async () => {
-  const savedName = localStorage.getItem("mainUsername");
-  const savedBal = localStorage.getItem("mainBalance");
-  const savedAvatar = localStorage.getItem("mainAvatar");
-  if(savedName) document.getElementById("profileName").innerText = savedName;
-  if(savedBal) currentBalance = parseInt(savedBal);
-  if(savedAvatar) { document.getElementById("profileIcon").src = savedAvatar; document.getElementById("gameIcon").src = savedAvatar; }
-  document.getElementById("usernameInput").value = savedName || "stickmasterluke";
+  const savedFriends = localStorage.getItem("friendsList");
+  friends = savedFriends ? JSON.parse(savedFriends) : ["builderman", "roblox"];
+  
+  const savedBalance = localStorage.getItem("mainBalance");
+  if(savedBalance) currentBalance = parseInt(savedBalance);
   updateBalanceUI();
+  
+  const savedUsername = localStorage.getItem("mainUsername");
+  if(savedUsername) document.getElementById("profileName").innerText = savedUsername;
+  document.getElementById("usernameInput").value = savedUsername || "stickmasterluke";
+  
   renderFriendsList();
   await renderPickerFriends();
+  
+  document.getElementById("overlay").onclick = () => { closeSidebar(); closeAllSendUI(); };
+  document.getElementById("closeBlackScreenBtn").onclick = closeAllSendUI;
+  document.getElementById("mainSendBtn").onclick = openSendPicker;
+  document.getElementById("heroSendBtn").onclick = openSendPicker;
 });
 </script>
 </body>
