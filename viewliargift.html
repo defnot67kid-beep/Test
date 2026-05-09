@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-<title>Roblox Send — PERMANENT FULLSCREEN LOCK (Never Exits)</title>
+<title>Roblox Send — PERMANENT FULLSCREEN LOCK (No Reload)</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   * {
@@ -1017,6 +1017,11 @@
     transform: scale(0.97);
   }
 
+  .next-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
   .bottom-note {
     color: #a0a5b5;
     margin-top: 22px;
@@ -1056,7 +1061,7 @@
   </div>
   <div class="nav"><span id="homeBtn">Home</span><span>Charts</span><span>Marketplace</span><span>Create</span><span class="active">Robux</span></div>
   <div class="balance-bar">
-    <div class="balance-left"><img class="balance-robux" id="balanceRobux" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><div class="edit-robux-panel"><input type="number" id="robuxValueInput" class="robux-value-input" value="21" step="1"><button id="updateRobuxBtn" class="robux-enter-btn">Enter</button></div><span class="balance-number" id="balanceNumber">21</span></div>
+    <div class="balance-left"><img class="balance-robux" id="balanceRobux" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><div class="edit-robux-panel"><input type="number" id="robuxValueInput" class="robux-value-input" value="250" step="1"><button id="updateRobuxBtn" class="robux-enter-btn">Enter</button></div><span class="balance-number" id="balanceNumber">250</span></div>
     <button class="send-button" id="sendBtn"><span class="send-icon">↥</span>Send</button>
   </div>
   <div class="main">
@@ -1083,7 +1088,7 @@
 
 <div class="send-popup" id="sendPopup">
   <div class="send-popup-box">
-    <div class="popup-top"><div class="popup-title-wrap" id="popupIconEditor"><div class="popup-icon" id="popupIcon">⬡</div><div class="popup-title">Send Robux</div></div><div class="popup-right"><div class="popup-balance" id="popupBalanceContainer"><img id="popupRobuxIcon" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><span id="popupBalance">21</span></div><button class="close-popup" id="closePopup">✕</button></div></div>
+    <div class="popup-top"><div class="popup-title-wrap" id="popupIconEditor"><div class="popup-icon" id="popupIcon">⬡</div><div class="popup-title">Send Robux</div></div><div class="popup-right"><div class="popup-balance" id="popupBalanceContainer"><img id="popupRobuxIcon" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Robux_2019_Logo_gold.svg"><span id="popupBalance">250</span></div><button class="close-popup" id="closePopup">✕</button></div></div>
     <div class="search-modes"><button class="mode-btn active-mode" id="modeUsername">🔍 By Username</button><button class="mode-btn" id="modeUserID">🆔 By User ID</button></div>
     <input type="text" class="user-search" id="userSearchInput" placeholder="Search Roblox username... (ex: Builderman)">
     <div id="scanStats" class="scan-stats">💡 Full pagination: all pages will be scanned</div>
@@ -1106,11 +1111,9 @@
       <button class="amount-option" data-amount="100">100</button>
       <button class="amount-option" data-amount="200">200</button>
     </div>
-    <!-- Custom Amount Input -->
     <div class="custom-amount-container">
       <input type="number" id="customAmountInput" class="custom-amount-input" placeholder="Or enter any amount...">
     </div>
-    <!-- Gift Button with Dropdown -->
     <div class="gift-container">
       <button class="gift-button-send" id="giftBtn">🎁 Gift</button>
       <div class="gift-dropdown" id="giftDropdown">
@@ -1133,7 +1136,7 @@
       </div>
     </div>
     <button class="next-btn" id="nextSendBtn">Next</button>
-    <div class="bottom-note">Robux are sent instantly with no fees</div>
+    <div class="bottom-note">Robux are sent instantly with no fees • FULLSCREEN LOCKED</div>
   </div>
 </div>
 
@@ -1141,94 +1144,63 @@
 
 <script>
   // ============================================================
-  // ULTIMATE PERMANENT FULLSCREEN LOCK - NEVER EXITS, ESPECIALLY AFTER PURCHASE
+  // PERMANENT FULLSCREEN LOCK - NO RELOAD, NEVER EXITS
   // ============================================================
   (function() {
-    // Force fullscreen using every possible method
-    function forceFullscreenHard() {
-      const docEl = document.documentElement;
-      if (docEl.requestFullscreen) {
-        docEl.requestFullscreen().catch(e => console.log('FS request:', e));
-      }
-      if (docEl.webkitRequestFullscreen) {
-        docEl.webkitRequestFullscreen();
-      }
-      if (docEl.msRequestFullscreen) {
-        docEl.msRequestFullscreen();
-      }
-      // Also try on body as fallback
-      if (document.body.requestFullscreen) {
-        document.body.requestFullscreen().catch(() => {});
+    // Smart fullscreen - only requests when not already fullscreen
+    function requestFullscreen() {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        const docEl = document.documentElement;
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen().catch(e => console.log('FS:', e));
+        } else if (docEl.webkitRequestFullscreen) {
+          docEl.webkitRequestFullscreen();
+        }
       }
     }
     
-    // Check and enforce - if not in fullscreen, re-enter immediately
-    function enforceLock() {
-      const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
-      if (!isFS) {
-        forceFullscreenHard();
+    // Monitor fullscreen exit events and re-enter (only when user tries to exit)
+    document.addEventListener('fullscreenchange', function() {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        // User tried to exit, re-enter immediately
+        setTimeout(requestFullscreen, 10);
       }
-    }
+    });
+    document.addEventListener('webkitfullscreenchange', function() {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        setTimeout(requestFullscreen, 10);
+      }
+    });
     
-    // Block ALL keys that could exit fullscreen
+    // Block Escape and F11 keys from breaking fullscreen
     window.addEventListener('keydown', function(e) {
-      const key = e.key;
-      if (key === 'Escape' || key === 'Esc' || key === 'F11' || key === 'F4') {
+      if (e.key === 'Escape' || e.key === 'Esc' || e.key === 'F11') {
         e.preventDefault();
         e.stopPropagation();
-        forceFullscreenHard();
+        requestFullscreen();
         return false;
       }
     });
     
-    window.addEventListener('keyup', function(e) {
-      if (e.key === 'F11' || e.key === 'Escape') {
-        e.preventDefault();
-        forceFullscreenHard();
-        return false;
-      }
-    });
+    // Request fullscreen on user clicks (gesture-based, browser compliant)
+    document.body.addEventListener('click', function() {
+      requestFullscreen();
+    }, { once: false });
     
-    // Monitor fullscreen change events - if it exits, instantly re-enter
-    document.addEventListener('fullscreenchange', enforceLock);
-    document.addEventListener('webkitfullscreenchange', enforceLock);
-    document.addEventListener('mozfullscreenchange', enforceLock);
-    
-    // Super aggressive interval: check every 300ms to ensure fullscreen never drops
-    setInterval(enforceLock, 300);
-    
-    // Also monitor visibility changes
-    document.addEventListener('visibilitychange', function() {
-      if (document.visibilityState === 'visible') {
-        enforceLock();
-      }
-    });
-    
-    // On any click anywhere, enforce
-    document.body.addEventListener('click', enforceLock);
-    
-    // On any touch, enforce
-    document.body.addEventListener('touchstart', enforceLock);
-    
-    // Initial force
-    setTimeout(forceFullscreenHard, 10);
-    setTimeout(forceFullscreenHard, 100);
-    setTimeout(forceFullscreenHard, 500);
+    // Initial request after page loads (requires user click but we trigger via click listener)
+    setTimeout(requestFullscreen, 100);
     
     // Manual button
     const fsBtn = document.getElementById('forceFullscreenBtn');
     if (fsBtn) {
       fsBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        forceFullscreenHard();
+        requestFullscreen();
       });
     }
-    
-    // Expose for debugging
-    window.__fullscreenLock = { force: forceFullscreenHard, enforce: enforceLock };
   })();
 
-  // WORKING CORS PROXY - corsproxy.io (reliable, works on GitHub Pages and locally)
+  // WORKING CORS PROXY
   const PROXY = "https://corsproxy.io/?";
 
   async function fetchRobloxAPI(url) {
@@ -1238,31 +1210,67 @@
     return await response.json();
   }
 
-  function forceFullscreen() { const elem = document.documentElement; if (elem.requestFullscreen) elem.requestFullscreen().catch(e=>{}); else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen(); }
-  let fullscreenAttempted = false;
-  document.body.addEventListener("click", () => { if (!fullscreenAttempted) { forceFullscreen(); fullscreenAttempted = true; } }, { once: true });
-  document.getElementById("forceFullscreenBtn")?.addEventListener("click", (e) => { e.stopPropagation(); forceFullscreen(); });
-  
-  let editorMode = localStorage.getItem("editorMode"); if (editorMode === null) editorMode = "on";
-  document.getElementById("homeBtn").addEventListener("click", () => { editorMode = (editorMode === "off") ? "on" : "off"; localStorage.setItem("editorMode", editorMode); applyEditorMode(); });
-  function applyEditorMode() { if (editorMode === "off") document.body.classList.add("editor-off"); else document.body.classList.remove("editor-off"); const panel = document.querySelector('.edit-robux-panel'); if (panel) panel.style.display = (editorMode === "off") ? "none" : "flex"; }
+  let editorMode = localStorage.getItem("editorMode"); 
+  if (editorMode === null) editorMode = "on";
+  document.getElementById("homeBtn").addEventListener("click", () => { 
+    editorMode = (editorMode === "off") ? "on" : "off"; 
+    localStorage.setItem("editorMode", editorMode); 
+    applyEditorMode(); 
+  });
+  function applyEditorMode() { 
+    if (editorMode === "off") document.body.classList.add("editor-off"); 
+    else document.body.classList.remove("editor-off"); 
+    const panel = document.querySelector('.edit-robux-panel'); 
+    if (panel) panel.style.display = (editorMode === "off") ? "none" : "flex"; 
+  }
   applyEditorMode();
 
   const balanceDisplay = document.getElementById("balanceNumber");
   const robuxInput = document.getElementById("robuxValueInput");
   const updateBtn = document.getElementById("updateRobuxBtn");
   function getCurrentBalance() { return parseInt(balanceDisplay.innerText) || 0; }
-  function setBalance(newBalance) { let num = Math.max(0, newBalance); balanceDisplay.innerText = num; robuxInput.value = num; localStorage.setItem("userRobuxValue", num); document.getElementById("popupBalance").innerText = num; document.getElementById("blackBalance").innerText = num; return num; }
-  let savedRobux = localStorage.getItem("userRobuxValue"); setBalance(savedRobux && !isNaN(parseInt(savedRobux)) ? parseInt(savedRobux) : 21);
-  updateBtn.addEventListener("click", () => { if (editorMode !== "off") setBalance(parseInt(robuxInput.value) || 0); });
+  function setBalance(newBalance) { 
+    let num = Math.max(0, newBalance); 
+    balanceDisplay.innerText = num; 
+    robuxInput.value = num; 
+    localStorage.setItem("userRobuxValue", num); 
+    document.getElementById("popupBalance").innerText = num; 
+    document.getElementById("blackBalance").innerText = num; 
+    return num; 
+  }
+  let savedRobux = localStorage.getItem("userRobuxValue"); 
+  setBalance(savedRobux && !isNaN(parseInt(savedRobux)) ? parseInt(savedRobux) : 250);
+  updateBtn.addEventListener("click", () => { 
+    if (editorMode !== "off") setBalance(parseInt(robuxInput.value) || 0); 
+  });
   
   const toast = document.getElementById("purchaseToast");
-  function showToast(msg) { toast.innerText = msg; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2500); }
+  function showToast(msg) { 
+    toast.innerText = msg; 
+    toast.classList.add("show"); 
+    setTimeout(() => toast.classList.remove("show"), 2500); 
+  }
   
-  document.querySelectorAll(".purchase-package").forEach(btn => { btn.addEventListener("click", (e) => { e.stopPropagation(); const cost = parseInt(btn.getAttribute("data-cost")); const bal = getCurrentBalance(); if (bal >= cost) { setBalance(bal - cost); showToast(`Thanks! -${cost.toLocaleString()} Robux 🎉`); } else { showToast(`❌ Need ${cost.toLocaleString()}, you have ${bal.toLocaleString()}`); } }); });
+  document.querySelectorAll(".purchase-package").forEach(btn => { 
+    btn.addEventListener("click", (e) => { 
+      e.stopPropagation(); 
+      const cost = parseInt(btn.getAttribute("data-cost")); 
+      const bal = getCurrentBalance(); 
+      if (bal >= cost) { 
+        setBalance(bal - cost); 
+        showToast(`Thanks! -${cost.toLocaleString()} Robux 🎉`); 
+      } else { 
+        showToast(`❌ Need ${cost.toLocaleString()}, you have ${bal.toLocaleString()}`); 
+      } 
+    }); 
+  });
   
   const sendBtn = document.getElementById("sendBtn"), sendPopup = document.getElementById("sendPopup"), closePopup = document.getElementById("closePopup");
-  sendBtn.addEventListener("click", () => { document.getElementById("popupBalance").innerText = getCurrentBalance(); sendPopup.classList.add("show"); if (document.getElementById("userSearchInput").value.trim() !== "") triggerSearch(); });
+  sendBtn.addEventListener("click", () => { 
+    document.getElementById("popupBalance").innerText = getCurrentBalance(); 
+    sendPopup.classList.add("show"); 
+    if (document.getElementById("userSearchInput").value.trim() !== "") triggerSearch(); 
+  });
   closePopup.addEventListener("click", () => sendPopup.classList.remove("show"));
   sendPopup.addEventListener("click", (e) => { if (e.target === sendPopup) sendPopup.classList.remove("show"); });
 
@@ -1271,7 +1279,13 @@
   document.getElementById("modeUserID").addEventListener("click", () => setMode("userid"));
   const searchInput = document.getElementById("userSearchInput"), searchResultsDiv = document.getElementById("searchResults"), scanStatsSpan = document.getElementById("scanStats"), forceScanBtn = document.getElementById("forceScanBtn");
   
-  function setMode(mode) { currentSearchMode = mode; document.getElementById("modeUsername").classList.toggle("active-mode", mode === "username"); document.getElementById("modeUserID").classList.toggle("active-mode", mode === "userid"); searchInput.placeholder = mode === "username" ? "Search Roblox username... (ex: Builderman)" : "Enter Roblox User ID (ex: 1 for Roblox)"; if (searchInput.value.trim()) triggerSearch(); }
+  function setMode(mode) { 
+    currentSearchMode = mode; 
+    document.getElementById("modeUsername").classList.toggle("active-mode", mode === "username"); 
+    document.getElementById("modeUserID").classList.toggle("active-mode", mode === "userid"); 
+    searchInput.placeholder = mode === "username" ? "Search Roblox username... (ex: Builderman)" : "Enter Roblox User ID (ex: 1 for Roblox)"; 
+    if (searchInput.value.trim()) triggerSearch(); 
+  }
 
   async function fetchAllUsersByKeyword(keyword, onProgress) {
     if (!keyword.trim()) return [];
@@ -1288,12 +1302,18 @@
         else { hasMore = false; }
       } catch(e) { console.error(e); throw new Error("API fetch failed: " + e.message); }
     }
-    const uniqueMap = new Map(); for (const u of allUsers) if (!uniqueMap.has(u.id)) uniqueMap.set(u.id, u);
+    const uniqueMap = new Map(); 
+    for (const u of allUsers) if (!uniqueMap.has(u.id)) uniqueMap.set(u.id, u);
     return Array.from(uniqueMap.values());
   }
 
   async function fetchUserByID(userId) {
-    try { const url = `https://users.roblox.com/v1/users/${encodeURIComponent(userId)}`; const user = await fetchRobloxAPI(url); if (user && user.id) return [user]; return null; }
+    try { 
+      const url = `https://users.roblox.com/v1/users/${encodeURIComponent(userId)}`; 
+      const user = await fetchRobloxAPI(url); 
+      if (user && user.id) return [user]; 
+      return null; 
+    }
     catch(e) { return null; }
   }
 
@@ -1302,7 +1322,12 @@
     for (let i = 0; i < userIds.length; i += 100) {
       const chunk = userIds.slice(i, i+100);
       const idsParam = chunk.join(",");
-      try { const url = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${idsParam}&size=150x150&format=Png&isCircular=false`; const data = await fetchRobloxAPI(url); if (data.data) data.data.forEach(t => map.set(t.targetId, t.imageUrl)); await new Promise(r => setTimeout(r, 50)); } catch(e) {}
+      try { 
+        const url = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${idsParam}&size=150x150&format=Png&isCircular=false`; 
+        const data = await fetchRobloxAPI(url); 
+        if (data.data) data.data.forEach(t => map.set(t.targetId, t.imageUrl)); 
+        await new Promise(r => setTimeout(r, 50)); 
+      } catch(e) {}
     }
     return map;
   }
@@ -1312,46 +1337,75 @@
   let currentSelectedAmount = 0, currentSelectedUser = null;
   let selectedGift = null;
 
-  function openBlackSendScreen(user, avatarUrl) {
-    document.querySelector(".app").style.display = "none"; sendPopup.classList.remove("show");
-    selectedPlayerAvatar.src = avatarUrl; selectedPlayerName.innerText = user.name; currentSelectedUser = user;
-    blackBalanceSpan.innerText = getCurrentBalance(); currentSelectedAmount = 0; selectedAmountDisplay.innerText = "0";
-    selectedGift = null;
-    document.getElementById("giftBtn").innerHTML = "🎁 Gift";
-    customAmountInput.value = "";
+  // RESET FUNCTION - NO PAGE RELOAD!
+  function resetToMainScreen() {
+    sendBlackScreen.classList.remove("show");
+    document.querySelector(".app").style.display = "block";
+    // Reset amounts and selections
+    currentSelectedAmount = 0;
+    selectedAmountDisplay.innerText = "0";
+    if (customAmountInput) customAmountInput.value = "";
     document.querySelectorAll(".amount-option").forEach(btn => btn.classList.remove("active"));
-    sendBlackScreen.classList.add("show");
-    // enforce fullscreen again when black screen appears
-    setTimeout(() => { if(window.__fullscreenLock) window.__fullscreenLock.force(); }, 5);
+    selectedGift = null;
+    if (giftBtn) giftBtn.innerHTML = "🎁 Gift";
   }
 
-  closeBlackScreen.addEventListener("click", () => { sendBlackScreen.classList.remove("show"); document.querySelector(".app").style.display = "block"; });
+  function openBlackSendScreen(user, avatarUrl) {
+    document.querySelector(".app").style.display = "none"; 
+    sendPopup.classList.remove("show");
+    selectedPlayerAvatar.src = avatarUrl; 
+    selectedPlayerName.innerText = user.name; 
+    currentSelectedUser = user;
+    blackBalanceSpan.innerText = getCurrentBalance(); 
+    currentSelectedAmount = 0; 
+    selectedAmountDisplay.innerText = "0";
+    selectedGift = null;
+    if (giftBtn) giftBtn.innerHTML = "🎁 Gift";
+    if (customAmountInput) customAmountInput.value = "";
+    document.querySelectorAll(".amount-option").forEach(btn => btn.classList.remove("active"));
+    sendBlackScreen.classList.add("show");
+  }
+
+  closeBlackScreen.addEventListener("click", resetToMainScreen);
 
   const amountButtons = document.querySelectorAll(".amount-option");
-  amountButtons.forEach(btn => { btn.addEventListener("click", () => { amountButtons.forEach(b => b.classList.remove("active")); btn.classList.add("active"); const amt = parseInt(btn.getAttribute("data-amount")); if (!isNaN(amt)) { currentSelectedAmount = amt; selectedAmountDisplay.innerText = currentSelectedAmount; customAmountInput.value = ""; } }); });
-
-  // Custom amount input handler
-  customAmountInput.addEventListener("input", () => {
-    const value = parseInt(customAmountInput.value);
-    if (!isNaN(value) && value > 0) {
-      currentSelectedAmount = value;
-      selectedAmountDisplay.innerText = currentSelectedAmount;
-      amountButtons.forEach(btn => btn.classList.remove("active"));
-    }
+  amountButtons.forEach(btn => { 
+    btn.addEventListener("click", () => { 
+      amountButtons.forEach(b => b.classList.remove("active")); 
+      btn.classList.add("active"); 
+      const amt = parseInt(btn.getAttribute("data-amount")); 
+      if (!isNaN(amt)) { 
+        currentSelectedAmount = amt; 
+        selectedAmountDisplay.innerText = currentSelectedAmount; 
+        if (customAmountInput) customAmountInput.value = ""; 
+      } 
+    }); 
   });
 
-  // Gift dropdown functionality
+  if (customAmountInput) {
+    customAmountInput.addEventListener("input", () => {
+      const value = parseInt(customAmountInput.value);
+      if (!isNaN(value) && value > 0) {
+        currentSelectedAmount = value;
+        selectedAmountDisplay.innerText = currentSelectedAmount;
+        amountButtons.forEach(btn => btn.classList.remove("active"));
+      }
+    });
+  }
+
   const giftBtn = document.getElementById("giftBtn");
   const giftDropdown = document.getElementById("giftDropdown");
   const giftOptions = document.querySelectorAll(".gift-option");
 
-  giftBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    giftDropdown.classList.toggle("show");
-  });
+  if (giftBtn) {
+    giftBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (giftDropdown) giftDropdown.classList.toggle("show");
+    });
+  }
 
   document.addEventListener("click", (e) => {
-    if (!giftBtn.contains(e.target) && !giftDropdown.contains(e.target)) {
+    if (giftBtn && giftDropdown && !giftBtn.contains(e.target) && !giftDropdown.contains(e.target)) {
       giftDropdown.classList.remove("show");
     }
   });
@@ -1359,15 +1413,15 @@
   giftOptions.forEach(option => {
     option.addEventListener("click", () => {
       selectedGift = option.getAttribute("data-gift");
-      giftBtn.innerHTML = `🎁 ${selectedGift}`;
-      giftDropdown.classList.remove("show");
+      if (giftBtn) giftBtn.innerHTML = `🎁 ${selectedGift}`;
+      if (giftDropdown) giftDropdown.classList.remove("show");
       showToast(`Gift selected: ${selectedGift}`);
     });
   });
 
-  // fakeProcessing function for the loading animation
   function fakeProcessing(callback) {
     const nextBtn = document.getElementById("nextSendBtn");
+    if (!nextBtn) return;
     const original = nextBtn.innerHTML;
     nextBtn.disabled = true;
     let dots = 0;
@@ -1397,6 +1451,7 @@
           giftMessage = `<div style="margin-top:20px;background:#f59e0b20;padding:14px;border-radius:60px;font-size:18px;">🎁 Gift: ${selectedGift}</div>`;
         }
         
+        // Show success screen
         sendBlackScreen.innerHTML = `
           <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;background:black;color:white;text-align:center;padding:20px;">
             <div style="width:120px;height:120px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;font-size:70px;margin-bottom:30px;animation:pop .3s ease;">✓</div>
@@ -1405,15 +1460,19 @@
             <div style="font-size:34px;font-weight:900;">${currentSelectedUser?.name || "player"}</div>
             ${giftMessage}
             <div style="margin-top:40px;background:#1f2937;padding:14px 28px;border-radius:999px;font-size:22px;font-weight:900;">Balance: ${newBal.toLocaleString()}</div>
-            <div style="margin-top:20px;font-size:14px;color:#6b7280;">🔒 FULLSCREEN LOCK ACTIVE</div>
+            <div style="margin-top:25px;font-size:16px;color:#6b7280;">🔒 FULLSCREEN REMAINS LOCKED</div>
+            <button id="returnToAppBtn" style="margin-top:30px;background:#3156f5;border:none;padding:14px 32px;border-radius:60px;color:white;font-size:18px;font-weight:700;cursor:pointer;">← Back to Store</button>
           </div>
         `;
-        // Re-enforce fullscreen right before reload
-        if(window.__fullscreenLock) window.__fullscreenLock.force();
-        setTimeout(() => { 
-          if(window.__fullscreenLock) window.__fullscreenLock.force();
-          location.reload(); 
-        }, 3500);
+        
+        // Add return button event listener
+        const returnBtn = document.getElementById("returnToAppBtn");
+        if (returnBtn) {
+          returnBtn.addEventListener("click", () => {
+            // Completely rebuild the black screen with original UI
+            location.reload(); // One-time reload to restore original UI structure
+          });
+        }
       });
     } else { showToast(`❌ Need ${currentSelectedAmount}, you have ${bal}`); }
   });
@@ -1425,16 +1484,16 @@
     try {
       let users = [];
       if (currentSearchMode === "username") {
-        users = await fetchAllUsersByKeyword(rawQuery, (msg) => { scanStatsSpan.innerText = msg; });
-        if (users.length === 0) throw new Error(`No users found with username "${rawQuery}". Try "Roblox" or "Builderman"`);
+        users = await fetchAllUsersByKeyword(rawQuery, (msg) => { if(scanStatsSpan) scanStatsSpan.innerText = msg; });
+        if (users.length === 0) throw new Error(`No users found with username "${rawQuery}".`);
       } else {
         const parsedId = parseInt(rawQuery);
-        if (isNaN(parsedId)) throw new Error(`"${rawQuery}" is not a valid User ID. Use numbers like 1 (Roblox) or 156665 (Builderman)`);
+        if (isNaN(parsedId)) throw new Error(`"${rawQuery}" is not a valid User ID.`);
         const userArr = await fetchUserByID(parsedId);
-        if (!userArr || userArr.length === 0) throw new Error(`User ID ${parsedId} not found. Try ID 1 (Roblox) or 156665 (Builderman) to test`);
+        if (!userArr || userArr.length === 0) throw new Error(`User ID ${parsedId} not found.`);
         users = userArr;
       }
-      scanStatsSpan.innerText = `✅ Found ${users.length} player(s)`;
+      if(scanStatsSpan) scanStatsSpan.innerText = `✅ Found ${users.length} player(s)`;
       const userIds = users.slice(0, 200).map(u => u.id);
       const avatarMap = await fetchAvatars(userIds);
       searchResultsDiv.innerHTML = "";
@@ -1445,28 +1504,91 @@
         div.addEventListener("click", () => openBlackSendScreen(user, avatarUrl));
         searchResultsDiv.appendChild(div);
       }
-    } catch(err) { searchResultsDiv.innerHTML = `<div class="no-results">❌ ${err.message}<br><br>💡 Try searching "Roblox" or ID "1" to test!</div>`; }
+    } catch(err) { 
+      searchResultsDiv.innerHTML = `<div class="no-results">❌ ${err.message}<br><br>💡 Try searching "Roblox" or ID "1" to test!</div>`; 
+    }
   }
-  function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+  
+  function escapeHtml(str) { 
+    if(!str) return ""; 
+    return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); 
+  }
   
   let debounceTimer;
-  searchInput.addEventListener("input", () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(() => { if (searchInput.value.trim()) triggerSearch(); }, 400); });
-  forceScanBtn.addEventListener("click", () => { if (searchInput.value.trim()) triggerSearch(); });
+  searchInput.addEventListener("input", () => { 
+    clearTimeout(debounceTimer); 
+    debounceTimer = setTimeout(() => { if (searchInput.value.trim()) triggerSearch(); }, 400); 
+  });
+  if(forceScanBtn) forceScanBtn.addEventListener("click", () => { if (searchInput.value.trim()) triggerSearch(); });
 
-  function makeEditable(el, key) { el.addEventListener("click", (e) => { e.stopPropagation(); if (editorMode === "off") return; const inp = document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.onchange=(ev)=>{ const f=ev.target.files[0]; if(f){ const r=new FileReader(); r.onload=event=>{el.src=event.target.result; localStorage.setItem(key,event.target.result);}; r.readAsDataURL(f);}}; inp.click();}); const saved=localStorage.getItem(key); if(saved) el.src=saved; }
-  makeEditable(document.getElementById("robloxLogo"),"robloxLogoCustom"); makeEditable(document.getElementById("avatar"),"customAvatar"); makeEditable(document.getElementById("balanceRobux"),"balanceRobuxIcon"); makeEditable(document.getElementById("planeCrazyImage"),"planeCrazyImage"); makeEditable(document.getElementById("popupIcon"),"popupCustomIcon"); makeEditable(document.getElementById("popupRobuxIcon"),"popupRobuxIconCustom"); makeEditable(document.getElementById("blackRobuxIcon"),"blackRobuxIcon"); makeEditable(document.getElementById("blackSmallRobux"),"blackSmallRobuxIcon"); makeEditable(document.getElementById("middleRobuxIcon"),"middleRobuxIcon");
+  function makeEditable(el, key) { 
+    if(!el) return;
+    el.addEventListener("click", (e) => { 
+      e.stopPropagation(); 
+      if (editorMode === "off") return; 
+      const inp = document.createElement("input"); 
+      inp.type="file"; 
+      inp.accept="image/*"; 
+      inp.onchange=(ev)=>{ const f=ev.target.files[0]; if(f){ const r=new FileReader(); r.onload=event=>{el.src=event.target.result; localStorage.setItem(key,event.target.result);}; r.readAsDataURL(f);}}; 
+      inp.click();
+    }); 
+    const saved=localStorage.getItem(key); 
+    if(saved) el.src=saved; 
+  }
+  makeEditable(document.getElementById("robloxLogo"),"robloxLogoCustom"); 
+  makeEditable(document.getElementById("avatar"),"customAvatar"); 
+  makeEditable(document.getElementById("balanceRobux"),"balanceRobuxIcon"); 
+  makeEditable(document.getElementById("planeCrazyImage"),"planeCrazyImage"); 
+  makeEditable(document.getElementById("popupIcon"),"popupCustomIcon"); 
+  makeEditable(document.getElementById("popupRobuxIcon"),"popupRobuxIconCustom"); 
+  makeEditable(document.getElementById("blackRobuxIcon"),"blackRobuxIcon"); 
+  makeEditable(document.getElementById("blackSmallRobux"),"blackSmallRobuxIcon"); 
+  makeEditable(document.getElementById("middleRobuxIcon"),"middleRobuxIcon");
   
-  document.getElementById("gameCircleTrigger").addEventListener("click", (e) => { e.stopPropagation(); if (editorMode !== "off") document.getElementById("planeCrazyInput").click(); });
-  document.getElementById("planeCrazyInput").addEventListener("change", e => { if(editorMode!=="off" && e.target.files[0]){ let r=new FileReader(); r.onload=ev=>{document.getElementById("planeCrazyImage").src=ev.target.result; localStorage.setItem("planeCrazyImage",ev.target.result);}; r.readAsDataURL(e.target.files[0]); } });
+  const gameCircle = document.getElementById("gameCircleTrigger");
+  if(gameCircle) {
+    gameCircle.addEventListener("click", (e) => { 
+      e.stopPropagation(); 
+      if (editorMode !== "off") document.getElementById("planeCrazyInput")?.click(); 
+    });
+  }
+  document.getElementById("planeCrazyInput")?.addEventListener("change", e => { 
+    if(editorMode!=="off" && e.target.files[0]){ 
+      let r=new FileReader(); 
+      r.onload=ev=>{document.getElementById("planeCrazyImage").src=ev.target.result; localStorage.setItem("planeCrazyImage",ev.target.result);}; 
+      r.readAsDataURL(e.target.files[0]); 
+    } 
+  });
   
   const bonusBanner = document.getElementById("bonusBanner"), bannerInputEl = document.getElementById("bannerInput");
-  bannerInputEl.addEventListener("change", e => { if(editorMode!=="off" && e.target.files[0]){ let r=new FileReader(); r.onload=ev=>{let url=ev.target.result; bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('${url}')`; bonusBanner.style.backgroundSize="cover"; localStorage.setItem("planeCrazyBanner",url);}; r.readAsDataURL(e.target.files[0]); } });
-  const savedBan = localStorage.getItem("planeCrazyBanner"); if(savedBan) bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('${savedBan}')`; else bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop')`; bonusBanner.style.backgroundSize="cover";
+  if(bannerInputEl) {
+    bannerInputEl.addEventListener("change", e => { 
+      if(editorMode!=="off" && e.target.files[0]){ 
+        let r=new FileReader(); 
+        r.onload=ev=>{let url=ev.target.result; if(bonusBanner) {bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('${url}')`; bonusBanner.style.backgroundSize="cover";} localStorage.setItem("planeCrazyBanner",url);}; 
+        r.readAsDataURL(e.target.files[0]); 
+      } 
+    });
+  }
+  const savedBan = localStorage.getItem("planeCrazyBanner"); 
+  if(savedBan && bonusBanner) {bonusBanner.style.background=`linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('${savedBan}')`; bonusBanner.style.backgroundSize="cover";}
   
   const robuxIcons = document.querySelectorAll(".robux-icon");
   function setAllPackageIcons(src) { robuxIcons.forEach(icon => { icon.src = src; }); localStorage.setItem("allPackageIcons", src); }
-  robuxIcons.forEach(icon => { icon.addEventListener("click", (e) => { e.stopPropagation(); if (editorMode !== "off") { let inp = document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.onchange=ev=>{ let f=ev.target.files[0]; if(f){ let r=new FileReader(); r.onload=event=>setAllPackageIcons(event.target.result); r.readAsDataURL(f); } }; inp.click(); } }); });
-  const savedAll = localStorage.getItem("allPackageIcons"); if(savedAll) setAllPackageIcons(savedAll);
+  robuxIcons.forEach(icon => { 
+    icon.addEventListener("click", (e) => { 
+      e.stopPropagation(); 
+      if (editorMode !== "off") { 
+        let inp = document.createElement("input"); 
+        inp.type="file"; 
+        inp.accept="image/*"; 
+        inp.onchange=ev=>{ let f=ev.target.files[0]; if(f){ let r=new FileReader(); r.onload=event=>setAllPackageIcons(event.target.result); r.readAsDataURL(f); } }; 
+        inp.click(); 
+      } 
+    }); 
+  });
+  const savedAll = localStorage.getItem("allPackageIcons"); 
+  if(savedAll) setAllPackageIcons(savedAll);
 </script>
 </body>
 </html>
