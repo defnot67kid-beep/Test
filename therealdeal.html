@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Roblox Plus — Bonus Item Manager | War Tycoon</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RobloxPlus</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
+
 *{
     margin:0;
     padding:0;
@@ -21,13 +23,14 @@ body{
     color:white;
 }
 
-/* DYNAMIC FLOATING BACKGROUND */
+/* BACKGROUND */
+
 body::before{
     content:"";
     position:fixed;
     inset:0;
     background:
-    radial-gradient(circle at 70% 20%, #101d66 0%, #060611 55%, #010103 100%);
+    radial-gradient(circle at center,#101d66 0%,#060611 45%,#020204 100%);
     z-index:-2;
 }
 
@@ -36,130 +39,100 @@ body::after{
     position:fixed;
     inset:0;
     background-image:
-    radial-gradient(rgba(255,255,255,.1) 1.2px, transparent 1.2px);
-    background-size:42px 42px;
-    opacity:.3;
+    radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px);
+    background-size:35px 35px;
+    opacity:.25;
     z-index:-1;
-    pointer-events:none;
 }
 
-/* TOP BAR (glass) */
+/* TOPBAR */
+
 .topbar{
     height:76px;
-    width:100%;
-    padding:0 28px;
-    border-bottom:1px solid rgba(255,255,255,.08);
+    padding:0 24px;
     display:flex;
     align-items:center;
     justify-content:space-between;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    backdrop-filter:blur(20px);
     position:sticky;
     top:0;
-    z-index:30;
-    backdrop-filter:blur(24px);
-    background:rgba(0,0,0,.5);
+    z-index:40;
+    background:rgba(0,0,0,.35);
 }
 
 .left-top{
     display:flex;
     align-items:center;
-    gap:24px;
-}
-
-.manage-btn{
-    background:#0f0f14;
-    color:white;
-    border:none;
-    border-radius:40px;
-    padding:12px 24px;
-    font-weight:700;
-    font-size:15px;
-    letter-spacing:0.3px;
-    cursor:pointer;
-    transition:0.2s;
-    border:1px solid rgba(255,255,255,.05);
-}
-.manage-btn:hover{
-    background:#1e1e28;
-    transform:scale(0.97);
+    gap:18px;
 }
 
 .logo{
-    font-size:26px;
+    font-size:24px;
+    font-weight:900;
+}
+
+.manage-btn{
+    border:none;
+    background:#111;
+    color:white;
+    border-radius:14px;
+    padding:14px 20px;
     font-weight:800;
-    background:linear-gradient(135deg,#FFF, #b7c9ff);
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
+    cursor:pointer;
 }
 
 .right-top{
     display:flex;
     align-items:center;
-    gap:18px;
+    gap:12px;
 }
 
 .profile-pill{
-    background:#0b0b12;
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:100px;
-    padding:6px 16px 6px 8px;
+    background:#0f0f15;
+    border:1px solid rgba(255,255,255,.05);
+    border-radius:999px;
+    padding:8px 16px;
     display:flex;
     align-items:center;
-    gap:10px;
-    backdrop-filter:blur(4px);
+    gap:12px;
 }
 
 .profile-pill img{
-    width:44px;
-    height:44px;
+    width:42px;
+    height:42px;
     border-radius:50%;
-    object-fit:cover;
-    border:1.5px solid #5e7eff;
 }
 
 .profile-name{
     font-weight:700;
-    font-size:15px;
 }
 
 .robux-pill{
-    background:#0b0b12;
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:100px;
-    padding:10px 22px;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    font-weight:800;
-    font-size:28px;
-    letter-spacing:-0.5px;
-}
-.robux-pill span{
-    font-size:26px;
+    background:#0f0f15;
+    border:1px solid rgba(255,255,255,.05);
+    border-radius:999px;
+    padding:12px 18px;
+    font-size:24px;
+    font-weight:900;
 }
 
 .send-btn{
-    background:linear-gradient(95deg,#3b56f5,#764eff);
     border:none;
+    background:#111;
     color:white;
-    border-radius:40px;
-    padding:12px 28px;
+    padding:12px 22px;
+    border-radius:999px;
     font-weight:800;
-    font-size:16px;
     cursor:pointer;
-    transition:0.2s;
-    box-shadow:0 4px 12px rgba(90,118,255,0.3);
-}
-.send-btn:hover{
-    transform:translateY(-2px);
-    filter:brightness(1.05);
 }
 
-/* HERO + CARD LAYOUT */
+/* HERO */
+
 .hero{
-    max-width:1300px;
+    max-width:1200px;
     margin:auto;
-    padding:60px 32px 80px;
+    padding:80px 30px;
 }
 
 .hero-wrap{
@@ -167,762 +140,1261 @@ body::after{
     justify-content:space-between;
     align-items:center;
     gap:50px;
-    flex-wrap:wrap;
 }
 
 .big-text{
-    font-size:86px;
+    font-size:96px;
     font-weight:900;
-    line-height:0.96;
-    background:linear-gradient(to right,#ffffff,#c0ceff);
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-    max-width:550px;
+    line-height:.92;
 }
 
 .glow-btn{
     border:none;
-    background:linear-gradient(100deg,#5a76ff,#a855ff);
+    background:linear-gradient(90deg,#5d77ff,#785cff);
     color:white;
-    padding:24px 64px;
-    border-radius:38px;
-    font-size:32px;
-    font-weight:800;
+    padding:26px 70px;
+    border-radius:24px;
+    font-size:30px;
+    font-weight:900;
     cursor:pointer;
-    transition:transform 0.15s, box-shadow 0.2s;
-    box-shadow:0 0 22px rgba(96,113,255,0.6);
-}
-.glow-btn:hover{
-    transform:scale(1.02);
-    box-shadow:0 0 38px #5a76ff;
+    box-shadow:0 0 50px rgba(92,113,255,.5);
 }
 
-/* BONUS CARD */
+/* CARD */
+
 .card-area{
-    margin-top:80px;
+    margin-top:70px;
 }
+
 .card-label{
-    margin-bottom:16px;
+    margin-bottom:18px;
+    color:#b9b9b9;
     font-weight:700;
-    font-size:20px;
-    letter-spacing:-0.2px;
-    color:#bcbcff;
-    border-left:4px solid #5a6eff;
-    padding-left:18px;
 }
 
 .main-card{
-    width:100%;
-    max-width:980px;
-    background:#0c0c10e6;
-    backdrop-filter:blur(8px);
-    border-radius:44px;
+    max-width:920px;
+    border-radius:28px;
     overflow:hidden;
-    border:1px solid rgba(255,255,255,.12);
-    transition:0.25s;
-}
-.main-card:hover{
-    border-color:#3f51ff40;
+    background:#090909;
+    border:1px solid rgba(255,255,255,.05);
 }
 
 .banner{
-    height:260px;
+    height:240px;
     background:
-    linear-gradient(to bottom,transparent 30%,rgba(0,0,0,0.85)),
-    url('https://images.unsplash.com/photo-1580234811497-9df7fd2f6b5a?q=80&w=1400&auto=format&fit=crop');
+    linear-gradient(to bottom,transparent,rgba(0,0,0,.88)),
+    url('https://images.unsplash.com/photo-1474302770737-173ee21bab63?q=80&w=1400&auto=format&fit=crop');
     background-size:cover;
-    background-position:center 30%;
+    background-position:center;
     position:relative;
 }
 
 .game-info{
     position:absolute;
     bottom:22px;
-    left:26px;
+    left:22px;
     display:flex;
     align-items:center;
-    gap:20px;
+    gap:16px;
 }
 
 .game-info img{
-    width:78px;
-    height:78px;
-    border-radius:28px;
-    object-fit:cover;
-    border:2px solid rgba(255,215,0,0.5);
-    background:#0f0f1c;
-    box-shadow:0 8px 20px rgba(0,0,0,0.5);
+    width:74px;
+    height:74px;
+    border-radius:50%;
 }
 
 .game-title{
-    font-size:34px;
-    font-weight:800;
-    letter-spacing:-0.5px;
+    font-size:30px;
+    font-weight:900;
 }
+
 .game-sub{
-    margin-top:8px;
-    background:#ffd96620;
-    display:inline-block;
-    padding:6px 14px;
-    border-radius:40px;
-    font-weight:700;
-    font-size:20px;
-    backdrop-filter:blur(12px);
+    color:#aaa;
+    margin-top:5px;
 }
 
 .pack{
     display:flex;
-    align-items:center;
     justify-content:space-between;
-    padding:24px 36px;
-    border-bottom:1px solid rgba(255,255,255,.05);
+    align-items:center;
+    padding:26px 30px;
+    border-top:1px solid rgba(255,255,255,.06);
 }
-.pack:last-child{
-    border-bottom:none;
-}
+
 .pack-left{
     display:flex;
     align-items:center;
-    gap:22px;
-    flex-wrap:wrap;
-}
-.robux-amount{
-    font-size:32px;
-    font-weight:900;
-    color:#ffde9e;
-}
-.old{
-    text-decoration:line-through;
-    color:#8e8eaa;
-    font-size:22px;
-    font-weight:500;
-}
-.more{
-    background:#2a2a3a;
-    padding:6px 16px;
-    border-radius:50px;
-    color:#bdbdff;
-    font-weight:800;
-    font-size:15px;
-}
-.price{
-    background:#1f1f2c;
-    padding:14px 28px;
-    border-radius:60px;
-    font-size:26px;
-    font-weight:800;
-    letter-spacing:-0.3px;
+    gap:16px;
 }
 
-/* SIDEBAR MANAGEMENT */
+.robux-amount{
+    font-size:34px;
+    font-weight:900;
+}
+
+.old{
+    text-decoration:line-through;
+    color:#777;
+    font-size:22px;
+}
+
+.more{
+    background:#1a1a1a;
+    padding:8px 14px;
+    border-radius:12px;
+    font-size:15px;
+    color:#bbb;
+    font-weight:700;
+}
+
+.price{
+    background:#1d1d1d;
+    padding:16px 24px;
+    border-radius:14px;
+    font-size:24px;
+    font-weight:900;
+}
+
+/* SIDEBAR */
+
 .sidebar{
     position:fixed;
     top:0;
-    left:-500px;
-    width:500px;
+    left:-480px;
+    width:480px;
     height:100vh;
-    background:#050508e6;
-    backdrop-filter:blur(32px);
-    border-right:1px solid rgba(255,255,255,.1);
-    transition:.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    background:#090909;
+    border-right:1px solid rgba(255,255,255,.06);
     z-index:200;
+    transition:.35s;
     overflow-y:auto;
 }
+
 .sidebar.open{
     left:0;
 }
+
 .side-content{
-    padding:30px 28px;
+    padding:28px;
 }
+
 .side-header{
     display:flex;
-    align-items:center;
     justify-content:space-between;
-    margin-bottom:28px;
+    align-items:center;
+    margin-bottom:24px;
 }
+
 .side-title{
-    font-size:44px;
-    font-weight:800;
-    background:linear-gradient(135deg,#fff,#9ab3ff);
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-}
-.close{
     font-size:42px;
+    font-weight:900;
+}
+
+.close{
+    font-size:34px;
     cursor:pointer;
-    transition:0.2s;
+    color:#999;
 }
-.close:hover{
-    color:#ff8a7a;
-}
+
 .panel{
-    background:#111118cc;
-    border-radius:32px;
-    padding:28px;
-    margin-bottom:30px;
-    border:1px solid rgba(255,255,255,.06);
+    background:#111;
+    border-radius:24px;
+    padding:24px;
+    margin-bottom:24px;
+    border:1px solid rgba(255,255,255,.05);
 }
+
 .panel h2{
-    font-size:28px;
+    font-size:34px;
     margin-bottom:20px;
-    font-weight:700;
 }
+
 .label{
     display:block;
-    color:#bcbce6;
-    margin-bottom:12px;
-    font-weight:600;
-    font-size:15px;
-    margin-top:18px;
+    color:#999;
+    margin-top:16px;
+    margin-bottom:10px;
+    font-weight:700;
 }
+
 .input{
     width:100%;
-    background:#030308;
-    border:1px solid #2a2a3c;
+    background:black;
+    border:none;
     outline:none;
     color:white;
-    font-size:20px;
-    padding:16px 18px;
-    border-radius:24px;
-    transition:0.2s;
+    padding:20px;
+    border-radius:16px;
+    font-size:22px;
 }
-.input:focus{
-    border-color:#5f7aff;
-}
+
 .blue-btn{
     width:100%;
     border:none;
-    margin-top:28px;
-    background:#4f6bff;
+    background:#5670ff;
     color:white;
-    font-size:20px;
-    font-weight:800;
-    padding:18px;
-    border-radius:32px;
+    padding:20px;
+    border-radius:18px;
+    margin-top:24px;
+    font-size:24px;
+    font-weight:900;
     cursor:pointer;
-    transition:0.15s;
-}
-.blue-btn:hover{
-    background:#6c84ff;
-    transform:scale(0.98);
 }
 
-.check-wrap{
-    display:flex;
-    align-items:center;
-    gap:20px;
-    margin-bottom:32px;
-    font-size:24px;
-    font-weight:700;
-    background:#0c0c14;
-    padding:18px 24px;
-    border-radius:60px;
-}
-.checkbox{
-    width:28px;
-    height:28px;
-    accent-color:#5f7aff;
-}
 .friend-wrap{
     display:flex;
-    gap:14px;
-    margin:20px 0 16px;
+    gap:12px;
 }
+
 .add-btn{
-    width:110px;
+    width:120px;
     border:none;
-    background:#5f7aff;
+    background:#5670ff;
     color:white;
-    border-radius:28px;
-    font-size:20px;
-    font-weight:800;
+    border-radius:16px;
+    font-size:22px;
+    font-weight:900;
 }
-.friend-buttons{
-    display:flex;
-    gap:14px;
-    margin:20px 0;
-}
-.dark-btn{
-    flex:1;
-    background:#1f1e2a;
-    border:none;
-    color:#cdcdff;
-    padding:14px;
-    border-radius:32px;
-    font-weight:700;
-    font-size:16px;
-    cursor:pointer;
-}
+
 .friend-list{
-    margin-top:18px;
+    margin-top:20px;
 }
+
 .friend{
-    background:#15151f;
-    padding:16px 20px;
-    border-radius:28px;
+    background:#171717;
+    padding:18px;
+    border-radius:16px;
     display:flex;
-    justify-content:space-between;
     align-items:center;
+    justify-content:space-between;
     margin-bottom:12px;
-    font-weight:700;
-    font-size:20px;
 }
+
 .remove{
-    background:#2f151f;
-    color:#ff8070;
     border:none;
-    padding:8px 18px;
-    border-radius:40px;
+    background:#2d0b0b;
+    color:#ff6a6a;
+    padding:10px 14px;
+    border-radius:10px;
     font-weight:800;
     cursor:pointer;
 }
+
+/* OVERLAY */
 
 .overlay{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,0.65);
+    background:rgba(0,0,0,.6);
+    z-index:100;
     opacity:0;
     pointer-events:none;
-    transition:.3s;
-    z-index:100;
+    transition:.25s;
 }
+
 .overlay.show{
     opacity:1;
     pointer-events:auto;
 }
 
-/* small utilities */
-.update-status {
-    font-size: 13px;
-    margin-top: 14px;
-    padding: 9px 12px;
-    border-radius: 28px;
-    text-align: center;
-    background: #1a1a26;
-}
-.loading-spinner {
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    border: 2px solid #ffffff50;
-    border-radius: 50%;
-    border-top-color: white;
-    animation: spin 0.6s linear infinite;
-    margin-left: 8px;
-    vertical-align: middle;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+/* SEND MODAL */
 
-@media(max-width:800px){
-    .big-text{font-size:48px;}
-    .glow-btn{font-size:24px; padding:18px 40px;}
-    .sidebar{width:100%; left:-100%;}
-    .robux-pill span{font-size:20px;}
-    .profile-name{display:none;}
+.send-modal{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:760px;
+    max-width:95%;
+    background:#0b0b10;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:28px;
+    z-index:999;
+    display:none;
+    overflow:hidden;
 }
+
+.send-top{
+    height:90px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 30px;
+}
+
+.send-title{
+    font-size:34px;
+    font-weight:900;
+}
+
+.send-balance{
+    font-size:28px;
+    font-weight:900;
+}
+
+.send-close{
+    font-size:34px;
+    cursor:pointer;
+}
+
+.send-search{
+    width:calc(100% - 60px);
+    margin:26px 30px;
+    background:black;
+    border:none;
+    outline:none;
+    color:white;
+    padding:22px;
+    border-radius:18px;
+    font-size:22px;
+}
+
+.send-section-title{
+    margin-left:30px;
+    margin-bottom:16px;
+    font-size:28px;
+    font-weight:900;
+}
+
+.user-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:14px 30px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.user-row:hover{
+    background:#15151d;
+}
+
+.user-row img{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+}
+
+.user-name{
+    font-size:26px;
+    font-weight:900;
+}
+
+.user-handle{
+    color:#999;
+    margin-top:4px;
+}
+
+.profile-center{
+    text-align:center;
+    padding:36px 20px 10px;
+}
+
+.selected-avatar{
+    width:130px;
+    height:130px;
+    border-radius:50%;
+}
+
+.selected-name{
+    margin-top:18px;
+    font-size:46px;
+    font-weight:900;
+}
+
+.selected-handle{
+    color:#999;
+    font-size:24px;
+    margin-top:8px;
+}
+
+.selected-info{
+    margin-top:10px;
+    color:#bbb;
+    font-size:22px;
+}
+
+.amount-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    padding:30px;
+}
+
+.amount-btn{
+    height:74px;
+    border:none;
+    border-radius:18px;
+    background:#181818;
+    color:white;
+    font-size:28px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.amount-btn.active{
+    background:#5670ff;
+}
+
+.custom-input{
+    width:calc(100% - 60px);
+    margin:0 30px;
+    height:76px;
+    background:#111;
+    border:2px solid #5670ff;
+    border-radius:18px;
+    color:white;
+    font-size:28px;
+    padding:20px;
+    outline:none;
+}
+
+.big-amount{
+    text-align:center;
+    margin-top:24px;
+    font-size:60px;
+    font-weight:900;
+}
+
+.bottom-buttons{
+    display:flex;
+    gap:16px;
+    padding:30px;
+}
+
+.continue-btn,
+.back-btn{
+    flex:1;
+    height:84px;
+    border:none;
+    border-radius:18px;
+    font-size:30px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.continue-btn{
+    background:#5670ff;
+    color:white;
+}
+
+.back-btn{
+    background:#1b1b1b;
+    color:white;
+}
+
+.warning-text{
+    text-align:center;
+    color:#888;
+    font-size:16px;
+    padding:0 30px 30px;
+}
+
+@media(max-width:900px){
+
+.hero-wrap{
+    flex-direction:column;
+    align-items:flex-start;
+}
+
+.big-text{
+    font-size:64px;
+}
+
+.glow-btn{
+    width:100%;
+}
+
+.sidebar{
+    width:100%;
+    left:-100%;
+}
+
+}
+
 </style>
 </head>
 <body>
 
 <div class="overlay" id="overlay"></div>
 
-<!-- SIDEBAR (Manage Site) -->
+<!-- SIDEBAR -->
+
 <div class="sidebar" id="sidebar">
+
 <div class="side-content">
 
 <div class="side-header">
-<div class="side-title">✧ MANAGE SITE</div>
-<div class="close" onclick="closeSidebar()">✕</div>
+<div class="side-title">Manage Site</div>
+<div class="close" onclick="closeSidebar()">×</div>
 </div>
 
 <div class="panel">
-<h2>👤 Profile & Roblox Avatar</h2>
-<label class="label">Roblox Username (Sync avatar)</label>
-<input class="input" id="usernameInput" placeholder="e.g., stickmasterluke" value="stickmasterluke">
 
-<label class="label">Balance (Robux)</label>
-<input class="input" id="balanceInput" value="1859403" type="number">
+<h2>My Profile</h2>
 
-<button class="blue-btn" onclick="updateProfile()">⟳ Update Profile & Avatar</button>
-<div id="profileUpdateStatus" class="update-status"></div>
-</div>
+<label class="label">Username</label>
+<input class="input" id="usernameInput" value="stickmasterluke">
 
-<div class="check-wrap">
-<input type="checkbox" class="checkbox" id="hideCheck">
-<span id="hideText">🙈 Hide profile from top bar</span>
-</div>
+<label class="label">Balance</label>
+<input class="input" id="balanceInput" value="1859403">
 
-<div class="panel">
-<h2>🎴 BONUS BANNER EDITOR</h2>
-<label class="label">Background Image URL (for War Tycoon card)</label>
-<input class="input" id="bgInput" placeholder="https://... image">
+<button class="blue-btn" onclick="updateProfile()">
+Update Profile
+</button>
 
-<label class="label">Bonus Icon / Game Icon (square)</label>
-<input class="input" id="iconInput" placeholder="Avatar / custom icon">
-
-<button class="blue-btn" onclick="saveBanner()">⚡ Apply Banner & Icon</button>
-<p style="font-size:12px; margin-top:12px; opacity:0.6;">✨ The "Bonus item we picked for you" card will reflect your changes instantly</p>
 </div>
 
 <div class="panel">
-<h2>👥 Saved Friends (showcase)</h2>
+
+<h2>Saved Friends</h2>
+
 <div class="friend-wrap">
-<input class="input" id="friendInput" placeholder="Exact username">
-<button class="add-btn" onclick="addFriend()">+ Add</button>
+
+<input
+class="input"
+id="friendInput"
+placeholder="Username">
+
+<button class="add-btn" onclick="addFriend()">
+Add
+</button>
+
 </div>
-<div class="friend-buttons">
-<button class="dark-btn" onclick="removeAll()">🗑 Remove all</button>
-<button class="dark-btn" onclick="resetFriends()">⟳ Reset</button>
-</div>
+
 <div class="friend-list" id="friendList"></div>
+
 </div>
+
 </div>
+
 </div>
 
 <!-- TOPBAR -->
+
 <div class="topbar">
+
 <div class="left-top">
-<button class="manage-btn" onclick="openSidebar()">⚙️ MANAGE SITE</button>
-<div class="logo">ROBLOX<span style="font-weight:400">+</span> STUDIO</div>
-</div>
-<div class="right-top">
-<div class="profile-pill" id="profileHeader">
-<img id="profileIcon" src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter">
-<div class="profile-name" id="profileName">Stickmasterluke</div>
-</div>
-<div class="robux-pill">
-💰 <span id="balanceText">1859403</span>
-</div>
-<button class="send-btn">🚀 Send</button>
-</div>
+
+<button class="manage-btn" onclick="openSidebar()">
+MANAGE SITE
+</button>
+
+<div class="logo">
+RobloxPlus
 </div>
 
-<!-- HERO SECTION: Bonus item card -->
-<div class="hero">
-<div class="hero-wrap">
-<div class="big-text">
-Boost your <br>
-arsenal with<br>
-<span style="color:#ffe1a0;">2X CASH</span>
 </div>
-<button class="glow-btn">⚡ CLAIM BONUS</button>
+
+<div class="right-top">
+
+<div class="profile-pill">
+
+<img
+id="profileIcon"
+src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3109B0E4C5F0D85B77E89A20A6B1E9B3-Png/150/150/AvatarHeadshot/Png/noFilter">
+
+<div
+class="profile-name"
+id="profileName">
+stickmasterluke
+</div>
+
+</div>
+
+<div class="robux-pill">
+⏺ <span id="balanceText">1859403</span>
+</div>
+
+<button class="send-btn">
+Send
+</button>
+
+</div>
+
+</div>
+
+<!-- HERO -->
+
+<div class="hero">
+
+<div class="hero-wrap">
+
+<div class="big-text">
+Enjoy up to<br>
+25%<br>
+more Robux
+</div>
+
+<button class="glow-btn">
+↑ Send Robux
+</button>
+
 </div>
 
 <div class="card-area">
+
 <div class="card-label">
-🌟 BONUS ITEM WE PICKED FOR YOU
+Bonus item we picked for you
 </div>
+
 <div class="main-card">
-<div class="banner" id="bannerDynamic">
+
+<div class="banner">
+
 <div class="game-info">
-<img id="gameIconDynamic" src="https://tr.rbxcdn.com/180DAY-e14c2f238f7b5cbfe8a5f4dbd3d70e6b/150/150/Image/Png/noFilter">
+
+<img
+id="gameIcon"
+src="https://tr.rbxcdn.com/180DAY-e14c2f238f7b5cbfe8a5f4dbd3d70e6b/150/150/Image/Png/noFilter">
+
 <div>
-<div class="game-title">[EOD] War Tycoon</div>
-<div class="game-sub">🔥 2X CASH EVENT 🔥</div>
+
+<div class="game-title">
+[EOD] War Tycoon
 </div>
+
+<div class="game-sub">
+2X CASH
 </div>
+
 </div>
+
+</div>
+
+</div>
+
 <div class="pack">
+
 <div class="pack-left">
 <div class="robux-amount">24.000</div>
 <div class="old">22.500</div>
-<div class="more">+ 1500 BONUS</div>
+<div class="more">+1500 more</div>
 </div>
-<div class="price">$199,99</div>
+
+<div class="price">$199.99</div>
+
 </div>
+
 <div class="pack">
+
 <div class="pack-left">
 <div class="robux-amount">11.000</div>
 <div class="old">10.000</div>
-<div class="more">+ 1000 EXTRA</div>
+<div class="more">+1000 more</div>
 </div>
-<div class="price">$99,99</div>
+
+<div class="price">$99.99</div>
+
 </div>
+
 <div class="pack">
+
 <div class="pack-left">
 <div class="robux-amount">5.250</div>
 <div class="old">4.500</div>
-<div class="more">+ 750 DOUBLE</div>
+<div class="more">+750 more</div>
 </div>
-<div class="price">$49,99</div>
+
+<div class="price">$49.99</div>
+
 </div>
+
 </div>
+
 </div>
+
+</div>
+
+<!-- SEND MODAL -->
+
+<div class="send-modal" id="sendModal">
+
+<!-- SEARCH SCREEN -->
+
+<div id="sendSearchScreen">
+
+<div class="send-top">
+
+<div class="send-title">
+Send Robux
+</div>
+
+<div class="send-balance">
+⏺ <span id="sendBalanceText">1859403</span>
+</div>
+
+<div class="send-close" onclick="closeSendModal()">
+×
+</div>
+
+</div>
+
+<input
+class="send-search"
+id="sendSearchInput"
+placeholder="Search by username">
+
+<div class="send-section-title">
+My Friends (<span id="friendCount">0</span>)
+</div>
+
+<div id="friendsContainer"></div>
+
+<div class="send-section-title" style="margin-top:24px;">
+Search Results
+</div>
+
+<div id="searchResults"></div>
+
+</div>
+
+<!-- USER PROFILE -->
+
+<div id="userProfileScreen" style="display:none;">
+
+<div class="send-top">
+
+<div class="send-title">
+Send Robux
+</div>
+
+<div class="send-balance">
+⏺ <span id="sendBalanceText2">1859403</span>
+</div>
+
+<div class="send-close" onclick="closeSendModal()">
+×
+</div>
+
+</div>
+
+<div class="profile-center">
+
+<img id="selectedAvatar" class="selected-avatar">
+
+<div class="selected-name" id="selectedName"></div>
+
+<div class="selected-handle" id="selectedHandle"></div>
+
+<div class="selected-info">
+👥 0 Mutual Connections
+</div>
+
+<div class="selected-info" id="selectedJoined">
+Joined in 2008
+</div>
+
+</div>
+
+<div class="amount-grid">
+
+<button onclick="selectAmount(25,event)" class="amount-btn">
+25
+</button>
+
+<button onclick="selectAmount(50,event)" class="amount-btn">
+50
+</button>
+
+<button onclick="selectAmount(100,event)" class="amount-btn">
+100
+</button>
+
+<button onclick="selectAmount(200,event)" class="amount-btn">
+200
+</button>
+
+<button onclick="selectAmount(500,event)" class="amount-btn active">
+500
+</button>
+
+<button onclick="selectAmount(1000,event)" class="amount-btn">
+1000
+</button>
+
+</div>
+
+<input
+type="number"
+id="customAmount"
+class="custom-input"
+placeholder="Custom amount">
+
+<div class="big-amount">
+⏺ <span id="bigAmountText">500</span>
+</div>
+
+<div class="bottom-buttons">
+
+<button class="continue-btn">
+Continue
+</button>
+
+<button class="back-btn" onclick="backToSearch()">
+Back
+</button>
+
+</div>
+
+<div class="warning-text">
+You need an age check or parental consent to send Robux.
+Once you send, you cannot cancel.
+</div>
+
+</div>
+
 </div>
 
 <script>
-// ---- GLOBAL REFERENCES ----
+
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("overlay");
-const bannerElement = document.getElementById("bannerDynamic");
-const gameIconElem = document.getElementById("gameIconDynamic");
-const profileIconElem = document.getElementById("profileIcon");
-const profileNameSpan = document.getElementById("profileName");
-const balanceSpan = document.getElementById("balanceText");
 
-// ---------- ROBLOX API (corsproxy) ----------
+function openSidebar(){
+    sidebar.classList.add("open");
+    overlay.classList.add("show");
+}
+
+function closeSidebar(){
+    sidebar.classList.remove("open");
+    overlay.classList.remove("show");
+}
+
+overlay.onclick = ()=>{
+    closeSidebar();
+    closeSendModal();
+};
+
+/* API */
+
 const PROXY = "https://corsproxy.io/?";
 
-async function fetchRobloxAPI(url) {
-    const proxyUrl = PROXY + encodeURIComponent(url);
-    const res = await fetch(proxyUrl);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
+async function fetchRobloxAPI(url){
+
+    const response = await fetch(
+        PROXY + encodeURIComponent(url)
+    );
+
+    return await response.json();
+
 }
 
-async function fetchUserByUsername(username) {
-    try {
-        const url = `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`;
-        const data = await fetchRobloxAPI(url);
+async function fetchUserByUsername(username){
+
+    try{
+
+        const data = await fetchRobloxAPI(
+            `https://users.roblox.com/v1/users/search?keyword=${username}&limit=10`
+        );
+
         return data.data || [];
-    } catch(e) {
-        console.warn("search error", e);
+
+    }catch(e){
+
         return [];
+
     }
+
 }
 
-async function fetchAvatarUrl(userId) {
-    try {
-        const url = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`;
-        const data = await fetchRobloxAPI(url);
-        if (data.data && data.data[0]?.imageUrl) return data.data[0].imageUrl;
-        return null;
-    } catch(e) {
-        return null;
+async function fetchAvatarUrl(userId){
+
+    try{
+
+        const data = await fetchRobloxAPI(
+            `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`
+        );
+
+        return data.data[0].imageUrl;
+
+    }catch(e){
+
+        return "";
+
     }
+
 }
 
-// update avatar using Roblox API (full integration)
-async function syncRobloxAvatar(username) {
-    const statusDiv = document.getElementById("profileUpdateStatus");
-    if (!username || username.trim() === "") {
-        statusDiv.className = "update-status error";
-        statusDiv.innerText = "❌ Enter a username";
-        return false;
-    }
-    statusDiv.className = "update-status loading";
-    statusDiv.innerHTML = `🔍 searching Roblox for ${username}... <span class='loading-spinner'></span>`;
-    try {
-        const users = await fetchUserByUsername(username);
-        if (!users.length) {
-            statusDiv.className = "update-status error";
-            statusDiv.innerText = `❌ User "${username}" not found`;
-            return false;
-        }
+/* PROFILE */
+
+async function updateProfile(){
+
+    const username =
+    document.getElementById("usernameInput").value;
+
+    const balance =
+    document.getElementById("balanceInput").value;
+
+    document.getElementById("profileName").innerText =
+    username;
+
+    document.getElementById("balanceText").innerText =
+    balance;
+
+    localStorage.setItem("mainUsername",username);
+    localStorage.setItem("mainBalance",balance);
+
+    const users = await fetchUserByUsername(username);
+
+    if(users.length){
+
         const user = users[0];
-        const userId = user.id;
-        statusDiv.innerHTML = `✅ found: ${user.name} (ID:${userId})<br>📸 loading avatar...`;
-        const avatarUrl = await fetchAvatarUrl(userId);
-        if (avatarUrl) {
-            profileIconElem.src = avatarUrl;
-            gameIconElem.src = avatarUrl;
-            statusDiv.className = "update-status success";
-            statusDiv.innerHTML = `🎉 Avatar synced for @${user.name}!`;
-            localStorage.setItem("robloxUsername", user.name);
-            localStorage.setItem("robloxAvatarUrl", avatarUrl);
-            localStorage.setItem("robloxUserId", userId);
-            return true;
-        } else {
-            statusDiv.className = "update-status error";
-            statusDiv.innerText = `⚠️ user found but avatar missing.`;
-            return false;
-        }
-    } catch(err) {
-        statusDiv.className = "update-status error";
-        statusDiv.innerText = `❌ API error: ${err.message}`;
-        return false;
+
+        const avatar =
+        await fetchAvatarUrl(user.id);
+
+        document.getElementById("profileIcon").src =
+        avatar;
+
+        document.getElementById("gameIcon").src =
+        avatar;
+
+        localStorage.setItem("mainAvatar",avatar);
+
     }
+
 }
 
-// Update full profile (username, balance, avatar)
-async function updateProfile() {
-    const username = document.getElementById("usernameInput").value.trim();
-    const balance = document.getElementById("balanceInput").value;
-    if (username) profileNameSpan.innerText = username;
-    balanceSpan.innerText = balance;
-    localStorage.setItem("robloxBalance", balance);
-    // sync avatar via API
-    await syncRobloxAvatar(username);
-    // also force profile name display
-    if (username) profileNameSpan.innerText = username;
-    document.getElementById("usernameInput").value = username;
+/* FRIENDS */
+
+let friends = [];
+
+function renderFriends(){
+
+    const list =
+    document.getElementById("friendList");
+
+    list.innerHTML = "";
+
+    friends.forEach((friend,index)=>{
+
+        list.innerHTML += `
+        <div class="friend">
+
+            <span>${friend}</span>
+
+            <button
+            class="remove"
+            onclick="removeFriend(${index})">
+            Remove
+            </button>
+
+        </div>
+        `;
+
+    });
+
+    localStorage.setItem(
+        "friendsList",
+        JSON.stringify(friends)
+    );
+
 }
 
-// Load saved profile data from localstorage
-async function loadSavedProfile() {
-    const savedName = localStorage.getItem("robloxUsername");
-    const savedAvatar = localStorage.getItem("robloxAvatarUrl");
-    const savedBalance = localStorage.getItem("robloxBalance");
-    if (savedName) {
-        profileNameSpan.innerText = savedName;
-        document.getElementById("usernameInput").value = savedName;
-    }
-    if (savedAvatar) {
-        profileIconElem.src = savedAvatar;
-        gameIconElem.src = savedAvatar;
-    }
-    if (savedBalance) {
-        balanceSpan.innerText = savedBalance;
-        document.getElementById("balanceInput").value = savedBalance;
-    }
-    // if username exists but no avatar OR re-validate
-    if (savedName && !savedAvatar) {
-        await syncRobloxAvatar(savedName);
-    } else if (savedName && savedAvatar) {
-        // optional: still re-fetch? we keep offline cached.
-    }
+function addFriend(){
+
+    const input =
+    document.getElementById("friendInput");
+
+    const value = input.value.trim();
+
+    if(!value) return;
+
+    friends.push(value);
+
+    input.value = "";
+
+    renderFriends();
+
 }
 
-// ----- BANNER CUSTOMIZATION (Bonus item picker image)
-function saveBanner() {
-    const bgUrl = document.getElementById("bgInput").value.trim();
-    const iconUrl = document.getElementById("iconInput").value.trim();
-    
-    if (bgUrl) {
-        bannerElement.style.background = `linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.9)), url('${bgUrl}') center/cover`;
-        localStorage.setItem("customBannerBg", bgUrl);
-    }
-    if (iconUrl) {
-        gameIconElem.src = iconUrl;
-        profileIconElem.src = iconUrl;
-        localStorage.setItem("customBannerIcon", iconUrl);
-    }
-    // success visual feedback without alert
-    const statusDiv = document.getElementById("profileUpdateStatus");
-    if (statusDiv) {
-        statusDiv.className = "update-status success";
-        statusDiv.innerText = "🎨 Bonus card image updated!";
-        setTimeout(() => {
-            if(statusDiv.innerText.includes("Bonus card")) statusDiv.innerText = "";
-        }, 2000);
-    }
+function removeFriend(index){
+
+    friends.splice(index,1);
+
+    renderFriends();
+
 }
 
-function loadSavedBanner() {
-    const savedBg = localStorage.getItem("customBannerBg");
-    const savedIcon = localStorage.getItem("customBannerIcon");
-    if (savedBg) {
-        bannerElement.style.background = `linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.9)), url('${savedBg}') center/cover`;
-        document.getElementById("bgInput").value = savedBg;
+/* LOAD SAVED */
+
+window.addEventListener("DOMContentLoaded",()=>{
+
+    const savedFriends =
+    localStorage.getItem("friendsList");
+
+    if(savedFriends){
+
+        friends = JSON.parse(savedFriends);
+
     }
-    if (savedIcon) {
-        gameIconElem.src = savedIcon;
-        profileIconElem.src = savedIcon;
-        document.getElementById("iconInput").value = savedIcon;
+
+    const savedUser =
+    localStorage.getItem("mainUsername");
+
+    const savedBalance =
+    localStorage.getItem("mainBalance");
+
+    const savedAvatar =
+    localStorage.getItem("mainAvatar");
+
+    if(savedUser){
+
+        document.getElementById("profileName").innerText =
+        savedUser;
+
+        document.getElementById("usernameInput").value =
+        savedUser;
+
     }
+
+    if(savedBalance){
+
+        document.getElementById("balanceText").innerText =
+        savedBalance;
+
+        document.getElementById("balanceInput").value =
+        savedBalance;
+
+    }
+
+    if(savedAvatar){
+
+        document.getElementById("profileIcon").src =
+        savedAvatar;
+
+        document.getElementById("gameIcon").src =
+        savedAvatar;
+
+    }
+
+    renderFriends();
+
+});
+
+/* SEND MODAL */
+
+const sendModal =
+document.getElementById("sendModal");
+
+document.querySelectorAll(".send-btn,.glow-btn")
+.forEach(btn=>{
+
+    btn.addEventListener("click",openSendModal);
+
+});
+
+function openSendModal(){
+
+    sendModal.style.display = "block";
+
+    overlay.classList.add("show");
+
+    document.getElementById("sendBalanceText").innerText =
+    document.getElementById("balanceText").innerText;
+
+    document.getElementById("sendBalanceText2").innerText =
+    document.getElementById("balanceText").innerText;
+
+    backToSearch();
+
+    renderSendFriends();
+
 }
 
-// ------- FRIENDS MANAGER (demo social) -------
-let friends = ["Roblox", "builderman"];
+function closeSendModal(){
 
-function renderFriends() {
-    const container = document.getElementById("friendList");
-    if (!container) return;
+    sendModal.style.display = "none";
+
+}
+
+function backToSearch(){
+
+    document.getElementById("sendSearchScreen")
+    .style.display = "block";
+
+    document.getElementById("userProfileScreen")
+    .style.display = "none";
+
+}
+
+/* FRIENDS INSIDE MODAL */
+
+async function renderSendFriends(){
+
+    const container =
+    document.getElementById("friendsContainer");
+
     container.innerHTML = "";
-    friends.forEach((f, idx) => {
-        const div = document.createElement("div");
-        div.className = "friend";
-        div.innerHTML = `<span>⭐ ${f}</span><button class="remove" data-index="${idx}">Remove</button>`;
-        container.appendChild(div);
-    });
-    document.querySelectorAll(".remove").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            const idx = parseInt(btn.getAttribute("data-index"));
-            if (!isNaN(idx)) {
-                friends.splice(idx, 1);
-                renderFriends();
-                localStorage.setItem("friendsList", JSON.stringify(friends));
-            }
-        });
-    });
-    localStorage.setItem("friendsList", JSON.stringify(friends));
-}
 
-function addFriend() {
-    const inp = document.getElementById("friendInput");
-    if (inp.value.trim() !== "") {
-        friends.push(inp.value.trim());
-        inp.value = "";
-        renderFriends();
+    document.getElementById("friendCount")
+    .innerText = friends.length;
+
+    for(const username of friends){
+
+        const users =
+        await fetchUserByUsername(username);
+
+        if(!users.length) continue;
+
+        const user = users[0];
+
+        const avatar =
+        await fetchAvatarUrl(user.id);
+
+        const row =
+        document.createElement("div");
+
+        row.className = "user-row";
+
+        row.innerHTML = `
+        <img src="${avatar}">
+
+        <div>
+
+            <div class="user-name">
+            ${user.displayName || user.name}
+            </div>
+
+            <div class="user-handle">
+            @${user.name}
+            </div>
+
+        </div>
+        `;
+
+        row.onclick = ()=>{
+
+            openUserProfile(user,avatar);
+
+        };
+
+        container.appendChild(row);
+
     }
+
 }
-function removeAll() { friends = []; renderFriends(); }
-function resetFriends() { friends = ["Roblox", "builderman"]; renderFriends(); }
-function loadSavedFriends() {
-    const saved = localStorage.getItem("friendsList");
-    if (saved) {
-        friends = JSON.parse(saved);
-        renderFriends();
-    } else {
-        renderFriends();
+
+/* SEARCH */
+
+document.getElementById("sendSearchInput")
+.addEventListener("input",async e=>{
+
+    const value = e.target.value.trim();
+
+    const results =
+    document.getElementById("searchResults");
+
+    results.innerHTML = "";
+
+    if(!value) return;
+
+    const users =
+    await fetchUserByUsername(value);
+
+    for(const user of users){
+
+        const avatar =
+        await fetchAvatarUrl(user.id);
+
+        const row =
+        document.createElement("div");
+
+        row.className = "user-row";
+
+        row.innerHTML = `
+        <img src="${avatar}">
+
+        <div>
+
+            <div class="user-name">
+            ${user.displayName || user.name}
+            </div>
+
+            <div class="user-handle">
+            @${user.name}
+            </div>
+
+        </div>
+        `;
+
+        row.onclick = ()=>{
+
+            openUserProfile(user,avatar);
+
+        };
+
+        results.appendChild(row);
+
     }
-}
 
-// Hide profile toggle
-const hideCheck = document.getElementById("hideCheck");
-const profileHeader = document.getElementById("profileHeader");
-const hideSpan = document.getElementById("hideText");
-if (hideCheck) {
-    hideCheck.addEventListener("change", () => {
-        if (hideCheck.checked) {
-            profileHeader.style.display = "none";
-            hideSpan.innerText = "🙈 Profile hidden";
-        } else {
-            profileHeader.style.display = "flex";
-            hideSpan.innerText = "Show profile in header";
-        }
-        localStorage.setItem("hideProfile", hideCheck.checked ? "true" : "false");
-    });
-    const storedHide = localStorage.getItem("hideProfile");
-    if (storedHide === "true") {
-        hideCheck.checked = true;
-        profileHeader.style.display = "none";
-        hideSpan.innerText = "🙈 Profile hidden";
-    }
-}
-
-// Sidebar handling
-function openSidebar() { sidebar.classList.add("open"); overlay.classList.add("show"); }
-function closeSidebar() { sidebar.classList.remove("open"); overlay.classList.remove("show"); }
-overlay.onclick = closeSidebar;
-window.closeSidebar = closeSidebar;
-window.openSidebar = openSidebar;
-window.saveBanner = saveBanner;
-window.updateProfile = updateProfile;
-window.addFriend = addFriend;
-window.removeAll = removeAll;
-window.resetFriends = resetFriends;
-
-// Attach global for balance listener
-document.getElementById("balanceInput")?.addEventListener("change", () => {
-    const bal = document.getElementById("balanceInput").value;
-    balanceSpan.innerText = bal;
-    localStorage.setItem("robloxBalance", bal);
 });
 
-// initialization (load everything)
-window.addEventListener("DOMContentLoaded", async () => {
-    loadSavedProfile();
-    loadSavedBanner();
-    loadSavedFriends();
-    // ensure fallback for default banner gradient if no custom saved
-    if (!localStorage.getItem("customBannerBg")) {
-        bannerElement.style.background = `linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1580234811497-9df7fd2f6b5a?q=80&w=1400&auto=format&fit=crop') center/cover`;
+/* USER PROFILE */
+
+function openUserProfile(user,avatar){
+
+    document.getElementById("sendSearchScreen")
+    .style.display = "none";
+
+    document.getElementById("userProfileScreen")
+    .style.display = "block";
+
+    document.getElementById("selectedAvatar").src =
+    avatar;
+
+    document.getElementById("selectedName").innerText =
+    user.displayName || user.name;
+
+    document.getElementById("selectedHandle").innerText =
+    "@" + user.name;
+
+    if(user.created){
+
+        document.getElementById("selectedJoined")
+        .innerText =
+        "Joined in " +
+        new Date(user.created).getFullYear();
+
     }
-    // default icon if none saved
-    if(!localStorage.getItem("customBannerIcon") && !localStorage.getItem("robloxAvatarUrl")){
-        const defIcon = "https://tr.rbxcdn.com/180DAY-e14c2f238f7b5cbfe8a5f4dbd3d70e6b/150/150/Image/Png/noFilter";
-        gameIconElem.src = defIcon;
-        profileIconElem.src = defIcon;
+
+}
+
+/* AMOUNT */
+
+function selectAmount(amount,event){
+
+    document.getElementById("bigAmountText")
+    .innerText = amount;
+
+    document.querySelectorAll(".amount-btn")
+    .forEach(btn=>{
+
+        btn.classList.remove("active");
+
+    });
+
+    event.target.classList.add("active");
+
+}
+
+document.getElementById("customAmount")
+.addEventListener("input",e=>{
+
+    if(e.target.value){
+
+        document.getElementById("bigAmountText")
+        .innerText = e.target.value;
+
     }
-    // In case username exists but avatar not yet: tries to sync
-    const usernameField = document.getElementById("usernameInput").value;
-    if(usernameField && !localStorage.getItem("robloxAvatarUrl")){
-        await syncRobloxAvatar(usernameField);
-    }
+
 });
+
 </script>
+
 </body>
 </html>
