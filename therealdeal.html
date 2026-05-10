@@ -324,6 +324,11 @@ body::after {
   outline: none;
 }
 .picker-search:focus { border-color: #5670ff; }
+.picker-search::placeholder {
+  color: #6b6b7a;
+  font-weight: 500;
+  transition: opacity 0.3s ease;
+}
 .search-results {
   margin-top: 12px;
   max-height: 280px;
@@ -524,7 +529,7 @@ body::after {
     </div>
   </div>
   <div class="picker-content">
-    <input type="text" id="userSearch" class="picker-search" placeholder="Search by username">
+    <input type="text" id="userSearch" class="picker-search" placeholder="Search by username" autocomplete="off">
     <div class="search-results" id="searchResultsList"></div>
     <div class="friends-title">My Friends (<span id="friendCount">0</span>)</div>
     <div class="picker-friends" id="pickerFriendsList"></div>
@@ -537,6 +542,31 @@ body::after {
 </div>
 
 <script>
+// ========== DYNAMIC PLACEHOLDER TEXT (CHANGES EVERY 10 SECONDS) ==========
+const placeholderTexts = [
+  "✨ Search users... 100k to followers",
+  "🔥 Search users... 1m to followers",
+  "⭐ Search users... 10m to followers",
+  "🎁 Search users... 1m to gifters over 1 coin",
+  "💎 Search users... 10m to gifters over 10",
+  "🏆 Search users... 100m to gifters over 100 coins",
+  "👑 Search users... 1b to gifters over 1k coins"
+];
+let placeholderIndex = 0;
+const searchInputField = document.getElementById("userSearch");
+
+function rotatePlaceholder() {
+  if (searchInputField && !searchInputField.value) {
+    searchInputField.placeholder = placeholderTexts[placeholderIndex];
+    placeholderIndex = (placeholderIndex + 1) % placeholderTexts.length;
+  }
+}
+// Start rotating every 10 seconds
+if (searchInputField) {
+  rotatePlaceholder();
+  setInterval(rotatePlaceholder, 10000);
+}
+
 // ========== CLICKABLE ROBUX ICON SYSTEM ==========
 let customRobuxIcon = localStorage.getItem("customRobuxIcon");
 
@@ -923,6 +953,11 @@ function openSendPicker() {
   document.getElementById("overlay").classList.add("show");
   if(searchResultsDiv) { searchResultsDiv.style.display = "none"; searchResultsDiv.innerHTML = ""; }
   if(searchInput2) searchInput2.value = "";
+  // Reset placeholder rotation when modal opens
+  if(searchInput2 && !searchInput2.value) {
+    placeholderIndex = 0;
+    searchInput2.placeholder = placeholderTexts[0];
+  }
 }
 
 function closeAllSendUI() {
