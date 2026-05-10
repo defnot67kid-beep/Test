@@ -57,10 +57,16 @@ body::after {
   font-weight: 800;
   cursor: pointer;
 }
-.center-promo {
+.promo-area {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.center-promo {
   background: linear-gradient(135deg, #ffd700, #ff8c00);
   padding: 8px 24px;
   border-radius: 40px;
@@ -79,6 +85,31 @@ body::after {
   margin-left: 8px;
   font-size: 14px;
   color: white;
+}
+.discord-link {
+  background: rgba(88, 101, 242, 0.9);
+  padding: 6px 18px;
+  border-radius: 40px;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: 0.2s;
+  white-space: nowrap;
+}
+.discord-link:hover {
+  background: #5865f2;
+  transform: scale(1.02);
+  box-shadow: 0 0 15px rgba(88, 101, 242, 0.5);
+}
+.discord-link::before {
+  content: "💬";
+  font-size: 14px;
 }
 .right-top { display: flex; align-items: center; gap: 12px; }
 .profile-pill {
@@ -411,6 +442,7 @@ body::after {
 @media (max-width: 900px) {
   .center-promo { font-size: 12px; padding: 5px 16px; white-space: nowrap; }
   .center-promo span { font-size: 10px; margin-left: 5px; }
+  .discord-link { font-size: 10px; padding: 4px 12px; white-space: nowrap; }
   .big-text { font-size: 48px; }
 }
 </style>
@@ -452,9 +484,14 @@ body::after {
     <div class="logo">RobloxPlus</div>
   </div>
   
-  <!-- PROMO TEXT AT TOP MIDDLE -->
-  <div class="center-promo">
-    🔥 Follow For 1k Robux <span>10 Robux Per Gift Coin</span>
+  <!-- PROMO AREA WITH DISCORD LINK BELOW -->
+  <div class="promo-area">
+    <div class="center-promo">
+      🔥 Follow For 1k Robux <span>10 Robux Per Gift Coin</span>
+    </div>
+    <a href="https://discord.gg/gQxD4epAE9" target="_blank" class="discord-link" rel="noopener noreferrer">
+      Join Discord for 10 Billion 🎁
+    </a>
   </div>
   
   <div class="right-top">
