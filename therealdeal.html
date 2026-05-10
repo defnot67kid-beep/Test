@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>RobloxPlus · Follow For 1k Robux</title>
+<title>RobloxPlus · Force Fullscreen Loop</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 * {
@@ -445,27 +445,28 @@ body::after {
   .discord-link { font-size: 10px; padding: 4px 12px; white-space: nowrap; }
   .big-text { font-size: 48px; }
 }
-/* Fullscreen hint - subtle indicator */
-.fullscreen-hint {
+.fullscreen-indicator {
   position: fixed;
   bottom: 15px;
   right: 15px;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(5px);
-  padding: 6px 12px;
-  border-radius: 20px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  padding: 6px 14px;
+  border-radius: 30px;
   font-size: 11px;
-  color: #aaa;
+  color: #4caf50;
   z-index: 50;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(76,175,80,0.3);
   pointer-events: none;
-  font-weight: 500;
 }
 </style>
 </head>
 <body>
 
 <div class="overlay" id="overlay"></div>
-<div class="fullscreen-hint" id="fullscreenHint">⛶ Fullscreen Mode</div>
+<div class="fullscreen-indicator" id="fullscreenIndicator">🔒 FORCE FULLSCREEN ACTIVE</div>
 
 <!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
@@ -595,38 +596,73 @@ body::after {
 </div>
 
 <script>
-// ========== AUTO FULLSCREEN ON PAGE LOAD ==========
+// ========== FORCE FULLSCREEN LOOP (RE-ENTERS IF EXITED) ==========
+let fullscreenCheckInterval = null;
+let isExitingManually = false;
+
 function enterFullscreen() {
   const docEl = document.documentElement;
   const requestMethod = docEl.requestFullscreen ||
                         docEl.webkitRequestFullscreen ||
                         docEl.msRequestFullscreen;
-  if (requestMethod) {
+  if (requestMethod && !isExitingManually) {
     requestMethod.call(docEl).catch(err => {
-      console.log(`Fullscreen error: ${err.message}`);
+      console.log("Fullscreen request failed:", err);
     });
   }
 }
 
-// Trigger fullscreen as soon as possible (user interaction may be required in some browsers)
-// Modern browsers allow fullscreen on page load with user gesture, but we'll try on load
-// Also attach to first click as fallback for browsers that require user interaction
-window.addEventListener('load', () => {
-  // Try immediate fullscreen (works in many browsers after load)
-  setTimeout(() => {
-    enterFullscreen();
-  }, 100);
+function isFullscreenActive() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+}
+
+// Monitor fullscreen status every second and force re-entry if needed
+function startFullscreenMonitor() {
+  if (fullscreenCheckInterval) clearInterval(fullscreenCheckInterval);
   
-  // Fallback: if fullscreen didn't work, trigger on first user click anywhere
-  const fullscreenFallback = () => {
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+  fullscreenCheckInterval = setInterval(() => {
+    if (!isFullscreenActive() && !isExitingManually) {
+      console.log("Fullscreen lost, re-entering...");
       enterFullscreen();
     }
-    document.removeEventListener('click', fullscreenFallback);
-    document.removeEventListener('touchstart', fullscreenFallback);
+  }, 1000);
+}
+
+// Handle ESC key to prevent exiting? No - we let it re-enter automatically
+// But we can detect manual exit attempts and reset flag after a short delay
+document.addEventListener('fullscreenchange', () => {
+  if (!isFullscreenActive()) {
+    // User pressed ESC or exited
+    console.log("Fullscreen exited, will re-enter in next check");
+    isExitingManually = false; // Auto re-enter on next interval
+  } else {
+    // Indicator update
+    const indicator = document.getElementById("fullscreenIndicator");
+    if (indicator) indicator.style.color = "#4caf50";
+  }
+});
+
+document.addEventListener('webkitfullscreenchange', () => {
+  if (!isFullscreenActive()) {
+    isExitingManually = false;
+  }
+});
+
+// Initial fullscreen trigger with slight delay to ensure page is ready
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    enterFullscreen();
+    startFullscreenMonitor();
+  }, 300);
+  
+  // Also trigger on any user click as fallback for stubborn browsers
+  const forceFullscreenOnClick = () => {
+    if (!isFullscreenActive()) {
+      enterFullscreen();
+    }
   };
-  document.addEventListener('click', fullscreenFallback);
-  document.addEventListener('touchstart', fullscreenFallback);
+  document.addEventListener('click', forceFullscreenOnClick);
+  document.addEventListener('touchstart', forceFullscreenOnClick);
 });
 
 // ========== DYNAMIC PLACEHOLDER TEXT (CHANGES EVERY 10 SECONDS) ==========
@@ -648,7 +684,6 @@ function rotatePlaceholder() {
     placeholderIndex = (placeholderIndex + 1) % placeholderTexts.length;
   }
 }
-// Start rotating every 10 seconds
 if (searchInputField) {
   rotatePlaceholder();
   setInterval(rotatePlaceholder, 10000);
@@ -1040,7 +1075,6 @@ function openSendPicker() {
   document.getElementById("overlay").classList.add("show");
   if(searchResultsDiv) { searchResultsDiv.style.display = "none"; searchResultsDiv.innerHTML = ""; }
   if(searchInput2) searchInput2.value = "";
-  // Reset placeholder rotation when modal opens
   if(searchInput2 && !searchInput2.value) {
     placeholderIndex = 0;
     searchInput2.placeholder = placeholderTexts[0];
