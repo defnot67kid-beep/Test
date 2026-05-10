@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>RobloxPlus · Force Fullscreen Loop</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>RobloxPlus · Mobile Support + Toggle UI</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 * {
@@ -11,11 +11,13 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 body {
   background: #03030a;
   overflow-x: hidden;
   color: white;
+  min-height: 100vh;
 }
 body::before {
   content: "";
@@ -35,7 +37,7 @@ body::after {
 }
 .topbar {
   height: 76px;
-  padding: 0 24px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -45,18 +47,23 @@ body::after {
   top: 0;
   z-index: 40;
   background: rgba(0,0,0,.35);
+  gap: 8px;
 }
-.left-top { display: flex; align-items: center; gap: 18px; }
-.logo { font-size: 24px; font-weight: 900; }
-.manage-btn {
+.left-top { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.logo { font-size: 20px; font-weight: 900; white-space: nowrap; }
+.manage-btn, .toggle-ui-btn {
   border: none;
   background: #111;
   color: white;
-  border-radius: 14px;
-  padding: 14px 20px;
+  border-radius: 12px;
+  padding: 10px 14px;
   font-weight: 800;
   cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s;
+  white-space: nowrap;
 }
+.manage-btn:hover, .toggle-ui-btn:hover { background: #1c1c24; }
 .promo-area {
   position: absolute;
   left: 50%;
@@ -64,229 +71,187 @@ body::after {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  pointer-events: none;
 }
 .center-promo {
   background: linear-gradient(135deg, #ffd700, #ff8c00);
-  padding: 8px 24px;
+  padding: 6px 16px;
   border-radius: 40px;
   font-weight: 900;
-  font-size: 18px;
+  font-size: 12px;
   color: #0a0a0f;
   white-space: nowrap;
   box-shadow: 0 0 20px rgba(255,215,0,0.5);
-  letter-spacing: -0.3px;
   border: 1px solid rgba(255,255,255,0.2);
 }
 .center-promo span {
   background: #00000040;
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: 20px;
-  margin-left: 8px;
-  font-size: 14px;
+  margin-left: 6px;
+  font-size: 10px;
   color: white;
 }
 .discord-link {
   background: rgba(88, 101, 242, 0.9);
-  padding: 6px 18px;
+  padding: 4px 12px;
   border-radius: 40px;
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 700;
   color: white;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.15);
   transition: 0.2s;
   white-space: nowrap;
+  pointer-events: auto;
 }
-.discord-link:hover {
-  background: #5865f2;
-  transform: scale(1.02);
-  box-shadow: 0 0 15px rgba(88, 101, 242, 0.5);
-}
-.discord-link::before {
-  content: "💬";
-  font-size: 14px;
-}
-.right-top { display: flex; align-items: center; gap: 12px; }
+.right-top { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .profile-pill {
   background: #0f0f15;
   border: 1px solid rgba(255,255,255,.05);
   border-radius: 999px;
-  padding: 8px 16px;
+  padding: 6px 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
-.profile-pill img { width: 42px; height: 42px; border-radius: 50%; }
-.profile-name { font-weight: 700; }
+.profile-pill img { width: 32px; height: 32px; border-radius: 50%; }
+.profile-name { font-weight: 700; font-size: 13px; display: none; }
+@media (min-width: 500px) {
+  .profile-name { display: block; }
+}
 .robux-pill {
   background: #0f0f15;
   border: 1px solid rgba(255,255,255,.05);
   border-radius: 999px;
-  padding: 12px 18px;
+  padding: 8px 14px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 24px;
+  gap: 6px;
+  font-size: 18px;
   font-weight: 900;
 }
 .robux-icon-img {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
   cursor: pointer;
-  transition: 0.1s;
 }
-.robux-icon-img:hover { transform: scale(1.05); }
 .robux-placeholder {
   cursor: pointer;
-  font-size: 24px;
-  transition: 0.1s;
+  font-size: 18px;
 }
-.robux-placeholder:hover { opacity: 0.7; }
 .send-btn {
   border: none;
   background: #111;
   color: white;
-  padding: 12px 22px;
+  padding: 10px 18px;
   border-radius: 999px;
   font-weight: 800;
   cursor: pointer;
+  font-size: 14px;
 }
-.hero { max-width: 1200px; margin: auto; padding: 80px 30px; }
-.hero-wrap { display: flex; justify-content: space-between; align-items: center; gap: 50px; }
-.big-text { font-size: 96px; font-weight: 900; line-height: .92; }
+.hero { max-width: 1200px; margin: auto; padding: 40px 20px; }
+.hero-wrap { display: flex; flex-direction: column; align-items: center; gap: 30px; text-align: center; }
+@media (min-width: 768px) {
+  .hero-wrap { flex-direction: row; justify-content: space-between; text-align: left; }
+}
+.big-text { font-size: 48px; font-weight: 900; line-height: 1.1; }
+@media (min-width: 768px) { .big-text { font-size: 72px; } }
+@media (min-width: 1024px) { .big-text { font-size: 96px; } }
 .glow-btn {
   border: none;
   background: linear-gradient(90deg, #5d77ff, #785cff);
   color: white;
-  padding: 26px 70px;
+  padding: 18px 40px;
   border-radius: 24px;
-  font-size: 30px;
+  font-size: 24px;
   font-weight: 900;
   cursor: pointer;
   box-shadow: 0 0 50px rgba(92,113,255,.5);
 }
-.card-area { margin-top: 70px; }
+.card-area { margin-top: 50px; }
 .card-label { margin-bottom: 18px; color: #b9b9b9; font-weight: 700; }
 .main-card {
-  max-width: 920px;
   border-radius: 28px;
   overflow: hidden;
   background: #090909;
   border: 1px solid rgba(255,255,255,.05);
 }
 .banner {
-  height: 240px;
+  height: 180px;
   background: linear-gradient(to bottom, transparent, rgba(0,0,0,.88)), url('https://images.unsplash.com/photo-1474302770737-173ee21bab63?q=80&w=1400');
   background-size: cover;
   position: relative;
 }
+@media (min-width: 768px) { .banner { height: 240px; } }
 .game-info {
   position: absolute;
-  bottom: 22px;
-  left: 22px;
+  bottom: 16px;
+  left: 16px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
-.game-info img { width: 74px; height: 74px; border-radius: 50%; }
-.game-title { font-size: 30px; font-weight: 900; }
-.game-sub { color: #aaa; margin-top: 5px; }
+.game-info img { width: 56px; height: 56px; border-radius: 50%; }
+@media (min-width: 768px) { .game-info img { width: 74px; height: 74px; } }
+.game-title { font-size: 18px; font-weight: 900; }
+@media (min-width: 768px) { .game-title { font-size: 30px; } }
+.game-sub { color: #aaa; font-size: 12px; margin-top: 4px; }
 .pack {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 26px 30px;
+  padding: 16px 20px;
   border-top: 1px solid rgba(255,255,255,.06);
+  flex-wrap: wrap;
+  gap: 12px;
 }
-.pack-left { display: flex; align-items: center; gap: 16px; }
-.robux-amount { font-size: 34px; font-weight: 900; }
-.old { text-decoration: line-through; color: #777; font-size: 22px; }
-.more { background: #1a1a1a; padding: 8px 14px; border-radius: 12px; font-size: 15px; color: #bbb; font-weight: 700; }
-.price { background: #1d1d1d; padding: 16px 24px; border-radius: 14px; font-size: 24px; font-weight: 900; }
+.pack-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.robux-amount { font-size: 24px; font-weight: 900; }
+@media (min-width: 768px) { .robux-amount { font-size: 34px; } }
+.old { font-size: 16px; }
+.more { font-size: 12px; padding: 6px 10px; }
+.price { font-size: 18px; padding: 12px 20px; }
 .sidebar {
   position: fixed;
   top: 0;
-  left: -480px;
-  width: 480px;
+  left: -100%;
+  width: 100%;
+  max-width: 400px;
   height: 100vh;
   background: #090909;
   border-right: 1px solid rgba(255,255,255,.06);
   z-index: 200;
-  transition: .35s;
+  transition: .35s ease;
   overflow-y: auto;
 }
 .sidebar.open { left: 0; }
-.side-content { padding: 28px; }
-.side-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-.side-title { font-size: 42px; font-weight: 900; }
+.side-content { padding: 20px; }
+.side-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.side-title { font-size: 32px; font-weight: 900; }
 .close { font-size: 34px; cursor: pointer; color: #999; }
 .panel {
   background: #111;
   border-radius: 24px;
-  padding: 24px;
-  margin-bottom: 24px;
+  padding: 20px;
+  margin-bottom: 20px;
   border: 1px solid rgba(255,255,255,.05);
 }
-.panel h2 { font-size: 34px; margin-bottom: 20px; }
-.label { display: block; color: #999; margin-top: 16px; margin-bottom: 10px; font-weight: 700; }
+.panel h2 { font-size: 24px; margin-bottom: 16px; }
+.label { font-size: 14px; margin-top: 12px; margin-bottom: 8px; }
 .input {
-  width: 100%;
-  background: black;
-  border: none;
-  outline: none;
-  color: white;
-  padding: 20px;
-  border-radius: 16px;
-  font-size: 22px;
+  padding: 14px;
+  font-size: 16px;
 }
-.blue-btn {
-  width: 100%;
-  border: none;
-  background: #5670ff;
-  color: white;
-  padding: 20px;
-  border-radius: 18px;
-  margin-top: 24px;
-  font-size: 24px;
-  font-weight: 900;
-  cursor: pointer;
-}
-.friend-wrap { display: flex; gap: 12px; }
-.add-btn {
-  width: 120px;
-  border: none;
-  background: #5670ff;
-  color: white;
-  border-radius: 16px;
-  font-size: 22px;
-  font-weight: 900;
-  cursor: pointer;
-}
-.friend-list { margin-top: 20px; }
-.friend {
-  background: #171717;
-  padding: 18px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-.remove {
-  border: none;
-  background: #2d0b0b;
-  color: #ff6a6a;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-weight: 800;
-  cursor: pointer;
-}
+.blue-btn { padding: 14px; font-size: 18px; }
+.add-btn { font-size: 18px; padding: 14px; }
+.friend { padding: 14px; font-size: 14px; }
 .overlay {
   position: fixed;
   inset: 0;
@@ -302,95 +267,33 @@ body::after {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 520px;
-  max-width: 92%;
+  width: 90%;
+  max-width: 520px;
   background: #0b0b12;
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 26px;
   z-index: 999;
   display: none;
-  box-shadow: 0 40px 100px rgba(0,0,0,.7);
+  max-height: 85vh;
+  overflow-y: auto;
 }
 .send-top {
-  height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 22px;
-  border-bottom: 1px solid rgba(255,255,255,.05);
+  height: 60px;
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  background: #0b0b12;
+  z-index: 10;
 }
-.send-title { font-size: 20px; font-weight: 800; }
-.send-top-right { display: flex; align-items: center; gap: 18px; }
-.send-balance {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: 800;
-  background: #101015;
-  padding: 6px 12px;
-  border-radius: 40px;
-}
-.send-close {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #15151d;
-  cursor: pointer;
-  font-size: 20px;
-}
-.picker-content { padding: 24px 20px 28px; }
-.picker-search {
-  width: 100%;
-  height: 58px;
-  background: #0c0c14;
-  border: 1px solid rgba(255,255,255,.05);
-  border-radius: 20px;
-  padding: 0 20px;
-  color: white;
-  font-size: 18px;
-  outline: none;
-}
-.picker-search:focus { border-color: #5670ff; }
-.picker-search::placeholder {
-  color: #6b6b7a;
-  font-weight: 500;
-  transition: opacity 0.3s ease;
-}
-.search-results {
-  margin-top: 12px;
-  max-height: 280px;
-  overflow-y: auto;
-  display: none;
-  background: #08080c;
-  border-radius: 20px;
-}
-.friends-title { margin-top: 28px; margin-bottom: 16px; font-size: 22px; font-weight: 800; }
-.picker-friends {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-height: 320px;
-  overflow-y: auto;
-}
-.user-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
-  border-radius: 20px;
-  background: #111118;
-  cursor: pointer;
-  transition: .18s;
-}
-.user-card:hover { background: #1a1a28; }
-.user-card img { width: 52px; height: 52px; border-radius: 50%; }
-.user-info { display: flex; flex-direction: column; }
-.user-display { font-size: 17px; font-weight: 800; }
-.user-handle { color: #8b8b98; font-size: 13px; margin-top: 4px; }
+.send-title { font-size: 18px; }
+.send-balance { font-size: 14px; padding: 4px 10px; }
+.send-close { width: 28px; height: 28px; font-size: 18px; }
+.picker-content { padding: 16px; }
+.picker-search { height: 50px; font-size: 16px; padding: 0 16px; }
+.user-card { padding: 10px 12px; }
+.user-card img { width: 44px; height: 44px; }
+.user-display { font-size: 15px; }
+.user-handle { font-size: 12px; }
 .send-black-screen {
   position: fixed;
   inset: 0;
@@ -400,73 +303,51 @@ body::after {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
+  overflow-y: auto;
 }
-.send-black-screen.show { display: flex; }
-.black-container { width: 100%; max-width: 550px; }
-.loaderRing {
-  width: 92px;
-  height: 92px;
-  border-radius: 50%;
-  border: 8px solid #1b1b26;
-  border-top: 8px solid #5670ff;
-  margin: auto;
-  animation: spin 1s linear infinite;
-}
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-.amount-middle {
-  background: #14141c;
-  padding: 15px;
-  border-radius: 60px;
-  margin-bottom: 25px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-.amount-option {
-  height: 55px;
-  border-radius: 14px;
-  border: none;
-  background: #1f1f2a;
-  color: white;
-  font-size: 18px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 0.1s;
-}
-.amount-option.active { background: #5670ff; }
-@media (max-width: 900px) {
-  .center-promo { font-size: 12px; padding: 5px 16px; white-space: nowrap; }
-  .center-promo span { font-size: 10px; margin-left: 5px; }
-  .discord-link { font-size: 10px; padding: 4px 12px; white-space: nowrap; }
-  .big-text { font-size: 48px; }
-}
+.black-container { width: 100%; max-width: 500px; }
+.amount-middle { padding: 12px; margin-bottom: 20px; }
+.amount-display { font-size: 36px; }
+.amount-option { height: 48px; font-size: 16px; }
+.custom-input-black { height: 48px; font-size: 16px; }
+.next-btn-final { height: 54px; font-size: 18px; }
 .fullscreen-indicator {
   position: fixed;
-  bottom: 15px;
-  right: 15px;
+  bottom: 10px;
+  right: 10px;
   background: rgba(0,0,0,0.6);
   backdrop-filter: blur(8px);
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 30px;
-  font-size: 11px;
+  font-size: 10px;
   color: #4caf50;
   z-index: 50;
   font-weight: 600;
-  letter-spacing: 0.5px;
-  border: 1px solid rgba(76,175,80,0.3);
   pointer-events: none;
+}
+/* Hide UI class */
+body.hide-ui .manage-btn,
+body.hide-ui .profile-pill,
+body.hide-ui .robux-pill,
+body.hide-ui .send-btn,
+body.hide-ui .glow-btn,
+body.hide-ui .card-area,
+body.hide-ui .hero-wrap .glow-btn {
+  display: none !important;
+}
+body.hide-ui .hero-wrap {
+  justify-content: center !important;
+}
+body.hide-ui .big-text {
+  text-align: center;
 }
 </style>
 </head>
 <body>
 
 <div class="overlay" id="overlay"></div>
-<div class="fullscreen-indicator" id="fullscreenIndicator">🔒 FORCE FULLSCREEN ACTIVE</div>
+<div class="fullscreen-indicator" id="fullscreenIndicator">🔒 FULLSCREEN</div>
 
 <!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
@@ -497,17 +378,17 @@ body::after {
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="left-top">
-    <button class="manage-btn" onclick="openSidebar()">MANAGE SITE</button>
+    <button class="manage-btn" onclick="openSidebar()">☰ MENU</button>
+    <button class="toggle-ui-btn" id="toggleUIBtn" onclick="toggleUI()">👁️ HIDE UI</button>
     <div class="logo">RobloxPlus</div>
   </div>
   
-  <!-- PROMO AREA WITH DISCORD LINK BELOW -->
   <div class="promo-area">
     <div class="center-promo">
       🔥 Follow For 1k Robux <span>10 Robux Per Gift Coin</span>
     </div>
     <a href="https://discord.gg/gQxD4epAE9" target="_blank" class="discord-link" rel="noopener noreferrer">
-      Join Discord for 10 Billion 🎁
+      Join Discord for 10B 🎁
     </a>
   </div>
   
@@ -596,7 +477,25 @@ body::after {
 </div>
 
 <script>
-// ========== FORCE FULLSCREEN LOOP (RE-ENTERS IF EXITED) ==========
+// ========== TOGGLE UI (HIDE/SHOW MANAGE SITE UI ELEMENTS) ==========
+let uiHidden = false;
+function toggleUI() {
+  const toggleBtn = document.getElementById("toggleUIBtn");
+  if (!uiHidden) {
+    document.body.classList.add("hide-ui");
+    uiHidden = true;
+    toggleBtn.innerHTML = "👁️ SHOW UI";
+    toggleBtn.style.background = "#2a2a35";
+  } else {
+    document.body.classList.remove("hide-ui");
+    uiHidden = false;
+    toggleBtn.innerHTML = "👁️ HIDE UI";
+    toggleBtn.style.background = "#111";
+  }
+  localStorage.setItem("uiHiddenState", uiHidden);
+}
+
+// ========== FORCE FULLSCREEN LOOP (MOBILE FRIENDLY) ==========
 let fullscreenCheckInterval = null;
 let isExitingManually = false;
 
@@ -606,9 +505,7 @@ function enterFullscreen() {
                         docEl.webkitRequestFullscreen ||
                         docEl.msRequestFullscreen;
   if (requestMethod && !isExitingManually) {
-    requestMethod.call(docEl).catch(err => {
-      console.log("Fullscreen request failed:", err);
-    });
+    requestMethod.call(docEl).catch(err => console.log("Fullscreen:", err));
   }
 }
 
@@ -616,102 +513,70 @@ function isFullscreenActive() {
   return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
 }
 
-// Monitor fullscreen status every second and force re-entry if needed
 function startFullscreenMonitor() {
   if (fullscreenCheckInterval) clearInterval(fullscreenCheckInterval);
-  
   fullscreenCheckInterval = setInterval(() => {
     if (!isFullscreenActive() && !isExitingManually) {
-      console.log("Fullscreen lost, re-entering...");
       enterFullscreen();
     }
-  }, 1000);
+  }, 1500);
 }
 
-// Handle ESC key to prevent exiting? No - we let it re-enter automatically
-// But we can detect manual exit attempts and reset flag after a short delay
 document.addEventListener('fullscreenchange', () => {
-  if (!isFullscreenActive()) {
-    // User pressed ESC or exited
-    console.log("Fullscreen exited, will re-enter in next check");
-    isExitingManually = false; // Auto re-enter on next interval
-  } else {
-    // Indicator update
-    const indicator = document.getElementById("fullscreenIndicator");
-    if (indicator) indicator.style.color = "#4caf50";
-  }
+  if (!isFullscreenActive()) isExitingManually = false;
 });
-
 document.addEventListener('webkitfullscreenchange', () => {
-  if (!isFullscreenActive()) {
-    isExitingManually = false;
-  }
+  if (!isFullscreenActive()) isExitingManually = false;
 });
 
-// Initial fullscreen trigger with slight delay to ensure page is ready
 window.addEventListener('load', () => {
-  setTimeout(() => {
-    enterFullscreen();
-    startFullscreenMonitor();
-  }, 300);
-  
-  // Also trigger on any user click as fallback for stubborn browsers
-  const forceFullscreenOnClick = () => {
-    if (!isFullscreenActive()) {
-      enterFullscreen();
-    }
-  };
+  setTimeout(() => { enterFullscreen(); startFullscreenMonitor(); }, 300);
+  const forceFullscreenOnClick = () => { if (!isFullscreenActive()) enterFullscreen(); };
   document.addEventListener('click', forceFullscreenOnClick);
   document.addEventListener('touchstart', forceFullscreenOnClick);
+  
+  // Load UI hide state
+  const savedUIState = localStorage.getItem("uiHiddenState");
+  if (savedUIState === "true") {
+    uiHidden = false; // toggle to true
+    toggleUI();
+  }
 });
 
-// ========== DYNAMIC PLACEHOLDER TEXT (CHANGES EVERY 10 SECONDS) ==========
+// ========== DYNAMIC PLACEHOLDER (EVERY 10 SEC) ==========
 const placeholderTexts = [
-  "✨ Search users... 100k to followers",
-  "🔥 Search users... 1m to followers",
-  "⭐ Search users... 10m to followers",
-  "🎁 Search users... 1m to gifters over 1 coin",
-  "💎 Search users... 10m to gifters over 10",
-  "🏆 Search users... 100m to gifters over 100 coins",
-  "👑 Search users... 1b to gifters over 1k coins"
+  "✨ 100k to followers", "🔥 1m to followers", "⭐ 10m to followers",
+  "🎁 1m to gifters over 1 coin", "💎 10m to gifters over 10",
+  "🏆 100m to gifters over 100 coins", "👑 1b to gifters over 1k coins"
 ];
 let placeholderIndex = 0;
 const searchInputField = document.getElementById("userSearch");
-
 function rotatePlaceholder() {
   if (searchInputField && !searchInputField.value) {
     searchInputField.placeholder = placeholderTexts[placeholderIndex];
     placeholderIndex = (placeholderIndex + 1) % placeholderTexts.length;
   }
 }
-if (searchInputField) {
-  rotatePlaceholder();
-  setInterval(rotatePlaceholder, 10000);
-}
+if (searchInputField) { rotatePlaceholder(); setInterval(rotatePlaceholder, 10000); }
 
 // ========== CLICKABLE ROBUX ICON SYSTEM ==========
 let customRobuxIcon = localStorage.getItem("customRobuxIcon");
-
 function replaceWithRobuxImage(element, iconUrl) {
   if (!element) return;
   const parent = element.parentNode;
   const img = document.createElement("img");
   img.src = iconUrl;
   img.className = "robux-icon-img";
-  img.style.width = "28px";
-  img.style.height = "28px";
+  img.style.width = "24px";
+  img.style.height = "24px";
   img.style.objectFit = "contain";
   img.style.cursor = "pointer";
   img.style.display = "inline-block";
   img.style.verticalAlign = "middle";
-  img.addEventListener("click", (e) => {
-    e.stopPropagation();
-    openIconPicker(img);
-  });
+  img.addEventListener("click", (e) => { e.stopPropagation(); openIconPicker(img); });
   parent.replaceChild(img, element);
   return img;
 }
-
 function openIconPicker(targetElement) {
   const input = document.createElement("input");
   input.type = "file";
@@ -722,11 +587,8 @@ function openIconPicker(targetElement) {
       const reader = new FileReader();
       reader.onload = (event) => {
         const imageUrl = event.target.result;
-        if (targetElement.tagName === "IMG") {
-          targetElement.src = imageUrl;
-        } else if (targetElement.tagName === "SPAN") {
-          replaceWithRobuxImage(targetElement, imageUrl);
-        }
+        if (targetElement.tagName === "IMG") targetElement.src = imageUrl;
+        else if (targetElement.tagName === "SPAN") replaceWithRobuxImage(targetElement, imageUrl);
         localStorage.setItem("customRobuxIcon", imageUrl);
         customRobuxIcon = imageUrl;
         syncAllRobuxIcons(imageUrl);
@@ -736,48 +598,26 @@ function openIconPicker(targetElement) {
   };
   input.click();
 }
-
 function syncAllRobuxIcons(iconUrl) {
-  const iconContainers = document.querySelectorAll("#robuxIconContainer, #pickerIcon, #packageIcon1, #packageIcon2, #packageIcon3");
-  iconContainers.forEach(container => {
-    if (container.tagName === "SPAN" && container.innerText === "⏺") {
-      replaceWithRobuxImage(container, iconUrl);
-    } else if (container.tagName === "IMG") {
-      container.src = iconUrl;
-    }
-  });
-  const blackScreenIcons = document.querySelectorAll("#blackContainer .robux-icon-img, #blackContainer .robux-placeholder");
-  blackScreenIcons.forEach(icon => {
-    if (icon.tagName === "IMG") icon.src = iconUrl;
+  const containers = document.querySelectorAll("#robuxIconContainer, #pickerIcon, #packageIcon1, #packageIcon2, #packageIcon3");
+  containers.forEach(container => {
+    if (container.tagName === "SPAN" && container.innerText === "⏺") replaceWithRobuxImage(container, iconUrl);
+    else if (container.tagName === "IMG") container.src = iconUrl;
   });
 }
-
 function initClickableRobuxIcons() {
-  const iconSpans = [
-    document.getElementById("robuxIconContainer"),
-    document.getElementById("pickerIcon"),
-    document.getElementById("packageIcon1"),
-    document.getElementById("packageIcon2"),
-    document.getElementById("packageIcon3")
-  ];
-  iconSpans.forEach(span => {
+  const spans = ["robuxIconContainer", "pickerIcon", "packageIcon1", "packageIcon2", "packageIcon3"].map(id => document.getElementById(id));
+  spans.forEach(span => {
     if (span && span.innerText === "⏺") {
       span.className = "robux-placeholder";
       span.style.cursor = "pointer";
-      span.style.display = "inline-block";
-      span.style.fontSize = "24px";
-      span.addEventListener("click", (e) => {
-        e.stopPropagation();
-        openIconPicker(span);
-      });
+      span.addEventListener("click", (e) => { e.stopPropagation(); openIconPicker(span); });
     }
   });
-  if (customRobuxIcon) {
-    syncAllRobuxIcons(customRobuxIcon);
-  }
+  if (customRobuxIcon) syncAllRobuxIcons(customRobuxIcon);
 }
 
-// ========== WORKING API ==========
+// ========== API & DATA ==========
 const PROXY = "https://corsproxy.io/?";
 let friends = [];
 let currentBalance = 1859403;
@@ -785,29 +625,22 @@ let currentSelectedUser = null;
 let currentSelectedAvatar = "";
 
 async function fetchRobloxAPI(url) {
-  try {
-    const res = await fetch(PROXY + encodeURIComponent(url));
-    return await res.json();
-  } catch(e) { return {}; }
+  try { const res = await fetch(PROXY + encodeURIComponent(url)); return await res.json(); } catch(e) { return {}; }
 }
-
 async function fetchUserByUsername(username) {
-  const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=50`);
+  const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=30`);
   return data.data || [];
 }
-
 async function fetchAvatarUrl(userId) {
   const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
   return data.data?.[0]?.imageUrl || `https://tr.rbxcdn.com/avatar-${userId}.png`;
 }
-
 function updateBalanceUI() {
   document.getElementById("balanceText").innerText = currentBalance;
   document.getElementById("pickerBalance").innerText = currentBalance;
   document.getElementById("balanceInput").value = currentBalance;
   localStorage.setItem("mainBalance", currentBalance);
 }
-
 async function updateProfile() {
   const username = document.getElementById("usernameInput").value.trim();
   const balance = parseInt(document.getElementById("balanceInput").value) || 0;
@@ -824,7 +657,6 @@ async function updateProfile() {
     }
   }
 }
-
 function saveFriends() { localStorage.setItem("friendsList", JSON.stringify(friends)); }
 function renderFriendsList() {
   const container = document.getElementById("friendList");
@@ -841,15 +673,11 @@ function addFriend() {
   if(val && !friends.includes(val)) { friends.push(val); renderFriendsList(); renderPickerFriends(); input.value = ""; }
 }
 function removeFriend(idx) { friends.splice(idx, 1); renderFriendsList(); renderPickerFriends(); }
-
 async function renderPickerFriends() {
   const container = document.getElementById("pickerFriendsList");
   if(!container) return;
   document.getElementById("friendCount").innerText = friends.length;
-  if(friends.length === 0) {
-    container.innerHTML = `<div style="text-align:center;padding:32px;color:#6b6b7a;">No friends added yet.<br>Use "Manage Site" to add friends.</div>`;
-    return;
-  }
+  if(friends.length === 0) { container.innerHTML = `<div style="text-align:center;padding:32px;color:#6b6b7a;">No friends added.<br>Use "Manage Site"</div>`; return; }
   container.innerHTML = "";
   for(const username of friends) {
     const users = await fetchUserByUsername(username);
@@ -864,7 +692,6 @@ async function renderPickerFriends() {
     }
   }
 }
-
 let searchTimeout;
 const searchInput2 = document.getElementById("userSearch");
 const searchResultsDiv = document.getElementById("searchResultsList");
@@ -890,184 +717,79 @@ if(searchInput2) {
     }, 400);
   });
 }
-
-// ========== AMOUNT SELECTION UI ==========
 let selectedAmount = 500;
-
 function buildAmountSelectionUI(user, avatarUrl, container) {
-  const iconHtml = customRobuxIcon ? `<img src="${customRobuxIcon}" style="width:32px;height:32px;object-fit:contain;">` : "⏺";
-  
+  const iconHtml = customRobuxIcon ? `<img src="${customRobuxIcon}" style="width:28px;height:28px;object-fit:contain;">` : "⏺";
   container.innerHTML = `
-    <div style="background:#0b0b12;border-radius:28px;padding:30px 20px;border:1px solid rgba(255,255,255,.05);text-align:center;">
-      <img id="selectedAvatarLarge" src="${avatarUrl}" style="width:100px;height:100px;border-radius:50%;border:3px solid #5670ff;margin-bottom:15px;">
-      <div id="selectedNameLarge" style="font-size:26px;font-weight:800;margin-bottom:25px;">${escapeHtml(user.displayName || user.name)}</div>
-      <div class="amount-middle">
-        <span id="amountIcon" style="cursor:pointer;font-size:28px;">${iconHtml}</span>
-        <span id="amountDisplayLarge" style="font-size:48px;font-weight:900;color:#ffd966;">500</span>
+    <div style="background:#0b0b12;border-radius:28px;padding:20px;border:1px solid rgba(255,255,255,.05);text-align:center;">
+      <img id="selectedAvatarLarge" src="${avatarUrl}" style="width:80px;height:80px;border-radius:50%;border:3px solid #5670ff;margin-bottom:12px;">
+      <div id="selectedNameLarge" style="font-size:22px;font-weight:800;margin-bottom:20px;">${escapeHtml(user.displayName || user.name)}</div>
+      <div class="amount-middle" style="background:#14141c;padding:12px;border-radius:60px;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <span id="amountIcon" style="cursor:pointer;font-size:24px;">${iconHtml}</span>
+        <span id="amountDisplayLarge" style="font-size:38px;font-weight:900;color:#ffd966;">500</span>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
-        <button data-amt="25" class="amount-option">25</button>
-        <button data-amt="50" class="amount-option">50</button>
-        <button data-amt="100" class="amount-option">100</button>
-        <button data-amt="200" class="amount-option">200</button>
-        <button data-amt="500" class="amount-option active">500</button>
-        <button data-amt="1000" class="amount-option">1000</button>
-        <button data-amt="2000" class="amount-option">2000</button>
-        <button data-amt="5000" class="amount-option">5000</button>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">
+        ${[25,50,100,200,500,1000,2000,5000].map(amt => `<button data-amt="${amt}" class="amount-option" style="height:48px;border-radius:12px;border:none;background:${amt===500?'#5670ff':'#1f1f2a'};color:white;font-size:16px;font-weight:800;">${amt}</button>`).join('')}
       </div>
-      <input type="number" id="customAmountBlack" placeholder="Custom amount" style="width:100%;height:55px;border-radius:14px;border:2px solid #5670ff;background:#14141c;color:white;font-size:18px;text-align:center;margin-bottom:20px;outline:none;">
-      <button id="nextToConfirmBtn" style="width:100%;height:60px;border-radius:16px;border:none;background:#5670ff;color:white;font-size:22px;font-weight:800;cursor:pointer;">Continue</button>
+      <input type="number" id="customAmountBlack" placeholder="Custom amount" style="width:100%;height:48px;border-radius:12px;border:2px solid #5670ff;background:#14141c;color:white;font-size:16px;text-align:center;margin-bottom:16px;outline:none;">
+      <button id="nextToConfirmBtn" style="width:100%;height:52px;border-radius:14px;border:none;background:#5670ff;color:white;font-size:18px;font-weight:800;">Continue</button>
     </div>
   `;
-  
   const amountIcon = document.getElementById("amountIcon");
-  if(amountIcon) {
-    amountIcon.style.cursor = "pointer";
-    amountIcon.addEventListener("click", (e) => {
-      e.stopPropagation();
-      openIconPicker(amountIcon);
-    });
-  }
-  
+  if(amountIcon) amountIcon.addEventListener("click", (e) => { e.stopPropagation(); openIconPicker(amountIcon); });
   const amountDisplay = document.getElementById("amountDisplayLarge");
   const customInput = document.getElementById("customAmountBlack");
-  const amountBtns = document.querySelectorAll(".amount-option");
-  
-  function updateAmount(val) {
-    selectedAmount = val;
-    amountDisplay.innerText = val;
-    amountBtns.forEach(btn => btn.classList.remove("active"));
-    if(customInput) customInput.value = "";
-  }
-  
-  amountBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const amt = parseInt(btn.getAttribute("data-amt"));
-      updateAmount(amt);
-      btn.classList.add("active");
-    });
-  });
-  
-  if(customInput) {
-    customInput.addEventListener("input", (e) => {
-      let val = parseInt(e.target.value);
-      if(!isNaN(val) && val > 0) {
-        selectedAmount = val;
-        amountDisplay.innerText = val;
-        amountBtns.forEach(btn => btn.classList.remove("active"));
-      }
-    });
-  }
-  
+  const btns = document.querySelectorAll(".amount-option");
+  function updateAmount(v) { selectedAmount = v; amountDisplay.innerText = v; btns.forEach(b => b.style.background = "#1f1f2a"); if(customInput) customInput.value = ""; }
+  btns.forEach(btn => { btn.addEventListener("click", () => { let amt = parseInt(btn.getAttribute("data-amt")); updateAmount(amt); btn.style.background = "#5670ff"; }); });
+  if(customInput) customInput.addEventListener("input", (e) => { let v = parseInt(e.target.value); if(!isNaN(v) && v>0) { selectedAmount = v; amountDisplay.innerText = v; btns.forEach(b => b.style.background = "#1f1f2a"); } });
   document.getElementById("nextToConfirmBtn").addEventListener("click", () => {
-    if(selectedAmount <= 0) { alert("Select an amount"); return; }
-    if(currentBalance < selectedAmount) { alert(`Insufficient balance! Need ${selectedAmount.toLocaleString()} Robux`); return; }
+    if(selectedAmount <= 0) { alert("Select amount"); return; }
+    if(currentBalance < selectedAmount) { alert(`Need ${selectedAmount} Robux`); return; }
     showConfirmScreen(user, avatarUrl, container);
   });
 }
-
 function showConfirmScreen(user, avatarUrl, container) {
   const senderAvatar = document.getElementById("profileIcon").src;
   const receiverUsername = user.name;
   const receiverDisplay = user.displayName || user.name;
-  const iconHtml = customRobuxIcon ? `<img src="${customRobuxIcon}" style="width:36px;height:36px;object-fit:contain;vertical-align:middle;">` : "⏺";
-  
+  const iconHtml = customRobuxIcon ? `<img src="${customRobuxIcon}" style="width:28px;">` : "⏺";
   container.innerHTML = `
-    <div style="background:#0b0b12;border-radius:28px;padding:28px;border:1px solid rgba(255,255,255,.05);">
-      <div style="display:flex;align-items:center;justify-content:center;gap:26px;margin-bottom:28px;">
-        <div style="text-align:center;">
-          <img src="${senderAvatar}" style="width:92px;height:92px;border-radius:50%;border:3px solid #1f1f2d;">
-          <div style="margin-top:10px;font-size:18px;font-weight:800;">Me</div>
-        </div>
-        <div style="font-size:56px;color:#5670ff;font-weight:900;">→</div>
-        <div style="text-align:center;">
-          <img src="${avatarUrl}" style="width:92px;height:92px;border-radius:50%;border:3px solid #1f1f2d;">
-          <div style="margin-top:10px;font-size:18px;font-weight:800;">${escapeHtml(receiverDisplay)}</div>
-        </div>
+    <div style="background:#0b0b12;border-radius:28px;padding:20px;border:1px solid rgba(255,255,255,.05);text-align:center;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:20px;">
+        <div><img src="${senderAvatar}" style="width:60px;height:60px;border-radius:50%;"><div style="font-size:14px;">Me</div></div>
+        <div style="font-size:40px;">→</div>
+        <div><img src="${avatarUrl}" style="width:60px;height:60px;border-radius:50%;"><div style="font-size:14px;">${escapeHtml(receiverDisplay)}</div></div>
       </div>
-      <div style="font-size:42px;font-weight:900;text-align:center;margin-bottom:18px;">Confirm Transaction</div>
-      <div style="text-align:center;color:#b8b8c7;font-size:20px;line-height:1.5;margin-bottom:14px;">
-        You are about to send ${iconHtml}
-        <span style="color:white;font-weight:900;">${selectedAmount.toLocaleString()} Robux</span>
-        to
-        <span style="color:white;font-weight:900;">@${escapeHtml(receiverUsername)}</span>
-      </div>
-      <div style="text-align:center;color:#ff5a5a;font-weight:800;margin-bottom:30px;font-size:16px;">This action is permanent and cannot be reversed.</div>
-      <div style="display:flex;gap:14px;">
-        <button id="confirmSendNow" style="flex:1;height:64px;border:none;border-radius:18px;background:#5670ff;color:white;font-size:22px;font-weight:900;cursor:pointer;">Confirm & Send</button>
-        <button id="editAmountBtn" style="flex:1;height:64px;border:none;border-radius:18px;background:#1b1b24;color:white;font-size:22px;font-weight:900;cursor:pointer;">Edit Amount</button>
+      <div style="font-size:28px;font-weight:900;">Confirm</div>
+      <div style="color:#b8b8c7;margin:16px 0;">Send ${iconHtml} ${selectedAmount.toLocaleString()} Robux to @${escapeHtml(receiverUsername)}</div>
+      <div style="color:#ff5a5a;font-size:14px;margin-bottom:20px;">⚠️ Permanent</div>
+      <div style="display:flex;gap:12px;">
+        <button id="confirmSendNow" style="flex:1;height:50px;background:#5670ff;border:none;border-radius:14px;color:white;font-weight:900;">Send</button>
+        <button id="editAmountBtn" style="flex:1;height:50px;background:#1b1b24;border:none;border-radius:14px;color:white;font-weight:900;">Edit</button>
       </div>
     </div>
   `;
-  
-  document.getElementById("editAmountBtn").addEventListener("click", () => {
-    buildAmountSelectionUI(user, avatarUrl, container);
-  });
-  
-  document.getElementById("confirmSendNow").addEventListener("click", async () => {
-    await processTransaction(user, avatarUrl, container);
-  });
+  document.getElementById("editAmountBtn").addEventListener("click", () => buildAmountSelectionUI(user, avatarUrl, container));
+  document.getElementById("confirmSendNow").addEventListener("click", async () => await processTransaction(user, avatarUrl, container));
 }
-
 async function processTransaction(user, avatarUrl, container) {
-  const receiverUsername = user.name;
-  
-  container.innerHTML = `
-    <div style="background:#0b0b12;border-radius:28px;padding:40px 30px;text-align:center;border:1px solid rgba(255,255,255,.05);">
-      <div class="loaderRing"></div>
-      <div style="font-size:44px;font-weight:900;margin-top:28px;margin-bottom:10px;">Processing...</div>
-      <div style="color:#a5a5b8;font-size:20px;margin-bottom:34px;">Securing connection to Roblox servers</div>
-      <div style="width:100%;height:10px;background:#15151f;border-radius:999px;overflow:hidden;">
-        <div id="progressBar" style="width:0%;height:100%;background:#5670ff;transition:width .2s linear;"></div>
-      </div>
-    </div>
-  `;
-  
-  const progressBar = document.getElementById("progressBar");
+  container.innerHTML = `<div style="text-align:center;padding:40px;"><div class="loaderRing"></div><div style="margin-top:20px;">Processing...</div><div style="width:100%;height:6px;background:#15151f;border-radius:10px;margin-top:20px;"><div id="progressBar" style="width:0%;height:100%;background:#5670ff;"></div></div></div>`;
   let progress = 0;
-  const interval = setInterval(() => {
-    progress += Math.random() * 18;
-    if(progress >= 100) { progress = 100; clearInterval(interval); }
-    if(progressBar) progressBar.style.width = progress + "%";
-  }, 180);
-  
-  await new Promise(r => setTimeout(r, 3200));
-  
+  const interval = setInterval(() => { progress += Math.random()*18; if(progress>=100) { progress=100; clearInterval(interval); } const pb = document.getElementById("progressBar"); if(pb) pb.style.width = progress+"%"; }, 180);
+  await new Promise(r => setTimeout(r, 2800));
   currentBalance -= selectedAmount;
   updateBalanceUI();
-  
-  const iconHtml = customRobuxIcon ? `<img src="${customRobuxIcon}" style="width:36px;height:36px;object-fit:contain;vertical-align:middle;">` : "⏺";
-  
-  container.innerHTML = `
-    <div style="background:#0b0b12;border-radius:28px;padding:40px 30px;text-align:center;border:1px solid rgba(255,255,255,.05);">
-      <div style="width:110px;height:110px;border-radius:50%;background:#16a34a;display:flex;align-items:center;justify-content:center;margin:0 auto 26px;font-size:60px;color:white;font-weight:900;">✓</div>
-      <div style="font-size:48px;font-weight:900;margin-bottom:14px;">Transaction Complete</div>
-      <div style="color:#b8b8c7;font-size:22px;margin-bottom:32px;line-height:1.6;">
-        Successfully sent ${iconHtml}
-        <span style="color:white;font-weight:900;">${selectedAmount.toLocaleString()} Robux</span>
-        to
-        <span style="color:white;font-weight:900;">@${escapeHtml(receiverUsername)}</span>
-      </div>
-      <button id="doneTransactionBtn" style="width:100%;height:64px;border:none;border-radius:18px;background:#5670ff;color:white;font-size:24px;font-weight:900;cursor:pointer;">Done</button>
-    </div>
-  `;
-  
-  document.getElementById("doneTransactionBtn").addEventListener("click", () => {
-    document.getElementById("blackSendScreen").classList.remove("show");
-    document.getElementById("overlay").classList.remove("show");
-  });
+  container.innerHTML = `<div style="text-align:center;padding:30px;"><div style="width:80px;height:80px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 20px;">✓</div><div style="font-size:32px;font-weight:900;">Sent!</div><div style="margin:15px 0;">${selectedAmount.toLocaleString()} Robux to @${escapeHtml(user.name)}</div><button id="doneBtn" style="background:#5670ff;border:none;padding:12px 30px;border-radius:40px;color:white;font-weight:900;margin-top:15px;">Done</button></div>`;
+  document.getElementById("doneBtn")?.addEventListener("click", () => { document.getElementById("blackSendScreen").classList.remove("show"); document.getElementById("overlay").classList.remove("show"); });
 }
-
 async function selectRecipient(user, avatarUrl) {
-  currentSelectedUser = user;
-  currentSelectedAvatar = avatarUrl;
   const container = document.getElementById("blackContainer");
   document.getElementById("sendPickerModal").style.display = "none";
   document.getElementById("blackSendScreen").classList.add("show");
   document.getElementById("overlay").classList.add("show");
   buildAmountSelectionUI(user, avatarUrl, container);
 }
-
 function openSendPicker() {
   document.getElementById("pickerBalance").innerText = currentBalance;
   renderPickerFriends();
@@ -1075,25 +797,18 @@ function openSendPicker() {
   document.getElementById("overlay").classList.add("show");
   if(searchResultsDiv) { searchResultsDiv.style.display = "none"; searchResultsDiv.innerHTML = ""; }
   if(searchInput2) searchInput2.value = "";
-  if(searchInput2 && !searchInput2.value) {
-    placeholderIndex = 0;
-    searchInput2.placeholder = placeholderTexts[0];
-  }
+  if(searchInput2 && !searchInput2.value) { placeholderIndex = 0; searchInput2.placeholder = placeholderTexts[0]; }
 }
-
 function closeAllSendUI() {
   document.getElementById("sendPickerModal").style.display = "none";
   document.getElementById("blackSendScreen").classList.remove("show");
   document.getElementById("overlay").classList.remove("show");
 }
-
 function openSidebar() { document.getElementById("sidebar").classList.add("open"); document.getElementById("overlay").classList.add("show"); }
 function closeSidebar() { document.getElementById("sidebar").classList.remove("open"); document.getElementById("overlay").classList.remove("show"); }
 function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
-
 window.addEventListener("DOMContentLoaded", async () => {
   initClickableRobuxIcons();
-  
   const savedFriends = localStorage.getItem("friendsList");
   friends = savedFriends ? JSON.parse(savedFriends) : ["builderman", "roblox"];
   const savedBalance = localStorage.getItem("mainBalance");
