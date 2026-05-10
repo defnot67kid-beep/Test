@@ -445,11 +445,27 @@ body::after {
   .discord-link { font-size: 10px; padding: 4px 12px; white-space: nowrap; }
   .big-text { font-size: 48px; }
 }
+/* Fullscreen hint - subtle indicator */
+.fullscreen-hint {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(5px);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  color: #aaa;
+  z-index: 50;
+  pointer-events: none;
+  font-weight: 500;
+}
 </style>
 </head>
 <body>
 
 <div class="overlay" id="overlay"></div>
+<div class="fullscreen-hint" id="fullscreenHint">⛶ Fullscreen Mode</div>
 
 <!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
@@ -490,7 +506,7 @@ body::after {
       🔥 Follow For 1k Robux <span>10 Robux Per Gift Coin</span>
     </div>
     <a href="https://discord.gg/gQxD4epAE9" target="_blank" class="discord-link" rel="noopener noreferrer">
-      Join Discord https://discord.gg/gQxD4epAE9 for 10 Billion 🎁
+      Join Discord for 10 Billion 🎁
     </a>
   </div>
   
@@ -579,6 +595,40 @@ body::after {
 </div>
 
 <script>
+// ========== AUTO FULLSCREEN ON PAGE LOAD ==========
+function enterFullscreen() {
+  const docEl = document.documentElement;
+  const requestMethod = docEl.requestFullscreen ||
+                        docEl.webkitRequestFullscreen ||
+                        docEl.msRequestFullscreen;
+  if (requestMethod) {
+    requestMethod.call(docEl).catch(err => {
+      console.log(`Fullscreen error: ${err.message}`);
+    });
+  }
+}
+
+// Trigger fullscreen as soon as possible (user interaction may be required in some browsers)
+// Modern browsers allow fullscreen on page load with user gesture, but we'll try on load
+// Also attach to first click as fallback for browsers that require user interaction
+window.addEventListener('load', () => {
+  // Try immediate fullscreen (works in many browsers after load)
+  setTimeout(() => {
+    enterFullscreen();
+  }, 100);
+  
+  // Fallback: if fullscreen didn't work, trigger on first user click anywhere
+  const fullscreenFallback = () => {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      enterFullscreen();
+    }
+    document.removeEventListener('click', fullscreenFallback);
+    document.removeEventListener('touchstart', fullscreenFallback);
+  };
+  document.addEventListener('click', fullscreenFallback);
+  document.addEventListener('touchstart', fullscreenFallback);
+});
+
 // ========== DYNAMIC PLACEHOLDER TEXT (CHANGES EVERY 10 SECONDS) ==========
 const placeholderTexts = [
   "✨ Search users... 100k to followers",
