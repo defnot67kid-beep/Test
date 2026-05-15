@@ -473,7 +473,7 @@
 
             <!-- STEP 1: Search -->
             <div id="step-search" class="p-5">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search by username" oninput="handleSearch(this.value)">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by username" autocomplete="off">
                 
                 <!-- No results state -->
                 <div id="no-results" class="hidden mt-4">
@@ -760,13 +760,33 @@
         let currentEditingElement = null;
         let currentItemKey = null;
 
-        // Fake user database for search
-        const fakeUsers = [
-            { name: 'builderman', handle: '@builderman', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=builderman', joined: 2008, mutual: 0 },
-            { name: 'Roblox', handle: '@roblox', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Roblox', joined: 2006, mutual: 2 },
-            { name: 'SAITAMA', handle: '@imnotbobgray58', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Saitama', joined: 2019, mutual: 5 },
-            { name: 'CyberNova', handle: '@cybernova', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=CyberNova', joined: 2021, mutual: 1 },
-        ];
+        // ===== ROBLOX API (from Script B) =====
+        const PROXY = "https://corsproxy.io/?";
+        let searchTimeout;
+
+        async function fetchRobloxAPI(url) {
+            try {
+                const res = await fetch(PROXY + encodeURIComponent(url));
+                return await res.json();
+            } catch(e) { return {}; }
+        }
+
+        async function fetchUserByUsername(username) {
+            const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`);
+            return data.data || [];
+        }
+
+        async function fetchAvatarUrl(userId) {
+            const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
+            return data.data?.[0]?.imageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`;
+        }
+
+        function escapeHtml(str) { 
+            if(!str) return ""; 
+            return str.replace(/[&<>'"]/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[m]));
+        }
 
         // ===== SEND MODAL =====
         function openSendModal() {
@@ -789,84 +809,71 @@
             document.getElementById('step-' + step).classList.remove('hidden');
         }
 
-        async function handleSearch(val) {
-    const noRes = document.getElementById('no-results');
-    const resList = document.getElementById('search-results');
-    const defaultList = document.getElementById('friends-list-default');
-    
-    if (val.trim() === '') {
-        noRes.classList.add('hidden');
-        resList.classList.add('hidden');
-        defaultList.classList.remove('hidden');
-        return;
-    }
-    
-    defaultList.classList.add('hidden');
-    
-    // Show loading state
-    resList.classList.remove('hidden');
-    noRes.classList.add('hidden');
-    const list = document.getElementById('results-list');
-    list.innerHTML = `
-        <div class="text-center py-8">
-            <i class="fas fa-circle-notch fa-spin text-gray-400 text-xl mb-2"></i>
-            <p class="text-xs text-gray-500">Searching...</p>
-        </div>
-    `;
-    document.getElementById('results-label').textContent = 'Global Search ( ... )';
-    
-    try {
-        // Fetch users from Roblox API
-        const response = await fetch(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(val)}&limit=10`);
-        
-        if (!response.ok) throw new Error('API error');
-        
-        const data = await response.json();
-        const users = data.data || [];
-        
-        if (users.length === 0) {
-            resList.classList.add('hidden');
-            noRes.classList.remove('hidden');
-            document.getElementById('no-results-term').textContent = val;
-            document.getElementById('search-label').textContent = `Global Search ( 0 )`;
-            return;
-        }
-        
-        // Get avatars for all users
-        const userIds = users.map(u => u.id).join(',');
-        const avatarResponse = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userIds}&size=150x150&format=Png&isCircular=true`);
-        
-        let avatarMap = {};
-        if (avatarResponse.ok) {
-            const avatarData = await avatarResponse.json();
-            avatarData.data.forEach(av => {
-                avatarMap[av.targetId] = av.imageUrl;
+        // ===== DEBOUNCED SEARCH (from Script B) =====
+        const searchInput = document.getElementById('searchInput');
+        const searchResultsDiv = document.getElementById('search-results');
+        const resultsList = document.getElementById('results-list');
+        const noResDiv = document.getElementById('no-results');
+        const defaultList = document.getElementById('friends-list-default');
+
+        if(searchInput) {
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                const val = searchInput.value.trim();
+                
+                if(!val) {
+                    noResDiv.classList.add('hidden');
+                    searchResultsDiv.classList.add('hidden');
+                    defaultList.classList.remove('hidden');
+                    return;
+                }
+                
+                defaultList.classList.add('hidden');
+                
+                searchTimeout = setTimeout(async () => {
+                    // Show loading state
+                    searchResultsDiv.classList.remove('hidden');
+                    noResDiv.classList.add('hidden');
+                    resultsList.innerHTML = `
+                        <div class="text-center py-6">
+                            <i class="fas fa-circle-notch fa-spin text-gray-400 text-lg mb-2"></i>
+                            <p class="text-xs text-gray-500">Searching Roblox...</p>
+                        </div>
+                    `;
+                    document.getElementById('results-label').textContent = 'Global Search ( ... )';
+                    
+                    const users = await fetchUserByUsername(val);
+                    
+                    if(users.length === 0) {
+                        searchResultsDiv.classList.add('hidden');
+                        noResDiv.classList.remove('hidden');
+                        document.getElementById('no-results-term').textContent = val;
+                        document.getElementById('search-label').textContent = 'Global Search ( 0 )';
+                        return;
+                    }
+                    
+                    noResDiv.classList.add('hidden');
+                    searchResultsDiv.classList.remove('hidden');
+                    document.getElementById('results-label').textContent = `Global Search ( ${users.length} )`;
+                    
+                    resultsList.innerHTML = '';
+                    for(const user of users.slice(0, 10)) {
+                        const avatar = await fetchAvatarUrl(user.id);
+                        const handle = '@' + user.name.toLowerCase().replace(/\s+/g, '');
+                        const displayName = user.displayName || user.name;
+                        
+                        const card = document.createElement('div');
+                        card.className = 'user-result-item';
+                        card.innerHTML = `
+                            <div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}'"></div>
+                            <div><p class="text-sm font-bold">${escapeHtml(displayName)}</p><p class="text-[10px] text-gray-500">${escapeHtml(handle)}</p></div>
+                        `;
+                        card.onclick = () => selectUser(displayName, handle, avatar);
+                        resultsList.appendChild(card);
+                    }
+                }, 400);
             });
         }
-        
-        // Display results
-        document.getElementById('results-label').textContent = `Global Search ( ${users.length} )`;
-        list.innerHTML = users.map(u => {
-            const avatarUrl = avatarMap[u.id] || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(u.name);
-            const handle = '@' + u.name.toLowerCase().replace(/\s+/g, '');
-            return `
-                <div class="user-result-item" onclick="selectUser('${u.name.replace(/'/g, "\\'")}','${handle}','${avatarUrl.replace(/'/g, "\\'")}')">
-                    <div class="avatar-sm"><img src="${avatarUrl}" class="w-full h-full object-cover" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}'"></div>
-                    <div><p class="text-sm font-bold">${u.name}</p><p class="text-[10px] text-gray-500">${handle}</p></div>
-                </div>
-            `;
-        }).join('');
-        
-    } catch (error) {
-        console.error('Search error:', error);
-        resList.classList.add('hidden');
-        noRes.classList.remove('hidden');
-        document.getElementById('no-results-term').textContent = val;
-        document.getElementById('search-label').textContent = `Global Search ( 0 )`;
-        document.getElementById('no-results').querySelector('.text-sm').innerHTML = 
-            'Search unavailable. Please try again later.';
-    }
-}
 
         function selectUser(name, handle, avatar) {
             selectedUser = { name, handle, avatar };
