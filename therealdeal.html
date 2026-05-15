@@ -94,7 +94,6 @@
             box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
         }
 
-        /* Amount selector buttons */
         .amount-btn {
             border: 1px solid rgba(255,255,255,0.1);
             background: rgba(255,255,255,0.05);
@@ -120,7 +119,6 @@
             color: white;
         }
 
-        /* Progress dots */
         .progress-track {
             display: flex;
             align-items: center;
@@ -147,7 +145,6 @@
         }
         .progress-line.done { background: #22c55e; }
 
-        /* Shield icon for loading */
         .shield-container {
             width: 70px;
             height: 70px;
@@ -176,7 +173,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Success checkmark */
         .success-circle {
             width: 70px;
             height: 70px;
@@ -194,7 +190,6 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* User result item */
         .user-result-item {
             display: flex;
             align-items: center;
@@ -206,7 +201,6 @@
         }
         .user-result-item:hover { background: rgba(255,255,255,0.07); }
 
-        /* Toast notification */
         #toast-notif {
             position: fixed;
             top: 16px;
@@ -227,20 +221,11 @@
         }
         #toast-notif.show { transform: translateX(-50%) translateY(0); }
 
-        /* Modal overlay transition */
-        .modal-overlay {
-            animation: fadeIn 0.15s ease;
-        }
+        .modal-overlay { animation: fadeIn 0.15s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .modal-card {
-            animation: slideUp 0.2s ease;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        .modal-card { animation: slideUp 0.2s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* Search input */
         .search-input {
             background: rgba(255,255,255,0.05);
             border: 1.5px solid rgba(59,130,246,0.5);
@@ -254,7 +239,6 @@
         }
         .search-input:focus { border-color: #3b82f6; }
 
-        /* Avatar ring */
         .avatar-ring {
             width: 72px;
             height: 72px;
@@ -275,7 +259,6 @@
             background: #1a1a1a;
         }
 
-        /* Transaction details table */
         .tx-row {
             display: flex;
             justify-content: space-between;
@@ -286,7 +269,6 @@
         }
         .tx-row:last-child { border-bottom: none; }
 
-        /* Background for loading screens */
         .loading-bg {
             background: linear-gradient(180deg, #111 0%, #0d1117 100%);
             border-radius: 12px;
@@ -312,7 +294,6 @@
             margin-bottom: 20px;
         }
         
-        /* Loading spinner for API calls */
         .api-loading {
             display: inline-block;
             width: 16px;
@@ -323,12 +304,10 @@
             animation: spin 0.8s linear infinite;
             margin-left: 8px;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="flex">
 
-    <!-- Toast notification -->
     <div id="toast-notif">
         <span style="color:#22c55e;font-size:16px;">✓</span>
         <span id="toast-text">Gift sent!</span>
@@ -350,47 +329,18 @@
         <input type="file" id="logoFileInput" accept="image/*" style="display: none;">
         
         <nav class="flex-1 space-y-1" id="sidebarNav">
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-white group" data-item="home">
-                <i class="fas fa-home w-5 editable-icon" data-item-key="home"></i>
-                <span>Home</span>
-            </div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="profile">
-                <i class="fas fa-user w-5 editable-icon" data-item-key="profile"></i>
-                <span>Profile</span>
-            </div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-blue-400 group" data-item="plus">
-                <i class="fas fa-shield-alt w-5 editable-icon" data-item-key="plus"></i>
-                <span>Plus Membership</span>
-                <i class="fas fa-check-circle ml-auto text-xs"></i>
-            </div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="messages">
-                <i class="fas fa-envelope w-5 editable-icon" data-item-key="messages"></i>
-                <span>Messages</span>
-            </div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="friends">
-                <i class="fas fa-users w-5 editable-icon" data-item-key="friends"></i>
-                <span>Friends</span>
-                <span id="friendCountBadge" class="ml-auto bg-white/10 px-2 py-0.5 rounded-full text-[10px] friend-count-badge" title="Click to edit friend count">211</span>
-            </div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="avatar">
-                <i class="fas fa-user-circle w-5 editable-icon" data-item-key="avatar"></i>
-                <span>Avatar</span>
-            </div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="inventory">
-                <i class="fas fa-archive w-5 editable-icon" data-item-key="inventory"></i>
-                <span>Inventory</span>
-            </div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="sandbox">
-                <i class="fas fa-cube w-5 editable-icon" data-item-key="sandbox"></i>
-                <span>Sandbox</span>
-            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-white group"><i class="fas fa-home w-5 editable-icon" data-item-key="home"></i><span>Home</span></div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group"><i class="fas fa-user w-5 editable-icon" data-item-key="profile"></i><span>Profile</span></div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-blue-400 group"><i class="fas fa-shield-alt w-5 editable-icon" data-item-key="plus"></i><span>Plus Membership</span><i class="fas fa-check-circle ml-auto text-xs"></i></div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group"><i class="fas fa-envelope w-5 editable-icon" data-item-key="messages"></i><span>Messages</span></div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group"><i class="fas fa-users w-5 editable-icon" data-item-key="friends"></i><span>Friends</span><span id="friendCountBadge" class="ml-auto bg-white/10 px-2 py-0.5 rounded-full text-[10px] friend-count-badge">211</span></div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group"><i class="fas fa-user-circle w-5 editable-icon" data-item-key="avatar"></i><span>Avatar</span></div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group"><i class="fas fa-archive w-5 editable-icon" data-item-key="inventory"></i><span>Inventory</span></div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group"><i class="fas fa-cube w-5 editable-icon" data-item-key="sandbox"></i><span>Sandbox</span></div>
         </nav>
 
         <div class="mt-auto border-t border-white/10 pt-4 text-[11px]">
-            <div class="bg-white/5 p-3 rounded-lg border border-white/10">
-                <p class="text-white font-semibold">Plus Active</p>
-                <p class="text-green-500">● Membership active</p>
-            </div>
+            <div class="bg-white/5 p-3 rounded-lg border border-white/10"><p class="text-white font-semibold">Plus Active</p><p class="text-green-500">● Membership active</p></div>
         </div>
     </aside>
 
@@ -413,170 +363,63 @@
         </header>
 
         <div class="max-w-4xl mx-auto py-12 px-6">
-            <div class="text-center mb-12">
-                <h1 class="text-5xl font-extrabold tracking-tight mb-2">Enjoy up to 25% <br> more Credits</h1>
-            </div>
-
+            <div class="text-center mb-12"><h1 class="text-5xl font-extrabold tracking-tight mb-2">Enjoy up to 25% <br> more Credits</h1></div>
             <div class="bg-[#161616] rounded-xl border border-white/5 overflow-hidden mb-8">
                 <div class="p-6 border-b border-white/5 bg-gradient-to-r from-blue-900/20 to-transparent">
                     <p class="text-sm font-bold uppercase tracking-wider text-gray-400">Bonus item we picked for you</p>
-                    <div class="flex items-center mt-4 space-x-4">
-                        <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">🍀</div>
-                        <div>
-                            <p class="font-bold">Celestial Luck</p>
-                            <p class="text-xs text-gray-500">RNG Battles</p>
-                        </div>
-                    </div>
+                    <div class="flex items-center mt-4 space-x-4"><div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">🍀</div><div><p class="font-bold">Celestial Luck</p><p class="text-xs text-gray-500">RNG Battles</p></div></div>
                 </div>
                 <div class="p-2 space-y-1">
-                    <div class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg group transition">
-                        <div class="flex items-center space-x-4">
-                            <span class="font-bold text-xl">24.000</span>
-                            <span class="text-gray-500 line-through text-sm">22.500</span>
-                            <span class="text-green-400 text-xs font-bold bg-green-400/10 px-2 py-1 rounded">+1500 more</span>
-                        </div>
-                        <button class="bg-[#2a2a2a] px-6 py-2 rounded font-bold text-sm w-32">$199,99</button>
-                    </div>
-                    <div class="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-500/30 rounded-lg">
-                        <div class="flex items-center space-x-4">
-                            <span class="font-bold text-xl">2.000</span>
-                            <span class="text-gray-500 line-through text-sm">1.700</span>
-                            <span class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-1 rounded">+300 more</span>
-                        </div>
-                        <button class="btn-blue px-6 py-2 rounded font-bold text-sm w-32">$19,99</button>
-                    </div>
+                    <div class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg"><div class="flex items-center space-x-4"><span class="font-bold text-xl">24.000</span><span class="text-gray-500 line-through text-sm">22.500</span><span class="text-green-400 text-xs font-bold bg-green-400/10 px-2 py-1 rounded">+1500 more</span></div><button class="bg-[#2a2a2a] px-6 py-2 rounded font-bold text-sm w-32">$199,99</button></div>
+                    <div class="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-500/30 rounded-lg"><div class="flex items-center space-x-4"><span class="font-bold text-xl">2.000</span><span class="text-gray-500 line-through text-sm">1.700</span><span class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-1 rounded">+300 more</span></div><button class="btn-blue px-6 py-2 rounded font-bold text-sm w-32">$19,99</button></div>
                 </div>
             </div>
-
-            <div class="mt-16 space-y-4">
-                <h2 class="text-2xl font-bold">FAQ</h2>
-                <div class="space-y-2">
-                    <div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer">
-                        <span>What are Credits?</span>
-                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
-                    </div>
-                    <div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer">
-                        <span>Where are my Credits?</span>
-                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
-                    </div>
-                </div>
-            </div>
+            <div class="mt-16 space-y-4"><h2 class="text-2xl font-bold">FAQ</h2><div class="space-y-2"><div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer"><span>What are Credits?</span><i class="fas fa-chevron-down text-xs text-gray-500"></i></div><div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer"><span>Where are my Credits?</span><i class="fas fa-chevron-down text-xs text-gray-500"></i></div></div></div>
         </div>
     </main>
 
-    <!-- SEND MODAL -->
+    <!-- SEND MODAL with Roblox API Integration -->
     <div id="sendModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 modal-overlay">
         <div class="glass-modal w-[420px] rounded-xl overflow-hidden shadow-2xl modal-card">
             <div class="p-4 border-b border-white/10 flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-share text-gray-400 text-sm"></i>
-                    <span class="font-bold text-sm">Gift Balance</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-1.5">
-                        <i class="fas fa-gem text-[10px] text-gray-400"></i>
-                        <span class="text-xs font-bold" id="gift-balance-header">9.229.940</span>
-                    </div>
-                    <button onclick="closeSendModal()" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button>
-                </div>
+                <div class="flex items-center space-x-2"><i class="fas fa-share text-gray-400 text-sm"></i><span class="font-bold text-sm">Gift Balance</span></div>
+                <div class="flex items-center gap-3"><div class="flex items-center gap-1.5"><i class="fas fa-gem text-[10px] text-gray-400"></i><span class="text-xs font-bold" id="gift-balance-header">9.229.940</span></div><button onclick="closeSendModal()" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button></div>
             </div>
 
             <div id="step-search" class="p-5">
                 <input type="text" id="searchInput" class="search-input" placeholder="Search Roblox username..." oninput="handleRobloxSearch(this.value)">
-                <div id="no-results" class="hidden mt-4">
-                    <p class="text-[11px] text-gray-500 font-bold uppercase mb-3">Roblox Search (0)</p>
-                    <div class="bg-white/5 rounded-xl p-8 text-center">
-                        <p class="text-sm text-gray-400">No Roblox users found for "<span id="no-results-term"></span>"</p>
-                    </div>
-                </div>
-                <div id="search-results" class="hidden mt-4">
-                    <p class="text-[11px] text-gray-500 font-bold uppercase mb-2" id="results-label">Roblox Users</p>
-                    <div id="results-list" class="space-y-1 max-h-[260px] overflow-y-auto custom-scrollbar"></div>
-                </div>
-                <div id="friends-list-default" class="mt-4">
-                    <p class="text-[11px] text-gray-500 font-bold uppercase mb-3">Saved Friends</p>
-                    <div id="savedFriendsList" class="space-y-1 max-h-[280px] overflow-y-auto custom-scrollbar pr-1"></div>
-                </div>
+                <div id="no-results" class="hidden mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-3">Roblox Search (0)</p><div class="bg-white/5 rounded-xl p-8 text-center"><p class="text-sm text-gray-400">No Roblox users found for "<span id="no-results-term"></span>"</p></div></div>
+                <div id="search-results" class="hidden mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-2" id="results-label">Roblox Users</p><div id="results-list" class="space-y-1 max-h-[260px] overflow-y-auto custom-scrollbar"></div></div>
+                <div id="friends-list-default" class="mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-3">Saved Friends</p><div id="savedFriendsList" class="space-y-1 max-h-[280px] overflow-y-auto custom-scrollbar pr-1"></div></div>
             </div>
 
             <div id="step-amount" class="hidden p-5">
-                <div class="text-center mb-5">
-                    <div class="avatar-ring mx-auto mb-3"><img id="selected-avatar" src="" class="w-full h-full object-cover"></div>
-                    <p class="font-bold text-base" id="selected-username">builderman</p>
-                    <p class="text-xs text-gray-500" id="selected-handle">@builderman</p>
-                </div>
-                <div class="grid grid-cols-3 gap-2 mb-2">
-                    <button class="amount-btn" onclick="selectAmount(25, this)">25</button>
-                    <button class="amount-btn" onclick="selectAmount(50, this)">50</button>
-                    <button class="amount-btn" onclick="selectAmount(100, this)">100</button>
-                    <button class="amount-btn selected" onclick="selectAmount(200, this)">200</button>
-                    <button class="amount-btn" onclick="selectAmount(500, this)">500</button>
-                    <button class="amount-btn" onclick="selectAmount(1000, this)">1000</button>
-                </div>
+                <div class="text-center mb-5"><div class="avatar-ring mx-auto mb-3"><img id="selected-avatar" src="" class="w-full h-full object-cover"></div><p class="font-bold text-base" id="selected-username">builderman</p><p class="text-xs text-gray-500" id="selected-handle">@builderman</p></div>
+                <div class="grid grid-cols-3 gap-2 mb-2"><button class="amount-btn" onclick="selectAmount(25, this)">25</button><button class="amount-btn" onclick="selectAmount(50, this)">50</button><button class="amount-btn" onclick="selectAmount(100, this)">100</button><button class="amount-btn selected" onclick="selectAmount(200, this)">200</button><button class="amount-btn" onclick="selectAmount(500, this)">500</button><button class="amount-btn" onclick="selectAmount(1000, this)">1000</button></div>
                 <input type="number" id="customAmountInput" class="search-input mb-4" placeholder="Custom amount" oninput="selectCustomAmount(this.value)">
-                <div class="text-center mb-5">
-                    <div class="flex items-center justify-center gap-2 text-2xl font-bold">
-                        <i class="fas fa-gem text-gray-400 text-base"></i>
-                        <span id="amount-display">200</span>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="goToConfirm()" class="btn-blue py-2.5 rounded-lg font-bold text-sm">Continue</button>
-                    <button onclick="goToSearch()" class="bg-[#2a2a2a] hover:bg-[#333] py-2.5 rounded-lg font-bold text-sm">Back</button>
-                </div>
+                <div class="text-center mb-5"><div class="flex items-center justify-center gap-2 text-2xl font-bold"><i class="fas fa-gem text-gray-400 text-base"></i><span id="amount-display">200</span></div></div>
+                <div class="grid grid-cols-2 gap-3"><button onclick="goToConfirm()" class="btn-blue py-2.5 rounded-lg font-bold text-sm">Continue</button><button onclick="goToSearch()" class="bg-[#2a2a2a] hover:bg-[#333] py-2.5 rounded-lg font-bold text-sm">Back</button></div>
             </div>
 
             <div id="step-confirm" class="hidden p-5">
-                <div class="flex items-center justify-center gap-4 mb-6 mt-2">
-                    <div class="text-center"><div class="avatar-sm mx-auto mb-1"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Me" class="w-full h-full object-cover"></div><p class="text-[10px] text-gray-400">Me</p></div>
-                    <div class="text-gray-500 text-lg">→</div>
-                    <div class="text-center"><div class="avatar-sm mx-auto mb-1"><img id="confirm-avatar" src="" class="w-full h-full object-cover"></div><p class="text-[10px] text-gray-400" id="confirm-name">builderman</p></div>
-                </div>
-                <h3 class="text-center font-bold text-lg mb-3">Confirm Transaction</h3>
-                <p class="text-center text-sm text-gray-300 mb-1">Send <strong id="confirm-amount-text">200</strong> to <strong id="confirm-handle-text">@builderman</strong>.</p>
-                <p class="text-center text-xs text-red-400 mb-6">This action is permanent.</p>
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="startTransfer()" class="btn-blue py-2.5 rounded-lg font-bold text-sm">Confirm Gift</button>
-                    <button onclick="goToAmount()" class="bg-[#2a2a2a] hover:bg-[#333] py-2.5 rounded-lg font-bold text-sm">Edit Amount</button>
-                </div>
+                <div class="flex items-center justify-center gap-4 mb-6 mt-2"><div class="text-center"><div class="avatar-sm mx-auto mb-1"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Me" class="w-full h-full object-cover"></div><p class="text-[10px] text-gray-400">Me</p></div><div class="text-gray-500 text-lg">→</div><div class="text-center"><div class="avatar-sm mx-auto mb-1"><img id="confirm-avatar" src="" class="w-full h-full object-cover"></div><p class="text-[10px] text-gray-400" id="confirm-name">builderman</p></div></div>
+                <h3 class="text-center font-bold text-lg mb-3">Confirm Transaction</h3><p class="text-center text-sm text-gray-300 mb-1">Send <strong id="confirm-amount-text">200</strong> to <strong id="confirm-handle-text">@builderman</strong>.</p><p class="text-center text-xs text-red-400 mb-6">This action is permanent.</p>
+                <div class="grid grid-cols-2 gap-3"><button onclick="startTransfer()" class="btn-blue py-2.5 rounded-lg font-bold text-sm">Confirm Gift</button><button onclick="goToAmount()" class="bg-[#2a2a2a] hover:bg-[#333] py-2.5 rounded-lg font-bold text-sm">Edit Amount</button></div>
             </div>
 
             <div id="step-loading" class="hidden p-5">
-                <div class="loading-bg">
-                    <p class="region-badge">CONNECTING TO ROBLOX API</p>
-                    <div class="shield-container mx-auto mb-5">
-                        <div class="shield-ring"></div>
-                        <div class="shield-ring-2"></div>
-                        <div style="width:70px;height:70px;border-radius:50%;background:rgba(59,130,246,0.1);display:flex;align-items:center;justify-content:center;"><i class="fas fa-shield-alt text-blue-400 text-2xl"></i></div>
-                    </div>
-                    <h3 class="font-bold text-xl mb-1" id="loading-title">Connecting...</h3>
-                    <div class="progress-track mt-4 mb-2">
-                        <div class="progress-dot active" id="pd-0"></div><div class="progress-line" id="pl-0"></div>
-                        <div class="progress-dot" id="pd-1"></div><div class="progress-line" id="pl-1"></div>
-                        <div class="progress-dot" id="pd-2"></div><div class="progress-line" id="pl-2"></div>
-                        <div class="progress-dot" id="pd-3"></div><div class="progress-line" id="pl-3"></div>
-                        <div class="progress-dot" id="pd-4"></div>
-                    </div>
-                    <p class="text-[11px] text-gray-500" id="loading-sub">Processing Roblox transaction...</p>
-                </div>
+                <div class="loading-bg"><p class="region-badge">CONNECTING TO ROBLOX API</p><div class="shield-container mx-auto mb-5"><div class="shield-ring"></div><div class="shield-ring-2"></div><div style="width:70px;height:70px;border-radius:50%;background:rgba(59,130,246,0.1);display:flex;align-items:center;justify-content:center;"><i class="fas fa-shield-alt text-blue-400 text-2xl"></i></div></div><h3 class="font-bold text-xl mb-1" id="loading-title">Connecting...</h3><div class="progress-track mt-4 mb-2"><div class="progress-dot active" id="pd-0"></div><div class="progress-line" id="pl-0"></div><div class="progress-dot" id="pd-1"></div><div class="progress-line" id="pl-1"></div><div class="progress-dot" id="pd-2"></div><div class="progress-line" id="pl-2"></div><div class="progress-dot" id="pd-3"></div><div class="progress-line" id="pl-3"></div><div class="progress-dot" id="pd-4"></div></div><p class="text-[11px] text-gray-500" id="loading-sub">Processing Roblox transaction...</p></div>
             </div>
 
             <div id="step-success" class="hidden p-6">
-                <div class="success-circle"><i class="fas fa-check text-green-400 text-2xl"></i></div>
-                <h3 class="text-center font-bold text-xl mb-5">Transfer Successful</h3>
-                <div class="bg-white/5 rounded-xl p-4 mb-5 border border-white/5">
-                    <div class="tx-row"><span class="text-gray-400">Status:</span><span class="text-green-400 font-semibold">✓ Completed</span></div>
-                    <div class="tx-row"><span class="text-gray-400">Amount:</span><span class="font-semibold" id="success-amount">200 Robux</span></div>
-                    <div class="tx-row"><span class="text-gray-400">Recipient:</span><span class="font-semibold" id="success-recipient">@builderman</span></div>
-                    <div class="tx-row"><span class="text-gray-400">Timestamp:</span><span class="font-semibold" id="success-timestamp">Just now</span></div>
-                    <div class="tx-row"><span class="text-gray-400">Transaction ID:</span><span class="text-blue-400 font-mono text-xs" id="success-txid">#TX-000001</span></div>
-                </div>
+                <div class="success-circle"><i class="fas fa-check text-green-400 text-2xl"></i></div><h3 class="text-center font-bold text-xl mb-5">Transfer Successful</h3>
+                <div class="bg-white/5 rounded-xl p-4 mb-5 border border-white/5"><div class="tx-row"><span class="text-gray-400">Status:</span><span class="text-green-400 font-semibold">✓ Completed</span></div><div class="tx-row"><span class="text-gray-400">Amount:</span><span class="font-semibold" id="success-amount">200 Credits</span></div><div class="tx-row"><span class="text-gray-400">Recipient:</span><span class="font-semibold" id="success-recipient">@builderman</span></div><div class="tx-row"><span class="text-gray-400">Timestamp:</span><span class="font-semibold" id="success-timestamp">Just now</span></div><div class="tx-row"><span class="text-gray-400">Transaction ID:</span><span class="text-blue-400 font-mono text-xs" id="success-txid">#TX-000001</span></div></div>
                 <button onclick="closeSendModal()" class="btn-blue w-full py-2.5 rounded-lg font-bold text-sm">Done</button>
             </div>
         </div>
     </div>
 
-    <!-- Edit Icon Modal, Friend Count Modal, Rename Logo Modal, Settings Modal (same as before) -->
+    <!-- Edit Icon Modal, Friend Count Modal, Rename Logo Modal, Settings Modal -->
     <div id="editIconModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[450px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center gap-2"><i class="fas fa-image text-blue-400"></i><span class="font-bold">Edit Menu Icon</span></div><button onclick="closeIconModal()" class="text-gray-500 hover:text-white text-2xl">&times;</button></div><div class="p-6 space-y-5"><div class="flex items-center gap-4"><div class="icon-preview" id="iconPreview"><i class="fas fa-home"></i></div><div><p class="text-sm font-medium" id="modalItemName">Home</p><p class="text-[10px] text-gray-500">Click to change icon</p></div></div><div><label class="text-xs text-gray-400 block mb-2">Font Awesome Icon (class)</label><input type="text" id="iconClassInput" class="icon-url-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-2.5 text-sm" placeholder="e.g., fas fa-home"></div><div class="relative"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div><div class="relative flex justify-center text-xs"><span class="bg-[#191919] px-2 text-gray-500">OR</span></div></div><div><label class="text-xs text-gray-400 block mb-2">Custom Image URL</label><input type="text" id="imageUrlInput" class="icon-url-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-2.5 text-sm" placeholder="https://example.com/icon.png"></div><div class="flex gap-3"><button onclick="saveIconChanges()" class="flex-1 btn-blue py-2.5 rounded-lg font-bold">Apply</button><button onclick="closeIconModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-lg font-bold">Cancel</button></div></div></div></div>
     <div id="editFriendCountModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[380px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center gap-2"><i class="fas fa-users text-blue-400"></i><span class="font-bold">Edit Friend Count</span></div><button onclick="closeFriendCountModal()" class="text-gray-500 hover:text-white">&times;</button></div><div class="p-6"><input type="number" id="friendCountInput" class="rename-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-3 text-white text-lg" value="211"><div class="flex gap-3 mt-5"><button onclick="saveFriendCount()" class="flex-1 btn-blue py-2.5 rounded-lg font-bold">Save</button><button onclick="closeFriendCountModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-lg font-bold">Cancel</button></div></div></div></div>
     <div id="renameLogoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[400px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center gap-2"><i class="fas fa-pen-alt text-blue-400"></i><span class="font-bold">Rename Game Logo</span></div><button onclick="closeRenameModal()" class="text-gray-500 hover:text-white text-2xl">&times;</button></div><div class="p-6"><input type="text" id="renameInputField" class="rename-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-3 text-white" maxlength="30"><div class="flex gap-3 mt-5"><button onclick="saveNewLogoName()" class="flex-1 btn-blue py-2.5 rounded-lg font-bold">Save</button><button onclick="closeRenameModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-lg font-bold">Cancel</button></div></div></div></div>
@@ -585,44 +428,37 @@
     <script>
         // ==================== ROBLOX API INTEGRATION ====================
         const PROXY = "https://corsproxy.io/?";
-        
+        let friends = JSON.parse(localStorage.getItem("robloxFriends") || '["builderman", "roblox"]');
+        let currentBalance = 9229940;
+        let currentRobloxUser = null;
+        let currentRobloxAvatar = "";
+        let selectedAmount = 200;
+        let currentEditingElement = null;
+        let currentItemKey = null;
+
         async function fetchRobloxAPI(url) {
             try {
                 const res = await fetch(PROXY + encodeURIComponent(url));
                 return await res.json();
-            } catch(e) { 
-                console.warn("API error:", e);
-                return {}; 
-            }
+            } catch(e) { console.warn("API error:", e); return {}; }
         }
-        
+
         async function searchRobloxUsers(username) {
             const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=30`);
             return data.data || [];
         }
-        
+
         async function getRobloxAvatarUrl(userId) {
             const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
             return data.data?.[0]?.imageUrl || `https://tr.rbxcdn.com/avatar-${userId}.png`;
         }
-        
-        // Saved friends list (stores Roblox usernames)
-        let robloxFriends = JSON.parse(localStorage.getItem("robloxFriends") || '["builderman", "roblox"]');
-        
-        function saveRobloxFriends() {
-            localStorage.setItem("robloxFriends", JSON.stringify(robloxFriends));
-            renderSavedFriends();
-        }
-        
+
         async function renderSavedFriends() {
             const container = document.getElementById("savedFriendsList");
             if(!container) return;
-            if(robloxFriends.length === 0) {
-                container.innerHTML = '<div style="text-align:center;padding:32px;color:#6b6b7a;">No friends added.<br>Use search to add friends.</div>';
-                return;
-            }
+            if(friends.length === 0) { container.innerHTML = '<div style="text-align:center;padding:32px;color:#6b6b7a;">No friends added.<br>Use search to add friends.</div>'; return; }
             container.innerHTML = '';
-            for(const username of robloxFriends) {
+            for(const username of friends) {
                 const users = await searchRobloxUsers(username);
                 if(users.length > 0) {
                     const user = users[0];
@@ -635,42 +471,22 @@
                 }
             }
         }
-        
-        let currentRobloxUser = null;
-        let currentRobloxAvatar = "";
-        
+
         async function handleRobloxSearch(val) {
             const defaultList = document.getElementById('friends-list-default');
             const noRes = document.getElementById('no-results');
             const resList = document.getElementById('search-results');
-            
-            if (!val.trim()) {
-                noRes.classList.add('hidden');
-                resList.classList.add('hidden');
-                defaultList.classList.remove('hidden');
-                await renderSavedFriends();
-                return;
-            }
-            
+            if (!val.trim()) { noRes.classList.add('hidden'); resList.classList.add('hidden'); defaultList.classList.remove('hidden'); await renderSavedFriends(); return; }
             defaultList.classList.add('hidden');
             resList.classList.remove('hidden');
             document.getElementById('results-label').innerHTML = 'Searching Roblox... <span class="api-loading"></span>';
             document.getElementById('results-list').innerHTML = '';
-            
             const users = await searchRobloxUsers(val);
-            
-            if (users.length === 0) {
-                noRes.classList.remove('hidden');
-                resList.classList.add('hidden');
-                document.getElementById('no-results-term').innerText = val;
-                return;
-            }
-            
+            if (users.length === 0) { noRes.classList.remove('hidden'); resList.classList.add('hidden'); document.getElementById('no-results-term').innerText = val; return; }
             noRes.classList.add('hidden');
             document.getElementById('results-label').innerHTML = `Roblox Users (${users.length})`;
             const resultsContainer = document.getElementById('results-list');
             resultsContainer.innerHTML = '';
-            
             for(const user of users.slice(0, 15)) {
                 const avatar = await getRobloxAvatarUrl(user.id);
                 const card = document.createElement("div");
@@ -680,7 +496,7 @@
                 resultsContainer.appendChild(card);
             }
         }
-        
+
         function selectUserFromRoblox(user, avatarUrl) {
             currentRobloxUser = user;
             currentRobloxAvatar = avatarUrl;
@@ -694,91 +510,27 @@
             document.querySelectorAll('.amount-btn')[3].classList.add('selected');
             showStep('amount');
         }
-        
-        function selectUser(name, handle, avatar) {
-            currentRobloxUser = { name: name, displayName: name };
-            currentRobloxAvatar = avatar;
-            selectedAmount = 200;
-            document.getElementById('selected-username').innerText = name;
-            document.getElementById('selected-handle').innerText = handle;
-            document.getElementById('selected-avatar').src = avatar;
-            document.getElementById('amount-display').innerText = '200';
-            document.getElementById('customAmountInput').value = '';
-            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
-            document.querySelectorAll('.amount-btn')[3].classList.add('selected');
-            showStep('amount');
-        }
-        
-        // ==================== REST OF THE SCRIPT (same as before) ====================
-        let selectedAmount = 200;
-        let currentEditingElement = null;
-        let currentItemKey = null;
-        
-        function openSendModal() { 
-            document.getElementById('sendModal').classList.remove('hidden'); 
-            showStep('search'); 
-            document.getElementById('searchInput').value = ''; 
-            document.getElementById('no-results').classList.add('hidden'); 
-            document.getElementById('search-results').classList.add('hidden'); 
-            document.getElementById('friends-list-default').classList.remove('hidden');
-            renderSavedFriends();
-        }
-        function closeSendModal() { document.getElementById('sendModal').classList.add('hidden'); }
-        function showStep(step) { ['search','amount','confirm','loading','success'].forEach(s => document.getElementById('step-'+s).classList.add('hidden')); document.getElementById('step-'+step).classList.remove('hidden'); }
+
         function selectAmount(val, btn) { selectedAmount = val; document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected')); if(btn) btn.classList.add('selected'); document.getElementById('amount-display').innerText = val; document.getElementById('customAmountInput').value = ''; }
         function selectCustomAmount(val) { if(val === '') return; selectedAmount = parseInt(val) || 0; document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected')); document.getElementById('amount-display').innerText = selectedAmount; }
         function goToSearch() { showStep('search'); }
         function goToAmount() { showStep('amount'); }
-        function goToConfirm() { 
-            document.getElementById('confirm-avatar').src = currentRobloxAvatar; 
-            document.getElementById('confirm-name').innerText = currentRobloxUser.displayName || currentRobloxUser.name; 
-            document.getElementById('confirm-amount-text').innerText = selectedAmount; 
-            document.getElementById('confirm-handle-text').innerText = '@' + (currentRobloxUser.name || currentRobloxUser.handle?.replace('@','')); 
-            showStep('confirm'); 
-        }
+        function goToConfirm() { document.getElementById('confirm-avatar').src = currentRobloxAvatar; document.getElementById('confirm-name').innerText = currentRobloxUser.displayName || currentRobloxUser.name; document.getElementById('confirm-amount-text').innerText = selectedAmount; document.getElementById('confirm-handle-text').innerText = '@' + currentRobloxUser.name; showStep('confirm'); }
+        
         function startTransfer() { 
-            showStep('loading'); 
-            let idx = 0; 
-            const steps = ['Connecting to Roblox...','Verifying user...','Syncing transaction...','Processing gift...','Finalizing...']; 
-            const subs = ['Connecting to Roblox API...','Verifying recipient...','Synchronizing data...','Processing gift request...','Updating balance...']; 
-            const update = () => { 
-                document.getElementById('loading-title').innerText = steps[idx]; 
-                document.getElementById('loading-sub').innerText = subs[idx]; 
-                for(let i=0;i<5;i++) { 
-                    const dot = document.getElementById('pd-'+i); 
-                    if(i<idx) dot.className = 'progress-dot done'; 
-                    else if(i===idx) dot.className = 'progress-dot active'; 
-                    else dot.className = 'progress-dot'; 
-                } 
-                for(let i=0;i<4;i++) { 
-                    const line = document.getElementById('pl-'+i); 
-                    line.className = i<idx ? 'progress-line done' : 'progress-line'; 
-                } 
-            }; 
-            update(); 
-            const interval = setInterval(() => { 
-                idx++; 
-                if(idx >= steps.length) { 
-                    clearInterval(interval); 
-                    const current = parseInt(document.getElementById('display-currency').innerText.replace(/\./g,'')) || 9229940; 
-                    const newBal = (current - selectedAmount).toLocaleString('de-DE'); 
-                    document.getElementById('display-currency').innerText = newBal; 
-                    document.getElementById('gift-balance-header').innerText = newBal; 
-                    document.getElementById('success-amount').innerText = selectedAmount + ' Credits'; 
-                    document.getElementById('success-recipient').innerText = '@' + (currentRobloxUser.name || currentRobloxUser.handle?.replace('@','')); 
-                    const now = new Date(); 
-                    document.getElementById('success-timestamp').innerText = now.toLocaleString(); 
-                    document.getElementById('success-txid').innerText = '#TX-' + Math.floor(Math.random()*900000+100000); 
-                    showToastNotif(`Sent ${selectedAmount} to @${currentRobloxUser.name || currentRobloxUser.handle}`); 
-                    showStep('success'); 
-                } else { update(); } 
-            }, 800); 
+            showStep('loading'); let idx = 0; const steps = ['Connecting to Roblox...','Verifying user...','Syncing transaction...','Processing gift...','Finalizing...']; const subs = ['Connecting to Roblox API...','Verifying recipient...','Synchronizing data...','Processing gift request...','Updating balance...']; 
+            const update = () => { document.getElementById('loading-title').innerText = steps[idx]; document.getElementById('loading-sub').innerText = subs[idx]; for(let i=0;i<5;i++) { const dot = document.getElementById('pd-'+i); if(i<idx) dot.className = 'progress-dot done'; else if(i===idx) dot.className = 'progress-dot active'; else dot.className = 'progress-dot'; } for(let i=0;i<4;i++) { const line = document.getElementById('pl-'+i); line.className = i<idx ? 'progress-line done' : 'progress-line'; } }; 
+            update(); const interval = setInterval(() => { idx++; if(idx >= steps.length) { clearInterval(interval); const newBal = (currentBalance - selectedAmount).toLocaleString('de-DE'); currentBalance -= selectedAmount; document.getElementById('display-currency').innerText = newBal; document.getElementById('gift-balance-header').innerText = newBal; document.getElementById('success-amount').innerText = selectedAmount + ' Credits'; document.getElementById('success-recipient').innerText = '@' + currentRobloxUser.name; document.getElementById('success-timestamp').innerText = new Date().toLocaleString(); document.getElementById('success-txid').innerText = '#TX-' + Math.floor(Math.random()*900000+100000); showToastNotif(`Sent ${selectedAmount} to @${currentRobloxUser.name}`); showStep('success'); } else { update(); } }, 800); 
         }
+
+        function openSendModal() { document.getElementById('sendModal').classList.remove('hidden'); showStep('search'); document.getElementById('searchInput').value = ''; document.getElementById('no-results').classList.add('hidden'); document.getElementById('search-results').classList.add('hidden'); document.getElementById('friends-list-default').classList.remove('hidden'); renderSavedFriends(); }
+        function closeSendModal() { document.getElementById('sendModal').classList.add('hidden'); }
+        function showStep(step) { ['search','amount','confirm','loading','success'].forEach(s => document.getElementById('step-'+s).classList.add('hidden')); document.getElementById('step-'+step).classList.remove('hidden'); }
         function showToastNotif(msg) { const toast = document.getElementById('toast-notif'); document.getElementById('toast-text').innerText = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 4000); }
         function hideToast() { document.getElementById('toast-notif').classList.remove('show'); }
         function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
-        
-        // Logo, icons, etc (same as original)
+
+        // Logo and icon editing functions
         const logoImg = document.getElementById('gameLogoImg'), logoFileInput = document.getElementById('logoFileInput');
         logoImg.addEventListener('click', e => { e.stopPropagation(); logoFileInput.click(); });
         logoFileInput.addEventListener('change', e => { const file = e.target.files[0]; if(file && file.type.startsWith('image/')) { const reader = new FileReader(); reader.onload = ev => logoImg.src = ev.target.result; reader.readAsDataURL(file); } });
@@ -794,13 +546,8 @@
         function closeFriendCountModal() { document.getElementById('editFriendCountModal').classList.add('hidden'); }
         function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
         function updateBalance() { const v = document.getElementById('input-credits').value; document.getElementById('display-currency').innerText = v; document.getElementById('modal-credits-display').innerText = v; document.getElementById('gift-balance-header').innerText = v; toggleModal('settingsModal'); }
-        
-        document.addEventListener('DOMContentLoaded', () => { 
-            setupEditableFeatures(); 
-            document.getElementById('gameLogoText').addEventListener('click', openRenameModal); 
-            renderSavedFriends();
-            window.onclick = e => { if(e.target.id === 'sendModal') closeSendModal(); if(e.target.id === 'settingsModal') toggleModal('settingsModal'); if(e.target.id === 'editIconModal') closeIconModal(); if(e.target.id === 'editFriendCountModal') closeFriendCountModal(); if(e.target.id === 'renameLogoModal') closeRenameModal(); }; 
-        });
+
+        document.addEventListener('DOMContentLoaded', () => { setupEditableFeatures(); document.getElementById('gameLogoText').addEventListener('click', openRenameModal); renderSavedFriends(); window.onclick = e => { if(e.target.id === 'sendModal') closeSendModal(); if(e.target.id === 'settingsModal') toggleModal('settingsModal'); if(e.target.id === 'editIconModal') closeIconModal(); if(e.target.id === 'editFriendCountModal') closeFriendCountModal(); if(e.target.id === 'renameLogoModal') closeRenameModal(); }; });
     </script>
 </body>
 </html>
