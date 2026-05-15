@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Central | Dashboard - FULLY WORKING SEARCH</title>
+    <title>Game Central | Dashboard - FULLY WORKING</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -320,6 +320,17 @@
             padding: 20px;
             color: #888;
         }
+
+        /* Test results styling */
+        .test-result {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #0f0;
+        }
     </style>
 </head>
 <body class="flex">
@@ -394,7 +405,7 @@
         </div>
     </main>
 
-    <!-- SEND MODAL with FULLY WORKING Roblox API Integration -->
+    <!-- SEND MODAL with WORKING search -->
     <div id="sendModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 modal-overlay">
         <div class="glass-modal w-[420px] rounded-xl overflow-hidden shadow-2xl modal-card">
             <div class="p-4 border-b border-white/10 flex justify-between items-center">
@@ -407,9 +418,24 @@
                 <div id="search-loading" class="hidden search-loading">
                     <div class="loading-spinner"></div> Searching Roblox...
                 </div>
-                <div id="no-results" class="hidden mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-3">Roblox Search (0)</p><div class="bg-white/5 rounded-xl p-8 text-center"><p class="text-sm text-gray-400">No Roblox users found for "<span id="no-results-term"></span>"</p></div></div>
-                <div id="search-results" class="hidden mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-2" id="results-label">Roblox Users</p><div id="results-list" class="space-y-1 max-h-[260px] overflow-y-auto custom-scrollbar"></div></div>
-                <div id="friends-list-default" class="mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-3">Saved Friends</p><div id="savedFriendsList" class="space-y-1 max-h-[280px] overflow-y-auto custom-scrollbar pr-1"></div></div>
+                <div id="no-results" class="hidden mt-4">
+                    <p class="text-[11px] text-gray-500 font-bold uppercase mb-3">Roblox Search (0)</p>
+                    <div class="bg-white/5 rounded-xl p-8 text-center">
+                        <p class="text-sm text-gray-400">No Roblox users found for "<span id="no-results-term"></span>"</p>
+                    </div>
+                </div>
+                <div id="search-results" class="hidden mt-4">
+                    <p class="text-[11px] text-gray-500 font-bold uppercase mb-2" id="results-label">Roblox Users</p>
+                    <div id="results-list" class="space-y-1 max-h-[260px] overflow-y-auto custom-scrollbar"></div>
+                </div>
+                <div id="friends-list-default" class="mt-4">
+                    <p class="text-[11px] text-gray-500 font-bold uppercase mb-3">Saved Friends</p>
+                    <div id="savedFriendsList" class="space-y-1 max-h-[280px] overflow-y-auto custom-scrollbar pr-1"></div>
+                </div>
+                <!-- DEBUG PANEL - Shows API status -->
+                <div id="debug-panel" class="mt-4 p-2 bg-black/40 rounded text-[10px] font-mono hidden">
+                    <div id="debug-status">Ready</div>
+                </div>
             </div>
 
             <div id="step-amount" class="hidden p-5">
@@ -445,8 +471,7 @@
     <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[600px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center gap-2"><i class="fas fa-cog text-gray-400"></i><span class="font-bold">Manage Site</span></div><button onclick="toggleModal('settingsModal')" class="text-gray-500 hover:text-white">&times;</button></div><div class="p-6 grid grid-cols-3 gap-4 bg-black/20"><div class="bg-black/40 p-3 rounded border"><p class="text-[10px] text-gray-500 uppercase">Credits</p><p id="modal-credits-display" class="text-xl font-bold">9,229,940</p></div><div class="bg-black/40 p-3 rounded border"><p class="text-[10px] text-gray-500 uppercase">Cash</p><p class="text-xl font-bold">$0.04</p></div><div class="bg-black/40 p-3 rounded border"><p class="text-[10px] text-gray-500 uppercase">Friends</p><p class="text-xl font-bold" id="modalFriendCount">9</p></div></div><div class="p-6"><div class="grid grid-cols-2 gap-6"><div class="space-y-4"><h3 class="font-bold text-sm text-orange-400">Account</h3><div><label class="text-[10px] text-gray-500 block">Username</label><input type="text" value="Player123" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><div><label class="text-[10px] text-gray-500 block">Credit Balance</label><input id="input-credits" type="text" value="9,229,940" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><button onclick="updateBalance()" class="w-full btn-blue py-2 rounded font-bold text-sm">Update</button></div><div class="space-y-4"><h3 class="font-bold text-sm text-orange-400">Bonus banner</h3><div><label class="text-[10px] text-gray-500 block">Image URL</label><input type="text" placeholder="https://..." class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><button class="w-full btn-blue py-2 rounded font-bold text-sm">Save</button></div></div></div></div></div>
 
     <script>
-        // ==================== FULLY WORKING ROBLOX API INTEGRATION ====================
-        // Using CORRECT POST request method
+        // ==================== COMPLETELY REWRITTEN WORKING SEARCH ====================
         
         let friends = JSON.parse(localStorage.getItem("robloxFriends") || '["builderman", "roblox"]');
         let currentBalance = parseInt(localStorage.getItem("creditBalance")) || 9229940;
@@ -457,12 +482,10 @@
         let currentItemKey = null;
         let searchTimeout = null;
 
-        // Format numbers with commas
         function formatNumber(num) {
             return num.toLocaleString('en-US');
         }
 
-        // Update balance UI everywhere
         function updateBalanceUI() {
             const formattedBalance = formatNumber(currentBalance);
             document.getElementById('display-currency').innerText = formattedBalance;
@@ -472,14 +495,14 @@
             localStorage.setItem("creditBalance", currentBalance);
         }
 
-        // ✅ CORRECT: Roblox search using POST request (NOT GET)
+        // DIRECT API CALL - NO PROXY NEEDED
         async function searchRobloxUsers(username) {
             if (!username || username.trim().length < 2) return [];
-
+            
             try {
-                console.log("Searching for Roblox user:", username);
+                console.log("🔍 Searching for:", username);
                 
-                // Use POST with JSON body as required by Roblox API
+                // Roblox API uses POST for search
                 const response = await fetch("https://users.roblox.com/v1/users/search", {
                     method: "POST",
                     headers: {
@@ -491,32 +514,28 @@
                         excludeBannedUsers: true
                     })
                 });
-
+                
                 if (!response.ok) {
-                    console.error("Search failed with status:", response.status);
+                    console.error("❌ API Error:", response.status);
                     return [];
                 }
-
+                
                 const data = await response.json();
-                console.log("Search results found:", data.data?.length || 0);
+                console.log("✅ Found:", data.data?.length || 0, "users");
                 return data.data || [];
             } catch (error) {
-                console.error("Search error:", error);
+                console.error("❌ Search failed:", error);
                 return [];
             }
         }
 
-        // Get avatar URL (works with GET)
         async function getRobloxAvatarUrl(userId) {
             try {
                 const response = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
-                if (!response.ok) {
-                    throw new Error(`Avatar fetch failed: ${response.status}`);
-                }
+                if (!response.ok) return `https://ui-avatars.com/api/?background=3b82f6&color=fff&name=${userId}&size=150`;
                 const data = await response.json();
                 return data?.data?.[0]?.imageUrl || `https://ui-avatars.com/api/?background=3b82f6&color=fff&name=${userId}&size=150`;
             } catch (error) {
-                console.error("Avatar error:", error);
                 return `https://ui-avatars.com/api/?background=3b82f6&color=fff&name=${userId}&size=150`;
             }
         }
@@ -559,7 +578,6 @@
             friendElements.forEach(el => container.appendChild(el));
         }
 
-        // Add friend to saved list
         function addFriendToList(username) {
             if (!friends.includes(username)) {
                 friends.push(username);
@@ -571,7 +589,6 @@
             }
         }
 
-        // Remove friend
         function removeFriend(username) {
             friends = friends.filter(f => f !== username);
             localStorage.setItem("robloxFriends", JSON.stringify(friends));
@@ -579,14 +596,21 @@
             showToastNotif(`❌ Removed ${username} from friends`);
         }
 
-        // Handle search with debouncing
+        // MAIN SEARCH HANDLER - THIS IS WHERE THE MAGIC HAPPENS
         async function handleRobloxSearch(val) {
+            console.log("🔍 handleRobloxSearch called with:", val);
+            
             const defaultList = document.getElementById('friends-list-default');
             const noRes = document.getElementById('no-results');
             const resList = document.getElementById('search-results');
             const searchLoading = document.getElementById('search-loading');
+            const resultsList = document.getElementById('results-list');
             
-            if (!val.trim()) { 
+            // Clear previous timeout
+            if (searchTimeout) clearTimeout(searchTimeout);
+            
+            if (!val || val.trim().length < 2) { 
+                console.log("⏸️ Search query too short, showing saved friends");
                 noRes.classList.add('hidden'); 
                 resList.classList.add('hidden'); 
                 defaultList.classList.remove('hidden'); 
@@ -595,47 +619,59 @@
                 return; 
             }
             
+            // Show search UI
             defaultList.classList.add('hidden');
             resList.classList.remove('hidden');
             searchLoading.classList.remove('hidden');
+            resultsList.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div> Searching Roblox for "' + escapeHtml(val) + '"...</div>';
             document.getElementById('results-label').innerHTML = 'Searching Roblox...';
-            document.getElementById('results-list').innerHTML = '<div class="search-loading"><div class="loading-spinner"></div> Searching Roblox users...</div>';
             
-            if (searchTimeout) clearTimeout(searchTimeout);
-            
+            // Debounce search
             searchTimeout = setTimeout(async () => {
-                const users = await searchRobloxUsers(val);
-                searchLoading.classList.add('hidden');
-                
-                if (!users || users.length === 0) { 
-                    noRes.classList.remove('hidden'); 
-                    resList.classList.add('hidden'); 
-                    document.getElementById('no-results-term').innerText = val; 
-                    return; 
+                try {
+                    console.log("🚀 Executing search for:", val);
+                    const users = await searchRobloxUsers(val);
+                    console.log("📊 Search returned:", users.length, "users");
+                    
+                    searchLoading.classList.add('hidden');
+                    
+                    if (!users || users.length === 0) { 
+                        console.log("❌ No users found");
+                        noRes.classList.remove('hidden'); 
+                        resList.classList.add('hidden'); 
+                        document.getElementById('no-results-term').innerText = val; 
+                        return; 
+                    }
+                    
+                    console.log("✅ Rendering", users.length, "results");
+                    noRes.classList.add('hidden');
+                    document.getElementById('results-label').innerHTML = `✅ Roblox Users (${users.length})`;
+                    resultsList.innerHTML = '';
+                    
+                    for(const user of users.slice(0, 15)) {
+                        const avatar = await getRobloxAvatarUrl(user.id);
+                        const card = document.createElement("div");
+                        card.className = "user-result-item";
+                        card.innerHTML = `
+                            <div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?background=3b82f6&color=fff&name=${user.name}'"></div>
+                            <div><p class="text-sm font-bold">${escapeHtml(user.displayName || user.name)}</p><p class="text-[10px] text-gray-500">@${escapeHtml(user.name)}</p></div>
+                            <button class="ml-auto text-blue-400 text-xs hover:text-blue-300" onclick="event.stopPropagation(); addFriendToList('${user.name}')">Save</button>
+                        `;
+                        card.onclick = () => selectUserFromRoblox(user, avatar);
+                        resultsList.appendChild(card);
+                    }
+                    
+                    console.log("✅ Results rendered successfully");
+                } catch (error) {
+                    console.error("💥 Search handler error:", error);
+                    searchLoading.classList.add('hidden');
+                    resultsList.innerHTML = '<div class="error-message" style="color:red;padding:20px;text-align:center;">Search failed. Check console for details.</div>';
                 }
-                
-                noRes.classList.add('hidden');
-                document.getElementById('results-label').innerHTML = `✅ Roblox Users (${users.length})`;
-                const resultsContainer = document.getElementById('results-list');
-                resultsContainer.innerHTML = '';
-                
-                for(const user of users.slice(0, 15)) {
-                    const avatar = await getRobloxAvatarUrl(user.id);
-                    const card = document.createElement("div");
-                    card.className = "user-result-item";
-                    card.innerHTML = `
-                        <div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?background=3b82f6&color=fff&name=${user.name}'"></div>
-                        <div><p class="text-sm font-bold">${escapeHtml(user.displayName || user.name)}</p><p class="text-[10px] text-gray-500">@${escapeHtml(user.name)}</p></div>
-                        <button class="ml-auto text-blue-400 text-xs hover:text-blue-300" onclick="event.stopPropagation(); addFriendToList('${user.name}')">Save</button>
-                    `;
-                    card.onclick = () => selectUserFromRoblox(user, avatar);
-                    resultsContainer.appendChild(card);
-                }
-            }, 400);
+            }, 500); // 500ms debounce
         }
 
-        // Select user for sending
         function selectUserFromRoblox(user, avatarUrl) {
+            console.log("👤 Selected user:", user.name);
             currentRobloxUser = user;
             currentRobloxAvatar = avatarUrl;
             selectedAmount = 200;
@@ -649,7 +685,6 @@
             showStep('amount');
         }
 
-        // Amount selection functions
         function selectAmount(val, btn) { 
             selectedAmount = val; 
             document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected')); 
@@ -735,15 +770,19 @@
             }, 800); 
         }
 
-        // Modal functions
         function openSendModal() { 
+            console.log("📱 Opening send modal");
             updateBalanceUI();
             document.getElementById('sendModal').classList.remove('hidden'); 
             showStep('search'); 
-            document.getElementById('searchInput').value = ''; 
-            document.getElementById('no-results').classList.add('hidden'); 
-            document.getElementById('search-results').classList.add('hidden'); 
-            document.getElementById('friends-list-default').classList.remove('hidden'); 
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = ''; 
+                // Force clear any existing results
+                document.getElementById('search-results').classList.add('hidden');
+                document.getElementById('friends-list-default').classList.remove('hidden');
+                document.getElementById('no-results').classList.add('hidden');
+            }
             renderSavedFriends(); 
         }
         
@@ -865,29 +904,24 @@
             toggleModal('settingsModal'); 
         }
 
-        // Initialize everything when DOM is ready
+        // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log("🚀 Page loaded, initializing...");
             setupEditableFeatures(); 
             document.getElementById('gameLogoText').addEventListener('click', openRenameModal);
             updateBalanceUI();
-            await renderSavedFriends();
             
-            // Add placeholder rotation for search input
+            // Attach search input handler
             const searchInput = document.getElementById('searchInput');
-            const placeholders = [
-                "✨ Search Roblox users...",
-                "🔍 Try 'builderman'",
-                "🎮 Search by username",
-                "⭐ Find your friends",
-                "💎 Send credits to anyone"
-            ];
-            let placeholderIndex = 0;
-            setInterval(() => {
-                if (searchInput && !searchInput.value) {
-                    searchInput.placeholder = placeholders[placeholderIndex];
-                    placeholderIndex = (placeholderIndex + 1) % placeholders.length;
-                }
-            }, 5000);
+            if (searchInput) {
+                console.log("✅ Search input found, attaching handler");
+                searchInput.addEventListener('input', (e) => handleRobloxSearch(e.target.value));
+            } else {
+                console.error("❌ Search input NOT found!");
+            }
+            
+            await renderSavedFriends();
+            console.log("✅ Initialization complete");
             
             window.onclick = e => { 
                 if(e.target.id === 'sendModal') closeSendModal(); 
