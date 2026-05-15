@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Central | Dashboard - Advanced</title>
+    <title>Game Central | Dashboard - Fixed API</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -305,7 +305,6 @@
             margin-left: 8px;
         }
 
-        /* Loading states */
         .loading-spinner {
             display: inline-block;
             width: 20px;
@@ -320,26 +319,6 @@
             text-align: center;
             padding: 20px;
             color: #888;
-        }
-        
-        .error-message {
-            background: rgba(220, 38, 38, 0.1);
-            border: 1px solid rgba(220, 38, 38, 0.3);
-            border-radius: 8px;
-            padding: 12px;
-            color: #ef4444;
-            font-size: 13px;
-            text-align: center;
-        }
-        
-        .avatar-fallback {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 20px;
-            color: white;
         }
     </style>
 </head>
@@ -415,7 +394,7 @@
         </div>
     </main>
 
-    <!-- SEND MODAL with improved Roblox API Integration -->
+    <!-- SEND MODAL with CORRECT Roblox API Integration -->
     <div id="sendModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 modal-overlay">
         <div class="glass-modal w-[420px] rounded-xl overflow-hidden shadow-2xl modal-card">
             <div class="p-4 border-b border-white/10 flex justify-between items-center">
@@ -426,7 +405,7 @@
             <div id="step-search" class="p-5">
                 <input type="text" id="searchInput" class="search-input" placeholder="Search Roblox username..." autocomplete="off">
                 <div id="search-loading" class="hidden search-loading">
-                    <div class="loading-spinner"></div> Searching...
+                    <div class="loading-spinner"></div> Searching Roblox...
                 </div>
                 <div id="no-results" class="hidden mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-3">Roblox Search (0)</p><div class="bg-white/5 rounded-xl p-8 text-center"><p class="text-sm text-gray-400">No Roblox users found for "<span id="no-results-term"></span>"</p></div></div>
                 <div id="search-results" class="hidden mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-2" id="results-label">Roblox Users</p><div id="results-list" class="space-y-1 max-h-[260px] overflow-y-auto custom-scrollbar"></div></div>
@@ -466,10 +445,9 @@
     <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[600px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center gap-2"><i class="fas fa-cog text-gray-400"></i><span class="font-bold">Manage Site</span></div><button onclick="toggleModal('settingsModal')" class="text-gray-500 hover:text-white">&times;</button></div><div class="p-6 grid grid-cols-3 gap-4 bg-black/20"><div class="bg-black/40 p-3 rounded border"><p class="text-[10px] text-gray-500 uppercase">Credits</p><p id="modal-credits-display" class="text-xl font-bold">9,229,940</p></div><div class="bg-black/40 p-3 rounded border"><p class="text-[10px] text-gray-500 uppercase">Cash</p><p class="text-xl font-bold">$0.04</p></div><div class="bg-black/40 p-3 rounded border"><p class="text-[10px] text-gray-500 uppercase">Friends</p><p class="text-xl font-bold" id="modalFriendCount">9</p></div></div><div class="p-6"><div class="grid grid-cols-2 gap-6"><div class="space-y-4"><h3 class="font-bold text-sm text-orange-400">Account</h3><div><label class="text-[10px] text-gray-500 block">Username</label><input type="text" value="Player123" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><div><label class="text-[10px] text-gray-500 block">Credit Balance</label><input id="input-credits" type="text" value="9,229,940" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><button onclick="updateBalance()" class="w-full btn-blue py-2 rounded font-bold text-sm">Update</button></div><div class="space-y-4"><h3 class="font-bold text-sm text-orange-400">Bonus banner</h3><div><label class="text-[10px] text-gray-500 block">Image URL</label><input type="text" placeholder="https://..." class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><button class="w-full btn-blue py-2 rounded font-bold text-sm">Save</button></div></div></div></div></div>
 
     <script>
-        // ==================== ADVANCED ROBLOX API INTEGRATION ====================
-        const PROXY = "https://corsproxy.io/?";
+        // ==================== CORRECT ROBLOX API INTEGRATION ====================
+        // Using POST request as required by Roblox API
         
-        // Load saved data from localStorage
         let friends = JSON.parse(localStorage.getItem("robloxFriends") || '["builderman", "roblox"]');
         let currentBalance = parseInt(localStorage.getItem("creditBalance")) || 9229940;
         let currentRobloxUser = null;
@@ -479,7 +457,7 @@
         let currentItemKey = null;
         let searchTimeout = null;
 
-        // Helper function to format numbers with commas
+        // Format numbers with commas
         function formatNumber(num) {
             return num.toLocaleString('en-US');
         }
@@ -494,43 +472,55 @@
             localStorage.setItem("creditBalance", currentBalance);
         }
 
-        // Improved API fetch with better error handling
-        async function fetchRobloxAPI(url) {
+        // ✅ CORRECTED: Roblox search using POST request (not GET)
+        async function searchRobloxUsers(username) {
+            if (!username || username.trim().length < 2) return [];
+
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                console.log("Searching for:", username);
                 
-                const res = await fetch(PROXY + encodeURIComponent(url), {
-                    signal: controller.signal
+                // Use POST with JSON body as required by Roblox API
+                const response = await fetch("https://users.roblox.com/v1/users/search", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        keyword: username,
+                        limit: 30
+                    })
                 });
-                
-                clearTimeout(timeoutId);
-                
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}`);
+
+                if (!response.ok) {
+                    console.error("Search failed with status:", response.status);
+                    return [];
                 }
-                
-                return await res.json();
-            } catch(e) {
-                console.warn("API error:", e);
-                return null;
+
+                const data = await response.json();
+                console.log("Search results:", data);
+                return data.data || [];
+            } catch (error) {
+                console.error("Search error:", error);
+                return [];
             }
         }
 
-        // Search Roblox users with debouncing
-        async function searchRobloxUsers(username) {
-            if (!username || username.trim().length < 2) return [];
-            const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=30`);
-            return data?.data || [];
-        }
-
-        // Get avatar URL with fallback
+        // Get avatar URL (this one works with GET)
         async function getRobloxAvatarUrl(userId) {
-            const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
-            return data?.data?.[0]?.imageUrl || `https://ui-avatars.com/api/?background=3b82f6&color=fff&name=${userId}&size=150`;
+            try {
+                const response = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
+                if (!response.ok) {
+                    throw new Error(`Avatar fetch failed: ${response.status}`);
+                }
+                const data = await response.json();
+                return data?.data?.[0]?.imageUrl || `https://ui-avatars.com/api/?background=3b82f6&color=fff&name=${userId}&size=150`;
+            } catch (error) {
+                console.error("Avatar error:", error);
+                return `https://ui-avatars.com/api/?background=3b82f6&color=fff&name=${userId}&size=150`;
+            }
         }
 
-        // Render saved friends with improved loading
+        // Render saved friends
         async function renderSavedFriends() {
             const container = document.getElementById("savedFriendsList");
             if(!container) return;
@@ -540,8 +530,9 @@
                 return; 
             }
             
-            container.innerHTML = '<div class="loading-spinner" style="margin:20px auto;display:block;"></div>';
+            container.innerHTML = '<div class="search-loading"><div class="loading-spinner"></div> Loading friends...</div>';
             
+            const friendElements = [];
             for(const username of friends) {
                 try {
                     const users = await searchRobloxUsers(username);
@@ -556,12 +547,15 @@
                             <button class="ml-auto text-red-400 text-xs" onclick="event.stopPropagation(); removeFriend('${username}')">Remove</button>
                         `;
                         card.onclick = () => selectUserFromRoblox(user, avatar);
-                        container.appendChild(card);
+                        friendElements.push(card);
                     }
                 } catch(e) {
                     console.error("Error loading friend:", username, e);
                 }
             }
+            
+            container.innerHTML = '';
+            friendElements.forEach(el => container.appendChild(el));
         }
 
         // Add friend to saved list
@@ -570,7 +564,6 @@
                 friends.push(username);
                 localStorage.setItem("robloxFriends", JSON.stringify(friends));
                 renderSavedFriends();
-                renderPickerFriends();
                 showToastNotif(`Added ${username} to friends`);
             }
         }
@@ -580,11 +573,10 @@
             friends = friends.filter(f => f !== username);
             localStorage.setItem("robloxFriends", JSON.stringify(friends));
             renderSavedFriends();
-            renderPickerFriends();
             showToastNotif(`Removed ${username} from friends`);
         }
 
-        // Handle search with debouncing and loading states
+        // Handle search with debouncing
         async function handleRobloxSearch(val) {
             const defaultList = document.getElementById('friends-list-default');
             const noRes = document.getElementById('no-results');
@@ -606,10 +598,8 @@
             document.getElementById('results-label').innerHTML = 'Searching Roblox...';
             document.getElementById('results-list').innerHTML = '<div class="search-loading"><div class="loading-spinner"></div> Searching Roblox users...</div>';
             
-            // Clear previous timeout
             if (searchTimeout) clearTimeout(searchTimeout);
             
-            // Debounce search
             searchTimeout = setTimeout(async () => {
                 const users = await searchRobloxUsers(val);
                 searchLoading.classList.add('hidden');
@@ -779,13 +769,6 @@
             return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); 
         }
 
-        // Placeholder for renderPickerFriends (for compatibility with sidebar)
-        async function renderPickerFriends() {
-            // This function is called by add/remove friend operations
-            // It's a stub for compatibility with the friend management system
-            console.log("Friend list updated");
-        }
-
         // Logo and icon editing functions
         const logoImg = document.getElementById('gameLogoImg'), logoFileInput = document.getElementById('logoFileInput');
         logoImg.addEventListener('click', e => { e.stopPropagation(); logoFileInput.click(); });
@@ -886,7 +869,6 @@
             updateBalanceUI();
             await renderSavedFriends();
             
-            // Close modals when clicking outside
             window.onclick = e => { 
                 if(e.target.id === 'sendModal') closeSendModal(); 
                 if(e.target.id === 'settingsModal') toggleModal('settingsModal'); 
