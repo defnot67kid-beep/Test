@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Central | Dashboard</title>
+    <title>Game Central | Dashboard - Advanced</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -304,6 +304,43 @@
             animation: spin 0.8s linear infinite;
             margin-left: 8px;
         }
+
+        /* Loading states */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(59,130,246,0.3);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        .search-loading {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+        }
+        
+        .error-message {
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: #ef4444;
+            font-size: 13px;
+            text-align: center;
+        }
+        
+        .avatar-fallback {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            color: white;
+        }
     </style>
 </head>
 <body class="flex">
@@ -355,7 +392,7 @@
             <div class="flex items-center space-x-4">
                 <div class="flex items-center space-x-2 bg-black/40 px-3 py-1.5 rounded-full border border-white/10">
                     <i class="fas fa-gem text-xs"></i>
-                    <span id="display-currency" class="font-bold text-sm">9.229.940</span>
+                    <span id="display-currency" class="font-bold text-sm">9,229,940</span>
                     <button onclick="openSendModal()" class="ml-2 bg-white/10 px-2 py-0.5 rounded text-[10px] hover:bg-white/20">↑ Send</button>
                 </div>
                 <button onclick="toggleModal('settingsModal')" class="text-gray-400 hover:text-white"><i class="fas fa-cog text-lg"></i></button>
@@ -370,24 +407,27 @@
                     <div class="flex items-center mt-4 space-x-4"><div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">🍀</div><div><p class="font-bold">Celestial Luck</p><p class="text-xs text-gray-500">RNG Battles</p></div></div>
                 </div>
                 <div class="p-2 space-y-1">
-                    <div class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg"><div class="flex items-center space-x-4"><span class="font-bold text-xl">24.000</span><span class="text-gray-500 line-through text-sm">22.500</span><span class="text-green-400 text-xs font-bold bg-green-400/10 px-2 py-1 rounded">+1500 more</span></div><button class="bg-[#2a2a2a] px-6 py-2 rounded font-bold text-sm w-32">$199,99</button></div>
-                    <div class="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-500/30 rounded-lg"><div class="flex items-center space-x-4"><span class="font-bold text-xl">2.000</span><span class="text-gray-500 line-through text-sm">1.700</span><span class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-1 rounded">+300 more</span></div><button class="btn-blue px-6 py-2 rounded font-bold text-sm w-32">$19,99</button></div>
+                    <div class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg"><div class="flex items-center space-x-4"><span class="font-bold text-xl">24,000</span><span class="text-gray-500 line-through text-sm">22,500</span><span class="text-green-400 text-xs font-bold bg-green-400/10 px-2 py-1 rounded">+1500 more</span></div><button class="bg-[#2a2a2a] px-6 py-2 rounded font-bold text-sm w-32">$199.99</button></div>
+                    <div class="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-500/30 rounded-lg"><div class="flex items-center space-x-4"><span class="font-bold text-xl">2,000</span><span class="text-gray-500 line-through text-sm">1,700</span><span class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-1 rounded">+300 more</span></div><button class="btn-blue px-6 py-2 rounded font-bold text-sm w-32">$19.99</button></div>
                 </div>
             </div>
             <div class="mt-16 space-y-4"><h2 class="text-2xl font-bold">FAQ</h2><div class="space-y-2"><div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer"><span>What are Credits?</span><i class="fas fa-chevron-down text-xs text-gray-500"></i></div><div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer"><span>Where are my Credits?</span><i class="fas fa-chevron-down text-xs text-gray-500"></i></div></div></div>
         </div>
     </main>
 
-    <!-- SEND MODAL with Roblox API Integration -->
+    <!-- SEND MODAL with improved Roblox API Integration -->
     <div id="sendModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 modal-overlay">
         <div class="glass-modal w-[420px] rounded-xl overflow-hidden shadow-2xl modal-card">
             <div class="p-4 border-b border-white/10 flex justify-between items-center">
                 <div class="flex items-center space-x-2"><i class="fas fa-share text-gray-400 text-sm"></i><span class="font-bold text-sm">Gift Balance</span></div>
-                <div class="flex items-center gap-3"><div class="flex items-center gap-1.5"><i class="fas fa-gem text-[10px] text-gray-400"></i><span class="text-xs font-bold" id="gift-balance-header">9.229.940</span></div><button onclick="closeSendModal()" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button></div>
+                <div class="flex items-center gap-3"><div class="flex items-center gap-1.5"><i class="fas fa-gem text-[10px] text-gray-400"></i><span class="text-xs font-bold" id="gift-balance-header">9,229,940</span></div><button onclick="closeSendModal()" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button></div>
             </div>
 
             <div id="step-search" class="p-5">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search Roblox username..." oninput="handleRobloxSearch(this.value)">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search Roblox username..." autocomplete="off">
+                <div id="search-loading" class="hidden search-loading">
+                    <div class="loading-spinner"></div> Searching...
+                </div>
                 <div id="no-results" class="hidden mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-3">Roblox Search (0)</p><div class="bg-white/5 rounded-xl p-8 text-center"><p class="text-sm text-gray-400">No Roblox users found for "<span id="no-results-term"></span>"</p></div></div>
                 <div id="search-results" class="hidden mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-2" id="results-label">Roblox Users</p><div id="results-list" class="space-y-1 max-h-[260px] overflow-y-auto custom-scrollbar"></div></div>
                 <div id="friends-list-default" class="mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-3">Saved Friends</p><div id="savedFriendsList" class="space-y-1 max-h-[280px] overflow-y-auto custom-scrollbar pr-1"></div></div>
@@ -423,80 +463,185 @@
     <div id="editIconModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[450px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center gap-2"><i class="fas fa-image text-blue-400"></i><span class="font-bold">Edit Menu Icon</span></div><button onclick="closeIconModal()" class="text-gray-500 hover:text-white text-2xl">&times;</button></div><div class="p-6 space-y-5"><div class="flex items-center gap-4"><div class="icon-preview" id="iconPreview"><i class="fas fa-home"></i></div><div><p class="text-sm font-medium" id="modalItemName">Home</p><p class="text-[10px] text-gray-500">Click to change icon</p></div></div><div><label class="text-xs text-gray-400 block mb-2">Font Awesome Icon (class)</label><input type="text" id="iconClassInput" class="icon-url-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-2.5 text-sm" placeholder="e.g., fas fa-home"></div><div class="relative"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div><div class="relative flex justify-center text-xs"><span class="bg-[#191919] px-2 text-gray-500">OR</span></div></div><div><label class="text-xs text-gray-400 block mb-2">Custom Image URL</label><input type="text" id="imageUrlInput" class="icon-url-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-2.5 text-sm" placeholder="https://example.com/icon.png"></div><div class="flex gap-3"><button onclick="saveIconChanges()" class="flex-1 btn-blue py-2.5 rounded-lg font-bold">Apply</button><button onclick="closeIconModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-lg font-bold">Cancel</button></div></div></div></div>
     <div id="editFriendCountModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[380px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center gap-2"><i class="fas fa-users text-blue-400"></i><span class="font-bold">Edit Friend Count</span></div><button onclick="closeFriendCountModal()" class="text-gray-500 hover:text-white">&times;</button></div><div class="p-6"><input type="number" id="friendCountInput" class="rename-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-3 text-white text-lg" value="211"><div class="flex gap-3 mt-5"><button onclick="saveFriendCount()" class="flex-1 btn-blue py-2.5 rounded-lg font-bold">Save</button><button onclick="closeFriendCountModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-lg font-bold">Cancel</button></div></div></div></div>
     <div id="renameLogoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[400px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center gap-2"><i class="fas fa-pen-alt text-blue-400"></i><span class="font-bold">Rename Game Logo</span></div><button onclick="closeRenameModal()" class="text-gray-500 hover:text-white text-2xl">&times;</button></div><div class="p-6"><input type="text" id="renameInputField" class="rename-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-3 text-white" maxlength="30"><div class="flex gap-3 mt-5"><button onclick="saveNewLogoName()" class="flex-1 btn-blue py-2.5 rounded-lg font-bold">Save</button><button onclick="closeRenameModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-lg font-bold">Cancel</button></div></div></div></div>
-    <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[600px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center gap-2"><i class="fas fa-cog text-gray-400"></i><span class="font-bold">Manage Site</span></div><button onclick="toggleModal('settingsModal')" class="text-gray-500 hover:text-white">&times;</button></div><div class="p-6 grid grid-cols-3 gap-4 bg-black/20"><div class="bg-black/40 p-3 rounded border"><p class="text-[10px] text-gray-500 uppercase">Credits</p><p id="modal-credits-display" class="text-xl font-bold">9.229.940</p></div><div class="bg-black/40 p-3 rounded border"><p class="text-[10px] text-gray-500 uppercase">Cash</p><p class="text-xl font-bold">$0,04</p></div><div class="bg-black/40 p-3 rounded border"><p class="text-[10px] text-gray-500 uppercase">Friends</p><p class="text-xl font-bold" id="modalFriendCount">9</p></div></div><div class="p-6"><div class="grid grid-cols-2 gap-6"><div class="space-y-4"><h3 class="font-bold text-sm text-orange-400">Account</h3><div><label class="text-[10px] text-gray-500 block">Username</label><input type="text" value="Player123" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><div><label class="text-[10px] text-gray-500 block">Credit Balance</label><input id="input-credits" type="text" value="9.229.940" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><button onclick="updateBalance()" class="w-full btn-blue py-2 rounded font-bold text-sm">Update</button></div><div class="space-y-4"><h3 class="font-bold text-sm text-orange-400">Bonus banner</h3><div><label class="text-[10px] text-gray-500 block">Image URL</label><input type="text" placeholder="https://..." class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><button class="w-full btn-blue py-2 rounded font-bold text-sm">Save</button></div></div></div></div></div>
+    <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[600px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center gap-2"><i class="fas fa-cog text-gray-400"></i><span class="font-bold">Manage Site</span></div><button onclick="toggleModal('settingsModal')" class="text-gray-500 hover:text-white">&times;</button></div><div class="p-6 grid grid-cols-3 gap-4 bg-black/20"><div class="bg-black/40 p-3 rounded border"><p class="text-[10px] text-gray-500 uppercase">Credits</p><p id="modal-credits-display" class="text-xl font-bold">9,229,940</p></div><div class="bg-black/40 p-3 rounded border"><p class="text-[10px] text-gray-500 uppercase">Cash</p><p class="text-xl font-bold">$0.04</p></div><div class="bg-black/40 p-3 rounded border"><p class="text-[10px] text-gray-500 uppercase">Friends</p><p class="text-xl font-bold" id="modalFriendCount">9</p></div></div><div class="p-6"><div class="grid grid-cols-2 gap-6"><div class="space-y-4"><h3 class="font-bold text-sm text-orange-400">Account</h3><div><label class="text-[10px] text-gray-500 block">Username</label><input type="text" value="Player123" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><div><label class="text-[10px] text-gray-500 block">Credit Balance</label><input id="input-credits" type="text" value="9,229,940" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><button onclick="updateBalance()" class="w-full btn-blue py-2 rounded font-bold text-sm">Update</button></div><div class="space-y-4"><h3 class="font-bold text-sm text-orange-400">Bonus banner</h3><div><label class="text-[10px] text-gray-500 block">Image URL</label><input type="text" placeholder="https://..." class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><button class="w-full btn-blue py-2 rounded font-bold text-sm">Save</button></div></div></div></div></div>
 
     <script>
-        // ==================== ROBLOX API INTEGRATION ====================
+        // ==================== ADVANCED ROBLOX API INTEGRATION ====================
         const PROXY = "https://corsproxy.io/?";
+        
+        // Load saved data from localStorage
         let friends = JSON.parse(localStorage.getItem("robloxFriends") || '["builderman", "roblox"]');
-        let currentBalance = 9229940;
+        let currentBalance = parseInt(localStorage.getItem("creditBalance")) || 9229940;
         let currentRobloxUser = null;
         let currentRobloxAvatar = "";
         let selectedAmount = 200;
         let currentEditingElement = null;
         let currentItemKey = null;
+        let searchTimeout = null;
 
+        // Helper function to format numbers with commas
+        function formatNumber(num) {
+            return num.toLocaleString('en-US');
+        }
+
+        // Update balance UI everywhere
+        function updateBalanceUI() {
+            const formattedBalance = formatNumber(currentBalance);
+            document.getElementById('display-currency').innerText = formattedBalance;
+            document.getElementById('gift-balance-header').innerText = formattedBalance;
+            document.getElementById('modal-credits-display').innerText = formattedBalance;
+            document.getElementById('input-credits').value = currentBalance;
+            localStorage.setItem("creditBalance", currentBalance);
+        }
+
+        // Improved API fetch with better error handling
         async function fetchRobloxAPI(url) {
             try {
-                const res = await fetch(PROXY + encodeURIComponent(url));
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                
+                const res = await fetch(PROXY + encodeURIComponent(url), {
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+                
                 return await res.json();
-            } catch(e) { console.warn("API error:", e); return {}; }
+            } catch(e) {
+                console.warn("API error:", e);
+                return null;
+            }
         }
 
+        // Search Roblox users with debouncing
         async function searchRobloxUsers(username) {
+            if (!username || username.trim().length < 2) return [];
             const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=30`);
-            return data.data || [];
+            return data?.data || [];
         }
 
+        // Get avatar URL with fallback
         async function getRobloxAvatarUrl(userId) {
             const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
-            return data.data?.[0]?.imageUrl || `https://tr.rbxcdn.com/avatar-${userId}.png`;
+            return data?.data?.[0]?.imageUrl || `https://ui-avatars.com/api/?background=3b82f6&color=fff&name=${userId}&size=150`;
         }
 
+        // Render saved friends with improved loading
         async function renderSavedFriends() {
             const container = document.getElementById("savedFriendsList");
             if(!container) return;
-            if(friends.length === 0) { container.innerHTML = '<div style="text-align:center;padding:32px;color:#6b6b7a;">No friends added.<br>Use search to add friends.</div>'; return; }
-            container.innerHTML = '';
+            
+            if(friends.length === 0) { 
+                container.innerHTML = '<div style="text-align:center;padding:32px;color:#6b6b7a;">No friends added.<br>Use search to add friends.</div>'; 
+                return; 
+            }
+            
+            container.innerHTML = '<div class="loading-spinner" style="margin:20px auto;display:block;"></div>';
+            
             for(const username of friends) {
-                const users = await searchRobloxUsers(username);
-                if(users.length > 0) {
-                    const user = users[0];
-                    const avatar = await getRobloxAvatarUrl(user.id);
-                    const card = document.createElement("div");
-                    card.className = "user-result-item";
-                    card.innerHTML = `<div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover"></div><div><p class="text-sm font-bold">${escapeHtml(user.displayName || user.name)}</p><p class="text-[10px] text-gray-500">@${escapeHtml(user.name)}</p></div>`;
-                    card.onclick = () => selectUserFromRoblox(user, avatar);
-                    container.appendChild(card);
+                try {
+                    const users = await searchRobloxUsers(username);
+                    if(users && users.length > 0) {
+                        const user = users[0];
+                        const avatar = await getRobloxAvatarUrl(user.id);
+                        const card = document.createElement("div");
+                        card.className = "user-result-item";
+                        card.innerHTML = `
+                            <div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?background=3b82f6&color=fff&name=${user.name}'"></div>
+                            <div><p class="text-sm font-bold">${escapeHtml(user.displayName || user.name)}</p><p class="text-[10px] text-gray-500">@${escapeHtml(user.name)}</p></div>
+                            <button class="ml-auto text-red-400 text-xs" onclick="event.stopPropagation(); removeFriend('${username}')">Remove</button>
+                        `;
+                        card.onclick = () => selectUserFromRoblox(user, avatar);
+                        container.appendChild(card);
+                    }
+                } catch(e) {
+                    console.error("Error loading friend:", username, e);
                 }
             }
         }
 
+        // Add friend to saved list
+        function addFriendToList(username) {
+            if (!friends.includes(username)) {
+                friends.push(username);
+                localStorage.setItem("robloxFriends", JSON.stringify(friends));
+                renderSavedFriends();
+                renderPickerFriends();
+                showToastNotif(`Added ${username} to friends`);
+            }
+        }
+
+        // Remove friend
+        function removeFriend(username) {
+            friends = friends.filter(f => f !== username);
+            localStorage.setItem("robloxFriends", JSON.stringify(friends));
+            renderSavedFriends();
+            renderPickerFriends();
+            showToastNotif(`Removed ${username} from friends`);
+        }
+
+        // Handle search with debouncing and loading states
         async function handleRobloxSearch(val) {
             const defaultList = document.getElementById('friends-list-default');
             const noRes = document.getElementById('no-results');
             const resList = document.getElementById('search-results');
-            if (!val.trim()) { noRes.classList.add('hidden'); resList.classList.add('hidden'); defaultList.classList.remove('hidden'); await renderSavedFriends(); return; }
+            const searchLoading = document.getElementById('search-loading');
+            
+            if (!val.trim()) { 
+                noRes.classList.add('hidden'); 
+                resList.classList.add('hidden'); 
+                defaultList.classList.remove('hidden'); 
+                searchLoading.classList.add('hidden');
+                await renderSavedFriends(); 
+                return; 
+            }
+            
             defaultList.classList.add('hidden');
             resList.classList.remove('hidden');
-            document.getElementById('results-label').innerHTML = 'Searching Roblox... <span class="api-loading"></span>';
-            document.getElementById('results-list').innerHTML = '';
-            const users = await searchRobloxUsers(val);
-            if (users.length === 0) { noRes.classList.remove('hidden'); resList.classList.add('hidden'); document.getElementById('no-results-term').innerText = val; return; }
-            noRes.classList.add('hidden');
-            document.getElementById('results-label').innerHTML = `Roblox Users (${users.length})`;
-            const resultsContainer = document.getElementById('results-list');
-            resultsContainer.innerHTML = '';
-            for(const user of users.slice(0, 15)) {
-                const avatar = await getRobloxAvatarUrl(user.id);
-                const card = document.createElement("div");
-                card.className = "user-result-item";
-                card.innerHTML = `<div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover"></div><div><p class="text-sm font-bold">${escapeHtml(user.displayName || user.name)}</p><p class="text-[10px] text-gray-500">@${escapeHtml(user.name)}</p></div>`;
-                card.onclick = () => selectUserFromRoblox(user, avatar);
-                resultsContainer.appendChild(card);
-            }
+            searchLoading.classList.remove('hidden');
+            document.getElementById('results-label').innerHTML = 'Searching Roblox...';
+            document.getElementById('results-list').innerHTML = '<div class="search-loading"><div class="loading-spinner"></div> Searching Roblox users...</div>';
+            
+            // Clear previous timeout
+            if (searchTimeout) clearTimeout(searchTimeout);
+            
+            // Debounce search
+            searchTimeout = setTimeout(async () => {
+                const users = await searchRobloxUsers(val);
+                searchLoading.classList.add('hidden');
+                
+                if (!users || users.length === 0) { 
+                    noRes.classList.remove('hidden'); 
+                    resList.classList.add('hidden'); 
+                    document.getElementById('no-results-term').innerText = val; 
+                    return; 
+                }
+                
+                noRes.classList.add('hidden');
+                document.getElementById('results-label').innerHTML = `Roblox Users (${users.length})`;
+                const resultsContainer = document.getElementById('results-list');
+                resultsContainer.innerHTML = '';
+                
+                for(const user of users.slice(0, 15)) {
+                    const avatar = await getRobloxAvatarUrl(user.id);
+                    const card = document.createElement("div");
+                    card.className = "user-result-item";
+                    card.innerHTML = `
+                        <div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?background=3b82f6&color=fff&name=${user.name}'"></div>
+                        <div><p class="text-sm font-bold">${escapeHtml(user.displayName || user.name)}</p><p class="text-[10px] text-gray-500">@${escapeHtml(user.name)}</p></div>
+                        <button class="ml-auto text-blue-400 text-xs" onclick="event.stopPropagation(); addFriendToList('${user.name}')">Save</button>
+                    `;
+                    card.onclick = () => selectUserFromRoblox(user, avatar);
+                    resultsContainer.appendChild(card);
+                }
+            }, 400);
         }
 
+        // Select user for sending
         function selectUserFromRoblox(user, avatarUrl) {
             currentRobloxUser = user;
             currentRobloxAvatar = avatarUrl;
@@ -511,43 +656,245 @@
             showStep('amount');
         }
 
-        function selectAmount(val, btn) { selectedAmount = val; document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected')); if(btn) btn.classList.add('selected'); document.getElementById('amount-display').innerText = val; document.getElementById('customAmountInput').value = ''; }
-        function selectCustomAmount(val) { if(val === '') return; selectedAmount = parseInt(val) || 0; document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected')); document.getElementById('amount-display').innerText = selectedAmount; }
-        function goToSearch() { showStep('search'); }
+        // Amount selection functions
+        function selectAmount(val, btn) { 
+            selectedAmount = val; 
+            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected')); 
+            if(btn) btn.classList.add('selected'); 
+            document.getElementById('amount-display').innerText = val; 
+            document.getElementById('customAmountInput').value = ''; 
+        }
+        
+        function selectCustomAmount(val) { 
+            if(val === '') return; 
+            selectedAmount = parseInt(val) || 0; 
+            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected')); 
+            document.getElementById('amount-display').innerText = selectedAmount; 
+        }
+        
+        function goToSearch() { showStep('search'); renderSavedFriends(); }
         function goToAmount() { showStep('amount'); }
-        function goToConfirm() { document.getElementById('confirm-avatar').src = currentRobloxAvatar; document.getElementById('confirm-name').innerText = currentRobloxUser.displayName || currentRobloxUser.name; document.getElementById('confirm-amount-text').innerText = selectedAmount; document.getElementById('confirm-handle-text').innerText = '@' + currentRobloxUser.name; showStep('confirm'); }
+        
+        function goToConfirm() { 
+            if (!currentRobloxUser) {
+                showToastNotif("Please select a user first");
+                goToSearch();
+                return;
+            }
+            if (selectedAmount <= 0) {
+                showToastNotif("Please select a valid amount");
+                return;
+            }
+            if (currentBalance < selectedAmount) {
+                showToastNotif(`Insufficient balance! Need ${selectedAmount} credits`);
+                return;
+            }
+            document.getElementById('confirm-avatar').src = currentRobloxAvatar; 
+            document.getElementById('confirm-name').innerText = currentRobloxUser.displayName || currentRobloxUser.name; 
+            document.getElementById('confirm-amount-text').innerText = selectedAmount; 
+            document.getElementById('confirm-handle-text').innerText = '@' + currentRobloxUser.name; 
+            showStep('confirm'); 
+        }
         
         function startTransfer() { 
-            showStep('loading'); let idx = 0; const steps = ['Connecting to Roblox...','Verifying user...','Syncing transaction...','Processing gift...','Finalizing...']; const subs = ['Connecting to Roblox API...','Verifying recipient...','Synchronizing data...','Processing gift request...','Updating balance...']; 
-            const update = () => { document.getElementById('loading-title').innerText = steps[idx]; document.getElementById('loading-sub').innerText = subs[idx]; for(let i=0;i<5;i++) { const dot = document.getElementById('pd-'+i); if(i<idx) dot.className = 'progress-dot done'; else if(i===idx) dot.className = 'progress-dot active'; else dot.className = 'progress-dot'; } for(let i=0;i<4;i++) { const line = document.getElementById('pl-'+i); line.className = i<idx ? 'progress-line done' : 'progress-line'; } }; 
-            update(); const interval = setInterval(() => { idx++; if(idx >= steps.length) { clearInterval(interval); const newBal = (currentBalance - selectedAmount).toLocaleString('de-DE'); currentBalance -= selectedAmount; document.getElementById('display-currency').innerText = newBal; document.getElementById('gift-balance-header').innerText = newBal; document.getElementById('success-amount').innerText = selectedAmount + ' Credits'; document.getElementById('success-recipient').innerText = '@' + currentRobloxUser.name; document.getElementById('success-timestamp').innerText = new Date().toLocaleString(); document.getElementById('success-txid').innerText = '#TX-' + Math.floor(Math.random()*900000+100000); showToastNotif(`Sent ${selectedAmount} to @${currentRobloxUser.name}`); showStep('success'); } else { update(); } }, 800); 
+            if (currentBalance < selectedAmount) {
+                showToastNotif("Insufficient balance!");
+                goToAmount();
+                return;
+            }
+            
+            showStep('loading'); 
+            let idx = 0; 
+            const steps = ['Connecting to Roblox...','Verifying user...','Syncing transaction...','Processing gift...','Finalizing...']; 
+            const subs = ['Connecting to Roblox API...','Verifying recipient...','Synchronizing data...','Processing gift request...','Updating balance...']; 
+            
+            const update = () => { 
+                document.getElementById('loading-title').innerText = steps[idx]; 
+                document.getElementById('loading-sub').innerText = subs[idx]; 
+                for(let i=0;i<5;i++) { 
+                    const dot = document.getElementById('pd-'+i); 
+                    if(i<idx) dot.className = 'progress-dot done'; 
+                    else if(i===idx) dot.className = 'progress-dot active'; 
+                    else dot.className = 'progress-dot'; 
+                } 
+                for(let i=0;i<4;i++) { 
+                    const line = document.getElementById('pl-'+i); 
+                    line.className = i<idx ? 'progress-line done' : 'progress-line'; 
+                } 
+            }; 
+            
+            update(); 
+            const interval = setInterval(() => { 
+                idx++; 
+                if(idx >= steps.length) { 
+                    clearInterval(interval); 
+                    currentBalance -= selectedAmount; 
+                    updateBalanceUI();
+                    document.getElementById('success-amount').innerText = selectedAmount + ' Credits'; 
+                    document.getElementById('success-recipient').innerText = '@' + currentRobloxUser.name; 
+                    document.getElementById('success-timestamp').innerText = new Date().toLocaleString(); 
+                    document.getElementById('success-txid').innerText = '#TX-' + Math.floor(Math.random()*900000+100000); 
+                    showToastNotif(`Sent ${selectedAmount} credits to @${currentRobloxUser.name}`); 
+                    showStep('success'); 
+                } else { 
+                    update(); 
+                } 
+            }, 800); 
         }
 
-        function openSendModal() { document.getElementById('sendModal').classList.remove('hidden'); showStep('search'); document.getElementById('searchInput').value = ''; document.getElementById('no-results').classList.add('hidden'); document.getElementById('search-results').classList.add('hidden'); document.getElementById('friends-list-default').classList.remove('hidden'); renderSavedFriends(); }
-        function closeSendModal() { document.getElementById('sendModal').classList.add('hidden'); }
-        function showStep(step) { ['search','amount','confirm','loading','success'].forEach(s => document.getElementById('step-'+s).classList.add('hidden')); document.getElementById('step-'+step).classList.remove('hidden'); }
-        function showToastNotif(msg) { const toast = document.getElementById('toast-notif'); document.getElementById('toast-text').innerText = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 4000); }
-        function hideToast() { document.getElementById('toast-notif').classList.remove('show'); }
-        function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+        // Modal functions
+        function openSendModal() { 
+            updateBalanceUI();
+            document.getElementById('sendModal').classList.remove('hidden'); 
+            showStep('search'); 
+            document.getElementById('searchInput').value = ''; 
+            document.getElementById('no-results').classList.add('hidden'); 
+            document.getElementById('search-results').classList.add('hidden'); 
+            document.getElementById('friends-list-default').classList.remove('hidden'); 
+            renderSavedFriends(); 
+        }
+        
+        function closeSendModal() { 
+            document.getElementById('sendModal').classList.add('hidden'); 
+        }
+        
+        function showStep(step) { 
+            ['search','amount','confirm','loading','success'].forEach(s => document.getElementById('step-'+s).classList.add('hidden')); 
+            document.getElementById('step-'+step).classList.remove('hidden'); 
+        }
+        
+        function showToastNotif(msg) { 
+            const toast = document.getElementById('toast-notif'); 
+            document.getElementById('toast-text').innerText = msg; 
+            toast.classList.add('show'); 
+            setTimeout(() => toast.classList.remove('show'), 4000); 
+        }
+        
+        function hideToast() { 
+            document.getElementById('toast-notif').classList.remove('show'); 
+        }
+        
+        function escapeHtml(str) { 
+            if(!str) return ""; 
+            return str.replace(/[&<>]/g, m => m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); 
+        }
+
+        // Placeholder for renderPickerFriends (for compatibility with sidebar)
+        async function renderPickerFriends() {
+            // This function is called by add/remove friend operations
+            // It's a stub for compatibility with the friend management system
+            console.log("Friend list updated");
+        }
 
         // Logo and icon editing functions
         const logoImg = document.getElementById('gameLogoImg'), logoFileInput = document.getElementById('logoFileInput');
         logoImg.addEventListener('click', e => { e.stopPropagation(); logoFileInput.click(); });
         logoFileInput.addEventListener('change', e => { const file = e.target.files[0]; if(file && file.type.startsWith('image/')) { const reader = new FileReader(); reader.onload = ev => logoImg.src = ev.target.result; reader.readAsDataURL(file); } });
+        
         function openRenameModal() { document.getElementById('renameInputField').value = document.getElementById('gameLogoText').innerText; document.getElementById('renameLogoModal').classList.remove('hidden'); }
         function closeRenameModal() { document.getElementById('renameLogoModal').classList.add('hidden'); }
         function saveNewLogoName() { let n = document.getElementById('renameInputField').value.trim(); if(!n) n = 'GAMELOGO'; document.getElementById('gameLogoText').innerText = n; closeRenameModal(); }
         
-        function setupEditableFeatures() { document.querySelectorAll('.editable-icon').forEach(icon => { icon.addEventListener('click', e => { e.stopPropagation(); const parent = icon.closest('.sidebar-item'); const name = parent?.querySelector('span:not(.friend-count-badge)')?.innerText || 'Item'; currentEditingElement = icon; currentItemKey = icon.getAttribute('data-item-key'); openIconModal(name, icon); }); }); document.getElementById('friendCountBadge').addEventListener('click', e => { e.stopPropagation(); document.getElementById('friendCountInput').value = document.getElementById('friendCountBadge').innerText; document.getElementById('editFriendCountModal').classList.remove('hidden'); }); }
-        function openIconModal(name, el) { document.getElementById('modalItemName').innerText = name; const ic = document.getElementById('iconClassInput'); const iu = document.getElementById('imageUrlInput'); ic.value = el.tagName === 'I' ? el.className : ''; iu.value = el.tagName === 'IMG' ? el.src : ''; const preview = document.getElementById('iconPreview'); const updatePreview = () => { if(iu.value.trim()) preview.innerHTML = `<img src="${iu.value}" class="w-8 h-8 object-contain">`; else if(ic.value.trim()) preview.innerHTML = `<i class="${ic.value} text-2xl"></i>`; else preview.innerHTML = `<i class="fas fa-question text-2xl text-gray-500"></i>`; }; updatePreview(); ic.oninput = updatePreview; iu.oninput = updatePreview; document.getElementById('editIconModal').classList.remove('hidden'); }
-        function saveIconChanges() { if(!currentEditingElement) { closeIconModal(); return; } const iconClass = document.getElementById('iconClassInput').value.trim(); const imageUrl = document.getElementById('imageUrlInput').value.trim(); const newEl = document.createElement(imageUrl ? 'img' : 'i'); if(imageUrl) { newEl.src = imageUrl; newEl.style.cssText = 'width:20px;height:20px;object-fit:contain;cursor:pointer;'; } else { newEl.className = `${iconClass} w-5 editable-icon`; } newEl.setAttribute('data-item-key', currentItemKey); newEl.addEventListener('click', e => { e.stopPropagation(); const p = newEl.closest('.sidebar-item'); const n = p?.querySelector('span:not(.friend-count-badge)')?.innerText || 'Item'; currentEditingElement = newEl; currentItemKey = newEl.getAttribute('data-item-key'); openIconModal(n, newEl); }); currentEditingElement.parentNode.replaceChild(newEl, currentEditingElement); closeIconModal(); }
+        function setupEditableFeatures() { 
+            document.querySelectorAll('.editable-icon').forEach(icon => { 
+                icon.addEventListener('click', e => { 
+                    e.stopPropagation(); 
+                    const parent = icon.closest('.sidebar-item'); 
+                    const name = parent?.querySelector('span:not(.friend-count-badge)')?.innerText || 'Item'; 
+                    currentEditingElement = icon; 
+                    currentItemKey = icon.getAttribute('data-item-key'); 
+                    openIconModal(name, icon); 
+                }); 
+            }); 
+            document.getElementById('friendCountBadge').addEventListener('click', e => { 
+                e.stopPropagation(); 
+                document.getElementById('friendCountInput').value = document.getElementById('friendCountBadge').innerText; 
+                document.getElementById('editFriendCountModal').classList.remove('hidden'); 
+            }); 
+        }
+        
+        function openIconModal(name, el) { 
+            document.getElementById('modalItemName').innerText = name; 
+            const ic = document.getElementById('iconClassInput'); 
+            const iu = document.getElementById('imageUrlInput'); 
+            ic.value = el.tagName === 'I' ? el.className : ''; 
+            iu.value = el.tagName === 'IMG' ? el.src : ''; 
+            const preview = document.getElementById('iconPreview'); 
+            const updatePreview = () => { 
+                if(iu.value.trim()) preview.innerHTML = `<img src="${iu.value}" class="w-8 h-8 object-contain">`; 
+                else if(ic.value.trim()) preview.innerHTML = `<i class="${ic.value} text-2xl"></i>`; 
+                else preview.innerHTML = `<i class="fas fa-question text-2xl text-gray-500"></i>`; 
+            }; 
+            updatePreview(); 
+            ic.oninput = updatePreview; 
+            iu.oninput = updatePreview; 
+            document.getElementById('editIconModal').classList.remove('hidden'); 
+        }
+        
+        function saveIconChanges() { 
+            if(!currentEditingElement) { closeIconModal(); return; } 
+            const iconClass = document.getElementById('iconClassInput').value.trim(); 
+            const imageUrl = document.getElementById('imageUrlInput').value.trim(); 
+            const newEl = document.createElement(imageUrl ? 'img' : 'i'); 
+            if(imageUrl) { 
+                newEl.src = imageUrl; 
+                newEl.style.cssText = 'width:20px;height:20px;object-fit:contain;cursor:pointer;'; 
+            } else { 
+                newEl.className = `${iconClass} w-5 editable-icon`; 
+            } 
+            newEl.setAttribute('data-item-key', currentItemKey); 
+            newEl.addEventListener('click', e => { 
+                e.stopPropagation(); 
+                const p = newEl.closest('.sidebar-item'); 
+                const n = p?.querySelector('span:not(.friend-count-badge)')?.innerText || 'Item'; 
+                currentEditingElement = newEl; 
+                currentItemKey = newEl.getAttribute('data-item-key'); 
+                openIconModal(n, newEl); 
+            }); 
+            currentEditingElement.parentNode.replaceChild(newEl, currentEditingElement); 
+            closeIconModal(); 
+        }
+        
         function closeIconModal() { document.getElementById('editIconModal').classList.add('hidden'); currentEditingElement = null; }
-        function saveFriendCount() { let n = parseInt(document.getElementById('friendCountInput').value); if(isNaN(n)) n = 0; document.getElementById('friendCountBadge').innerText = n; const m = document.getElementById('modalFriendCount'); if(m) m.innerText = n; closeFriendCountModal(); }
+        
+        function saveFriendCount() { 
+            let n = parseInt(document.getElementById('friendCountInput').value); 
+            if(isNaN(n)) n = 0; 
+            document.getElementById('friendCountBadge').innerText = n; 
+            const m = document.getElementById('modalFriendCount'); 
+            if(m) m.innerText = n; 
+            closeFriendCountModal(); 
+        }
+        
         function closeFriendCountModal() { document.getElementById('editFriendCountModal').classList.add('hidden'); }
+        
         function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
-        function updateBalance() { const v = document.getElementById('input-credits').value; document.getElementById('display-currency').innerText = v; document.getElementById('modal-credits-display').innerText = v; document.getElementById('gift-balance-header').innerText = v; toggleModal('settingsModal'); }
+        
+        function updateBalance() { 
+            const v = parseInt(document.getElementById('input-credits').value); 
+            if (!isNaN(v)) {
+                currentBalance = v; 
+                updateBalanceUI();
+            }
+            toggleModal('settingsModal'); 
+        }
 
-        document.addEventListener('DOMContentLoaded', () => { setupEditableFeatures(); document.getElementById('gameLogoText').addEventListener('click', openRenameModal); renderSavedFriends(); window.onclick = e => { if(e.target.id === 'sendModal') closeSendModal(); if(e.target.id === 'settingsModal') toggleModal('settingsModal'); if(e.target.id === 'editIconModal') closeIconModal(); if(e.target.id === 'editFriendCountModal') closeFriendCountModal(); if(e.target.id === 'renameLogoModal') closeRenameModal(); }; });
+        // Initialize everything when DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupEditableFeatures(); 
+            document.getElementById('gameLogoText').addEventListener('click', openRenameModal);
+            updateBalanceUI();
+            await renderSavedFriends();
+            
+            // Close modals when clicking outside
+            window.onclick = e => { 
+                if(e.target.id === 'sendModal') closeSendModal(); 
+                if(e.target.id === 'settingsModal') toggleModal('settingsModal'); 
+                if(e.target.id === 'editIconModal') closeIconModal(); 
+                if(e.target.id === 'editFriendCountModal') closeFriendCountModal(); 
+                if(e.target.id === 'renameLogoModal') closeRenameModal(); 
+            }; 
+        });
     </script>
 </body>
 </html>
