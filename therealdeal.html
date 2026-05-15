@@ -491,19 +491,11 @@
 
                 <!-- Default friends list (before typing) -->
                 <div id="friends-list-default" class="mt-4">
-                    <p class="text-[11px] text-gray-500 font-bold uppercase mb-3">My Friends (9)</p>
-                    <div class="space-y-1 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
-                        <div class="user-result-item" onclick="selectUser('SAITAMA','@imnotbobgray58','https://api.dicebear.com/7.x/avataaars/svg?seed=Saitama')">
-                            <div class="avatar-sm"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Saitama" class="w-full h-full object-cover"></div>
-                            <div><p class="text-sm font-bold">SAITAMA</p><p class="text-[10px] text-gray-500">@imnotbobgray58</p></div>
-                        </div>
-                        <div class="user-result-item" onclick="selectUser('CyberNova','@cybernova','https://api.dicebear.com/7.x/avataaars/svg?seed=CyberNova')">
-                            <div class="avatar-sm"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=CyberNova" class="w-full h-full object-cover"></div>
-                            <div><p class="text-sm font-bold">CyberNova</p><p class="text-[10px] text-gray-500">@cybernova</p></div>
-                        </div>
-                        <div class="user-result-item" onclick="selectUser('PixelKnight','@pixelk','https://api.dicebear.com/7.x/avataaars/svg?seed=PixelKnight')">
-                            <div class="avatar-sm"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=PixelKnight" class="w-full h-full object-cover"></div>
-                            <div><p class="text-sm font-bold">PixelKnight</p><p class="text-[10px] text-gray-500">@pixelk</p></div>
+                    <p class="text-[11px] text-gray-500 font-bold uppercase mb-3">My Friends (3)</p>
+                    <div id="default-friends-list" class="space-y-1 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
+                        <div class="text-center py-6">
+                            <i class="fas fa-circle-notch fa-spin text-gray-400 text-lg mb-2"></i>
+                            <p class="text-xs text-gray-500">Loading friends...</p>
                         </div>
                     </div>
                 </div>
@@ -552,8 +544,8 @@
             <div id="step-confirm" class="hidden p-5">
                 <div class="flex items-center justify-center gap-4 mb-6 mt-2">
                     <div class="text-center">
-                        <div class="avatar-sm mx-auto mb-1"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Me" class="w-full h-full object-cover"></div>
-                        <p class="text-[10px] text-gray-400">Me</p>
+                        <div class="avatar-sm mx-auto mb-1"><img id="confirm-me-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Me" class="w-full h-full object-cover"></div>
+                        <p class="text-[10px] text-gray-400" id="confirm-me-name">Me</p>
                     </div>
                     <div class="text-gray-500 text-lg">→</div>
                     <div class="text-center">
@@ -739,9 +731,9 @@
                 <div class="grid grid-cols-2 gap-6">
                     <div class="space-y-4">
                         <h3 class="font-bold text-sm text-orange-400">Account</h3>
-                        <div><label class="text-[10px] text-gray-500 block mb-1">My Username</label><input type="text" value="Player123" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div>
+                        <div><label class="text-[10px] text-gray-500 block mb-1">My Username</label><input type="text" id="settings-username" value="Player123" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div>
                         <div><label class="text-[10px] text-gray-500 block mb-1">Credit Balance</label><input id="input-credits" type="text" value="9.229.940" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div>
-                        <button onclick="updateBalance()" class="w-full btn-blue py-2 rounded font-bold text-sm mt-2">Update Account</button>
+                        <button onclick="updateProfile()" class="w-full btn-blue py-2 rounded font-bold text-sm mt-2">Update Account</button>
                     </div>
                     <div class="space-y-4">
                         <h3 class="font-bold text-sm text-orange-400">Bonus banner</h3>
@@ -759,8 +751,10 @@
         let selectedAmount = 200;
         let currentEditingElement = null;
         let currentItemKey = null;
+        let myUsername = localStorage.getItem('mainUsername') || 'Player123';
+        let myAvatar = localStorage.getItem('mainAvatar') || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Me';
 
-        // ===== ROBLOX API (from Script B) =====
+        // ===== ROBLOX API =====
         const PROXY = "https://corsproxy.io/?";
         let searchTimeout;
 
@@ -788,6 +782,70 @@
             }[m]));
         }
 
+        // ===== UPDATE MY AVATAR =====
+        async function updateMyAvatar() {
+            const users = await fetchUserByUsername(myUsername);
+            if(users.length > 0) {
+                const avatar = await fetchAvatarUrl(users[0].id);
+                myAvatar = avatar;
+                localStorage.setItem('mainAvatar', avatar);
+                document.getElementById('confirm-me-avatar').src = avatar;
+                document.getElementById('confirm-me-name').textContent = users[0].displayName || myUsername;
+            }
+        }
+
+        // ===== UPDATE PROFILE =====
+        async function updateProfile() {
+            const username = document.getElementById('settings-username').value.trim();
+            const balance = document.getElementById('input-credits').value;
+            
+            if(username) {
+                myUsername = username;
+                localStorage.setItem('mainUsername', username);
+                document.getElementById('confirm-me-name').textContent = username;
+                await updateMyAvatar();
+            }
+            
+            document.getElementById('display-currency').textContent = balance;
+            document.getElementById('modal-credits-display').textContent = balance;
+            document.getElementById('gift-balance-header').textContent = balance;
+            toggleModal('settingsModal');
+        }
+
+        // ===== LOAD DEFAULT FRIENDS WITH REAL ROBLOX AVATARS =====
+        async function loadDefaultFriends() {
+            const defaultFriends = ['builderman', 'Roblox', 'SAITAMA'];
+            const container = document.getElementById('default-friends-list');
+            
+            container.innerHTML = `
+                <div class="text-center py-6">
+                    <i class="fas fa-circle-notch fa-spin text-gray-400 text-lg mb-2"></i>
+                    <p class="text-xs text-gray-500">Loading friends...</p>
+                </div>
+            `;
+            
+            container.innerHTML = '';
+            
+            for(const username of defaultFriends) {
+                const users = await fetchUserByUsername(username);
+                if(users.length > 0) {
+                    const user = users[0];
+                    const avatar = await fetchAvatarUrl(user.id);
+                    const handle = '@' + user.name.toLowerCase().replace(/\s+/g, '');
+                    const displayName = user.displayName || user.name;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'user-result-item';
+                    card.innerHTML = `
+                        <div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}'"></div>
+                        <div><p class="text-sm font-bold">${escapeHtml(displayName)}</p><p class="text-[10px] text-gray-500">${escapeHtml(handle)}</p></div>
+                    `;
+                    card.onclick = () => selectUser(displayName, handle, avatar);
+                    container.appendChild(card);
+                }
+            }
+        }
+
         // ===== SEND MODAL =====
         function openSendModal() {
             document.getElementById('sendModal').classList.remove('hidden');
@@ -796,6 +854,7 @@
             document.getElementById('no-results').classList.add('hidden');
             document.getElementById('search-results').classList.add('hidden');
             document.getElementById('friends-list-default').classList.remove('hidden');
+            loadDefaultFriends();
         }
 
         function closeSendModal() {
@@ -809,7 +868,7 @@
             document.getElementById('step-' + step).classList.remove('hidden');
         }
 
-        // ===== DEBOUNCED SEARCH (from Script B) =====
+        // ===== DEBOUNCED SEARCH =====
         const searchInput = document.getElementById('searchInput');
         const searchResultsDiv = document.getElementById('search-results');
         const resultsList = document.getElementById('results-list');
@@ -831,7 +890,6 @@
                 defaultList.classList.add('hidden');
                 
                 searchTimeout = setTimeout(async () => {
-                    // Show loading state
                     searchResultsDiv.classList.remove('hidden');
                     noResDiv.classList.add('hidden');
                     resultsList.innerHTML = `
@@ -883,9 +941,8 @@
             document.getElementById('selected-avatar').src = avatar;
             document.getElementById('amount-display').textContent = '200';
             document.getElementById('customAmountInput').value = '';
-            // Reset amount buttons
             document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
-            document.querySelectorAll('.amount-btn')[3].classList.add('selected'); // 200 default
+            document.querySelectorAll('.amount-btn')[3].classList.add('selected');
             showStep('amount');
         }
 
@@ -908,6 +965,8 @@
         function goToAmount() { showStep('amount'); }
 
         function goToConfirm() {
+            document.getElementById('confirm-me-avatar').src = myAvatar;
+            document.getElementById('confirm-me-name').textContent = myUsername;
             document.getElementById('confirm-avatar').src = selectedUser.avatar;
             document.getElementById('confirm-name').textContent = selectedUser.name;
             document.getElementById('confirm-amount-text').textContent = selectedAmount;
@@ -915,7 +974,6 @@
             showStep('confirm');
         }
 
-        // Loading sequence
         const loadingSteps = [
             { title: 'Connecting...', sub: 'Connecting to servers...', dot: 0 },
             { title: 'Verifying...', sub: 'Verifying user credentials...', dot: 1 },
@@ -958,13 +1016,11 @@
         }
 
         function showSuccess() {
-            // Deduct from balance display
             const curr = document.getElementById('display-currency').textContent.replace(/\./g, '');
             const newBal = (parseInt(curr) - selectedAmount).toLocaleString('de-DE');
             document.getElementById('display-currency').textContent = newBal;
             document.getElementById('gift-balance-header').textContent = newBal;
 
-            // Fill success details
             document.getElementById('success-amount').textContent = selectedAmount + ' Robux';
             document.getElementById('success-recipient').textContent = selectedUser.handle;
             const now = new Date();
@@ -975,7 +1031,6 @@
             showToastNotif('Gift sent to ' + selectedUser.handle);
         }
 
-        // ===== TOAST =====
         function showToastNotif(msg) {
             document.getElementById('toast-text').textContent = msg;
             document.getElementById('toast-notif').classList.add('show');
@@ -985,7 +1040,6 @@
             document.getElementById('toast-notif').classList.remove('show');
         }
 
-        // ===== LOGO =====
         const logoImg = document.getElementById('gameLogoImg');
         const logoFileInput = document.getElementById('logoFileInput');
         logoImg.addEventListener('click', e => { e.stopPropagation(); logoFileInput.click(); });
@@ -1009,7 +1063,6 @@
             closeRenameModal();
         }
 
-        // ===== SIDEBAR ICONS =====
         function setupEditableFeatures() {
             document.querySelectorAll('.editable-icon').forEach(icon => {
                 icon.addEventListener('click', e => {
@@ -1084,17 +1137,18 @@
         }
 
         function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
-        function updateBalance() {
-            const v = document.getElementById('input-credits').value;
-            document.getElementById('display-currency').textContent = v;
-            document.getElementById('modal-credits-display').textContent = v;
-            document.getElementById('gift-balance-header').textContent = v;
-            toggleModal('settingsModal');
-        }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             setupEditableFeatures();
             document.getElementById('gameLogoText').addEventListener('click', openRenameModal);
+            
+            // Load saved profile
+            if(myUsername) {
+                document.getElementById('settings-username').value = myUsername;
+                document.getElementById('confirm-me-name').textContent = myUsername;
+                await updateMyAvatar();
+            }
+            
             window.onclick = event => {
                 if (event.target.id === 'sendModal') closeSendModal();
                 if (event.target.id === 'settingsModal') toggleModal('settingsModal');
