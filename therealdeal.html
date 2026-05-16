@@ -511,7 +511,7 @@
                     <p class="text-xs text-gray-500" id="selected-handle">@builderman</p>
                     <div class="flex items-center justify-center gap-4 mt-2 text-xs text-gray-500">
                         <span><i class="fas fa-user-friends mr-1"></i>0 Mutual Connections</span>
-                        <span>⊙ Joined in 2008</span>
+                        <span id="join-date-display"><i class="fas fa-calendar-alt mr-1"></i>Loading join date...</span>
                     </div>
                 </div>
 
@@ -747,7 +747,7 @@
 
     <script>
         // ===== STATE =====
-        let selectedUser = { name: '', handle: '', avatar: '' };
+        let selectedUser = { name: '', handle: '', avatar: '', joinDate: '' };
         let selectedAmount = 200;
         let currentEditingElement = null;
         let currentItemKey = null;
@@ -770,9 +770,21 @@
             return data.data || [];
         }
 
+        async function fetchUserById(userId) {
+            const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/${userId}`);
+            return data;
+        }
+
         async function fetchAvatarUrl(userId) {
             const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
             return data.data?.[0]?.imageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`;
+        }
+
+        function formatJoinDate(dateString) {
+            if (!dateString) return 'Unknown join date';
+            const date = new Date(dateString);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
         }
 
         function escapeHtml(str) { 
@@ -812,7 +824,7 @@
             toggleModal('settingsModal');
         }
 
-        // ===== LOAD DEFAULT FRIENDS WITH REAL ROBLOX AVATARS =====
+        // ===== LOAD DEFAULT FRIENDS WITH REAL ROBLOX AVATARS AND JOIN DATES =====
         async function loadDefaultFriends() {
             const defaultFriends = ['builderman', 'Roblox', 'SAITAMA'];
             const container = document.getElementById('default-friends-list');
@@ -831,6 +843,8 @@
                 if(users.length > 0) {
                     const user = users[0];
                     const avatar = await fetchAvatarUrl(user.id);
+                    const userDetails = await fetchUserById(user.id);
+                    const joinDate = userDetails.created ? formatJoinDate(userDetails.created) : 'Unknown join date';
                     const handle = '@' + user.name.toLowerCase().replace(/\s+/g, '');
                     const displayName = user.displayName || user.name;
                     
@@ -838,9 +852,13 @@
                     card.className = 'user-result-item';
                     card.innerHTML = `
                         <div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}'"></div>
-                        <div><p class="text-sm font-bold">${escapeHtml(displayName)}</p><p class="text-[10px] text-gray-500">${escapeHtml(handle)}</p></div>
+                        <div>
+                            <p class="text-sm font-bold">${escapeHtml(displayName)}</p>
+                            <p class="text-[10px] text-gray-500">${escapeHtml(handle)}</p>
+                            <p class="text-[9px] text-gray-600 mt-0.5"><i class="fas fa-calendar-alt mr-1"></i>${joinDate}</p>
+                        </div>
                     `;
-                    card.onclick = () => selectUser(displayName, handle, avatar);
+                    card.onclick = () => selectUser(displayName, handle, avatar, joinDate);
                     container.appendChild(card);
                 }
             }
@@ -917,6 +935,8 @@
                     resultsList.innerHTML = '';
                     for(const user of users.slice(0, 10)) {
                         const avatar = await fetchAvatarUrl(user.id);
+                        const userDetails = await fetchUserById(user.id);
+                        const joinDate = userDetails.created ? formatJoinDate(userDetails.created) : 'Unknown join date';
                         const handle = '@' + user.name.toLowerCase().replace(/\s+/g, '');
                         const displayName = user.displayName || user.name;
                         
@@ -924,21 +944,26 @@
                         card.className = 'user-result-item';
                         card.innerHTML = `
                             <div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}'"></div>
-                            <div><p class="text-sm font-bold">${escapeHtml(displayName)}</p><p class="text-[10px] text-gray-500">${escapeHtml(handle)}</p></div>
+                            <div>
+                                <p class="text-sm font-bold">${escapeHtml(displayName)}</p>
+                                <p class="text-[10px] text-gray-500">${escapeHtml(handle)}</p>
+                                <p class="text-[9px] text-gray-600 mt-0.5"><i class="fas fa-calendar-alt mr-1"></i>${joinDate}</p>
+                            </div>
                         `;
-                        card.onclick = () => selectUser(displayName, handle, avatar);
+                        card.onclick = () => selectUser(displayName, handle, avatar, joinDate);
                         resultsList.appendChild(card);
                     }
                 }, 400);
             });
         }
 
-        function selectUser(name, handle, avatar) {
-            selectedUser = { name, handle, avatar };
+        function selectUser(name, handle, avatar, joinDate) {
+            selectedUser = { name, handle, avatar, joinDate };
             selectedAmount = 200;
             document.getElementById('selected-username').textContent = name;
             document.getElementById('selected-handle').textContent = handle;
             document.getElementById('selected-avatar').src = avatar;
+            document.getElementById('join-date-display').innerHTML = `<i class="fas fa-calendar-alt mr-1"></i>${joinDate}`;
             document.getElementById('amount-display').textContent = '200';
             document.getElementById('customAmountInput').value = '';
             document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
