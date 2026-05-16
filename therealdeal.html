@@ -2,266 +2,1161 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Game Central | Auto-Gift Loop | Editable Universe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Central | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        * { user-select: none; }
+        
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0b0b0b;
             color: #ffffff;
             overflow-x: hidden;
         }
-        :-webkit-full-screen { background-color: #0b0b0b; }
-        :fullscreen { background-color: #0b0b0b; }
-        .sidebar-item { transition: all 0.2s ease; cursor: pointer; }
-        .sidebar-item:hover { background-color: rgba(255, 255, 255, 0.05); }
-        .editable-icon { cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; width: 20px; text-align: center; }
-        .editable-icon:hover { transform: scale(1.1); filter: drop-shadow(0 0 3px rgba(59,130,246,0.5)); }
-        .friend-count-badge { cursor: pointer; transition: all 0.2s; }
-        .friend-count-badge:hover { background-color: rgba(59,130,246,0.4); transform: scale(1.05); }
-        .game-logo-img, .celestial-img, .celestial-card-click { cursor: pointer; transition: all 0.2s ease; border-radius: 12px; object-fit: cover; }
-        .game-logo-img:hover, .celestial-img:hover, .celestial-card-click:hover { filter: brightness(1.1); transform: scale(1.02); box-shadow: 0 0 0 2px rgba(59,130,246,0.6); }
-        .icon-preview { width: 48px; height: 48px; background: #1a1a1a; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; border: 1px solid #333; }
-        .glass-modal { background: rgba(22, 22, 22, 0.98); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); }
+
+        .sidebar-item {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .sidebar-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .editable-icon {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            text-align: center;
+        }
+        .editable-icon:hover {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 3px rgba(59,130,246,0.5));
+        }
+        
+        .friend-count-badge {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .friend-count-badge:hover {
+            background-color: rgba(59,130,246,0.4);
+            transform: scale(1.05);
+        }
+        
+        .game-logo-img {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+        .game-logo-img:hover {
+            filter: brightness(1.1);
+            transform: scale(1.05);
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.5);
+        }
+        
+        .icon-preview {
+            width: 48px;
+            height: 48px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            border: 1px solid #333;
+        }
+        
+        .glass-modal {
+            background: rgba(22, 22, 22, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
         .btn-blue { background-color: #3b82f6; transition: filter 0.2s; }
         .btn-blue:hover { filter: brightness(1.2); }
-        .rename-input, .icon-url-input { background: #1f1f1f; border: 1px solid #333; transition: all 0.2s; }
-        .rename-input:focus, .icon-url-input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 2px rgba(59,130,246,0.3); }
-        .amount-btn { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px; cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 5px; color: #ccc; }
-        .amount-btn:hover { background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.4); }
-        .amount-btn.selected { background: #3b82f6; border-color: #3b82f6; color: white; }
-        .progress-track { display: flex; align-items: center; gap: 0; width: 100%; max-width: 220px; margin: 0 auto; }
-        .progress-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.15); flex-shrink: 0; transition: background 0.3s; }
+        
+        .rename-input, .icon-url-input {
+            background: #1f1f1f;
+            border: 1px solid #333;
+            transition: all 0.2s;
+        }
+        .rename-input:focus, .icon-url-input:focus {
+            border-color: #3b82f6;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+        }
+
+        /* Amount selector buttons */
+        .amount-btn {
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            color: #ccc;
+        }
+        .amount-btn:hover {
+            background: rgba(59,130,246,0.15);
+            border-color: rgba(59,130,246,0.4);
+        }
+        .amount-btn.selected {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        /* Progress dots */
+        .progress-track {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            width: 100%;
+            max-width: 220px;
+            margin: 0 auto;
+        }
+        .progress-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            flex-shrink: 0;
+            transition: background 0.3s;
+        }
         .progress-dot.done { background: #22c55e; }
         .progress-dot.active { background: #3b82f6; }
-        .progress-line { flex: 1; height: 2px; background: rgba(255,255,255,0.1); transition: background 0.3s; }
+        .progress-line {
+            flex: 1;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            transition: background 0.3s;
+        }
         .progress-line.done { background: #22c55e; }
-        .shield-container { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; position: relative; }
-        .shield-ring { position: absolute; inset: -8px; border-radius: 50%; border: 2px solid transparent; border-top-color: #3b82f6; animation: spin 1.2s linear infinite; }
-        .shield-ring-2 { position: absolute; inset: -14px; border-radius: 50%; border: 2px solid transparent; border-top-color: rgba(59,130,246,0.3); animation: spin 2s linear infinite reverse; }
+
+        /* Shield icon for loading */
+        .shield-container {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        .shield-ring {
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: #3b82f6;
+            animation: spin 1.2s linear infinite;
+        }
+        .shield-ring-2 {
+            position: absolute;
+            inset: -14px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: rgba(59,130,246,0.3);
+            animation: spin 2s linear infinite reverse;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .success-circle { width: 70px; height: 70px; border-radius: 50%; border: 3px solid #22c55e; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; animation: popIn 0.4s ease; }
-        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 70% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
-        .user-result-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; cursor: pointer; transition: background 0.15s; }
+
+        /* Success checkmark */
+        .success-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid #22c55e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            animation: popIn 0.4s ease;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* User result item */
+        .user-result-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
         .user-result-item:hover { background: rgba(255,255,255,0.07); }
-        #toast-notif { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-80px); background: #1a1a1a; border: 1px solid rgba(34,197,94,0.5); border-radius: 999px; padding: 10px 20px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; z-index: 200; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); white-space: nowrap; }
+
+        /* Toast notification */
+        #toast-notif {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-80px);
+            background: #1a1a1a;
+            border: 1px solid rgba(34,197,94,0.5);
+            border-radius: 999px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 200;
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            white-space: nowrap;
+        }
         #toast-notif.show { transform: translateX(-50%) translateY(0); }
-        .modal-overlay { animation: fadeIn 0.15s ease; }
+
+        /* Modal overlay transition */
+        .modal-overlay {
+            animation: fadeIn 0.15s ease;
+        }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .modal-card { animation: slideUp 0.2s ease; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .search-input { background: rgba(255,255,255,0.05); border: 1.5px solid rgba(59,130,246,0.5); border-radius: 10px; padding: 10px 14px; width: 100%; color: white; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .modal-card {
+            animation: slideUp 0.2s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Search input */
+        .search-input {
+            background: rgba(255,255,255,0.05);
+            border: 1.5px solid rgba(59,130,246,0.5);
+            border-radius: 10px;
+            padding: 10px 14px;
+            width: 100%;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
         .search-input:focus { border-color: #3b82f6; }
-        .avatar-ring { width: 72px; height: 72px; border-radius: 50%; border: 3px solid #3b82f6; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #1a1a1a; }
-        .avatar-sm { width: 46px; height: 46px; border-radius: 50%; border: 2px solid rgba(59,130,246,0.6); overflow: hidden; background: #1a1a1a; }
-        .tx-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+
+        /* Avatar ring */
+        .avatar-ring {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 3px solid #3b82f6;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+        }
+        .avatar-sm {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 2px solid rgba(59,130,246,0.6);
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+
+        /* Transaction details table */
+        .tx-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
+        }
         .tx-row:last-child { border-bottom: none; }
-        .loading-bg { background: linear-gradient(180deg, #111 0%, #0d1117 100%); border-radius: 12px; padding: 32px 20px; text-align: center; position: relative; overflow: hidden; }
-        .loading-bg::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #3b82f6, transparent); animation: shimmer 2s infinite; }
+
+        /* Background for loading screens */
+        .loading-bg {
+            background: linear-gradient(180deg, #111 0%, #0d1117 100%);
+            border-radius: 12px;
+            padding: 32px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .loading-bg::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+            animation: shimmer 2s infinite;
+        }
         @keyframes shimmer { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
-        .region-badge { font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 0.5px; margin-bottom: 20px; }
-        #fps-counter { position: fixed; bottom: 16px; right: 16px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 20px; font-family: monospace; font-size: 12px; font-weight: bold; color: #0f0; z-index: 9999; pointer-events: none; border: 1px solid rgba(59,130,246,0.4); }
-        #loop-status { position: fixed; bottom: 16px; left: 16px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 9999; font-family: monospace; }
-        .loop-active { color: #22c55e; }
-        .loop-idle { color: #ef4444; }
-        .celestial-card-click { cursor: pointer; transition: 0.2s; }
-        .editable-text { cursor: pointer; transition: 0.1s; }
-        .editable-text:hover { text-decoration: underline; color: #3b82f6; }
+
+        .region-badge {
+            font-size: 10px;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body class="flex">
 
-    <div id="fps-counter">FPS: --</div>
-    <div id="loop-status" class="loop-idle">⚡ LOOP: IDLE</div>
-    <div id="toast-notif"><span style="color:#22c55e;">✓</span><span id="toast-text"></span><button onclick="hideToast()" style="margin-left:8px;color:#666;">×</button></div>
+    <!-- Toast notification -->
+    <div id="toast-notif">
+        <span style="color:#22c55e;font-size:16px;">✓</span>
+        <span id="toast-text">Gift sent to @builderman</span>
+        <button onclick="hideToast()" style="margin-left:8px;color:#666;font-size:16px;background:none;border:none;cursor:pointer;">×</button>
+    </div>
 
     <aside class="w-64 h-screen sticky top-0 bg-[#0b0b0b] border-r border-white/10 flex flex-col p-4 space-y-2 text-sm text-gray-400">
-        <div class="flex items-center space-x-2 text-white font-bold text-xl mb-6">
-            <div><img id="gameLogoImg" src="https://cdn-icons-png.flaticon.com/512/1055/1055685.png" alt="Logo" class="w-8 h-8 object-contain game-logo-img" title="Click to change image"></div>
-            <span id="gameLogoText" class="cursor-pointer hover:text-blue-400 editable-text" title="Click to rename">GAMELOGO</span>
+        <div class="flex items-center space-x-2 text-white font-bold text-xl mb-6 group">
+            <div id="logoImgContainer" class="relative">
+                <img id="gameLogoImg" 
+                     src="https://cdn-icons-png.flaticon.com/512/1055/1055685.png" 
+                     alt="Game Logo" 
+                     class="w-8 h-8 object-contain game-logo-img"
+                     title="Click to change logo image">
+            </div>
+            <span id="gameLogoText" class="cursor-pointer hover:text-blue-400 transition duration-150" title="Click to rename">GAMELOGO</span>
         </div>
+        
         <input type="file" id="logoFileInput" accept="image/*" style="display: none;">
-        <nav class="flex-1 space-y-1">
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-white"><i class="fas fa-home w-5 editable-icon" data-item-key="home"></i><span>Home</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3"><i class="fas fa-user w-5 editable-icon" data-item-key="profile"></i><span>Profile</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-blue-400"><i class="fas fa-shield-alt w-5 editable-icon" data-item-key="plus"></i><span>Plus Membership</span><i class="fas fa-check-circle ml-auto text-xs"></i></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3"><i class="fas fa-envelope w-5 editable-icon" data-item-key="messages"></i><span>Messages</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3"><i class="fas fa-users w-5 editable-icon" data-item-key="friends"></i><span>Friends</span><span id="friendCountBadge" class="ml-auto bg-white/10 px-2 py-0.5 rounded-full text-[10px] friend-count-badge">211</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3"><i class="fas fa-user-circle w-5 editable-icon" data-item-key="avatar"></i><span>Avatar</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3"><i class="fas fa-archive w-5 editable-icon" data-item-key="inventory"></i><span>Inventory</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3"><i class="fas fa-cube w-5 editable-icon" data-item-key="sandbox"></i><span>Sandbox</span></div>
+        
+        <nav class="flex-1 space-y-1" id="sidebarNav">
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-white group" data-item="home">
+                <i class="fas fa-home w-5 editable-icon" data-item-key="home"></i>
+                <span>Home</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="profile">
+                <i class="fas fa-user w-5 editable-icon" data-item-key="profile"></i>
+                <span>Profile</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-blue-400 group" data-item="plus">
+                <i class="fas fa-shield-alt w-5 editable-icon" data-item-key="plus"></i>
+                <span>Plus Membership</span>
+                <i class="fas fa-check-circle ml-auto text-xs"></i>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="messages">
+                <i class="fas fa-envelope w-5 editable-icon" data-item-key="messages"></i>
+                <span>Messages</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="friends">
+                <i class="fas fa-users w-5 editable-icon" data-item-key="friends"></i>
+                <span>Friends</span>
+                <span id="friendCountBadge" class="ml-auto bg-white/10 px-2 py-0.5 rounded-full text-[10px] friend-count-badge" title="Click to edit">211</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="avatar">
+                <i class="fas fa-user-circle w-5 editable-icon" data-item-key="avatar"></i>
+                <span>Avatar</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="inventory">
+                <i class="fas fa-archive w-5 editable-icon" data-item-key="inventory"></i>
+                <span>Inventory</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="sandbox">
+                <i class="fas fa-cube w-5 editable-icon" data-item-key="sandbox"></i>
+                <span>Sandbox</span>
+            </div>
         </nav>
-        <div class="mt-auto border-t border-white/10 pt-4 text-[11px]"><div class="bg-white/5 p-3 rounded-lg"><p class="text-white font-semibold">Plus Active</p><p class="text-green-500">● Membership active</p></div></div>
+
+        <div class="mt-auto border-t border-white/10 pt-4 text-[11px]">
+            <div class="bg-white/5 p-3 rounded-lg border border-white/10">
+                <p class="text-white font-semibold">Plus Active</p>
+                <p class="text-green-500">● Membership active</p>
+            </div>
+        </div>
     </aside>
 
     <main class="flex-1 min-h-screen">
         <header class="h-16 border-b border-white/10 flex items-center justify-between px-8 sticky top-0 bg-[#0b0b0b]/80 backdrop-blur-md z-40">
-            <div class="flex space-x-6 text-sm font-semibold text-gray-400"><span class="text-white border-b-2 border-white pb-5">Home</span><span>Charts</span><span>Marketplace</span><span>Create</span></div>
+            <div class="flex space-x-6 text-sm font-semibold text-gray-400">
+                <span class="text-white border-b-2 border-white pb-5">Home</span>
+                <span>Charts</span>
+                <span>Marketplace</span>
+                <span>Create</span>
+            </div>
             <div class="flex items-center space-x-4">
-                <div class="flex items-center space-x-2 bg-black/40 px-3 py-1.5 rounded-full border border-white/10"><i class="fas fa-gem text-xs"></i><span id="display-currency" class="font-bold text-sm">9.229.940</span><button onclick="openSendModal()" class="ml-2 bg-white/10 px-2 py-0.5 rounded text-[10px] hover:bg-white/20">↑ Send</button></div>
+                <div class="flex items-center space-x-2 bg-black/40 px-3 py-1.5 rounded-full border border-white/10">
+                    <i class="fas fa-gem text-xs"></i>
+                    <span id="display-currency" class="font-bold text-sm">9.229.940</span>
+                    <button onclick="openSendModal()" class="ml-2 bg-white/10 px-2 py-0.5 rounded text-[10px] hover:bg-white/20">↑ Send</button>
+                </div>
                 <button onclick="toggleModal('settingsModal')" class="text-gray-400 hover:text-white"><i class="fas fa-cog text-lg"></i></button>
             </div>
         </header>
+
         <div class="max-w-4xl mx-auto py-12 px-6">
-            <div class="text-center mb-12"><h1 class="text-5xl font-extrabold tracking-tight mb-2">Enjoy up to 25% <br> more Credits</h1></div>
-            
-            <!-- CELESTIAL LUCK CARD - FULLY EDITABLE -->
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-extrabold tracking-tight mb-2">Enjoy up to 25% <br> more Credits</h1>
+            </div>
+
             <div class="bg-[#161616] rounded-xl border border-white/5 overflow-hidden mb-8">
                 <div class="p-6 border-b border-white/5 bg-gradient-to-r from-blue-900/20 to-transparent">
                     <p class="text-sm font-bold uppercase tracking-wider text-gray-400">Bonus item we picked for you</p>
                     <div class="flex items-center mt-4 space-x-4">
-                        <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center overflow-hidden celestial-card-click" id="celestialImageContainer">
-                            <img id="celestialImg" src="https://cdn-icons-png.flaticon.com/512/1995/1995572.png" class="w-full h-full object-cover celestial-img" alt="celestial">
-                        </div>
+                        <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">🍀</div>
                         <div>
-                            <p id="celestialTitle" class="font-bold editable-text cursor-pointer hover:text-blue-400">Celestial Luck</p>
-                            <p id="celestialSub" class="text-xs text-gray-500 editable-text cursor-pointer hover:text-blue-400">RNG Battles</p>
+                            <p class="font-bold">Celestial Luck</p>
+                            <p class="text-xs text-gray-500">RNG Battles</p>
                         </div>
                     </div>
                 </div>
-                <input type="file" id="celestialFileInput" accept="image/*" style="display: none;">
                 <div class="p-2 space-y-1">
-                    <div class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg group transition"><div class="flex items-center space-x-4"><span class="font-bold text-xl">24.000</span><span class="text-gray-500 line-through text-sm">22.500</span><span class="text-green-400 text-xs font-bold bg-green-400/10 px-2 py-1 rounded">+1500 more</span></div><button class="bg-[#2a2a2a] px-6 py-2 rounded font-bold text-sm w-32">$199,99</button></div>
-                    <div class="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-500/30 rounded-lg"><div class="flex items-center space-x-4"><span class="font-bold text-xl">2.000</span><span class="text-gray-500 line-through text-sm">1.700</span><span class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-1 rounded">+300 more</span></div><button class="btn-blue px-6 py-2 rounded font-bold text-sm w-32">$19,99</button></div>
+                    <div class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg group transition">
+                        <div class="flex items-center space-x-4">
+                            <span class="font-bold text-xl">24.000</span>
+                            <span class="text-gray-500 line-through text-sm">22.500</span>
+                            <span class="text-green-400 text-xs font-bold bg-green-400/10 px-2 py-1 rounded">+1500 more</span>
+                        </div>
+                        <button class="bg-[#2a2a2a] px-6 py-2 rounded font-bold text-sm w-32">$199,99</button>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-500/30 rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <span class="font-bold text-xl">2.000</span>
+                            <span class="text-gray-500 line-through text-sm">1.700</span>
+                            <span class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-1 rounded">+300 more</span>
+                        </div>
+                        <button class="btn-blue px-6 py-2 rounded font-bold text-sm w-32">$19,99</button>
+                    </div>
                 </div>
             </div>
-            <div class="mt-16 space-y-4"><h2 class="text-2xl font-bold">FAQ</h2><div class="space-y-2"><div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center"><span>What are Credits?</span><i class="fas fa-chevron-down text-xs text-gray-500"></i></div><div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center"><span>Where are my Credits?</span><i class="fas fa-chevron-down text-xs text-gray-500"></i></div></div></div>
+
+            <div class="mt-16 space-y-4">
+                <h2 class="text-2xl font-bold">FAQ</h2>
+                <div class="space-y-2">
+                    <div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer">
+                        <span>What are Credits?</span>
+                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                    </div>
+                    <div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer">
+                        <span>Where are my Credits?</span>
+                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
-    <!-- SEND MODAL (unchanged but functional) -->
-    <div id="sendModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 modal-overlay"><div class="glass-modal w-[420px] rounded-xl overflow-hidden shadow-2xl modal-card"><div class="p-4 border-b border-white/10 flex justify-between"><div class="flex gap-2"><i class="fas fa-share"></i><span class="font-bold">Gift Balance</span></div><div class="flex gap-2"><span id="gift-balance-header">9.229.940</span><button onclick="closeSendModal()">×</button></div></div>
-        <div id="step-search" class="p-5"><input type="text" id="searchInput" class="search-input" placeholder="Search username"><div id="no-results" class="hidden mt-4 text-center p-4 bg-white/5">No results</div><div id="search-results" class="hidden mt-4"><div id="results-list"></div></div><div id="friends-list-default" class="mt-4"><p class="text-[11px] text-gray-500">My Friends</p><div id="default-friends-list"></div></div></div>
-        <div id="step-amount" class="hidden p-5"><div class="text-center"><div class="avatar-ring mx-auto"><img id="selected-avatar" class="w-full h-full object-cover"></div><p id="selected-username" class="font-bold mt-2">User</p><p id="selected-handle" class="text-xs text-gray-500">@handle</p></div><div class="grid grid-cols-3 gap-2 my-4"><button class="amount-btn" onclick="selectAmount(25,this)">25</button><button onclick="selectAmount(50,this)">50</button><button onclick="selectAmount(100,this)">100</button><button class="selected" onclick="selectAmount(200,this)">200</button><button onclick="selectAmount(500,this)">500</button><button onclick="selectAmount(1000,this)">1000</button></div><input type="number" id="customAmountInput" class="search-input mb-4" placeholder="Custom" oninput="selectCustomAmount(this.value)"><div class="text-center text-2xl font-bold"><span id="amount-display">200</span></div><div class="grid grid-cols-2 gap-3 mt-4"><button onclick="goToConfirm()" class="btn-blue py-2 rounded">Continue</button><button onclick="goToSearch()" class="bg-[#2a2a2a] py-2 rounded">Back</button></div></div>
-        <div id="step-confirm" class="hidden p-5 text-center"><div class="flex justify-center gap-4"><div><div class="avatar-sm"><img id="confirm-me-avatar"></div><p class="text-xs" id="confirm-me-name">Me</p></div><div>→</div><div><div class="avatar-sm"><img id="confirm-avatar"></div><p id="confirm-name" class="text-xs"></p></div></div><p class="my-4">Send <strong id="confirm-amount-text">200</strong> to <strong id="confirm-handle-text"></strong></p><div class="grid grid-cols-2 gap-3"><button onclick="startTransfer()" class="btn-blue py-2">Confirm</button><button onclick="goToAmount()" class="bg-gray-800 py-2">Edit</button></div></div>
-        <div id="step-loading" class="hidden p-5 loading-bg"><div class="shield-container"><div class="shield-ring"></div><div class="shield-ring-2"></div><i class="fas fa-shield-alt text-3xl"></i></div><p id="loading-title">Processing...</p><div class="progress-track mt-4"><div class="progress-dot active" id="pd-0"></div><div class="progress-line" id="pl-0"></div><div class="progress-dot" id="pd-1"></div><div class="progress-line" id="pl-1"></div><div class="progress-dot" id="pd-2"></div><div class="progress-line" id="pl-2"></div><div class="progress-dot" id="pd-3"></div><div class="progress-line" id="pl-3"></div><div class="progress-dot" id="pd-4"></div></div><p id="loading-sub" class="text-xs mt-2"></p></div>
-        <div id="step-success" class="hidden p-6 text-center"><div class="success-circle"><i class="fas fa-check text-green-400 text-3xl"></i></div><h3 class="font-bold text-xl">Success!</h3><div class="bg-white/5 p-3 rounded my-3"><p>Amount: <span id="success-amount"></span></p><p>Recipient: <span id="success-recipient"></span></p><p>TX: <span id="success-txid"></span></p></div><button onclick="closeSendModal()" class="btn-blue w-full py-2">Done</button></div></div></div>
+    <!-- ============================================================
+         SEND / GIFT BALANCE MODAL (Multi-step)
+    ============================================================ -->
+    <div id="sendModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 modal-overlay">
+        <div class="glass-modal w-[420px] rounded-xl overflow-hidden shadow-2xl modal-card">
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-share text-gray-400 text-sm"></i>
+                    <span class="font-bold text-sm">Gift Balance</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1.5">
+                        <i class="fas fa-gem text-[10px] text-gray-400"></i>
+                        <span class="text-xs font-bold" id="gift-balance-header">9.229.940</span>
+                    </div>
+                    <button onclick="closeSendModal()" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button>
+                </div>
+            </div>
 
-    <!-- MODALS FOR EDITING TEXT / IMAGES (inline clicks) -->
-    <div id="textEditModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[400px] p-5 rounded-xl"><h3 class="font-bold mb-3" id="textEditLabel">Edit Text</h3><input id="textEditInput" class="rename-input w-full p-2 rounded bg-black/60" autocomplete="off"><div class="flex gap-3 mt-4"><button id="textEditSaveBtn" class="btn-blue px-4 py-2 rounded">Save</button><button onclick="closeTextModal()" class="bg-gray-800 px-4 py-2 rounded">Cancel</button></div></div></div>
+            <!-- STEP 1: Search -->
+            <div id="step-search" class="p-5">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by username" autocomplete="off">
+                
+                <!-- No results state -->
+                <div id="no-results" class="hidden mt-4">
+                    <p class="text-[11px] text-gray-500 font-bold uppercase mb-3" id="search-label">Global Search ( 0 )</p>
+                    <div class="bg-white/5 rounded-xl p-8 text-center">
+                        <p class="text-sm text-gray-400">No users found for "<span id="no-results-term"></span>"</p>
+                    </div>
+                </div>
 
-    <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[500px] p-6"><h2 class="font-bold mb-4">Settings</h2><input id="settings-username" placeholder="Username" class="w-full bg-black/60 p-2 rounded mb-2"><input id="input-credits" placeholder="Credits" class="w-full bg-black/60 p-2 rounded mb-2"><button onclick="updateProfile()" class="btn-blue w-full py-2">Update</button></div></div>
+                <!-- Results list -->
+                <div id="search-results" class="hidden mt-4">
+                    <p class="text-[11px] text-gray-500 font-bold uppercase mb-2" id="results-label">Global Search</p>
+                    <div id="results-list" class="space-y-1 max-h-[260px] overflow-y-auto custom-scrollbar"></div>
+                </div>
+
+                <!-- Default friends list (before typing) -->
+                <div id="friends-list-default" class="mt-4">
+                    <p class="text-[11px] text-gray-500 font-bold uppercase mb-3">My Friends (3)</p>
+                    <div id="default-friends-list" class="space-y-1 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
+                        <div class="text-center py-6">
+                            <i class="fas fa-circle-notch fa-spin text-gray-400 text-lg mb-2"></i>
+                            <p class="text-xs text-gray-500">Loading friends...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Select Amount -->
+            <div id="step-amount" class="hidden p-5">
+                <div class="text-center mb-5">
+                    <div class="avatar-ring mx-auto mb-3">
+                        <img id="selected-avatar" src="" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-bold text-base" id="selected-username">builderman</p>
+                    <p class="text-xs text-gray-500" id="selected-handle">@builderman</p>
+                    <div class="flex items-center justify-center gap-4 mt-2 text-xs text-gray-500">
+                        <span><i class="fas fa-user-friends mr-1"></i>0 Mutual Connections</span>
+                        <span>⊙ Joined in 2008</span>
+                    </div>
+                </div>
+
+                <!-- Amount grid -->
+                <div class="grid grid-cols-3 gap-2 mb-2">
+                    <button class="amount-btn" onclick="selectAmount(25, this)"><i class="fas fa-gem text-[9px]"></i> 25</button>
+                    <button class="amount-btn" onclick="selectAmount(50, this)"><i class="fas fa-gem text-[9px]"></i> 50</button>
+                    <button class="amount-btn" onclick="selectAmount(100, this)"><i class="fas fa-gem text-[9px]"></i> 100</button>
+                    <button class="amount-btn selected" onclick="selectAmount(200, this)"><i class="fas fa-gem text-[9px]"></i> 200</button>
+                    <button class="amount-btn" onclick="selectAmount(500, this)"><i class="fas fa-gem text-[9px]"></i> 500</button>
+                    <button class="amount-btn" onclick="selectAmount(1000, this)"><i class="fas fa-gem text-[9px]"></i> 1000</button>
+                </div>
+                <input type="number" id="customAmountInput" class="search-input mb-4" placeholder="Custom amount" oninput="selectCustomAmount(this.value)" style="font-size:13px;padding:9px 14px;">
+
+                <div class="text-center mb-5">
+                    <div class="flex items-center justify-center gap-2 text-2xl font-bold">
+                        <i class="fas fa-gem text-gray-400 text-base"></i>
+                        <span id="amount-display">200</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="goToConfirm()" class="btn-blue py-2.5 rounded-lg font-bold text-sm">Continue</button>
+                    <button onclick="goToSearch()" class="bg-[#2a2a2a] hover:bg-[#333] py-2.5 rounded-lg font-bold text-sm">Back</button>
+                </div>
+                <p class="text-[10px] text-gray-500 text-center mt-3">You need an age check or parental consent to gift balance. Once you confirm, you cannot cancel.</p>
+            </div>
+
+            <!-- STEP 3: Confirm -->
+            <div id="step-confirm" class="hidden p-5">
+                <div class="flex items-center justify-center gap-4 mb-6 mt-2">
+                    <div class="text-center">
+                        <div class="avatar-sm mx-auto mb-1"><img id="confirm-me-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Me" class="w-full h-full object-cover"></div>
+                        <p class="text-[10px] text-gray-400" id="confirm-me-name">Me</p>
+                    </div>
+                    <div class="text-gray-500 text-lg">→</div>
+                    <div class="text-center">
+                        <div class="avatar-sm mx-auto mb-1"><img id="confirm-avatar" src="" class="w-full h-full object-cover"></div>
+                        <p class="text-[10px] text-gray-400" id="confirm-name">builderman</p>
+                    </div>
+                </div>
+
+                <h3 class="text-center font-bold text-lg mb-3">Confirm Transaction</h3>
+                <p class="text-center text-sm text-gray-300 mb-1">
+                    You are about to send <strong id="confirm-amount-text">200</strong> Robux to <strong id="confirm-handle-text">@builderman</strong>.
+                </p>
+                <p class="text-center text-xs text-red-400 mb-6">This action is permanent and cannot be reversed.</p>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="startTransfer()" class="btn-blue py-2.5 rounded-lg font-bold text-sm">Confirm Gift</button>
+                    <button onclick="goToAmount()" class="bg-[#2a2a2a] hover:bg-[#333] py-2.5 rounded-lg font-bold text-sm">Edit Amount</button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Loading/Processing -->
+            <div id="step-loading" class="hidden p-5">
+                <div class="loading-bg">
+                    <p class="region-badge">REGION: AP-SOUTHEAST-1 &nbsp;|&nbsp; PING: 37ms</p>
+                    
+                    <div class="shield-container mx-auto mb-5" style="position:relative;width:70px;height:70px;">
+                        <div class="shield-ring"></div>
+                        <div class="shield-ring-2"></div>
+                        <div style="width:70px;height:70px;border-radius:50%;background:rgba(59,130,246,0.1);display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-shield-alt text-blue-400 text-2xl"></i>
+                        </div>
+                    </div>
+
+                    <h3 class="font-bold text-xl mb-1" id="loading-title">Connecting...</h3>
+
+                    <!-- Progress bar -->
+                    <div class="progress-track mt-4 mb-2">
+                        <div class="progress-dot active" id="pd-0"></div>
+                        <div class="progress-line" id="pl-0"></div>
+                        <div class="progress-dot" id="pd-1"></div>
+                        <div class="progress-line" id="pl-1"></div>
+                        <div class="progress-dot" id="pd-2"></div>
+                        <div class="progress-line" id="pl-2"></div>
+                        <div class="progress-dot" id="pd-3"></div>
+                        <div class="progress-line" id="pl-3"></div>
+                        <div class="progress-dot" id="pd-4"></div>
+                    </div>
+                    <p class="text-[11px] text-gray-500" id="loading-sub">Connecting to servers...</p>
+                </div>
+            </div>
+
+            <!-- STEP 5: Success -->
+            <div id="step-success" class="hidden p-6">
+                <div class="success-circle">
+                    <i class="fas fa-check text-green-400 text-2xl"></i>
+                </div>
+                <h3 class="text-center font-bold text-xl mb-5">Transfer Successful</h3>
+
+                <div class="bg-white/5 rounded-xl p-4 mb-5 border border-white/5">
+                    <div class="tx-row">
+                        <span class="text-gray-400">Status:</span>
+                        <span class="text-green-400 font-semibold text-sm">✓ Completed</span>
+                    </div>
+                    <div class="tx-row">
+                        <span class="text-gray-400">Amount:</span>
+                        <span class="font-semibold text-sm" id="success-amount">500 Robux</span>
+                    </div>
+                    <div class="tx-row">
+                        <span class="text-gray-400">Recipient:</span>
+                        <span class="font-semibold text-sm" id="success-recipient">@builderman</span>
+                    </div>
+                    <div class="tx-row">
+                        <span class="text-gray-400">Timestamp:</span>
+                        <span class="font-semibold text-sm" id="success-timestamp">May 14, 2026 · 05:06 PM</span>
+                    </div>
+                    <div class="tx-row">
+                        <span class="text-gray-400">Transaction ID:</span>
+                        <span class="text-blue-400 font-mono text-xs" id="success-txid">#TX-499560</span>
+                    </div>
+                </div>
+
+                <div class="bg-amber-900/20 border border-amber-500/30 rounded-lg p-3 mb-5 flex gap-2 text-xs text-gray-300">
+                    <span class="text-amber-400 mt-0.5">⚠</span>
+                    <span><strong class="text-amber-400">Delivery Notice:</strong> Gifts may take 2–3 business days to arrive depending on your region and current server load.</span>
+                </div>
+
+                <button onclick="closeSendModal()" class="btn-blue w-full py-2.5 rounded-lg font-bold text-sm">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Icon Modal -->
+    <div id="editIconModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+        <div class="glass-modal w-[450px] rounded-xl overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-image text-blue-400"></i>
+                    <span class="font-bold">Edit Menu Icon</span>
+                </div>
+                <button onclick="closeIconModal()" class="text-gray-500 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="flex items-center space-x-4">
+                    <div class="icon-preview" id="iconPreview"><i class="fas fa-home"></i></div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium" id="modalItemName">Home</p>
+                        <p class="text-[10px] text-gray-500">Click to change icon or image</p>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 block mb-2 font-semibold">Font Awesome Icon (class)</label>
+                    <input type="text" id="iconClassInput" class="icon-url-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-2.5 text-sm" placeholder="e.g., fas fa-home">
+                </div>
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div>
+                    <div class="relative flex justify-center text-xs"><span class="bg-[#191919] px-2 text-gray-500">OR</span></div>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 block mb-2 font-semibold">Custom Image URL</label>
+                    <input type="text" id="imageUrlInput" class="icon-url-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-2.5 text-sm" placeholder="https://example.com/icon.png">
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button onclick="saveIconChanges()" class="flex-1 btn-blue py-2.5 rounded-lg font-bold text-sm">Apply Changes</button>
+                    <button onclick="closeIconModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-lg font-bold text-sm">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Friend Count Modal -->
+    <div id="editFriendCountModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+        <div class="glass-modal w-[380px] rounded-xl overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-users text-blue-400"></i>
+                    <span class="font-bold">Edit Friend Count</span>
+                </div>
+                <button onclick="closeFriendCountModal()" class="text-gray-500 hover:text-white">&times;</button>
+            </div>
+            <div class="p-6 space-y-5">
+                <input type="number" id="friendCountInput" class="rename-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-3 text-white text-lg" value="211" min="0">
+                <div class="flex space-x-3">
+                    <button onclick="saveFriendCount()" class="flex-1 btn-blue py-2.5 rounded-lg font-bold text-sm">Save</button>
+                    <button onclick="closeFriendCountModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-lg font-bold text-sm">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Logo Modal -->
+    <div id="renameLogoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+        <div class="glass-modal w-[400px] rounded-xl overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-pen-alt text-blue-400"></i>
+                    <span class="font-bold">Rename Game Logo</span>
+                </div>
+                <button onclick="closeRenameModal()" class="text-gray-500 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div class="p-6 space-y-5">
+                <input type="text" id="renameInputField" class="rename-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-3 text-white" placeholder="Enter new logo name" maxlength="30">
+                <div class="flex space-x-3">
+                    <button onclick="saveNewLogoName()" class="flex-1 btn-blue py-2.5 rounded-lg font-bold text-sm">Save Changes</button>
+                    <button onclick="closeRenameModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-lg font-bold text-sm">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+        <div class="glass-modal w-[600px] rounded-xl overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                <div class="flex items-center space-x-2"><i class="fas fa-cog text-gray-400"></i><span class="font-bold">Manage Site</span></div>
+                <button onclick="toggleModal('settingsModal')" class="text-gray-500 hover:text-white">&times;</button>
+            </div>
+            <div class="p-6 grid grid-cols-3 gap-4 bg-black/20">
+                <div class="bg-black/40 p-3 rounded border border-white/5"><p class="text-[10px] text-gray-500 uppercase font-bold">Credits</p><p id="modal-credits-display" class="text-xl font-bold">9.229.940</p></div>
+                <div class="bg-black/40 p-3 rounded border border-white/5"><p class="text-[10px] text-gray-500 uppercase font-bold">Cash</p><p class="text-xl font-bold">$0,04</p></div>
+                <div class="bg-black/40 p-3 rounded border border-white/5"><p class="text-[10px] text-gray-500 uppercase font-bold">Friends</p><p class="text-xl font-bold" id="modalFriendCount">9</p></div>
+            </div>
+            <div class="p-6 space-y-6 max-h-[400px] overflow-y-auto custom-scrollbar">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-sm text-orange-400">Account</h3>
+                        <div><label class="text-[10px] text-gray-500 block mb-1">My Username</label><input type="text" id="settings-username" value="Player123" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div>
+                        <div><label class="text-[10px] text-gray-500 block mb-1">Credit Balance</label><input id="input-credits" type="text" value="9.229.940" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div>
+                        <button onclick="updateProfile()" class="w-full btn-blue py-2 rounded font-bold text-sm mt-2">Update Account</button>
+                    </div>
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-sm text-orange-400">Bonus banner</h3>
+                        <div><label class="text-[10px] text-gray-500 block mb-1">Background Image URL</label><input type="text" placeholder="https://..." class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div>
+                        <button class="w-full btn-blue py-2 rounded font-bold text-sm">Save banner & icon</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // ---------- FULLSCREEN LOOP + SHIFT+F6 / SHIFT+F5 ----------
-        let loopActive = false, loopInterval = null, fpsEnabled = true;
-        let fpsHandle = null;
-        function toggleLoop() { if(loopActive) stopLoop(); else startLoop(); }
-        function startLoop() { if(loopInterval) clearInterval(loopInterval); loopActive=true; loopInterval=setInterval(()=>{ if(loopActive) performAutoGift(); }, 2800); document.getElementById('loop-status').innerHTML='🔄 LOOP: ACTIVE'; document.getElementById('loop-status').classList.add('loop-active'); document.getElementById('loop-status').classList.remove('loop-idle'); showToast('Auto-loop ON'); }
-        function stopLoop() { loopActive=false; if(loopInterval){ clearInterval(loopInterval); loopInterval=null; } document.getElementById('loop-status').innerHTML='⏹️ LOOP: IDLE'; document.getElementById('loop-status').classList.add('loop-idle'); document.getElementById('loop-status').classList.remove('loop-active'); showToast('Auto-loop OFF'); }
-        function performAutoGift() { let balTxt=document.getElementById('display-currency').innerText.replace(/\./g,''); let bal=parseInt(balTxt)||9229940; if(bal<200){ showToast('Insufficient credits'); return; } let newBal=bal-200; document.getElementById('display-currency').innerText=newBal.toLocaleString('de-DE'); document.getElementById('gift-balance-header').innerText=newBal.toLocaleString('de-DE'); showToast(`Auto-gift 200 to @${localStorage.getItem('lastRecipient')||'friend'}`); }
-        function toggleFps(){ fpsEnabled=!fpsEnabled; if(fpsEnabled) startFpsLoop(); else { if(fpsHandle) cancelAnimationFrame(fpsHandle); document.getElementById('fps-counter').innerHTML='FPS: --'; } showToast(fpsEnabled?'FPS ON':'FPS OFF'); }
-        function startFpsLoop(){ let last=performance.now(), frames=0; function upd(now){ frames++; if(now-last>=1000){ document.getElementById('fps-counter').innerHTML=`FPS: ${Math.round((frames*1000)/(now-last))}`; frames=0; last=now; } if(fpsEnabled) fpsHandle=requestAnimationFrame(upd); } fpsHandle=requestAnimationFrame(upd); }
-        document.addEventListener('keydown',(e)=>{ if(e.shiftKey && e.key==='F6'){ e.preventDefault(); toggleLoop(); } if(e.shiftKey && e.key==='F5'){ e.preventDefault(); toggleFps(); } if(e.key==='F5') e.preventDefault(); if(e.key==='Escape' && document.fullscreenElement) e.preventDefault(); });
-        function enforceFullscreen(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); }
-        setInterval(enforceFullscreen, 800);
-        document.addEventListener('fullscreenchange',()=>{ if(!document.fullscreenElement) enforceFullscreen(); });
-        window.addEventListener('load',()=>{ enforceFullscreen(); startFpsLoop(); loadFromLocalStorage(); setupEditableCelestial(); loadDefaultFriends(); });
-
-        // ---------- LOCALSTORAGE PERSISTENCE & EDITABLE FEATURES ----------
-        function saveAllToLocal(){
-            localStorage.setItem('gameLogoImg', document.getElementById('gameLogoImg').src);
-            localStorage.setItem('gameLogoText', document.getElementById('gameLogoText').innerText);
-            localStorage.setItem('celestialImg', document.getElementById('celestialImg').src);
-            localStorage.setItem('celestialTitle', document.getElementById('celestialTitle').innerText);
-            localStorage.setItem('celestialSub', document.getElementById('celestialSub').innerText);
-            localStorage.setItem('friendCount', document.getElementById('friendCountBadge').innerText);
-            localStorage.setItem('currency', document.getElementById('display-currency').innerText);
-        }
-        function loadFromLocalStorage(){
-            if(localStorage.getItem('gameLogoImg')) document.getElementById('gameLogoImg').src = localStorage.getItem('gameLogoImg');
-            if(localStorage.getItem('gameLogoText')) document.getElementById('gameLogoText').innerText = localStorage.getItem('gameLogoText');
-            if(localStorage.getItem('celestialImg')) document.getElementById('celestialImg').src = localStorage.getItem('celestialImg');
-            if(localStorage.getItem('celestialTitle')) document.getElementById('celestialTitle').innerText = localStorage.getItem('celestialTitle');
-            if(localStorage.getItem('celestialSub')) document.getElementById('celestialSub').innerText = localStorage.getItem('celestialSub');
-            if(localStorage.getItem('friendCount')) document.getElementById('friendCountBadge').innerText = localStorage.getItem('friendCount');
-            if(localStorage.getItem('currency')) document.getElementById('display-currency').innerText = localStorage.getItem('currency');
-        }
-
-        // Game Logo editing (click to change image & rename)
-        document.getElementById('gameLogoImg').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('logoFileInput').click(); });
-        document.getElementById('logoFileInput').addEventListener('change', (e) => { let file = e.target.files[0]; if(file){ let reader = new FileReader(); reader.onload = ev => { document.getElementById('gameLogoImg').src = ev.target.result; saveAllToLocal(); showToast('Logo updated'); }; reader.readAsDataURL(file); } });
-        document.getElementById('gameLogoText').addEventListener('click', () => openTextEditor('gameLogoText', 'Game Logo Name'));
-
-        // CELESTIAL CARD: click on image, title, subtitle to edit
-        function setupEditableCelestial(){
-            const celestialImgDiv = document.getElementById('celestialImageContainer');
-            const celestialFileInput = document.getElementById('celestialFileInput');
-            celestialImgDiv.addEventListener('click', (e) => { e.stopPropagation(); celestialFileInput.click(); });
-            celestialFileInput.addEventListener('change', (e) => { let file = e.target.files[0]; if(file){ let reader = new FileReader(); reader.onload = ev => { document.getElementById('celestialImg').src = ev.target.result; saveAllToLocal(); showToast('Celestial icon changed'); }; reader.readAsDataURL(file); } });
-            document.getElementById('celestialTitle').addEventListener('click', () => openTextEditor('celestialTitle', 'Edit Title'));
-            document.getElementById('celestialSub').addEventListener('click', () => openTextEditor('celestialSub', 'Edit Subtitle'));
-        }
-
-        let currentEditTargetId = null;
-        function openTextEditor(targetId, label){
-            currentEditTargetId = targetId;
-            const elem = document.getElementById(targetId);
-            document.getElementById('textEditLabel').innerText = label;
-            document.getElementById('textEditInput').value = elem.innerText;
-            document.getElementById('textEditModal').classList.remove('hidden');
-        }
-        function closeTextModal(){ document.getElementById('textEditModal').classList.add('hidden'); currentEditTargetId=null; }
-        document.getElementById('textEditSaveBtn').addEventListener('click', ()=>{
-            if(currentEditTargetId){
-                let newVal = document.getElementById('textEditInput').value.trim();
-                if(newVal) document.getElementById(currentEditTargetId).innerText = newVal;
-                saveAllToLocal();
-                showToast('Text updated');
-            }
-            closeTextModal();
-        });
-
-        // Friend count edit
-        document.getElementById('friendCountBadge').addEventListener('click', ()=>{
-            let newVal = prompt('Edit friend count:', document.getElementById('friendCountBadge').innerText);
-            if(newVal && !isNaN(parseInt(newVal))){ document.getElementById('friendCountBadge').innerText = parseInt(newVal); saveAllToLocal(); showToast('Friends updated'); }
-        });
-
-        // Sidebar icons edit (simplified)
-        document.querySelectorAll('.editable-icon').forEach(icon => { icon.addEventListener('click', (e) => { e.stopPropagation(); let newIcon = prompt('FontAwesome class (e.g., fas fa-star):', icon.className); if(newIcon) { icon.className = newIcon + ' w-5 editable-icon'; saveAllToLocal(); showToast('Icon changed'); } }); });
-
-        // Currency sync on send
-        function updateCurrencyAfterSend(amount){
-            let curr = document.getElementById('display-currency').innerText.replace(/\./g,'');
-            let newBal = parseInt(curr) - amount;
-            if(!isNaN(newBal)) document.getElementById('display-currency').innerText = newBal.toLocaleString('de-DE');
-            saveAllToLocal();
-        }
-
-        // Roblox API simulation + send logic
-        const PROXY = "https://corsproxy.io/?";
-        let selectedUser = { name: 'builderman', handle: '@builderman', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=builderman' };
+        // ===== STATE =====
+        let selectedUser = { name: '', handle: '', avatar: '' };
         let selectedAmount = 200;
+        let currentEditingElement = null;
+        let currentItemKey = null;
         let myUsername = localStorage.getItem('mainUsername') || 'Player123';
-        let myAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=Me';
-        async function fetchUserByUsername(username) { try { let res = await fetch(PROXY + encodeURIComponent(`https://users.roblox.com/v1/users/search?keyword=${username}&limit=5`)); let data = await res.json(); return data.data || []; } catch(e){ return []; } }
-        async function fetchAvatarUrl(uid) { return `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`; }
-        async function loadDefaultFriends(){ let cont=document.getElementById('default-friends-list'); cont.innerHTML='<div class="text-center py-2 text-xs">Loading...</div>'; let names=['builderman','Roblox','SAITAMA']; cont.innerHTML=''; for(let u of names){ let us=await fetchUserByUsername(u); if(us.length){ let av=await fetchAvatarUrl(us[0].id); let div=document.createElement('div'); div.className='user-result-item'; div.innerHTML=`<div class="avatar-sm"><img src="${av}" class="w-full h-full"></div><div><p class="text-sm font-bold">${us[0].displayName||us[0].name}</p><p class="text-[10px] text-gray-500">@${us[0].name}</p></div>`; div.onclick=()=>selectUser(us[0].displayName||us[0].name, '@'+us[0].name, av); cont.appendChild(div);} }
+        let myAvatar = localStorage.getItem('mainAvatar') || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Me';
+
+        // ===== ROBLOX API =====
+        const PROXY = "https://corsproxy.io/?";
+        let searchTimeout;
+
+        async function fetchRobloxAPI(url) {
+            try {
+                const res = await fetch(PROXY + encodeURIComponent(url));
+                return await res.json();
+            } catch(e) { return {}; }
         }
-        function selectUser(name,handle,avatar){ selectedUser={name,handle,avatar}; selectedAmount=200; document.getElementById('selected-username').innerText=name; document.getElementById('selected-handle').innerText=handle; document.getElementById('selected-avatar').src=avatar; document.getElementById('amount-display').innerText='200'; document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('selected')); document.querySelectorAll('.amount-btn')[3]?.classList.add('selected'); showStep('amount'); localStorage.setItem('lastRecipient', handle); }
-        function selectAmount(val,btn){ selectedAmount=val; document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('selected')); if(btn)btn.classList.add('selected'); document.getElementById('amount-display').innerText=val; }
-        function selectCustomAmount(val){ if(val) selectedAmount=parseInt(val)||0; document.getElementById('amount-display').innerText=selectedAmount; }
-        function openSendModal(){ document.getElementById('sendModal').classList.remove('hidden'); showStep('search'); loadDefaultFriends(); document.getElementById('searchInput').value=''; document.getElementById('search-results').classList.add('hidden'); document.getElementById('no-results').classList.add('hidden'); document.getElementById('friends-list-default').classList.remove('hidden'); }
-        function closeSendModal(){ document.getElementById('sendModal').classList.add('hidden'); }
-        function showStep(step){ ['search','amount','confirm','loading','success'].forEach(s=>document.getElementById(`step-${s}`).classList.add('hidden')); document.getElementById(`step-${step}`).classList.remove('hidden'); }
-        function goToSearch(){ showStep('search'); }
-        function goToAmount(){ showStep('amount'); }
-        function goToConfirm(){ document.getElementById('confirm-me-avatar').src=myAvatar; document.getElementById('confirm-me-name').innerText=myUsername; document.getElementById('confirm-avatar').src=selectedUser.avatar; document.getElementById('confirm-name').innerText=selectedUser.name; document.getElementById('confirm-amount-text').innerText=selectedAmount; document.getElementById('confirm-handle-text').innerText=selectedUser.handle; showStep('confirm'); }
-        function startTransfer(){ showStep('loading'); let step=0; const arr=['Connecting...','Verifying...','Syncing...','Processing...','Finalizing']; let ival=setInterval(()=>{ if(step>=arr.length-1){ clearInterval(ival); let bal=document.getElementById('display-currency').innerText.replace(/\./g,''); let nb=parseInt(bal)-selectedAmount; if(!isNaN(nb)){ document.getElementById('display-currency').innerText=nb.toLocaleString('de-DE'); document.getElementById('gift-balance-header').innerText=nb.toLocaleString('de-DE'); saveAllToLocal(); } document.getElementById('success-amount').innerText=selectedAmount+' Robux'; document.getElementById('success-recipient').innerText=selectedUser.handle; document.getElementById('success-txid').innerText='#TX-'+Math.floor(Math.random()*1000000); showStep('success'); showToast(`Gift sent to ${selectedUser.handle}`); return; } step++; document.getElementById('loading-title').innerText=arr[step]; document.getElementById('loading-sub').innerText='Step '+step+'/4'; for(let i=0;i<=step;i++){ let dot=document.getElementById('pd-'+i); if(dot)dot.className='progress-dot done'; if(i<step){ let l=document.getElementById('pl-'+i); if(l)l.className='progress-line done';} } if(step<5)document.getElementById('pd-'+step).className='progress-dot active'; }, 700); }
-        function updateProfile(){ let name=document.getElementById('settings-username').value; if(name) myUsername=name; let bal=document.getElementById('input-credits').value; if(bal) document.getElementById('display-currency').innerText=bal; saveAllToLocal(); toggleModal('settingsModal'); }
-        function toggleModal(id){ document.getElementById(id).classList.toggle('hidden'); }
-        function showToast(msg){ document.getElementById('toast-text').innerText=msg; document.getElementById('toast-notif').classList.add('show'); setTimeout(()=>document.getElementById('toast-notif').classList.remove('show'),2500); }
-        function hideToast(){ document.getElementById('toast-notif').classList.remove('show'); }
-        window.onclick = (e) => { if(e.target.id==='sendModal') closeSendModal(); if(e.target.id==='settingsModal') toggleModal('settingsModal'); if(e.target.id==='textEditModal') closeTextModal(); };
-        document.getElementById('settings-username').value = myUsername;
-        document.getElementById('input-credits').value = document.getElementById('display-currency').innerText;
+
+        async function fetchUserByUsername(username) {
+            const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`);
+            return data.data || [];
+        }
+
+        async function fetchAvatarUrl(userId) {
+            const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`);
+            return data.data?.[0]?.imageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`;
+        }
+
+        function escapeHtml(str) { 
+            if(!str) return ""; 
+            return str.replace(/[&<>'"]/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[m]));
+        }
+
+        // ===== UPDATE MY AVATAR =====
+        async function updateMyAvatar() {
+            const users = await fetchUserByUsername(myUsername);
+            if(users.length > 0) {
+                const avatar = await fetchAvatarUrl(users[0].id);
+                myAvatar = avatar;
+                localStorage.setItem('mainAvatar', avatar);
+                document.getElementById('confirm-me-avatar').src = avatar;
+                document.getElementById('confirm-me-name').textContent = users[0].displayName || myUsername;
+            }
+        }
+
+        // ===== UPDATE PROFILE =====
+        async function updateProfile() {
+            const username = document.getElementById('settings-username').value.trim();
+            const balance = document.getElementById('input-credits').value;
+            
+            if(username) {
+                myUsername = username;
+                localStorage.setItem('mainUsername', username);
+                document.getElementById('confirm-me-name').textContent = username;
+                await updateMyAvatar();
+            }
+            
+            document.getElementById('display-currency').textContent = balance;
+            document.getElementById('modal-credits-display').textContent = balance;
+            document.getElementById('gift-balance-header').textContent = balance;
+            toggleModal('settingsModal');
+        }
+
+        // ===== LOAD DEFAULT FRIENDS WITH REAL ROBLOX AVATARS =====
+        async function loadDefaultFriends() {
+            const defaultFriends = ['builderman', 'Roblox', 'SAITAMA'];
+            const container = document.getElementById('default-friends-list');
+            
+            container.innerHTML = `
+                <div class="text-center py-6">
+                    <i class="fas fa-circle-notch fa-spin text-gray-400 text-lg mb-2"></i>
+                    <p class="text-xs text-gray-500">Loading friends...</p>
+                </div>
+            `;
+            
+            container.innerHTML = '';
+            
+            for(const username of defaultFriends) {
+                const users = await fetchUserByUsername(username);
+                if(users.length > 0) {
+                    const user = users[0];
+                    const avatar = await fetchAvatarUrl(user.id);
+                    const handle = '@' + user.name.toLowerCase().replace(/\s+/g, '');
+                    const displayName = user.displayName || user.name;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'user-result-item';
+                    card.innerHTML = `
+                        <div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}'"></div>
+                        <div><p class="text-sm font-bold">${escapeHtml(displayName)}</p><p class="text-[10px] text-gray-500">${escapeHtml(handle)}</p></div>
+                    `;
+                    card.onclick = () => selectUser(displayName, handle, avatar);
+                    container.appendChild(card);
+                }
+            }
+        }
+
+        // ===== SEND MODAL =====
+        function openSendModal() {
+            document.getElementById('sendModal').classList.remove('hidden');
+            showStep('search');
+            document.getElementById('searchInput').value = '';
+            document.getElementById('no-results').classList.add('hidden');
+            document.getElementById('search-results').classList.add('hidden');
+            document.getElementById('friends-list-default').classList.remove('hidden');
+            loadDefaultFriends();
+        }
+
+        function closeSendModal() {
+            document.getElementById('sendModal').classList.add('hidden');
+        }
+
+        function showStep(step) {
+            ['search','amount','confirm','loading','success'].forEach(s => {
+                document.getElementById('step-' + s).classList.add('hidden');
+            });
+            document.getElementById('step-' + step).classList.remove('hidden');
+        }
+
+        // ===== DEBOUNCED SEARCH =====
+        const searchInput = document.getElementById('searchInput');
+        const searchResultsDiv = document.getElementById('search-results');
+        const resultsList = document.getElementById('results-list');
+        const noResDiv = document.getElementById('no-results');
+        const defaultList = document.getElementById('friends-list-default');
+
+        if(searchInput) {
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                const val = searchInput.value.trim();
+                
+                if(!val) {
+                    noResDiv.classList.add('hidden');
+                    searchResultsDiv.classList.add('hidden');
+                    defaultList.classList.remove('hidden');
+                    return;
+                }
+                
+                defaultList.classList.add('hidden');
+                
+                searchTimeout = setTimeout(async () => {
+                    searchResultsDiv.classList.remove('hidden');
+                    noResDiv.classList.add('hidden');
+                    resultsList.innerHTML = `
+                        <div class="text-center py-6">
+                            <i class="fas fa-circle-notch fa-spin text-gray-400 text-lg mb-2"></i>
+                            <p class="text-xs text-gray-500">Searching Roblox...</p>
+                        </div>
+                    `;
+                    document.getElementById('results-label').textContent = 'Global Search ( ... )';
+                    
+                    const users = await fetchUserByUsername(val);
+                    
+                    if(users.length === 0) {
+                        searchResultsDiv.classList.add('hidden');
+                        noResDiv.classList.remove('hidden');
+                        document.getElementById('no-results-term').textContent = val;
+                        document.getElementById('search-label').textContent = 'Global Search ( 0 )';
+                        return;
+                    }
+                    
+                    noResDiv.classList.add('hidden');
+                    searchResultsDiv.classList.remove('hidden');
+                    document.getElementById('results-label').textContent = `Global Search ( ${users.length} )`;
+                    
+                    resultsList.innerHTML = '';
+                    for(const user of users.slice(0, 10)) {
+                        const avatar = await fetchAvatarUrl(user.id);
+                        const handle = '@' + user.name.toLowerCase().replace(/\s+/g, '');
+                        const displayName = user.displayName || user.name;
+                        
+                        const card = document.createElement('div');
+                        card.className = 'user-result-item';
+                        card.innerHTML = `
+                            <div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover" onerror="this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}'"></div>
+                            <div><p class="text-sm font-bold">${escapeHtml(displayName)}</p><p class="text-[10px] text-gray-500">${escapeHtml(handle)}</p></div>
+                        `;
+                        card.onclick = () => selectUser(displayName, handle, avatar);
+                        resultsList.appendChild(card);
+                    }
+                }, 400);
+            });
+        }
+
+        function selectUser(name, handle, avatar) {
+            selectedUser = { name, handle, avatar };
+            selectedAmount = 200;
+            document.getElementById('selected-username').textContent = name;
+            document.getElementById('selected-handle').textContent = handle;
+            document.getElementById('selected-avatar').src = avatar;
+            document.getElementById('amount-display').textContent = '200';
+            document.getElementById('customAmountInput').value = '';
+            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.amount-btn')[3].classList.add('selected');
+            showStep('amount');
+        }
+
+        function selectAmount(val, btn) {
+            selectedAmount = val;
+            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+            if (btn) btn.classList.add('selected');
+            document.getElementById('amount-display').textContent = val;
+            document.getElementById('customAmountInput').value = '';
+        }
+
+        function selectCustomAmount(val) {
+            if (!val) return;
+            selectedAmount = parseInt(val) || 0;
+            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('amount-display').textContent = selectedAmount;
+        }
+
+        function goToSearch() { showStep('search'); }
+        function goToAmount() { showStep('amount'); }
+
+        function goToConfirm() {
+            document.getElementById('confirm-me-avatar').src = myAvatar;
+            document.getElementById('confirm-me-name').textContent = myUsername;
+            document.getElementById('confirm-avatar').src = selectedUser.avatar;
+            document.getElementById('confirm-name').textContent = selectedUser.name;
+            document.getElementById('confirm-amount-text').textContent = selectedAmount;
+            document.getElementById('confirm-handle-text').textContent = selectedUser.handle;
+            showStep('confirm');
+        }
+
+        const loadingSteps = [
+            { title: 'Connecting...', sub: 'Connecting to servers...', dot: 0 },
+            { title: 'Verifying...', sub: 'Verifying user credentials...', dot: 1 },
+            { title: 'Syncing...', sub: 'Synchronizing transaction data...', dot: 2 },
+            { title: 'Processing...', sub: 'Processing gift request...', dot: 3 },
+            { title: 'Finishing...', sub: 'Updating ledger...', dot: 4 },
+        ];
+
+        function updateProgress(stepIdx) {
+            for (let i = 0; i < 5; i++) {
+                const dot = document.getElementById('pd-' + i);
+                if (i < stepIdx) dot.className = 'progress-dot done';
+                else if (i === stepIdx) dot.className = 'progress-dot active';
+                else dot.className = 'progress-dot';
+            }
+            for (let i = 0; i < 4; i++) {
+                const line = document.getElementById('pl-' + i);
+                line.className = i < stepIdx ? 'progress-line done' : 'progress-line';
+            }
+        }
+
+        function startTransfer() {
+            showStep('loading');
+            let stepIdx = 0;
+            updateProgress(0);
+            document.getElementById('loading-title').textContent = loadingSteps[0].title;
+            document.getElementById('loading-sub').textContent = loadingSteps[0].sub;
+
+            const interval = setInterval(() => {
+                stepIdx++;
+                if (stepIdx >= loadingSteps.length) {
+                    clearInterval(interval);
+                    showSuccess();
+                    return;
+                }
+                updateProgress(stepIdx);
+                document.getElementById('loading-title').textContent = loadingSteps[stepIdx].title;
+                document.getElementById('loading-sub').textContent = loadingSteps[stepIdx].sub;
+            }, 900);
+        }
+
+        function showSuccess() {
+            const curr = document.getElementById('display-currency').textContent.replace(/\./g, '');
+            const newBal = (parseInt(curr) - selectedAmount).toLocaleString('de-DE');
+            document.getElementById('display-currency').textContent = newBal;
+            document.getElementById('gift-balance-header').textContent = newBal;
+
+            document.getElementById('success-amount').textContent = selectedAmount + ' Robux';
+            document.getElementById('success-recipient').textContent = selectedUser.handle;
+            const now = new Date();
+            document.getElementById('success-timestamp').textContent = now.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + ' · ' + now.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+            document.getElementById('success-txid').textContent = '#TX-' + Math.floor(Math.random()*900000+100000);
+
+            showStep('success');
+            showToastNotif('Gift sent to ' + selectedUser.handle);
+        }
+
+        function showToastNotif(msg) {
+            document.getElementById('toast-text').textContent = msg;
+            document.getElementById('toast-notif').classList.add('show');
+            setTimeout(hideToast, 4000);
+        }
+        function hideToast() {
+            document.getElementById('toast-notif').classList.remove('show');
+        }
+
+        const logoImg = document.getElementById('gameLogoImg');
+        const logoFileInput = document.getElementById('logoFileInput');
+        logoImg.addEventListener('click', e => { e.stopPropagation(); logoFileInput.click(); });
+        logoFileInput.addEventListener('change', event => {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = e => { logoImg.src = e.target.result; };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function openRenameModal() {
+            document.getElementById('renameInputField').value = document.getElementById('gameLogoText').innerText;
+            document.getElementById('renameLogoModal').classList.remove('hidden');
+        }
+        function closeRenameModal() { document.getElementById('renameLogoModal').classList.add('hidden'); }
+        function saveNewLogoName() {
+            let n = document.getElementById('renameInputField').value.trim() || 'GAMELOGO';
+            document.getElementById('gameLogoText').innerText = n;
+            closeRenameModal();
+        }
+
+        function setupEditableFeatures() {
+            document.querySelectorAll('.editable-icon').forEach(icon => {
+                icon.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const parentDiv = icon.closest('.sidebar-item');
+                    const itemName = parentDiv?.querySelector('span:not(.friend-count-badge)')?.innerText || 'Item';
+                    currentEditingElement = icon;
+                    currentItemKey = icon.getAttribute('data-item-key');
+                    openIconModal(itemName, icon);
+                });
+            });
+            document.getElementById('friendCountBadge')?.addEventListener('click', e => { e.stopPropagation(); openFriendCountModal(); });
+        }
+
+        function openIconModal(itemName, iconEl) {
+            document.getElementById('modalItemName').innerText = itemName;
+            const ic = document.getElementById('iconClassInput');
+            const iu = document.getElementById('imageUrlInput');
+            ic.value = iconEl.tagName === 'I' ? iconEl.className : '';
+            iu.value = iconEl.tagName === 'IMG' ? iconEl.src : '';
+            updateIconPreview(ic.value, iu.value);
+            document.getElementById('editIconModal').classList.remove('hidden');
+            ic.oninput = () => updateIconPreview(ic.value, iu.value);
+            iu.oninput = () => updateIconPreview(ic.value, iu.value);
+        }
+
+        function updateIconPreview(iconClass, imageUrl) {
+            const p = document.getElementById('iconPreview');
+            if (!p) return;
+            if (imageUrl.trim()) p.innerHTML = `<img src="${imageUrl}" class="w-8 h-8 object-contain">`;
+            else if (iconClass.trim()) p.innerHTML = `<i class="${iconClass} text-2xl"></i>`;
+            else p.innerHTML = `<i class="fas fa-question text-2xl text-gray-500"></i>`;
+        }
+
+        function saveIconChanges() {
+            if (!currentEditingElement) { closeIconModal(); return; }
+            const iconClass = document.getElementById('iconClassInput').value.trim();
+            const imageUrl = document.getElementById('imageUrlInput').value.trim();
+            const newEl = document.createElement(imageUrl ? 'img' : 'i');
+            if (imageUrl) {
+                newEl.src = imageUrl;
+                newEl.style.cssText = 'width:20px;height:20px;object-fit:contain;cursor:pointer;';
+            } else {
+                newEl.className = `${iconClass} w-5 editable-icon`;
+            }
+            newEl.setAttribute('data-item-key', currentItemKey);
+            newEl.addEventListener('click', e => {
+                e.stopPropagation();
+                const p = newEl.closest('.sidebar-item');
+                const n = p?.querySelector('span:not(.friend-count-badge)')?.innerText || 'Item';
+                currentEditingElement = newEl;
+                currentItemKey = newEl.getAttribute('data-item-key');
+                openIconModal(n, newEl);
+            });
+            currentEditingElement.parentNode.replaceChild(newEl, currentEditingElement);
+            closeIconModal();
+        }
+        function closeIconModal() { document.getElementById('editIconModal').classList.add('hidden'); currentEditingElement = null; }
+
+        function openFriendCountModal() {
+            document.getElementById('friendCountInput').value = document.getElementById('friendCountBadge').innerText;
+            document.getElementById('editFriendCountModal').classList.remove('hidden');
+        }
+        function closeFriendCountModal() { document.getElementById('editFriendCountModal').classList.add('hidden'); }
+        function saveFriendCount() {
+            let n = parseInt(document.getElementById('friendCountInput').value);
+            if (isNaN(n)) n = 0;
+            document.getElementById('friendCountBadge').innerText = n;
+            const m = document.getElementById('modalFriendCount');
+            if (m) m.innerText = n;
+            closeFriendCountModal();
+        }
+
+        function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupEditableFeatures();
+            document.getElementById('gameLogoText').addEventListener('click', openRenameModal);
+            
+            // Load saved profile
+            if(myUsername) {
+                document.getElementById('settings-username').value = myUsername;
+                document.getElementById('confirm-me-name').textContent = myUsername;
+                await updateMyAvatar();
+            }
+            
+            window.onclick = event => {
+                if (event.target.id === 'sendModal') closeSendModal();
+                if (event.target.id === 'settingsModal') toggleModal('settingsModal');
+                if (event.target.id === 'editIconModal') closeIconModal();
+                if (event.target.id === 'editFriendCountModal') closeFriendCountModal();
+                if (event.target.id === 'renameLogoModal') closeRenameModal();
+            };
+        });
     </script>
 </body>
 </html>
