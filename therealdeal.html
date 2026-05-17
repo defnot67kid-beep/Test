@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Central | Send Robux</title>
+    <title>Game Central | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -36,13 +36,6 @@
         .editable-icon:hover {
             transform: scale(1.1);
             filter: drop-shadow(0 0 3px rgba(59,130,246,0.5));
-        }
-        
-        .custom-robux-img, .custom-arrow-img {
-            width: 18px;
-            height: 18px;
-            object-fit: contain;
-            vertical-align: middle;
         }
         
         .friend-count-badge {
@@ -126,6 +119,7 @@
             color: white;
         }
 
+        /* Progress dots */
         .progress-track {
             display: flex;
             align-items: center;
@@ -152,6 +146,7 @@
         }
         .progress-line.done { background: #22c55e; }
 
+        /* Shield icon for loading */
         .shield-container {
             width: 70px;
             height: 70px;
@@ -180,6 +175,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* Success checkmark */
         .success-circle {
             width: 70px;
             height: 70px;
@@ -197,6 +193,7 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
+        /* User result item */
         .user-result-item {
             display: flex;
             align-items: center;
@@ -208,6 +205,7 @@
         }
         .user-result-item:hover { background: rgba(255,255,255,0.07); }
 
+        /* Toast notification */
         #toast-notif {
             position: fixed;
             top: 16px;
@@ -228,11 +226,20 @@
         }
         #toast-notif.show { transform: translateX(-50%) translateY(0); }
 
-        .modal-overlay { animation: fadeIn 0.15s ease; }
+        /* Modal overlay transition */
+        .modal-overlay {
+            animation: fadeIn 0.15s ease;
+        }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .modal-card { animation: slideUp 0.2s ease; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-card {
+            animation: slideUp 0.2s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
 
+        /* Search input */
         .search-input {
             background: rgba(255,255,255,0.05);
             border: 1.5px solid rgba(59,130,246,0.5);
@@ -246,6 +253,7 @@
         }
         .search-input:focus { border-color: #3b82f6; }
 
+        /* Avatar ring */
         .avatar-ring {
             width: 72px;
             height: 72px;
@@ -266,6 +274,7 @@
             background: #1a1a1a;
         }
 
+        /* Transaction details table */
         .tx-row {
             display: flex;
             justify-content: space-between;
@@ -276,6 +285,7 @@
         }
         .tx-row:last-child { border-bottom: none; }
 
+        /* Background for loading screens */
         .loading-bg {
             background: linear-gradient(180deg, #111 0%, #0d1117 100%);
             border-radius: 12px;
@@ -300,274 +310,734 @@
             letter-spacing: 0.5px;
             margin-bottom: 20px;
         }
-        
-        .robux-icon-wrapper, .arrow-icon-wrapper {
-            display: inline-flex;
+
+        /* HIDDEN WHEEL OVERLAY */
+        .wheel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.96);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.2s ease;
         }
-        .robux-icon-wrapper:hover, .arrow-icon-wrapper:hover {
-            transform: scale(1.1);
-            filter: drop-shadow(0 0 4px rgba(59,130,246,0.6));
+        .wheel-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .wheel-container {
+            background: linear-gradient(145deg, #111827, #0f172a);
+            border-radius: 48px;
+            padding: 25px 30px;
+            border: 1px solid rgba(251,191,36,0.3);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .wheel-canvas {
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(251,191,36,0.2);
+            margin: 0 auto;
+        }
+        .needle {
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 16px solid transparent;
+            border-right: 16px solid transparent;
+            border-top: 40px solid #fbbf24;
+            filter: drop-shadow(0 6px 8px rgba(0,0,0,0.5));
+            z-index: 15;
+        }
+        .wheel-wrap {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto 15px;
+        }
+        .auto-status {
+            background: rgba(0,0,0,0.6);
+            border-radius: 40px;
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fbbf24;
+            margin-top: 15px;
+        }
+        .key-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-family: monospace;
+            border: 1px solid #fbbf24;
+            z-index: 1001;
+            font-weight: bold;
         }
         
-        .send-arrow-img {
-            width: 14px;
-            height: 14px;
-            object-fit: contain;
+        /* Player management inside wheel */
+        .wheel-players-section {
+            background: rgba(0,0,0,0.4);
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
+        .wheel-player-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .wheel-player-input {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 30px;
+            padding: 10px 16px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+        .wheel-player-input:focus { border-color: #3b82f6; }
+        .wheel-player-tag {
+            background: rgba(59,130,246,0.25);
+            border: 1px solid rgba(59,130,246,0.4);
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px;
+        }
+        .wheel-player-tag button {
+            background: none;
+            border: none;
+            color: #f87171;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .wheel-players-list {
+            max-height: 120px;
+            overflow-y: auto;
+            text-align: left;
+            margin-top: 10px;
+        }
+        .spin-btn-wheel {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            font-weight: bold;
+            padding: 12px 28px;
+            border-radius: 40px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+            transition: all 0.2s;
+        }
+        .spin-btn-wheel:hover { transform: scale(0.98); filter: brightness(1.05); }
+        .spin-btn-wheel:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body class="flex">
 
+    <!-- Toast notification -->
     <div id="toast-notif">
         <span style="color:#22c55e;font-size:16px;">✓</span>
-        <span id="toast-text">Robux sent to @builderman</span>
+        <span id="toast-text">Gift sent to @builderman</span>
         <button onclick="hideToast()" style="margin-left:8px;color:#666;font-size:16px;background:none;border:none;cursor:pointer;">×</button>
     </div>
+
+    <!-- HIDDEN WHEEL OVERLAY (press - to show) -->
+    <div id="wheelOverlay" class="wheel-overlay">
+        <div class="wheel-container">
+            <h2 class="text-2xl font-bold mb-1" style="color:#fbbf24;">🎡 PRIZE WHEEL 🎡</h2>
+            <p class="text-xs text-gray-400 mb-3">Add contestants below, then press SPIN</p>
+            
+            <!-- Player management INSIDE wheel -->
+            <div class="wheel-players-section">
+                <div class="wheel-player-input-group">
+                    <input type="text" id="wheelPlayerInput" class="wheel-player-input" placeholder="Enter player name..." autocomplete="off">
+                    <button onclick="addWheelPlayer()" class="btn-blue px-5 rounded-full text-sm">➕ Add</button>
+                </div>
+                <div id="wheelPlayersList" class="wheel-players-list">
+                    <div class="text-gray-500 text-sm text-center">No contestants yet. Add some!</div>
+                </div>
+            </div>
+            
+            <div class="wheel-wrap">
+                <div class="needle"></div>
+                <canvas id="wheelCanvas" width="320" height="320" class="wheel-canvas"></canvas>
+            </div>
+            <div class="auto-status" id="wheelStatus">🎮 Add players, then click SPIN</div>
+            <button id="wheelSpinBtn" class="spin-btn-wheel" onclick="startWheelSpin()">✨ SPIN THE WHEEL ✨</button>
+            <p class="text-[10px] text-gray-500 mt-3">Press <kbd class="bg-gray-800 px-2 py-0.5 rounded">+</kbd> to close wheel</p>
+        </div>
+    </div>
+
+    <div class="key-hint"><kbd style="background:#fbbf24;color:#000;padding:2px 8px;border-radius:6px;">-</kbd> Open Prize Wheel &nbsp;&nbsp; <kbd style="background:#fbbf24;color:#000;padding:2px 8px;border-radius:6px;">+</kbd> Close Wheel</div>
 
     <aside class="w-64 h-screen sticky top-0 bg-[#0b0b0b] border-r border-white/10 flex flex-col p-4 space-y-2 text-sm text-gray-400">
         <div class="flex items-center space-x-2 text-white font-bold text-xl mb-6 group">
             <div id="logoImgContainer" class="relative">
-                <img id="gameLogoImg" src="https://cdn-icons-png.flaticon.com/512/1055/1055685.png" alt="Game Logo" class="w-8 h-8 object-contain game-logo-img" title="Click to change logo image">
+                <img id="gameLogoImg" 
+                     src="https://cdn-icons-png.flaticon.com/512/1055/1055685.png" 
+                     alt="Game Logo" 
+                     class="w-8 h-8 object-contain game-logo-img"
+                     title="Click to change logo image">
             </div>
             <span id="gameLogoText" class="cursor-pointer hover:text-blue-400 transition duration-150" title="Click to rename">GAMELOGO</span>
         </div>
+        
         <input type="file" id="logoFileInput" accept="image/*" style="display: none;">
+        
         <nav class="flex-1 space-y-1" id="sidebarNav">
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-white group" data-item="home"><i class="fas fa-home w-5 editable-icon" data-item-key="home"></i><span>Home</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="profile"><i class="fas fa-user w-5 editable-icon" data-item-key="profile"></i><span>Profile</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-blue-400 group" data-item="plus"><i class="fas fa-shield-alt w-5 editable-icon" data-item-key="plus"></i><span>Plus Membership</span><i class="fas fa-check-circle ml-auto text-xs"></i></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="messages"><i class="fas fa-envelope w-5 editable-icon" data-item-key="messages"></i><span>Messages</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="friends"><i class="fas fa-users w-5 editable-icon" data-item-key="friends"></i><span>Friends</span><span id="friendCountBadge" class="ml-auto bg-white/10 px-2 py-0.5 rounded-full text-[10px] friend-count-badge" title="Click to edit">211</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="avatar"><i class="fas fa-user-circle w-5 editable-icon" data-item-key="avatar"></i><span>Avatar</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="inventory"><i class="fas fa-archive w-5 editable-icon" data-item-key="inventory"></i><span>Inventory</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="sandbox"><i class="fas fa-cube w-5 editable-icon" data-item-key="sandbox"></i><span>Sandbox</span></div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-white group" data-item="home">
+                <i class="fas fa-home w-5 editable-icon" data-item-key="home"></i>
+                <span>Home</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="profile">
+                <i class="fas fa-user w-5 editable-icon" data-item-key="profile"></i>
+                <span>Profile</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-blue-400 group" data-item="plus">
+                <i class="fas fa-shield-alt w-5 editable-icon" data-item-key="plus"></i>
+                <span>Plus Membership</span>
+                <i class="fas fa-check-circle ml-auto text-xs"></i>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="messages">
+                <i class="fas fa-envelope w-5 editable-icon" data-item-key="messages"></i>
+                <span>Messages</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="friends">
+                <i class="fas fa-users w-5 editable-icon" data-item-key="friends"></i>
+                <span>Friends</span>
+                <span id="friendCountBadge" class="ml-auto bg-white/10 px-2 py-0.5 rounded-full text-[10px] friend-count-badge" title="Click to edit">211</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="avatar">
+                <i class="fas fa-user-circle w-5 editable-icon" data-item-key="avatar"></i>
+                <span>Avatar</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="inventory">
+                <i class="fas fa-archive w-5 editable-icon" data-item-key="inventory"></i>
+                <span>Inventory</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="sandbox">
+                <i class="fas fa-cube w-5 editable-icon" data-item-key="sandbox"></i>
+                <span>Sandbox</span>
+            </div>
         </nav>
-        <div class="mt-auto border-t border-white/10 pt-4 text-[11px]"><div class="bg-white/5 p-3 rounded-lg border border-white/10"><p class="text-white font-semibold">Plus Active</p><p class="text-green-500">● Membership active</p></div></div>
+
+        <div class="mt-auto border-t border-white/10 pt-4 text-[11px]">
+            <div class="bg-white/5 p-3 rounded-lg border border-white/10">
+                <p class="text-white font-semibold">Plus Active</p>
+                <p class="text-green-500">● Membership active</p>
+            </div>
+        </div>
     </aside>
 
     <main class="flex-1 min-h-screen">
         <header class="h-16 border-b border-white/10 flex items-center justify-between px-8 sticky top-0 bg-[#0b0b0b]/80 backdrop-blur-md z-40">
-            <div class="flex space-x-6 text-sm font-semibold text-gray-400"><span class="text-white border-b-2 border-white pb-5">Home</span><span>Charts</span><span>Marketplace</span><span>Create</span></div>
+            <div class="flex space-x-6 text-sm font-semibold text-gray-400">
+                <span class="text-white border-b-2 border-white pb-5">Home</span>
+                <span>Charts</span>
+                <span>Marketplace</span>
+                <span>Create</span>
+            </div>
             <div class="flex items-center space-x-4">
                 <div class="flex items-center space-x-2 bg-black/40 px-3 py-1.5 rounded-full border border-white/10">
-                    <div id="robuxIconContainer" class="robux-icon-wrapper" title="Click to change Robux icon">
-                        <i id="robuxNavIcon" class="fas fa-gem text-xs"></i>
-                    </div>
-                    <input type="file" id="robuxImageInput" accept="image/*" style="display: none;">
+                    <i class="fas fa-gem text-xs"></i>
                     <span id="display-currency" class="font-bold text-sm">9.229.940</span>
-                    <button onclick="openSendModal()" class="ml-2 bg-white/10 px-2 py-0.5 rounded text-[10px] hover:bg-white/20 flex items-center gap-1">
-                        <span id="sendArrowIcon" class="fas fa-arrow-up text-[9px]"></span>
-                        <span>Send</span>
-                    </button>
-                    <input type="file" id="arrowImageInput" accept="image/*" style="display: none;">
+                    <button onclick="openSendModal()" class="ml-2 bg-white/10 px-2 py-0.5 rounded text-[10px] hover:bg-white/20">↑ Send</button>
                 </div>
                 <button onclick="toggleModal('settingsModal')" class="text-gray-400 hover:text-white"><i class="fas fa-cog text-lg"></i></button>
             </div>
         </header>
 
         <div class="max-w-4xl mx-auto py-12 px-6">
-            <div class="text-center mb-12"><h1 class="text-5xl font-extrabold tracking-tight mb-2">Enjoy up to 25% <br> more Credits</h1></div>
-            <div class="bg-[#161616] rounded-xl border border-white/5 overflow-hidden mb-8">
-                <div class="p-6 border-b border-white/5 bg-gradient-to-r from-blue-900/20 to-transparent"><p class="text-sm font-bold uppercase tracking-wider text-gray-400">Bonus item we picked for you</p><div class="flex items-center mt-4 space-x-4"><div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">🍀</div><div><p class="font-bold">Celestial Luck</p><p class="text-xs text-gray-500">RNG Battles</p></div></div></div>
-                <div class="p-2 space-y-1"><div class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg"><div class="flex items-center space-x-4"><span class="font-bold text-xl">24.000</span><span class="text-gray-500 line-through text-sm">22.500</span><span class="text-green-400 text-xs font-bold bg-green-400/10 px-2 py-1 rounded">+1500 more</span></div><button class="bg-[#2a2a2a] px-6 py-2 rounded font-bold text-sm w-32">$199,99</button></div><div class="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-500/30 rounded-lg"><div class="flex items-center space-x-4"><span class="font-bold text-xl">2.000</span><span class="text-gray-500 line-through text-sm">1.700</span><span class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-1 rounded">+300 more</span></div><button class="btn-blue px-6 py-2 rounded font-bold text-sm w-32">$19,99</button></div></div>
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-extrabold tracking-tight mb-2">Enjoy up to 25% <br> more Credits</h1>
             </div>
-            <div class="mt-16 space-y-4"><h2 class="text-2xl font-bold">FAQ</h2><div class="space-y-2"><div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer"><span>What are Credits?</span><i class="fas fa-chevron-down text-xs text-gray-500"></i></div><div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer"><span>Where are my Credits?</span><i class="fas fa-chevron-down text-xs text-gray-500"></i></div></div></div>
+
+            <div class="bg-[#161616] rounded-xl border border-white/5 overflow-hidden mb-8">
+                <div class="p-6 border-b border-white/5 bg-gradient-to-r from-blue-900/20 to-transparent">
+                    <p class="text-sm font-bold uppercase tracking-wider text-gray-400">Bonus item we picked for you</p>
+                    <div class="flex items-center mt-4 space-x-4">
+                        <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">🍀</div>
+                        <div>
+                            <p class="font-bold">Celestial Luck</p>
+                            <p class="text-xs text-gray-500">RNG Battles</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-2 space-y-1">
+                    <div class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg group transition">
+                        <div class="flex items-center space-x-4">
+                            <span class="font-bold text-xl">24.000</span>
+                            <span class="text-gray-500 line-through text-sm">22.500</span>
+                            <span class="text-green-400 text-xs font-bold bg-green-400/10 px-2 py-1 rounded">+1500 more</span>
+                        </div>
+                        <button class="bg-[#2a2a2a] px-6 py-2 rounded font-bold text-sm w-32">$199,99</button>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-500/30 rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <span class="font-bold text-xl">2.000</span>
+                            <span class="text-gray-500 line-through text-sm">1.700</span>
+                            <span class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-1 rounded">+300 more</span>
+                        </div>
+                        <button class="btn-blue px-6 py-2 rounded font-bold text-sm w-32">$19,99</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-16 space-y-4">
+                <h2 class="text-2xl font-bold">FAQ</h2>
+                <div class="space-y-2">
+                    <div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer">
+                        <span>What are Credits?</span>
+                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                    </div>
+                    <div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer">
+                        <span>Where are my Credits?</span>
+                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
-    <!-- SEND ROBUX MODAL (formerly Gift Balance) -->
+    <!-- SEND MODAL (fully functional) -->
     <div id="sendModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 modal-overlay">
         <div class="glass-modal w-[420px] rounded-xl overflow-hidden shadow-2xl modal-card">
             <div class="p-4 border-b border-white/10 flex justify-between items-center">
-                <div class="flex items-center space-x-2"><i class="fas fa-paper-plane text-blue-400 text-sm"></i><span class="font-bold text-sm">Send Robux</span></div>
-                <div class="flex items-center gap-3"><div class="flex items-center gap-1.5"><i class="fas fa-gem text-[10px] text-gray-400"></i><span class="text-xs font-bold" id="gift-balance-header">9.229.940</span></div><button onclick="closeSendModal()" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button></div>
+                <div class="flex items-center space-x-2"><i class="fas fa-share text-gray-400 text-sm"></i><span class="font-bold text-sm">Gift Balance</span></div>
+                <div class="flex items-center gap-3"><i class="fas fa-gem text-[10px] text-gray-400"></i><span class="text-xs font-bold" id="gift-balance-header">9.229.940</span><button onclick="closeSendModal()" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button></div>
             </div>
-            <div id="step-search" class="p-5"><input type="text" id="searchInput" class="search-input" placeholder="Search by username" autocomplete="off"><div id="no-results" class="hidden mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-3">Global Search (0)</p><div class="bg-white/5 rounded-xl p-8 text-center"><p class="text-sm text-gray-400">No users found for "<span id="no-results-term"></span>"</p></div></div><div id="search-results" class="hidden mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-2" id="results-label">Global Search</p><div id="results-list" class="space-y-1 max-h-[260px] overflow-y-auto custom-scrollbar"></div></div><div id="friends-list-default" class="mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-3">My Friends (3)</p><div id="default-friends-list" class="space-y-1 max-h-[280px] overflow-y-auto custom-scrollbar pr-1"><div class="text-center py-6"><i class="fas fa-circle-notch fa-spin text-gray-400 text-lg mb-2"></i><p class="text-xs text-gray-500">Loading friends...</p></div></div></div></div>
-            <div id="step-amount" class="hidden p-5"><div class="text-center mb-5"><div class="avatar-ring mx-auto mb-3"><img id="selected-avatar" src="" class="w-full h-full object-cover"></div><p class="font-bold text-base" id="selected-username">builderman</p><p class="text-xs text-gray-500" id="selected-handle">@builderman</p><div class="flex items-center justify-center gap-4 mt-2 text-xs text-gray-500"><span><i class="fas fa-user-friends mr-1"></i>0 Mutual Connections</span><span id="join-date-display"><i class="fas fa-calendar-alt mr-1"></i>Loading join date...</span></div></div><div class="grid grid-cols-3 gap-2 mb-2"><button class="amount-btn" onclick="selectAmount(25, this)"><i class="fas fa-gem text-[9px]"></i> 25</button><button class="amount-btn" onclick="selectAmount(50, this)"><i class="fas fa-gem text-[9px]"></i> 50</button><button class="amount-btn" onclick="selectAmount(100, this)"><i class="fas fa-gem text-[9px]"></i> 100</button><button class="amount-btn selected" onclick="selectAmount(200, this)"><i class="fas fa-gem text-[9px]"></i> 200</button><button class="amount-btn" onclick="selectAmount(500, this)"><i class="fas fa-gem text-[9px]"></i> 500</button><button class="amount-btn" onclick="selectAmount(1000, this)"><i class="fas fa-gem text-[9px]"></i> 1000</button></div><input type="number" id="customAmountInput" class="search-input mb-4" placeholder="Custom amount" oninput="selectCustomAmount(this.value)" style="font-size:13px;padding:9px 14px;"><div class="text-center mb-5"><div class="flex items-center justify-center gap-2 text-2xl font-bold"><i class="fas fa-gem text-gray-400 text-base"></i><span id="amount-display">200</span></div></div><div class="grid grid-cols-2 gap-3"><button onclick="goToConfirm()" class="btn-blue py-2.5 rounded-lg font-bold text-sm">Continue</button><button onclick="goToSearch()" class="bg-[#2a2a2a] hover:bg-[#333] py-2.5 rounded-lg font-bold text-sm">Back</button></div><p class="text-[10px] text-gray-500 text-center mt-3">You need an age check or parental consent to send Robux. Once confirmed, you cannot cancel.</p></div>
-            <div id="step-confirm" class="hidden p-5"><div class="flex items-center justify-center gap-4 mb-6 mt-2"><div class="text-center"><div class="avatar-sm mx-auto mb-1"><img id="confirm-me-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Me" class="w-full h-full object-cover"></div><p class="text-[10px] text-gray-400" id="confirm-me-name">Me</p></div><div class="text-gray-500 text-lg">→</div><div class="text-center"><div class="avatar-sm mx-auto mb-1"><img id="confirm-avatar" src="" class="w-full h-full object-cover"></div><p class="text-[10px] text-gray-400" id="confirm-name">builderman</p></div></div><h3 class="text-center font-bold text-lg mb-3">Confirm Transaction</h3><p class="text-center text-sm text-gray-300 mb-1">You are about to send <strong id="confirm-amount-text">200</strong> Robux to <strong id="confirm-handle-text">@builderman</strong>.</p><p class="text-center text-xs text-red-400 mb-6">This action is permanent and cannot be reversed.</p><div class="grid grid-cols-2 gap-3"><button onclick="startTransfer()" class="btn-blue py-2.5 rounded-lg font-bold text-sm">Confirm Send</button><button onclick="goToAmount()" class="bg-[#2a2a2a] hover:bg-[#333] py-2.5 rounded-lg font-bold text-sm">Edit Amount</button></div></div>
+            <div id="step-search" class="p-5">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by username" autocomplete="off">
+                <div id="no-results" class="hidden mt-4"><div class="bg-white/5 rounded-xl p-8 text-center"><p class="text-sm text-gray-400">No users found for "<span id="no-results-term"></span>"</p></div></div>
+                <div id="search-results" class="hidden mt-4"><div id="results-list" class="space-y-1 max-h-[260px] overflow-y-auto custom-scrollbar"></div></div>
+                <div id="friends-list-default" class="mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-3">My Friends (3)</p><div id="default-friends-list" class="space-y-1 max-h-[280px] overflow-y-auto custom-scrollbar pr-1"><div class="text-center py-6"><i class="fas fa-circle-notch fa-spin text-gray-400 text-lg mb-2"></i><p class="text-xs text-gray-500">Loading friends...</p></div></div></div>
+            </div>
+            <div id="step-amount" class="hidden p-5">
+                <div class="text-center mb-5"><div class="avatar-ring mx-auto mb-3"><img id="selected-avatar" src=""></div><p class="font-bold text-base" id="selected-username">builderman</p><p class="text-xs text-gray-500" id="selected-handle">@builderman</p><div class="flex items-center justify-center gap-4 mt-2 text-xs text-gray-500"><span><i class="fas fa-user-friends mr-1"></i>0 Mutual Connections</span><span id="join-date-display"><i class="fas fa-calendar-alt mr-1"></i>Loading join date...</span></div></div>
+                <div class="grid grid-cols-3 gap-2 mb-2"><button class="amount-btn" onclick="selectAmount(25, this)">25</button><button class="amount-btn" onclick="selectAmount(50, this)">50</button><button class="amount-btn" onclick="selectAmount(100, this)">100</button><button class="amount-btn selected" onclick="selectAmount(200, this)">200</button><button class="amount-btn" onclick="selectAmount(500, this)">500</button><button class="amount-btn" onclick="selectAmount(1000, this)">1000</button></div>
+                <input type="number" id="customAmountInput" class="search-input mb-4" placeholder="Custom amount" oninput="selectCustomAmount(this.value)">
+                <div class="text-center mb-5"><div class="flex items-center justify-center gap-2 text-2xl font-bold"><i class="fas fa-gem text-gray-400 text-base"></i><span id="amount-display">200</span></div></div>
+                <div class="grid grid-cols-2 gap-3"><button onclick="goToConfirm()" class="btn-blue py-2.5 rounded-lg font-bold text-sm">Continue</button><button onclick="goToSearch()" class="bg-[#2a2a2a] py-2.5 rounded-lg font-bold text-sm">Back</button></div>
+                <p class="text-[10px] text-gray-500 text-center mt-3">You need an age check or parental consent to gift balance.</p>
+            </div>
+            <div id="step-confirm" class="hidden p-5">
+                <div class="flex items-center justify-center gap-4 mb-6 mt-2"><div class="text-center"><div class="avatar-sm mx-auto mb-1"><img id="confirm-me-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Me"></div><p class="text-[10px] text-gray-400" id="confirm-me-name">Me</p></div><div class="text-gray-500 text-lg">→</div><div class="text-center"><div class="avatar-sm mx-auto mb-1"><img id="confirm-avatar" src=""></div><p class="text-[10px] text-gray-400" id="confirm-name">builderman</p></div></div>
+                <h3 class="text-center font-bold text-lg mb-3">Confirm Transaction</h3>
+                <p class="text-center text-sm text-gray-300 mb-1">You are about to send <strong id="confirm-amount-text">200</strong> Robux to <strong id="confirm-handle-text">@builderman</strong>.</p>
+                <p class="text-center text-xs text-red-400 mb-6">This action is permanent and cannot be reversed.</p>
+                <div class="grid grid-cols-2 gap-3"><button onclick="startTransfer()" class="btn-blue py-2.5 rounded-lg font-bold text-sm">Confirm Gift</button><button onclick="goToAmount()" class="bg-[#2a2a2a] py-2.5 rounded-lg font-bold text-sm">Edit Amount</button></div>
+            </div>
             <div id="step-loading" class="hidden p-5"><div class="loading-bg"><p class="region-badge">REGION: AP-SOUTHEAST-1 | PING: 37ms</p><div class="shield-container mx-auto mb-5"><div class="shield-ring"></div><div class="shield-ring-2"></div><div style="width:70px;height:70px;border-radius:50%;background:rgba(59,130,246,0.1);display:flex;align-items:center;justify-content:center;"><i class="fas fa-shield-alt text-blue-400 text-2xl"></i></div></div><h3 class="font-bold text-xl mb-1" id="loading-title">Connecting...</h3><div class="progress-track mt-4 mb-2"><div class="progress-dot active" id="pd-0"></div><div class="progress-line" id="pl-0"></div><div class="progress-dot" id="pd-1"></div><div class="progress-line" id="pl-1"></div><div class="progress-dot" id="pd-2"></div><div class="progress-line" id="pl-2"></div><div class="progress-dot" id="pd-3"></div><div class="progress-line" id="pl-3"></div><div class="progress-dot" id="pd-4"></div></div><p class="text-[11px] text-gray-500" id="loading-sub">Connecting to servers...</p></div></div>
-            <div id="step-success" class="hidden p-6"><div class="success-circle"><i class="fas fa-check text-green-400 text-2xl"></i></div><h3 class="text-center font-bold text-xl mb-5">Transfer Successful</h3><div class="bg-white/5 rounded-xl p-4 mb-5 border border-white/5"><div class="tx-row"><span class="text-gray-400">Status:</span><span class="text-green-400 font-semibold text-sm">✓ Completed</span></div><div class="tx-row"><span class="text-gray-400">Amount:</span><span class="font-semibold text-sm" id="success-amount">500 Robux</span></div><div class="tx-row"><span class="text-gray-400">Recipient:</span><span class="font-semibold text-sm" id="success-recipient">@builderman</span></div><div class="tx-row"><span class="text-gray-400">Timestamp:</span><span class="font-semibold text-sm" id="success-timestamp"></span></div><div class="tx-row"><span class="text-gray-400">Transaction ID:</span><span class="text-blue-400 font-mono text-xs" id="success-txid">#TX-499560</span></div></div><div class="bg-amber-900/20 border border-amber-500/30 rounded-lg p-3 mb-5 flex gap-2 text-xs text-gray-300"><span class="text-amber-400 mt-0.5">⚠</span><span><strong class="text-amber-400">Delivery Notice:</strong> Robux may take 2–3 business days to arrive depending on your region and server load.</span></div><button onclick="closeSendModal()" class="btn-blue w-full py-2.5 rounded-lg font-bold text-sm">Done</button></div>
+            <div id="step-success" class="hidden p-6"><div class="success-circle"><i class="fas fa-check text-green-400 text-2xl"></i></div><h3 class="text-center font-bold text-xl mb-5">Transfer Successful</h3><div class="bg-white/5 rounded-xl p-4 mb-5 border border-white/5"><div class="tx-row"><span class="text-gray-400">Status:</span><span class="text-green-400 font-semibold text-sm">✓ Completed</span></div><div class="tx-row"><span class="text-gray-400">Amount:</span><span class="font-semibold text-sm" id="success-amount">500 Robux</span></div><div class="tx-row"><span class="text-gray-400">Recipient:</span><span class="font-semibold text-sm" id="success-recipient">@builderman</span></div><div class="tx-row"><span class="text-gray-400">Timestamp:</span><span class="font-semibold text-sm" id="success-timestamp"></span></div><div class="tx-row"><span class="text-gray-400">Transaction ID:</span><span class="text-blue-400 font-mono text-xs" id="success-txid"></span></div></div><div class="bg-amber-900/20 border border-amber-500/30 rounded-lg p-3 mb-5 flex gap-2 text-xs text-gray-300"><span class="text-amber-400 mt-0.5">⚠</span><span><strong class="text-amber-400">Delivery Notice:</strong> Gifts may take 2-3 business days to arrive depending on your region and current server load.</span></div><button onclick="closeSendModal()" class="btn-blue w-full py-2.5 rounded-lg font-bold text-sm">Done</button></div>
         </div>
     </div>
 
-    <!-- Edit Icon Modal (unchanged) -->
-    <div id="editIconModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[450px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center space-x-2"><i class="fas fa-image text-blue-400"></i><span class="font-bold">Edit Menu Icon</span></div><button onclick="closeIconModal()" class="text-gray-500 hover:text-white text-2xl">&times;</button></div><div class="p-6 space-y-5"><div class="flex items-center space-x-4"><div class="icon-preview" id="iconPreview"><i class="fas fa-home"></i></div><div class="flex-1"><p class="text-sm font-medium" id="modalItemName">Home</p><p class="text-[10px] text-gray-500">Click to change icon or image</p></div></div><div><label class="text-xs text-gray-400 block mb-2 font-semibold">Font Awesome Icon (class)</label><input type="text" id="iconClassInput" class="icon-url-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-2.5 text-sm" placeholder="e.g., fas fa-home"></div><div class="relative"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div><div class="relative flex justify-center text-xs"><span class="bg-[#191919] px-2 text-gray-500">OR</span></div></div><div><label class="text-xs text-gray-400 block mb-2 font-semibold">Custom Image URL</label><input type="text" id="imageUrlInput" class="icon-url-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-2.5 text-sm" placeholder="https://example.com/icon.png"></div><div class="flex space-x-3 pt-2"><button onclick="saveIconChanges()" class="flex-1 btn-blue py-2.5 rounded-lg font-bold text-sm">Apply Changes</button><button onclick="closeIconModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-lg font-bold text-sm">Cancel</button></div></div></div></div>
-
-    <div id="editFriendCountModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[380px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center space-x-2"><i class="fas fa-users text-blue-400"></i><span class="font-bold">Edit Friend Count</span></div><button onclick="closeFriendCountModal()" class="text-gray-500 hover:text-white">&times;</button></div><div class="p-6 space-y-5"><input type="number" id="friendCountInput" class="rename-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-3 text-white text-lg" value="211" min="0"><div class="flex space-x-3"><button onclick="saveFriendCount()" class="flex-1 btn-blue py-2.5 rounded-lg font-bold text-sm">Save</button><button onclick="closeFriendCountModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-lg font-bold text-sm">Cancel</button></div></div></div></div>
-
-    <div id="renameLogoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[400px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center space-x-2"><i class="fas fa-pen-alt text-blue-400"></i><span class="font-bold">Rename Game Logo</span></div><button onclick="closeRenameModal()" class="text-gray-500 hover:text-white text-2xl">&times;</button></div><div class="p-6 space-y-5"><input type="text" id="renameInputField" class="rename-input w-full bg-[#1a1a1a] border border-white/20 rounded-lg p-3 text-white" placeholder="Enter new logo name" maxlength="30"><div class="flex space-x-3"><button onclick="saveNewLogoName()" class="flex-1 btn-blue py-2.5 rounded-lg font-bold text-sm">Save Changes</button><button onclick="closeRenameModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2.5 rounded-lg font-bold text-sm">Cancel</button></div></div></div></div>
-
-    <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[600px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center space-x-2"><i class="fas fa-cog text-gray-400"></i><span class="font-bold">Manage Site</span></div><button onclick="toggleModal('settingsModal')" class="text-gray-500 hover:text-white">&times;</button></div><div class="p-6 grid grid-cols-3 gap-4 bg-black/20"><div class="bg-black/40 p-3 rounded border border-white/5"><p class="text-[10px] text-gray-500 uppercase font-bold">Credits</p><p id="modal-credits-display" class="text-xl font-bold">9.229.940</p></div><div class="bg-black/40 p-3 rounded border border-white/5"><p class="text-[10px] text-gray-500 uppercase font-bold">Cash</p><p class="text-xl font-bold">$0,04</p></div><div class="bg-black/40 p-3 rounded border border-white/5"><p class="text-[10px] text-gray-500 uppercase font-bold">Friends</p><p class="text-xl font-bold" id="modalFriendCount">9</p></div></div><div class="p-6 space-y-6 max-h-[400px] overflow-y-auto custom-scrollbar"><div class="grid grid-cols-2 gap-6"><div class="space-y-4"><h3 class="font-bold text-sm text-orange-400">Account</h3><div><label class="text-[10px] text-gray-500 block mb-1">My Username</label><input type="text" id="settings-username" value="Player123" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><div><label class="text-[10px] text-gray-500 block mb-1">Credit Balance</label><input id="input-credits" type="text" value="9.229.940" class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><button onclick="updateProfile()" class="w-full btn-blue py-2 rounded font-bold text-sm mt-2">Update Account</button></div><div class="space-y-4"><h3 class="font-bold text-sm text-orange-400">Bonus banner</h3><div><label class="text-[10px] text-gray-500 block mb-1">Background Image URL</label><input type="text" placeholder="https://..." class="w-full bg-black/60 border border-white/10 p-2 rounded text-sm"></div><button class="w-full btn-blue py-2 rounded font-bold text-sm">Save banner & icon</button></div></div></div></div></div>
+    <!-- Other modals (editIcon, friendCount, renameLogo, settings) - preserved but shortened for brevity -->
+    <div id="editIconModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[450px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between"><div class="flex items-center gap-2"><i class="fas fa-image text-blue-400"></i><span class="font-bold">Edit Menu Icon</span></div><button onclick="closeIconModal()" class="text-gray-500 text-2xl">&times;</button></div><div class="p-6"><div class="flex items-center gap-4"><div class="icon-preview" id="iconPreview"><i class="fas fa-home"></i></div><div><p class="text-sm font-medium" id="modalItemName">Home</p></div></div><input type="text" id="iconClassInput" class="rename-input w-full mt-4 p-2.5 rounded-lg" placeholder="fas fa-home"><div class="flex gap-3 mt-4"><button onclick="saveIconChanges()" class="flex-1 btn-blue py-2 rounded-lg">Save</button><button onclick="closeIconModal()" class="flex-1 bg-gray-800 py-2 rounded-lg">Cancel</button></div></div></div></div>
+    <div id="editFriendCountModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[380px] rounded-xl"><div class="p-4 border-b border-white/10 flex justify-between"><span class="font-bold">Edit Friend Count</span><button onclick="closeFriendCountModal()" class="text-gray-500">&times;</button></div><div class="p-6"><input type="number" id="friendCountInput" class="rename-input w-full p-3 rounded-lg" value="211"><div class="flex gap-3 mt-4"><button onclick="saveFriendCount()" class="flex-1 btn-blue py-2 rounded-lg">Save</button><button onclick="closeFriendCountModal()" class="flex-1 bg-gray-800 py-2 rounded-lg">Cancel</button></div></div></div></div>
+    <div id="renameLogoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[400px] rounded-xl"><div class="p-4 border-b border-white/10 flex justify-between"><span class="font-bold">Rename Logo</span><button onclick="closeRenameModal()" class="text-gray-500">&times;</button></div><div class="p-6"><input type="text" id="renameInputField" class="rename-input w-full p-3 rounded-lg"><div class="flex gap-3 mt-4"><button onclick="saveNewLogoName()" class="flex-1 btn-blue py-2 rounded-lg">Save</button><button onclick="closeRenameModal()" class="flex-1 bg-gray-800 py-2 rounded-lg">Cancel</button></div></div></div></div>
+    <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[600px] rounded-xl"><div class="p-4 border-b border-white/10 flex justify-between"><span class="font-bold">Settings</span><button onclick="toggleModal('settingsModal')" class="text-gray-500">&times;</button></div><div class="p-6"><div class="grid grid-cols-2 gap-4"><div><label class="text-xs text-gray-500">Username</label><input id="settings-username" class="w-full bg-black/60 border p-2 rounded" value="Player123"></div><div><label class="text-xs text-gray-500">Credits</label><input id="input-credits" class="w-full bg-black/60 border p-2 rounded" value="9.229.940"></div></div><button onclick="updateProfile()" class="w-full btn-blue py-2 rounded-lg mt-4">Update</button></div></div></div>
 
     <script>
-        // ROBUX ICON UPLOAD
-        let customRobuxImageUrl = localStorage.getItem('customRobuxImage') || null;
-        const robuxIconContainer = document.getElementById('robuxIconContainer');
-        const robuxImageInput = document.getElementById('robuxImageInput');
-        let robuxNavIcon = document.getElementById('robuxNavIcon');
-        
-        function updateRobuxIconDisplay() {
-            if (customRobuxImageUrl) {
-                if (robuxNavIcon.tagName === 'I') {
-                    const img = document.createElement('img');
-                    img.id = 'robuxNavIcon';
-                    img.className = 'custom-robux-img';
-                    img.src = customRobuxImageUrl;
-                    img.style.width = '18px';
-                    img.style.height = '18px';
-                    robuxNavIcon.parentNode.replaceChild(img, robuxNavIcon);
-                    robuxNavIcon = img;
-                } else { robuxNavIcon.src = customRobuxImageUrl; }
-            } else {
-                if (robuxNavIcon.tagName === 'IMG') {
-                    const i = document.createElement('i');
-                    i.id = 'robuxNavIcon';
-                    i.className = 'fas fa-gem text-xs';
-                    robuxNavIcon.parentNode.replaceChild(i, robuxNavIcon);
-                    robuxNavIcon = i;
-                } else { robuxNavIcon.className = 'fas fa-gem text-xs'; }
-            }
-        }
-        
-        robuxIconContainer.addEventListener('click', (e) => { e.stopPropagation(); robuxImageInput.click(); });
-        robuxImageInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => { customRobuxImageUrl = e.target.result; localStorage.setItem('customRobuxImage', customRobuxImageUrl); updateRobuxIconDisplay(); showToastNotif('Robux icon changed!'); };
-                reader.readAsDataURL(file);
-            } else { showToastNotif('Select a valid image'); }
-        });
-        
-        // ARROW ICON UPLOAD (Send button arrow)
-        let customArrowImageUrl = localStorage.getItem('customArrowImage') || null;
-        const arrowContainer = document.getElementById('sendArrowIcon');
-        const arrowImageInput = document.getElementById('arrowImageInput');
-        const sendButton = document.querySelector('button[onclick="openSendModal()"]');
-        
-        function updateArrowIconDisplay() {
-            const arrowSpan = document.getElementById('sendArrowIcon');
-            if (!arrowSpan) return;
-            if (customArrowImageUrl) {
-                if (arrowSpan.tagName === 'I') {
-                    const img = document.createElement('img');
-                    img.id = 'sendArrowIcon';
-                    img.className = 'send-arrow-img';
-                    img.src = customArrowImageUrl;
-                    img.style.width = '12px';
-                    img.style.height = '12px';
-                    arrowSpan.parentNode.replaceChild(img, arrowSpan);
-                } else if (arrowSpan.tagName === 'IMG') {
-                    arrowSpan.src = customArrowImageUrl;
-                }
-            } else {
-                if (arrowSpan.tagName === 'IMG') {
-                    const i = document.createElement('i');
-                    i.id = 'sendArrowIcon';
-                    i.className = 'fas fa-arrow-up text-[9px]';
-                    arrowSpan.parentNode.replaceChild(i, arrowSpan);
-                } else {
-                    arrowSpan.className = 'fas fa-arrow-up text-[9px]';
-                }
-            }
-        }
-        
-        // Attach click to the arrow wrapper area
-        const arrowWrapper = document.querySelector('.bg-white/10.px-2.py-0.5')?.parentElement?.querySelector('.flex.items-center.gap-1') || sendButton;
-        if (sendButton) {
-            sendButton.addEventListener('click', (e) => {
-                if (e.target === arrowImageInput || arrowImageInput.contains(e.target)) return;
-                const rect = sendButton.getBoundingClientRect();
-                const isArrowClick = (e.clientX - rect.left) < 40;
-                if (isArrowClick) {
-                    e.stopPropagation();
-                    arrowImageInput.click();
-                }
-            });
-        }
-        
-        arrowImageInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => { customArrowImageUrl = e.target.result; localStorage.setItem('customArrowImage', customArrowImageUrl); updateArrowIconDisplay(); showToastNotif('Arrow icon changed!'); };
-                reader.readAsDataURL(file);
-            } else { showToastNotif('Select a valid image for arrow'); }
-        });
-        
-        // Also allow clicking on the arrow icon itself
-        document.addEventListener('click', (e) => {
-            if (e.target.id === 'sendArrowIcon' || e.target.closest('#sendArrowIcon')) {
-                e.preventDefault();
-                e.stopPropagation();
-                arrowImageInput.click();
-            }
-        });
-        
-        updateRobuxIconDisplay();
-        updateArrowIconDisplay();
-        
-        // ========== REST OF ORIGINAL LOGIC (simplified but functional) ==========
+        // ==================== FULL DASHBOARD SCRIPT ====================
         let selectedUser = { name: '', handle: '', avatar: '', joinDate: '' };
         let selectedAmount = 200;
-        let currentEditingElement = null, currentItemKey = null;
+        let currentEditingElement = null;
+        let currentItemKey = null;
         let myUsername = localStorage.getItem('mainUsername') || 'Player123';
         let myAvatar = localStorage.getItem('mainAvatar') || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Me';
-        const PROXY = "https://corsproxy.io/?";
         let searchTimeout;
-        
+
+        const PROXY = "https://corsproxy.io/?";
         async function fetchRobloxAPI(url) { try { const res = await fetch(PROXY + encodeURIComponent(url)); return await res.json(); } catch(e) { return {}; } }
         async function fetchUserByUsername(username) { const data = await fetchRobloxAPI(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=10`); return data.data || []; }
         async function fetchUserById(userId) { return await fetchRobloxAPI(`https://users.roblox.com/v1/users/${userId}`); }
         async function fetchAvatarUrl(userId) { const data = await fetchRobloxAPI(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`); return data.data?.[0]?.imageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`; }
-        function formatJoinDate(dateString) { if (!dateString) return 'Unknown join date'; return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }); }
-        function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>'"]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[m])); }
+        function formatJoinDate(dateString) { if (!dateString) return 'Unknown'; return new Date(dateString).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }); }
+        function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+
+        function showStep(step) { ['search','amount','confirm','loading','success'].forEach(s => document.getElementById(`step-${s}`).classList.add('hidden')); document.getElementById(`step-${step}`).classList.remove('hidden'); }
+        function closeSendModal() { document.getElementById('sendModal').classList.add('hidden'); }
+        function openSendModal() { document.getElementById('sendModal').classList.remove('hidden'); showStep('search'); document.getElementById('searchInput').value = ''; document.getElementById('no-results').classList.add('hidden'); document.getElementById('search-results').classList.add('hidden'); document.getElementById('friends-list-default').classList.remove('hidden'); loadDefaultFriends(); }
+        function goToSearch() { showStep('search'); }
+        function goToAmount() { showStep('amount'); }
+        function selectAmount(val, btn) { selectedAmount = val; document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected')); if(btn) btn.classList.add('selected'); document.getElementById('amount-display').textContent = val; document.getElementById('customAmountInput').value = ''; }
+        function selectCustomAmount(val) { if(!val) return; selectedAmount = parseInt(val) || 0; document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected')); document.getElementById('amount-display').textContent = selectedAmount; }
+        function selectUser(name, handle, avatar, joinDate) { selectedUser = { name, handle, avatar, joinDate }; selectedAmount = 200; document.getElementById('selected-username').textContent = name; document.getElementById('selected-handle').textContent = handle; document.getElementById('selected-avatar').src = avatar; document.getElementById('join-date-display').innerHTML = `<i class="fas fa-calendar-alt mr-1"></i>${joinDate}`; document.getElementById('amount-display').textContent = '200'; document.getElementById('customAmountInput').value = ''; document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected')); document.querySelectorAll('.amount-btn')[3].classList.add('selected'); showStep('amount'); }
+        function goToConfirm() { document.getElementById('confirm-me-avatar').src = myAvatar; document.getElementById('confirm-me-name').textContent = myUsername; document.getElementById('confirm-avatar').src = selectedUser.avatar; document.getElementById('confirm-name').textContent = selectedUser.name; document.getElementById('confirm-amount-text').textContent = selectedAmount; document.getElementById('confirm-handle-text').textContent = selectedUser.handle; showStep('confirm'); }
         
-        async function updateMyAvatar() { const users = await fetchUserByUsername(myUsername); if(users.length>0) { myAvatar = await fetchAvatarUrl(users[0].id); localStorage.setItem('mainAvatar', myAvatar); document.getElementById('confirm-me-avatar').src = myAvatar; document.getElementById('confirm-me-name').textContent = users[0].displayName || myUsername; } }
+        function updateProgress(stepIdx) { for(let i=0;i<5;i++){ document.getElementById('pd-'+i).className = i<stepIdx ? 'progress-dot done' : (i===stepIdx ? 'progress-dot active' : 'progress-dot'); } for(let i=0;i<4;i++){ document.getElementById('pl-'+i).className = i<stepIdx ? 'progress-line done' : 'progress-line'; } }
+        
+        function startTransfer() {
+            showStep('loading');
+            let stepIdx = 0;
+            updateProgress(0);
+            document.getElementById('loading-title').textContent = 'Connecting...';
+            document.getElementById('loading-sub').textContent = 'Connecting to servers...';
+            const interval = setInterval(() => {
+                stepIdx++;
+                const steps = ['Connecting...','Verifying...','Syncing...','Processing...','Finishing...'];
+                const subs = ['Connecting to servers...','Verifying user credentials...','Synchronizing transaction data...','Processing gift request...','Updating ledger...'];
+                if(stepIdx >= 5) { clearInterval(interval); showSuccess(); return; }
+                updateProgress(stepIdx);
+                document.getElementById('loading-title').textContent = steps[stepIdx];
+                document.getElementById('loading-sub').textContent = subs[stepIdx];
+            }, 900);
+        }
+        
+        function showSuccess() {
+            const curr = document.getElementById('display-currency').textContent.replace(/\./g, '');
+            const newBal = (parseInt(curr) - selectedAmount).toLocaleString('de-DE');
+            document.getElementById('display-currency').textContent = newBal;
+            document.getElementById('gift-balance-header').textContent = newBal;
+            document.getElementById('success-amount').textContent = selectedAmount + ' Robux';
+            document.getElementById('success-recipient').textContent = selectedUser.handle;
+            const now = new Date();
+            document.getElementById('success-timestamp').textContent = now.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + ' · ' + now.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+            document.getElementById('success-txid').textContent = '#TX-' + Math.floor(Math.random()*900000+100000);
+            showStep('success');
+            showToastNotif('Gift sent to ' + selectedUser.handle);
+        }
+        
+        function showToastNotif(msg) { document.getElementById('toast-text').textContent = msg; document.getElementById('toast-notif').classList.add('show'); setTimeout(() => document.getElementById('toast-notif').classList.remove('show'), 4000); }
+        function hideToast() { document.getElementById('toast-notif').classList.remove('show'); }
+        
+        async function loadDefaultFriends() {
+            const defaultFriends = ['builderman', 'Roblox', 'SAITAMA'];
+            const container = document.getElementById('default-friends-list');
+            container.innerHTML = '';
+            for(const username of defaultFriends) {
+                const users = await fetchUserByUsername(username);
+                if(users.length > 0) {
+                    const user = users[0];
+                    const avatar = await fetchAvatarUrl(user.id);
+                    const userDetails = await fetchUserById(user.id);
+                    const joinDate = userDetails.created ? formatJoinDate(userDetails.created) : 'Unknown';
+                    const handle = '@' + user.name.toLowerCase();
+                    const displayName = user.displayName || user.name;
+                    const card = document.createElement('div');
+                    card.className = 'user-result-item';
+                    card.innerHTML = `<div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover"></div><div><p class="text-sm font-bold">${escapeHtml(displayName)}</p><p class="text-[10px] text-gray-500">${escapeHtml(handle)}</p></div>`;
+                    card.onclick = () => selectUser(displayName, handle, avatar, joinDate);
+                    container.appendChild(card);
+                }
+            }
+        }
+        
+        const searchInput = document.getElementById('searchInput');
+        if(searchInput) {
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                const val = searchInput.value.trim();
+                if(!val) { document.getElementById('no-results').classList.add('hidden'); document.getElementById('search-results').classList.add('hidden'); document.getElementById('friends-list-default').classList.remove('hidden'); return; }
+                document.getElementById('friends-list-default').classList.add('hidden');
+                searchTimeout = setTimeout(async () => {
+                    document.getElementById('search-results').classList.remove('hidden');
+                    document.getElementById('no-results').classList.add('hidden');
+                    const resultsList = document.getElementById('results-list');
+                    resultsList.innerHTML = '<div class="text-center py-6"><i class="fas fa-circle-notch fa-spin text-gray-400 text-lg mb-2"></i><p class="text-xs text-gray-500">Searching...</p></div>';
+                    const users = await fetchUserByUsername(val);
+                    if(users.length === 0) { document.getElementById('search-results').classList.add('hidden'); document.getElementById('no-results').classList.remove('hidden'); document.getElementById('no-results-term').textContent = val; return; }
+                    resultsList.innerHTML = '';
+                    for(const user of users.slice(0,10)) {
+                        const avatar = await fetchAvatarUrl(user.id);
+                        const userDetails = await fetchUserById(user.id);
+                        const joinDate = userDetails.created ? formatJoinDate(userDetails.created) : 'Unknown';
+                        const handle = '@' + user.name.toLowerCase();
+                        const displayName = user.displayName || user.name;
+                        const card = document.createElement('div');
+                        card.className = 'user-result-item';
+                        card.innerHTML = `<div class="avatar-sm"><img src="${avatar}" class="w-full h-full object-cover"></div><div><p class="text-sm font-bold">${escapeHtml(displayName)}</p><p class="text-[10px] text-gray-500">${escapeHtml(handle)}</p></div>`;
+                        card.onclick = () => selectUser(displayName, handle, avatar, joinDate);
+                        resultsList.appendChild(card);
+                    }
+                }, 400);
+            });
+        }
+
+        async function updateMyAvatar() { const users = await fetchUserByUsername(myUsername); if(users.length > 0) { const avatar = await fetchAvatarUrl(users[0].id); myAvatar = avatar; localStorage.setItem('mainAvatar', avatar); document.getElementById('confirm-me-avatar').src = avatar; document.getElementById('confirm-me-name').textContent = users[0].displayName || myUsername; } }
         async function updateProfile() { const username = document.getElementById('settings-username').value.trim(); const balance = document.getElementById('input-credits').value; if(username) { myUsername = username; localStorage.setItem('mainUsername', username); document.getElementById('confirm-me-name').textContent = username; await updateMyAvatar(); } document.getElementById('display-currency').textContent = balance; document.getElementById('modal-credits-display').textContent = balance; document.getElementById('gift-balance-header').textContent = balance; toggleModal('settingsModal'); }
         
-        async function loadDefaultFriends() { const friends = ['builderman','Roblox','SAITAMA']; const container = document.getElementById('default-friends-list'); container.innerHTML = ''; for(const un of friends) { const users = await fetchUserByUsername(un); if(users.length) { const u = users[0]; const av = await fetchAvatarUrl(u.id); const det = await fetchUserById(u.id); const jd = det.created ? formatJoinDate(det.created) : 'Unknown'; const handle = '@' + u.name.toLowerCase().replace(/\s+/g,''); const disp = u.displayName || u.name; const card = document.createElement('div'); card.className='user-result-item'; card.innerHTML=`<div class="avatar-sm"><img src="${av}" class="w-full h-full object-cover"></div><div><p class="text-sm font-bold">${escapeHtml(disp)}</p><p class="text-[10px] text-gray-500">${escapeHtml(handle)}</p><p class="text-[9px] text-gray-600 mt-0.5"><i class="fas fa-calendar-alt mr-1"></i>${jd}</p></div>`; card.onclick=()=>selectUser(disp,handle,av,jd); container.appendChild(card); } } }
+        function setupEditableFeatures() {
+            document.querySelectorAll('.editable-icon').forEach(icon => { icon.addEventListener('click', e => { e.stopPropagation(); const parentDiv = icon.closest('.sidebar-item'); const itemName = parentDiv?.querySelector('span:not(.friend-count-badge)')?.innerText || 'Item'; currentEditingElement = icon; currentItemKey = icon.getAttribute('data-item-key'); openIconModal(itemName, icon); }); });
+            document.getElementById('friendCountBadge')?.addEventListener('click', e => { e.stopPropagation(); openFriendCountModal(); });
+        }
+        function openIconModal(itemName, iconEl) { document.getElementById('modalItemName').innerText = itemName; const ic = document.getElementById('iconClassInput'); ic.value = iconEl.tagName === 'I' ? iconEl.className : ''; document.getElementById('editIconModal').classList.remove('hidden'); }
+        function saveIconChanges() { if (!currentEditingElement) { closeIconModal(); return; } const iconClass = document.getElementById('iconClassInput').value.trim(); const newEl = document.createElement('i'); newEl.className = `${iconClass} w-5 editable-icon`; newEl.setAttribute('data-item-key', currentItemKey); currentEditingElement.parentNode.replaceChild(newEl, currentEditingElement); closeIconModal(); }
+        function closeIconModal() { document.getElementById('editIconModal').classList.add('hidden'); currentEditingElement = null; }
+        function openFriendCountModal() { document.getElementById('friendCountInput').value = document.getElementById('friendCountBadge').innerText; document.getElementById('editFriendCountModal').classList.remove('hidden'); }
+        function closeFriendCountModal() { document.getElementById('editFriendCountModal').classList.add('hidden'); }
+        function saveFriendCount() { let n = parseInt(document.getElementById('friendCountInput').value); if (isNaN(n)) n = 0; document.getElementById('friendCountBadge').innerText = n; closeFriendCountModal(); }
+        function openRenameModal() { document.getElementById('renameInputField').value = document.getElementById('gameLogoText').innerText; document.getElementById('renameLogoModal').classList.remove('hidden'); }
+        function closeRenameModal() { document.getElementById('renameLogoModal').classList.add('hidden'); }
+        function saveNewLogoName() { let n = document.getElementById('renameInputField').value.trim() || 'GAMELOGO'; document.getElementById('gameLogoText').innerText = n; closeRenameModal(); }
+        function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
         
-        function openSendModal() { document.getElementById('sendModal').classList.remove('hidden'); showStep('search'); document.getElementById('searchInput').value=''; document.getElementById('no-results').classList.add('hidden'); document.getElementById('search-results').classList.add('hidden'); document.getElementById('friends-list-default').classList.remove('hidden'); loadDefaultFriends(); }
-        function closeSendModal() { document.getElementById('sendModal').classList.add('hidden'); }
-        function showStep(step) { ['search','amount','confirm','loading','success'].forEach(s=>document.getElementById('step-'+s).classList.add('hidden')); document.getElementById('step-'+step).classList.remove('hidden'); }
+        const logoImg = document.getElementById('gameLogoImg');
+        const logoFileInput = document.getElementById('logoFileInput');
+        logoImg.addEventListener('click', () => logoFileInput.click());
+        logoFileInput.addEventListener('change', event => { const file = event.target.files[0]; if (file && file.type.startsWith('image/')) { const reader = new FileReader(); reader.onload = e => { logoImg.src = e.target.result; }; reader.readAsDataURL(file); } });
+        document.getElementById('gameLogoText').addEventListener('click', openRenameModal);
+
+        // ==================== WHEEL SYSTEM ====================
+        let wheelPlayers = [];
         
-        const searchInputEl = document.getElementById('searchInput');
-        const searchResultsDiv = document.getElementById('search-results'), resultsList = document.getElementById('results-list'), noResDiv = document.getElementById('no-results'), defaultList = document.getElementById('friends-list-default');
-        if(searchInputEl) searchInputEl.addEventListener('input',()=>{ clearTimeout(searchTimeout); const val=searchInputEl.value.trim(); if(!val){ noResDiv.classList.add('hidden'); searchResultsDiv.classList.add('hidden'); defaultList.classList.remove('hidden'); return; } defaultList.classList.add('hidden'); searchTimeout=setTimeout(async()=>{ searchResultsDiv.classList.remove('hidden'); noResDiv.classList.add('hidden'); resultsList.innerHTML=`<div class="text-center py-6"><i class="fas fa-circle-notch fa-spin"></i><p>Searching...</p></div>`; const users=await fetchUserByUsername(val); if(!users.length){ searchResultsDiv.classList.add('hidden'); noResDiv.classList.remove('hidden'); document.getElementById('no-results-term').textContent=val; return; } noResDiv.classList.add('hidden'); searchResultsDiv.classList.remove('hidden'); document.getElementById('results-label').textContent=`Global Search (${users.length})`; resultsList.innerHTML=''; for(const user of users.slice(0,10)){ const av=await fetchAvatarUrl(user.id); const det=await fetchUserById(user.id); const jd=det.created?formatJoinDate(det.created):'Unknown'; const handle='@'+user.name.toLowerCase(); const disp=user.displayName||user.name; const card=document.createElement('div'); card.className='user-result-item'; card.innerHTML=`<div class="avatar-sm"><img src="${av}" class="w-full h-full object-cover"></div><div><p class="text-sm font-bold">${escapeHtml(disp)}</p><p class="text-[10px] text-gray-500">${escapeHtml(handle)}</p><p class="text-[9px] text-gray-600"><i class="fas fa-calendar-alt mr-1"></i>${jd}</p></div>`; card.onclick=()=>selectUser(disp,handle,av,jd); resultsList.appendChild(card); } },400); }); });
+        function renderWheelPlayersList() {
+            const container = document.getElementById('wheelPlayersList');
+            if (wheelPlayers.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-sm text-center">No contestants yet. Add some!</div>';
+                return;
+            }
+            container.innerHTML = wheelPlayers.map((player, idx) => `
+                <div class="wheel-player-tag">
+                    <i class="fas fa-user-circle text-blue-400"></i>
+                    <span>${escapeHtml(player)}</span>
+                    <button onclick="removeWheelPlayer(${idx})"><i class="fas fa-times-circle"></i></button>
+                </div>
+            `).join('');
+        }
         
-        function selectUser(name,handle,avatar,joinDate){ selectedUser={name,handle,avatar,joinDate}; selectedAmount=200; document.getElementById('selected-username').textContent=name; document.getElementById('selected-handle').textContent=handle; document.getElementById('selected-avatar').src=avatar; document.getElementById('join-date-display').innerHTML=`<i class="fas fa-calendar-alt mr-1"></i>${joinDate}`; document.getElementById('amount-display').textContent='200'; document.getElementById('customAmountInput').value=''; document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('selected')); document.querySelectorAll('.amount-btn')[3].classList.add('selected'); showStep('amount'); }
-        function selectAmount(val,btn){ selectedAmount=val; document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('selected')); if(btn)btn.classList.add('selected'); document.getElementById('amount-display').textContent=val; document.getElementById('customAmountInput').value=''; }
-        function selectCustomAmount(val){ if(!val)return; selectedAmount=parseInt(val)||0; document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('selected')); document.getElementById('amount-display').textContent=selectedAmount; }
-        function goToSearch(){ showStep('search'); }
-        function goToAmount(){ showStep('amount'); }
-        function goToConfirm(){ document.getElementById('confirm-me-avatar').src=myAvatar; document.getElementById('confirm-me-name').textContent=myUsername; document.getElementById('confirm-avatar').src=selectedUser.avatar; document.getElementById('confirm-name').textContent=selectedUser.name; document.getElementById('confirm-amount-text').textContent=selectedAmount; document.getElementById('confirm-handle-text').textContent=selectedUser.handle; showStep('confirm'); }
-        const steps=[{title:'Connecting...',sub:'Connecting to servers...'},{title:'Verifying...',sub:'Verifying user...'},{title:'Syncing...',sub:'Syncing transaction...'},{title:'Processing...',sub:'Processing request...'},{title:'Finishing...',sub:'Updating ledger...'}];
-        function updateProgress(idx){for(let i=0;i<5;i++){let dot=document.getElementById('pd-'+i);if(i<idx)dot.className='progress-dot done';else if(i===idx)dot.className='progress-dot active';else dot.className='progress-dot';}for(let i=0;i<4;i++){document.getElementById('pl-'+i).className=i<idx?'progress-line done':'progress-line';}}
-        function startTransfer(){ showStep('loading'); let idx=0; updateProgress(0); document.getElementById('loading-title').textContent=steps[0].title; document.getElementById('loading-sub').textContent=steps[0].sub; const iv=setInterval(()=>{ idx++; if(idx>=steps.length){ clearInterval(iv); showSuccess(); return; } updateProgress(idx); document.getElementById('loading-title').textContent=steps[idx].title; document.getElementById('loading-sub').textContent=steps[idx].sub; },900); }
-        function showSuccess(){ const curr=document.getElementById('display-currency').textContent.replace(/\./g,''); const newBal=(parseInt(curr)-selectedAmount).toLocaleString('de-DE'); document.getElementById('display-currency').textContent=newBal; document.getElementById('gift-balance-header').textContent=newBal; document.getElementById('success-amount').textContent=selectedAmount+' Robux'; document.getElementById('success-recipient').textContent=selectedUser.handle; const now=new Date(); document.getElementById('success-timestamp').textContent=now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' · '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); document.getElementById('success-txid').textContent='#TX-'+Math.floor(Math.random()*900000+100000); showStep('success'); showToastNotif('Robux sent to '+selectedUser.handle); }
-        function showToastNotif(msg){ document.getElementById('toast-text').textContent=msg; document.getElementById('toast-notif').classList.add('show'); setTimeout(()=>document.getElementById('toast-notif').classList.remove('show'),4000); }
-        function hideToast(){ document.getElementById('toast-notif').classList.remove('show'); }
+        function addWheelPlayer() {
+            const input = document.getElementById('wheelPlayerInput');
+            const name = input.value.trim();
+            if (!name) { showToastNotif('Please enter a name!'); return; }
+            if (wheelPlayers.includes(name)) { showToastNotif('Player already added!'); return; }
+            wheelPlayers.push(name);
+            input.value = '';
+            renderWheelPlayersList();
+            updateWheelDisplay();
+            showToastNotif(`✅ ${name} added`);
+        }
         
-        const logoImg=document.getElementById('gameLogoImg'), logoFile=document.getElementById('logoFileInput'); logoImg.addEventListener('click',()=>logoFile.click()); logoFile.addEventListener('change',e=>{ if(e.target.files[0]){ const r=new FileReader(); r.onload=ev=>logoImg.src=ev.target.result; r.readAsDataURL(e.target.files[0]); } });
-        function openRenameModal(){ document.getElementById('renameInputField').value=document.getElementById('gameLogoText').innerText; document.getElementById('renameLogoModal').classList.remove('hidden'); }
-        function closeRenameModal(){ document.getElementById('renameLogoModal').classList.add('hidden'); }
-        function saveNewLogoName(){ let n=document.getElementById('renameInputField').value.trim()||'GAMELOGO'; document.getElementById('gameLogoText').innerText=n; closeRenameModal(); }
-        function setupEditableFeatures(){ document.querySelectorAll('.editable-icon').forEach(icon=>{ icon.addEventListener('click',e=>{ e.stopPropagation(); const parent=icon.closest('.sidebar-item'); const name=parent?.querySelector('span:not(.friend-count-badge)')?.innerText||'Item'; currentEditingElement=icon; currentItemKey=icon.getAttribute('data-item-key'); openIconModal(name,icon); }); }); document.getElementById('friendCountBadge')?.addEventListener('click',e=>{ e.stopPropagation(); openFriendCountModal(); }); }
-        function openIconModal(itemName,iconEl){ document.getElementById('modalItemName').innerText=itemName; const ic=document.getElementById('iconClassInput'), iu=document.getElementById('imageUrlInput'); ic.value=iconEl.tagName==='I'?iconEl.className:''; iu.value=iconEl.tagName==='IMG'?iconEl.src:''; updateIconPreview(ic.value,iu.value); document.getElementById('editIconModal').classList.remove('hidden'); ic.oninput=()=>updateIconPreview(ic.value,iu.value); iu.oninput=()=>updateIconPreview(ic.value,iu.value); }
-        function updateIconPreview(ic,iu){ const p=document.getElementById('iconPreview'); if(!p)return; if(iu.trim())p.innerHTML=`<img src="${iu}" class="w-8 h-8 object-contain">`; else if(ic.trim())p.innerHTML=`<i class="${ic} text-2xl"></i>`; else p.innerHTML=`<i class="fas fa-question text-2xl"></i>`; }
-        function saveIconChanges(){ if(!currentEditingElement)return; const ic=document.getElementById('iconClassInput').value.trim(), iu=document.getElementById('imageUrlInput').value.trim(); const newEl=document.createElement(iu?'img':'i'); if(iu){ newEl.src=iu; newEl.style.cssText='width:20px;height:20px;object-fit:contain;cursor:pointer;'; }else newEl.className=`${ic} w-5 editable-icon`; newEl.setAttribute('data-item-key',currentItemKey); newEl.addEventListener('click',e=>{ e.stopPropagation(); const p=newEl.closest('.sidebar-item'); const n=p?.querySelector('span:not(.friend-count-badge)')?.innerText||'Item'; currentEditingElement=newEl; currentItemKey=newEl.getAttribute('data-item-key'); openIconModal(n,newEl); }); currentEditingElement.parentNode.replaceChild(newEl,currentEditingElement); closeIconModal(); }
-        function closeIconModal(){ document.getElementById('editIconModal').classList.add('hidden'); currentEditingElement=null; }
-        function openFriendCountModal(){ document.getElementById('friendCountInput').value=document.getElementById('friendCountBadge').innerText; document.getElementById('editFriendCountModal').classList.remove('hidden'); }
-        function closeFriendCountModal(){ document.getElementById('editFriendCountModal').classList.add('hidden'); }
-        function saveFriendCount(){ let n=parseInt(document.getElementById('friendCountInput').value); if(isNaN(n))n=0; document.getElementById('friendCountBadge').innerText=n; const m=document.getElementById('modalFriendCount'); if(m)m.innerText=n; closeFriendCountModal(); }
-        function toggleModal(id){ document.getElementById(id).classList.toggle('hidden'); }
+        function removeWheelPlayer(index) {
+            wheelPlayers.splice(index, 1);
+            renderWheelPlayersList();
+            updateWheelDisplay();
+        }
         
-        document.addEventListener('DOMContentLoaded',async()=>{ setupEditableFeatures(); document.getElementById('gameLogoText').addEventListener('click',openRenameModal); if(myUsername){ document.getElementById('settings-username').value=myUsername; document.getElementById('confirm-me-name').textContent=myUsername; await updateMyAvatar(); } window.onclick=event=>{ if(event.target.id==='sendModal')closeSendModal(); if(event.target.id==='settingsModal')toggleModal('settingsModal'); if(event.target.id==='editIconModal')closeIconModal(); if(event.target.id==='editFriendCountModal')closeFriendCountModal(); if(event.target.id==='renameLogoModal')closeRenameModal(); }; });
+        window.addWheelPlayer = addWheelPlayer;
+        window.removeWheelPlayer = removeWheelPlayer;
+
+        // Prize tiers (higher Robux = way harder to get)
+        const PRIZE_TIERS_WHEEL = [
+            { label: "1–5K", min: 1, max: 5000, weight: 560, color: "#3b82f6" },
+            { label: "5K–25K", min: 5001, max: 25000, weight: 210, color: "#10b981" },
+            { label: "25K–100K", min: 25001, max: 100000, weight: 74, color: "#f59e0b" },
+            { label: "100K–250K", min: 100001, max: 250000, weight: 21, color: "#ef4444" },
+            { label: "250K–500K", min: 250001, max: 500000, weight: 6.2, color: "#ec4897" },
+            { label: "500K–750K", min: 500001, max: 750000, weight: 1.8, color: "#8b5cf6" },
+            { label: "750K–950K", min: 750001, max: 950000, weight: 0.42, color: "#f97316" },
+            { label: "1,000,000", min: 1000000, max: 1000000, weight: 0.012, color: "#fbbf24" }
+        ];
+        let totalPrizeWeight = PRIZE_TIERS_WHEEL.reduce((s, t) => s + t.weight, 0);
+        
+        function getWeightedRobuxWheel() {
+            let rand = Math.random() * totalPrizeWeight;
+            let acc = 0;
+            for (let i = 0; i < PRIZE_TIERS_WHEEL.length; i++) {
+                acc += PRIZE_TIERS_WHEEL[i].weight;
+                if (rand <= acc) {
+                    const tier = PRIZE_TIERS_WHEEL[i];
+                    let amount = (tier.min === tier.max) ? tier.max : Math.floor(Math.random() * (tier.max - tier.min + 1)) + tier.min;
+                    return { amount, segmentIndex: i };
+                }
+            }
+            return { amount: 1, segmentIndex: 0 };
+        }
+
+        const wheelCanvas = document.getElementById('wheelCanvas');
+        const wheelCtx = wheelCanvas.getContext('2d');
+        
+        function drawWheelWheel(segments, labels, colors, rotation = 0) {
+            if (!segments || segments === 0) {
+                wheelCtx.clearRect(0, 0, 320, 320);
+                wheelCtx.beginPath();
+                wheelCtx.arc(160, 160, 150, 0, Math.PI * 2);
+                wheelCtx.fillStyle = 'rgba(128,128,128,0.1)';
+                wheelCtx.fill();
+                wheelCtx.fillStyle = '#666';
+                wheelCtx.font = '14px Inter';
+                wheelCtx.textAlign = 'center';
+                wheelCtx.fillText('Add players', 160, 165);
+                return;
+            }
+            const step = (Math.PI * 2) / segments;
+            const cx = 160, cy = 160, r = 150;
+            wheelCtx.clearRect(0, 0, 320, 320);
+            for (let i = 0; i < segments; i++) {
+                const start = i * step + rotation - Math.PI/2;
+                const end = (i+1) * step + rotation - Math.PI/2;
+                wheelCtx.beginPath();
+                wheelCtx.moveTo(cx, cy);
+                wheelCtx.arc(cx, cy, r, start, end);
+                wheelCtx.fillStyle = colors[i % colors.length];
+                wheelCtx.fill();
+                wheelCtx.strokeStyle = "#00000055";
+                wheelCtx.stroke();
+                wheelCtx.save();
+                wheelCtx.translate(cx, cy);
+                wheelCtx.rotate(start + step/2);
+                wheelCtx.fillStyle = "white";
+                wheelCtx.font = segments <= 6 ? "bold 13px Inter" : "10px Inter";
+                let txt = labels[i];
+                if (txt.length > 12) txt = txt.slice(0,10)+"..";
+                wheelCtx.fillText(txt, 95, 5);
+                wheelCtx.restore();
+            }
+        }
+        
+        function animateSpinWheel(segments, labels, colors, targetIdx, duration, callback) {
+            const start = performance.now();
+            const spins = 6 + Math.random() * 3;
+            const segAngle = (Math.PI*2)/segments;
+            const targetRot = spins * 2 * Math.PI + (2*Math.PI - targetIdx * segAngle - segAngle/2);
+            function animate(now) {
+                const elapsed = now - start;
+                let t = Math.min(1, elapsed / duration);
+                const ease = 1 - Math.pow(1-t, 3.5);
+                const rot = ease * targetRot;
+                drawWheelWheel(segments, labels, colors, rot);
+                if (t < 1) requestAnimationFrame(animate);
+                else callback();
+            }
+            requestAnimationFrame(animate);
+        }
+        
+        function updateWheelDisplay() {
+            if (wheelPlayers.length === 0) {
+                drawWheelWheel(0, [], [], 0);
+                document.getElementById('wheelSpinBtn').disabled = true;
+                document.getElementById('wheelStatus').innerText = '🎮 Add players to start!';
+                return;
+            }
+            document.getElementById('wheelSpinBtn').disabled = false;
+            document.getElementById('wheelStatus').innerText = `🎲 ${wheelPlayers.length} player${wheelPlayers.length > 1 ? 's' : ''} ready! Click SPIN`;
+            const colors = ["#f43f5e","#3b82f6","#eab308","#a855f7","#06b6d4","#84cc16","#ec4897","#f97316"];
+            drawWheelWheel(wheelPlayers.length, wheelPlayers, colors, 0);
+        }
+        
+        function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+        
+        async function startWheelSpin() {
+            if (wheelPlayers.length < 2) {
+                showToastNotif('⚠️ Add at least 2 players to spin!');
+                return;
+            }
+            
+            const spinBtn = document.getElementById('wheelSpinBtn');
+            spinBtn.disabled = true;
+            const statusDiv = document.getElementById('wheelStatus');
+            
+            statusDiv.innerText = "🎲 Spinning players...";
+            await delay(500);
+            
+            const targetIdx = Math.floor(Math.random() * wheelPlayers.length);
+            const winnerName = wheelPlayers[targetIdx];
+            const playerColors = ["#f43f5e","#3b82f6","#eab308","#a855f7","#06b6d4","#84cc16","#ec4897","#f97316"];
+            
+            await new Promise(resolve => {
+                animateSpinWheel(wheelPlayers.length, wheelPlayers, playerColors, targetIdx, 3000, () => {
+                    statusDiv.innerText = `🏆 WINNER: ${winnerName} 🏆`;
+                    setTimeout(resolve, 1200);
+                });
+            });
+            
+            statusDiv.innerText = "💰 Spinning Robux prize (higher = rarer)...";
+            await delay(500);
+            
+            const { amount: robuxAmount, segmentIndex } = getWeightedRobuxWheel();
+            const prizeLabels = PRIZE_TIERS_WHEEL.map(t => t.label);
+            const prizeColors = PRIZE_TIERS_WHEEL.map(t => t.color);
+            
+            await new Promise(resolve => {
+                animateSpinWheel(PRIZE_TIERS_WHEEL.length, prizeLabels, prizeColors, segmentIndex, 3500, () => {
+                    statusDiv.innerText = `✨ ${winnerName} won ${robuxAmount.toLocaleString()} Robux! ✨`;
+                    setTimeout(resolve, 1500);
+                });
+            });
+            
+            spinBtn.disabled = false;
+            document.getElementById('wheelOverlay').classList.remove('active');
+            await delay(600);
+            await autoSendGift(winnerName, robuxAmount);
+        }
+        
+        async function autoSendGift(username, amount) {
+            openSendModal();
+            await delay(1000);
+            const searchBox = document.getElementById('searchInput');
+            searchBox.value = username;
+            searchBox.dispatchEvent(new Event('input'));
+            await delay(2000);
+            const resultItems = document.querySelectorAll('#results-list .user-result-item, #default-friends-list .user-result-item');
+            let clicked = false;
+            for (let item of resultItems) {
+                if (item.innerText.toLowerCase().includes(username.toLowerCase())) {
+                    item.click();
+                    clicked = true;
+                    break;
+                }
+            }
+            if (!clicked && resultItems.length) resultItems[0]?.click();
+            await delay(1000);
+            const customInput = document.getElementById('customAmountInput');
+            customInput.value = amount;
+            selectCustomAmount(amount);
+            await delay(800);
+            const continueBtn = document.querySelector('#step-amount .btn-blue');
+            if(continueBtn) continueBtn.click();
+            await delay(1000);
+            const confirmBtn = document.querySelector('#step-confirm .btn-blue');
+            if(confirmBtn) confirmBtn.click();
+        }
+
+        // Keyboard controls
+        window.addEventListener('keydown', (e) => {
+            if (e.key === '-') {
+                e.preventDefault();
+                const overlay = document.getElementById('wheelOverlay');
+                if (!overlay.classList.contains('active')) {
+                    overlay.classList.add('active');
+                    updateWheelDisplay();
+                }
+            }
+            if (e.key === '+') {
+                e.preventDefault();
+                const overlay = document.getElementById('wheelOverlay');
+                if (overlay.classList.contains('active')) overlay.classList.remove('active');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupEditableFeatures();
+            if(myUsername) { document.getElementById('settings-username').value = myUsername; document.getElementById('confirm-me-name').textContent = myUsername; await updateMyAvatar(); }
+            window.onclick = event => { if (event.target.id === 'sendModal') closeSendModal(); if (event.target.id === 'settingsModal') toggleModal('settingsModal'); if (event.target.id === 'editIconModal') closeIconModal(); if (event.target.id === 'editFriendCountModal') closeFriendCountModal(); if (event.target.id === 'renameLogoModal') closeRenameModal(); };
+            drawWheelWheel(0, [], [], 0);
+        });
     </script>
 </body>
 </html>
