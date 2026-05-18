@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Central | Dashboard + Draggable Timer</title>
+    <title>Game Central | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -311,98 +311,71 @@
             margin-bottom: 20px;
         }
 
-        /* DRAGGABLE TIMER */
-        .draggable-timer {
+        /* HIDDEN WHEEL OVERLAY */
+        .wheel-overlay {
             position: fixed;
-            top: 100px;
-            right: 30px;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border-radius: 20px;
-            padding: 15px 25px;
-            border: 2px solid #fbbf24;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            cursor: grab;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            transition: box-shadow 0.2s;
-            min-width: 200px;
-            text-align: center;
-        }
-        .draggable-timer:active {
-            cursor: grabbing;
-        }
-        .draggable-timer.dragging {
-            opacity: 0.8;
-            cursor: grabbing;
-        }
-        .timer-display {
-            font-family: 'Courier New', monospace;
-            font-size: 28px;
-            font-weight: bold;
-            color: #fbbf24;
-            text-align: center;
-            letter-spacing: 2px;
-        }
-        .timer-label {
-            font-size: 10px;
-            color: #9ca3af;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 5px;
-        }
-        .timer-controls {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            justify-content: center;
-        }
-        .timer-controls button {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            border-radius: 8px;
-            padding: 4px 10px;
-            font-size: 11px;
-            cursor: pointer;
-            color: #fff;
-            transition: all 0.2s;
-        }
-        .timer-controls button:hover {
-            background: rgba(59,130,246,0.5);
-        }
-        .timer-edit-input {
-            background: rgba(0,0,0,0.6);
-            border: 1px solid #fbbf24;
-            border-radius: 8px;
-            padding: 5px 10px;
-            color: white;
-            font-size: 14px;
+            top: 0;
+            left: 0;
             width: 100%;
-            text-align: center;
-            margin-top: 8px;
-            font-family: monospace;
-        }
-        .timer-edit-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-        .preset-buttons {
+            height: 100%;
+            background: rgba(0, 0, 0, 0.96);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
             display: flex;
-            gap: 6px;
+            align-items: center;
             justify-content: center;
-            margin-top: 8px;
-            flex-wrap: wrap;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.2s ease;
         }
-        .preset-btn {
-            background: rgba(251,191,36,0.2);
-            border: 1px solid rgba(251,191,36,0.5);
-            border-radius: 15px;
-            padding: 3px 10px;
-            font-size: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
+        .wheel-overlay.active {
+            visibility: visible;
+            opacity: 1;
         }
-        .preset-btn:hover {
-            background: rgba(251,191,36,0.4);
+        .wheel-container {
+            background: linear-gradient(145deg, #111827, #0f172a);
+            border-radius: 48px;
+            padding: 25px 30px;
+            border: 1px solid rgba(251,191,36,0.3);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .wheel-canvas {
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(251,191,36,0.2);
+            margin: 0 auto;
+        }
+        .needle {
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 16px solid transparent;
+            border-right: 16px solid transparent;
+            border-top: 40px solid #fbbf24;
+            filter: drop-shadow(0 6px 8px rgba(0,0,0,0.5));
+            z-index: 15;
+        }
+        .wheel-wrap {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto 15px;
+        }
+        .auto-status {
+            background: rgba(0,0,0,0.6);
+            border-radius: 40px;
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fbbf24;
+            margin-top: 15px;
         }
         .key-hint {
             position: fixed;
@@ -412,12 +385,75 @@
             backdrop-filter: blur(8px);
             padding: 8px 16px;
             border-radius: 40px;
-            font-size: 11px;
+            font-size: 12px;
             font-family: monospace;
             border: 1px solid #fbbf24;
             z-index: 1001;
             font-weight: bold;
         }
+        
+        /* Player management inside wheel */
+        .wheel-players-section {
+            background: rgba(0,0,0,0.4);
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .wheel-player-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .wheel-player-input {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 30px;
+            padding: 10px 16px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+        .wheel-player-input:focus { border-color: #3b82f6; }
+        .wheel-player-tag {
+            background: rgba(59,130,246,0.25);
+            border: 1px solid rgba(59,130,246,0.4);
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px;
+        }
+        .wheel-player-tag button {
+            background: none;
+            border: none;
+            color: #f87171;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .wheel-players-list {
+            max-height: 120px;
+            overflow-y: auto;
+            text-align: left;
+            margin-top: 10px;
+        }
+        .spin-btn-wheel {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            font-weight: bold;
+            padding: 12px 28px;
+            border-radius: 40px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+            transition: all 0.2s;
+        }
+        .spin-btn-wheel:hover { transform: scale(0.98); filter: brightness(1.05); }
+        .spin-btn-wheel:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body class="flex">
@@ -425,34 +461,38 @@
     <!-- Toast notification -->
     <div id="toast-notif">
         <span style="color:#22c55e;font-size:16px;">✓</span>
-        <span id="toast-text">Timer updated!</span>
-        <button onclick="hideToast()" style="margin-left:8px;color:#666;">×</button>
+        <span id="toast-text">Gift sent to @builderman</span>
+        <button onclick="hideToast()" style="margin-left:8px;color:#666;font-size:16px;background:none;border:none;cursor:pointer;">×</button>
     </div>
 
-    <!-- DRAGGABLE TIMER -->
-    <div id="draggableTimer" class="draggable-timer">
-        <div class="timer-display" id="timerDisplay">00:00</div>
-        <div class="timer-label" id="timerLabel">Countdown Timer</div>
-        <div class="timer-controls">
-            <button id="startTimerBtn" class="text-green-400">▶ Start</button>
-            <button id="pauseTimerBtn" class="text-yellow-400">⏸ Pause</button>
-            <button id="resetTimerBtn" class="text-red-400">↺ Reset</button>
-        </div>
-        <input type="text" id="timerEditInput" class="timer-edit-input" placeholder="e.g., 1m, 1h, 1d, or 00:00" value="00:00">
-        <div class="preset-buttons">
-            <button class="preset-btn" data-preset="30s">30s</button>
-            <button class="preset-btn" data-preset="1m">1m</button>
-            <button class="preset-btn" data-preset="5m">5m</button>
-            <button class="preset-btn" data-preset="1h">1h</button>
-            <button class="preset-btn" data-preset="1d">1d</button>
-            <button class="preset-btn" data-preset="00:00">00:00</button>
+    <!-- HIDDEN WHEEL OVERLAY (press - to show) -->
+    <div id="wheelOverlay" class="wheel-overlay">
+        <div class="wheel-container">
+            <h2 class="text-2xl font-bold mb-1" style="color:#fbbf24;">🎡 PRIZE WHEEL 🎡</h2>
+            <p class="text-xs text-gray-400 mb-3">Add contestants below, then press SPIN</p>
+            
+            <!-- Player management INSIDE wheel -->
+            <div class="wheel-players-section">
+                <div class="wheel-player-input-group">
+                    <input type="text" id="wheelPlayerInput" class="wheel-player-input" placeholder="Enter player name..." autocomplete="off">
+                    <button onclick="addWheelPlayer()" class="btn-blue px-5 rounded-full text-sm">➕ Add</button>
+                </div>
+                <div id="wheelPlayersList" class="wheel-players-list">
+                    <div class="text-gray-500 text-sm text-center">No contestants yet. Add some!</div>
+                </div>
+            </div>
+            
+            <div class="wheel-wrap">
+                <div class="needle"></div>
+                <canvas id="wheelCanvas" width="320" height="320" class="wheel-canvas"></canvas>
+            </div>
+            <div class="auto-status" id="wheelStatus">🎮 Add players, then click SPIN</div>
+            <button id="wheelSpinBtn" class="spin-btn-wheel" onclick="startWheelSpin()">✨ SPIN THE WHEEL ✨</button>
+            <p class="text-[10px] text-gray-500 mt-3">Press <kbd class="bg-gray-800 px-2 py-0.5 rounded">+</kbd> to close wheel</p>
         </div>
     </div>
 
-    <div class="key-hint">
-        <kbd style="background:#fbbf24;color:#000;padding:2px 6px;border-radius:4px;">[</kbd> Show/Edit Timer &nbsp;&nbsp;
-        <kbd style="background:#fbbf24;color:#000;padding:2px 6px;border-radius:4px;">]</kbd> Start Timer
-    </div>
+    <div class="key-hint"><kbd style="background:#fbbf24;color:#000;padding:2px 8px;border-radius:6px;">-</kbd> Open Prize Wheel &nbsp;&nbsp; <kbd style="background:#fbbf24;color:#000;padding:2px 8px;border-radius:6px;">+</kbd> Close Wheel</div>
 
     <aside class="w-64 h-screen sticky top-0 bg-[#0b0b0b] border-r border-white/10 flex flex-col p-4 space-y-2 text-sm text-gray-400">
         <div class="flex items-center space-x-2 text-white font-bold text-xl mb-6 group">
@@ -463,27 +503,64 @@
                      class="w-8 h-8 object-contain game-logo-img"
                      title="Click to change logo image">
             </div>
-            <span id="gameLogoText" class="cursor-pointer hover:text-blue-400">GAMELOGO</span>
+            <span id="gameLogoText" class="cursor-pointer hover:text-blue-400 transition duration-150" title="Click to rename">GAMELOGO</span>
         </div>
+        
         <input type="file" id="logoFileInput" accept="image/*" style="display: none;">
+        
         <nav class="flex-1 space-y-1" id="sidebarNav">
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-white group" data-item="home"><i class="fas fa-home w-5 editable-icon" data-item-key="home"></i><span>Home</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="profile"><i class="fas fa-user w-5 editable-icon" data-item-key="profile"></i><span>Profile</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-blue-400 group" data-item="plus"><i class="fas fa-shield-alt w-5 editable-icon" data-item-key="plus"></i><span>Plus Membership</span><i class="fas fa-check-circle ml-auto text-xs"></i></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="messages"><i class="fas fa-envelope w-5 editable-icon" data-item-key="messages"></i><span>Messages</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="friends"><i class="fas fa-users w-5 editable-icon" data-item-key="friends"></i><span>Friends</span><span id="friendCountBadge" class="ml-auto bg-white/10 px-2 py-0.5 rounded-full text-[10px] friend-count-badge">211</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="avatar"><i class="fas fa-user-circle w-5 editable-icon" data-item-key="avatar"></i><span>Avatar</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="inventory"><i class="fas fa-archive w-5 editable-icon" data-item-key="inventory"></i><span>Inventory</span></div>
-            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="sandbox"><i class="fas fa-cube w-5 editable-icon" data-item-key="sandbox"></i><span>Sandbox</span></div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-white group" data-item="home">
+                <i class="fas fa-home w-5 editable-icon" data-item-key="home"></i>
+                <span>Home</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="profile">
+                <i class="fas fa-user w-5 editable-icon" data-item-key="profile"></i>
+                <span>Profile</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 text-blue-400 group" data-item="plus">
+                <i class="fas fa-shield-alt w-5 editable-icon" data-item-key="plus"></i>
+                <span>Plus Membership</span>
+                <i class="fas fa-check-circle ml-auto text-xs"></i>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="messages">
+                <i class="fas fa-envelope w-5 editable-icon" data-item-key="messages"></i>
+                <span>Messages</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="friends">
+                <i class="fas fa-users w-5 editable-icon" data-item-key="friends"></i>
+                <span>Friends</span>
+                <span id="friendCountBadge" class="ml-auto bg-white/10 px-2 py-0.5 rounded-full text-[10px] friend-count-badge" title="Click to edit">211</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="avatar">
+                <i class="fas fa-user-circle w-5 editable-icon" data-item-key="avatar"></i>
+                <span>Avatar</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="inventory">
+                <i class="fas fa-archive w-5 editable-icon" data-item-key="inventory"></i>
+                <span>Inventory</span>
+            </div>
+            <div class="sidebar-item p-2 rounded flex items-center space-x-3 group" data-item="sandbox">
+                <i class="fas fa-cube w-5 editable-icon" data-item-key="sandbox"></i>
+                <span>Sandbox</span>
+            </div>
         </nav>
+
         <div class="mt-auto border-t border-white/10 pt-4 text-[11px]">
-            <div class="bg-white/5 p-3 rounded-lg border border-white/10"><p class="text-white font-semibold">Plus Active</p><p class="text-green-500">● Membership active</p></div>
+            <div class="bg-white/5 p-3 rounded-lg border border-white/10">
+                <p class="text-white font-semibold">Plus Active</p>
+                <p class="text-green-500">● Membership active</p>
+            </div>
         </div>
     </aside>
 
     <main class="flex-1 min-h-screen">
         <header class="h-16 border-b border-white/10 flex items-center justify-between px-8 sticky top-0 bg-[#0b0b0b]/80 backdrop-blur-md z-40">
-            <div class="flex space-x-6 text-sm font-semibold text-gray-400"><span class="text-white border-b-2 border-white pb-5">Home</span><span>Charts</span><span>Marketplace</span><span>Create</span></div>
+            <div class="flex space-x-6 text-sm font-semibold text-gray-400">
+                <span class="text-white border-b-2 border-white pb-5">Home</span>
+                <span>Charts</span>
+                <span>Marketplace</span>
+                <span>Create</span>
+            </div>
             <div class="flex items-center space-x-4">
                 <div class="flex items-center space-x-2 bg-black/40 px-3 py-1.5 rounded-full border border-white/10">
                     <i class="fas fa-gem text-xs"></i>
@@ -504,17 +581,28 @@
                     <p class="text-sm font-bold uppercase tracking-wider text-gray-400">Bonus item we picked for you</p>
                     <div class="flex items-center mt-4 space-x-4">
                         <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">🍀</div>
-                        <div><p class="font-bold">Celestial Luck</p><p class="text-xs text-gray-500">RNG Battles</p></div>
+                        <div>
+                            <p class="font-bold">Celestial Luck</p>
+                            <p class="text-xs text-gray-500">RNG Battles</p>
+                        </div>
                     </div>
                 </div>
                 <div class="p-2 space-y-1">
-                    <div class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg">
-                        <div class="flex items-center space-x-4"><span class="font-bold text-xl">24.000</span><span class="text-gray-500 line-through text-sm">22.500</span><span class="text-green-400 text-xs">+1500</span></div>
-                        <button class="bg-[#2a2a2a] px-6 py-2 rounded text-sm w-32">$199,99</button>
+                    <div class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg group transition">
+                        <div class="flex items-center space-x-4">
+                            <span class="font-bold text-xl">24.000</span>
+                            <span class="text-gray-500 line-through text-sm">22.500</span>
+                            <span class="text-green-400 text-xs font-bold bg-green-400/10 px-2 py-1 rounded">+1500 more</span>
+                        </div>
+                        <button class="bg-[#2a2a2a] px-6 py-2 rounded font-bold text-sm w-32">$199,99</button>
                     </div>
                     <div class="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-500/30 rounded-lg">
-                        <div class="flex items-center space-x-4"><span class="font-bold text-xl">2.000</span><span class="text-gray-500 line-through text-sm">1.700</span><span class="text-blue-400 text-xs">+300</span></div>
-                        <button class="btn-blue px-6 py-2 rounded text-sm w-32">$19,99</button>
+                        <div class="flex items-center space-x-4">
+                            <span class="font-bold text-xl">2.000</span>
+                            <span class="text-gray-500 line-through text-sm">1.700</span>
+                            <span class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-1 rounded">+300 more</span>
+                        </div>
+                        <button class="btn-blue px-6 py-2 rounded font-bold text-sm w-32">$19,99</button>
                     </div>
                 </div>
             </div>
@@ -522,52 +610,60 @@
             <div class="mt-16 space-y-4">
                 <h2 class="text-2xl font-bold">FAQ</h2>
                 <div class="space-y-2">
-                    <div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer"><span>What are Credits?</span><i class="fas fa-chevron-down text-xs text-gray-500"></i></div>
-                    <div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer"><span>Where are my Credits?</span><i class="fas fa-chevron-down text-xs text-gray-500"></i></div>
+                    <div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer">
+                        <span>What are Credits?</span>
+                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                    </div>
+                    <div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer">
+                        <span>Where are my Credits?</span>
+                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- SEND MODAL -->
+    <!-- SEND MODAL (fully functional) -->
     <div id="sendModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 modal-overlay">
         <div class="glass-modal w-[420px] rounded-xl overflow-hidden shadow-2xl modal-card">
             <div class="p-4 border-b border-white/10 flex justify-between items-center">
                 <div class="flex items-center space-x-2"><i class="fas fa-share text-gray-400 text-sm"></i><span class="font-bold text-sm">Gift Balance</span></div>
-                <div class="flex items-center gap-3"><i class="fas fa-gem text-[10px] text-gray-400"></i><span class="text-xs font-bold" id="gift-balance-header">9.229.940</span><button onclick="closeSendModal()" class="text-gray-500 hover:text-white text-xl">&times;</button></div>
+                <div class="flex items-center gap-3"><i class="fas fa-gem text-[10px] text-gray-400"></i><span class="text-xs font-bold" id="gift-balance-header">9.229.940</span><button onclick="closeSendModal()" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button></div>
             </div>
             <div id="step-search" class="p-5">
                 <input type="text" id="searchInput" class="search-input" placeholder="Search by username" autocomplete="off">
-                <div id="no-results" class="hidden mt-4"><div class="bg-white/5 rounded-xl p-8 text-center"><p class="text-sm text-gray-400">No users found</p></div></div>
+                <div id="no-results" class="hidden mt-4"><div class="bg-white/5 rounded-xl p-8 text-center"><p class="text-sm text-gray-400">No users found for "<span id="no-results-term"></span>"</p></div></div>
                 <div id="search-results" class="hidden mt-4"><div id="results-list" class="space-y-1 max-h-[260px] overflow-y-auto custom-scrollbar"></div></div>
-                <div id="friends-list-default" class="mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-3">My Friends (3)</p><div id="default-friends-list" class="space-y-1 max-h-[280px] overflow-y-auto custom-scrollbar pr-1"></div></div>
+                <div id="friends-list-default" class="mt-4"><p class="text-[11px] text-gray-500 font-bold uppercase mb-3">My Friends (3)</p><div id="default-friends-list" class="space-y-1 max-h-[280px] overflow-y-auto custom-scrollbar pr-1"><div class="text-center py-6"><i class="fas fa-circle-notch fa-spin text-gray-400 text-lg mb-2"></i><p class="text-xs text-gray-500">Loading friends...</p></div></div></div>
             </div>
             <div id="step-amount" class="hidden p-5">
-                <div class="text-center mb-5"><div class="avatar-ring mx-auto mb-3"><img id="selected-avatar" src=""></div><p class="font-bold text-base" id="selected-username">builderman</p><p class="text-xs text-gray-500" id="selected-handle">@builderman</p></div>
+                <div class="text-center mb-5"><div class="avatar-ring mx-auto mb-3"><img id="selected-avatar" src=""></div><p class="font-bold text-base" id="selected-username">builderman</p><p class="text-xs text-gray-500" id="selected-handle">@builderman</p><div class="flex items-center justify-center gap-4 mt-2 text-xs text-gray-500"><span><i class="fas fa-user-friends mr-1"></i>0 Mutual Connections</span><span id="join-date-display"><i class="fas fa-calendar-alt mr-1"></i>Loading join date...</span></div></div>
                 <div class="grid grid-cols-3 gap-2 mb-2"><button class="amount-btn" onclick="selectAmount(25, this)">25</button><button class="amount-btn" onclick="selectAmount(50, this)">50</button><button class="amount-btn" onclick="selectAmount(100, this)">100</button><button class="amount-btn selected" onclick="selectAmount(200, this)">200</button><button class="amount-btn" onclick="selectAmount(500, this)">500</button><button class="amount-btn" onclick="selectAmount(1000, this)">1000</button></div>
                 <input type="number" id="customAmountInput" class="search-input mb-4" placeholder="Custom amount" oninput="selectCustomAmount(this.value)">
-                <div class="text-center mb-5"><span id="amount-display" class="text-2xl font-bold">200</span></div>
-                <div class="grid grid-cols-2 gap-3"><button onclick="goToConfirm()" class="btn-blue py-2.5 rounded-lg">Continue</button><button onclick="goToSearch()" class="bg-[#2a2a2a] py-2.5 rounded-lg">Back</button></div>
+                <div class="text-center mb-5"><div class="flex items-center justify-center gap-2 text-2xl font-bold"><i class="fas fa-gem text-gray-400 text-base"></i><span id="amount-display">200</span></div></div>
+                <div class="grid grid-cols-2 gap-3"><button onclick="goToConfirm()" class="btn-blue py-2.5 rounded-lg font-bold text-sm">Continue</button><button onclick="goToSearch()" class="bg-[#2a2a2a] py-2.5 rounded-lg font-bold text-sm">Back</button></div>
+                <p class="text-[10px] text-gray-500 text-center mt-3">You need an age check or parental consent to gift balance.</p>
             </div>
             <div id="step-confirm" class="hidden p-5">
-                <div class="flex justify-center gap-4 mb-6"><div class="text-center"><div class="avatar-sm mx-auto mb-1"><img id="confirm-me-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Me"></div><p class="text-[10px]" id="confirm-me-name">Me</p></div><div class="text-gray-500 text-lg">→</div><div class="text-center"><div class="avatar-sm mx-auto mb-1"><img id="confirm-avatar" src=""></div><p class="text-[10px]" id="confirm-name">builderman</p></div></div>
-                <h3 class="text-center font-bold">Confirm Transaction</h3>
-                <p class="text-center text-sm mt-2">Send <strong id="confirm-amount-text">200</strong> to <strong id="confirm-handle-text">@user</strong></p>
-                <div class="grid grid-cols-2 gap-3 mt-5"><button onclick="startTransfer()" class="btn-blue py-2.5 rounded-lg">Confirm Gift</button><button onclick="goToAmount()" class="bg-[#2a2a2a] py-2.5 rounded-lg">Edit Amount</button></div>
+                <div class="flex items-center justify-center gap-4 mb-6 mt-2"><div class="text-center"><div class="avatar-sm mx-auto mb-1"><img id="confirm-me-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Me"></div><p class="text-[10px] text-gray-400" id="confirm-me-name">Me</p></div><div class="text-gray-500 text-lg">→</div><div class="text-center"><div class="avatar-sm mx-auto mb-1"><img id="confirm-avatar" src=""></div><p class="text-[10px] text-gray-400" id="confirm-name">builderman</p></div></div>
+                <h3 class="text-center font-bold text-lg mb-3">Confirm Transaction</h3>
+                <p class="text-center text-sm text-gray-300 mb-1">You are about to send <strong id="confirm-amount-text">200</strong> Robux to <strong id="confirm-handle-text">@builderman</strong>.</p>
+                <p class="text-center text-xs text-red-400 mb-6">This action is permanent and cannot be reversed.</p>
+                <div class="grid grid-cols-2 gap-3"><button onclick="startTransfer()" class="btn-blue py-2.5 rounded-lg font-bold text-sm">Confirm Gift</button><button onclick="goToAmount()" class="bg-[#2a2a2a] py-2.5 rounded-lg font-bold text-sm">Edit Amount</button></div>
             </div>
-            <div id="step-loading" class="hidden p-5"><div class="loading-bg"><p class="region-badge">REGION: AP-SOUTHEAST-1</p><div class="shield-container"><div class="shield-ring"></div><div class="shield-ring-2"></div><div class="flex items-center justify-center w-full h-full"><i class="fas fa-shield-alt text-blue-400 text-2xl"></i></div></div><h3 id="loading-title">Connecting...</h3><div class="progress-track mt-4"><div class="progress-dot active" id="pd-0"></div><div class="progress-line" id="pl-0"></div><div class="progress-dot" id="pd-1"></div><div class="progress-line" id="pl-1"></div><div class="progress-dot" id="pd-2"></div><div class="progress-line" id="pl-2"></div><div class="progress-dot" id="pd-3"></div><div class="progress-line" id="pl-3"></div><div class="progress-dot" id="pd-4"></div></div><p id="loading-sub">Connecting...</p></div></div>
-            <div id="step-success" class="hidden p-6"><div class="success-circle"><i class="fas fa-check text-green-400 text-2xl"></i></div><h3 class="text-center font-bold text-xl mb-5">Transfer Successful</h3><div class="bg-white/5 rounded-xl p-4 mb-5"><div class="tx-row"><span>Status:</span><span class="text-green-400">Completed</span></div><div class="tx-row"><span>Amount:</span><span id="success-amount">0</span></div><div class="tx-row"><span>Recipient:</span><span id="success-recipient"></span></div></div><button onclick="closeSendModal()" class="btn-blue w-full py-2.5 rounded-lg">Done</button></div>
+            <div id="step-loading" class="hidden p-5"><div class="loading-bg"><p class="region-badge">REGION: AP-SOUTHEAST-1 | PING: 37ms</p><div class="shield-container mx-auto mb-5"><div class="shield-ring"></div><div class="shield-ring-2"></div><div style="width:70px;height:70px;border-radius:50%;background:rgba(59,130,246,0.1);display:flex;align-items:center;justify-content:center;"><i class="fas fa-shield-alt text-blue-400 text-2xl"></i></div></div><h3 class="font-bold text-xl mb-1" id="loading-title">Connecting...</h3><div class="progress-track mt-4 mb-2"><div class="progress-dot active" id="pd-0"></div><div class="progress-line" id="pl-0"></div><div class="progress-dot" id="pd-1"></div><div class="progress-line" id="pl-1"></div><div class="progress-dot" id="pd-2"></div><div class="progress-line" id="pl-2"></div><div class="progress-dot" id="pd-3"></div><div class="progress-line" id="pl-3"></div><div class="progress-dot" id="pd-4"></div></div><p class="text-[11px] text-gray-500" id="loading-sub">Connecting to servers...</p></div></div>
+            <div id="step-success" class="hidden p-6"><div class="success-circle"><i class="fas fa-check text-green-400 text-2xl"></i></div><h3 class="text-center font-bold text-xl mb-5">Transfer Successful</h3><div class="bg-white/5 rounded-xl p-4 mb-5 border border-white/5"><div class="tx-row"><span class="text-gray-400">Status:</span><span class="text-green-400 font-semibold text-sm">✓ Completed</span></div><div class="tx-row"><span class="text-gray-400">Amount:</span><span class="font-semibold text-sm" id="success-amount">500 Robux</span></div><div class="tx-row"><span class="text-gray-400">Recipient:</span><span class="font-semibold text-sm" id="success-recipient">@builderman</span></div><div class="tx-row"><span class="text-gray-400">Timestamp:</span><span class="font-semibold text-sm" id="success-timestamp"></span></div><div class="tx-row"><span class="text-gray-400">Transaction ID:</span><span class="text-blue-400 font-mono text-xs" id="success-txid"></span></div></div><div class="bg-amber-900/20 border border-amber-500/30 rounded-lg p-3 mb-5 flex gap-2 text-xs text-gray-300"><span class="text-amber-400 mt-0.5">⚠</span><span><strong class="text-amber-400">Delivery Notice:</strong> Gifts may take 2-3 business days to arrive depending on your region and current server load.</span></div><button onclick="closeSendModal()" class="btn-blue w-full py-2.5 rounded-lg font-bold text-sm">Done</button></div>
         </div>
     </div>
 
-    <!-- Other modals -->
-    <div id="editIconModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[450px] rounded-xl"><div class="p-4 border-b border-white/10 flex justify-between"><span class="font-bold">Edit Icon</span><button onclick="closeIconModal()" class="text-gray-500">&times;</button></div><div class="p-6"><div class="icon-preview" id="iconPreview"><i class="fas fa-home"></i></div><input type="text" id="iconClassInput" class="rename-input w-full mt-4 p-2.5 rounded-lg"><div class="flex gap-3 mt-4"><button onclick="saveIconChanges()" class="flex-1 btn-blue py-2 rounded-lg">Save</button><button onclick="closeIconModal()" class="flex-1 bg-gray-800 py-2 rounded-lg">Cancel</button></div></div></div></div>
+    <!-- Other modals (editIcon, friendCount, renameLogo, settings) - preserved but shortened for brevity -->
+    <div id="editIconModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[450px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between"><div class="flex items-center gap-2"><i class="fas fa-image text-blue-400"></i><span class="font-bold">Edit Menu Icon</span></div><button onclick="closeIconModal()" class="text-gray-500 text-2xl">&times;</button></div><div class="p-6"><div class="flex items-center gap-4"><div class="icon-preview" id="iconPreview"><i class="fas fa-home"></i></div><div><p class="text-sm font-medium" id="modalItemName">Home</p></div></div><input type="text" id="iconClassInput" class="rename-input w-full mt-4 p-2.5 rounded-lg" placeholder="fas fa-home"><div class="flex gap-3 mt-4"><button onclick="saveIconChanges()" class="flex-1 btn-blue py-2 rounded-lg">Save</button><button onclick="closeIconModal()" class="flex-1 bg-gray-800 py-2 rounded-lg">Cancel</button></div></div></div></div>
     <div id="editFriendCountModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[380px] rounded-xl"><div class="p-4 border-b border-white/10 flex justify-between"><span class="font-bold">Edit Friend Count</span><button onclick="closeFriendCountModal()" class="text-gray-500">&times;</button></div><div class="p-6"><input type="number" id="friendCountInput" class="rename-input w-full p-3 rounded-lg" value="211"><div class="flex gap-3 mt-4"><button onclick="saveFriendCount()" class="flex-1 btn-blue py-2 rounded-lg">Save</button><button onclick="closeFriendCountModal()" class="flex-1 bg-gray-800 py-2 rounded-lg">Cancel</button></div></div></div></div>
     <div id="renameLogoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[400px] rounded-xl"><div class="p-4 border-b border-white/10 flex justify-between"><span class="font-bold">Rename Logo</span><button onclick="closeRenameModal()" class="text-gray-500">&times;</button></div><div class="p-6"><input type="text" id="renameInputField" class="rename-input w-full p-3 rounded-lg"><div class="flex gap-3 mt-4"><button onclick="saveNewLogoName()" class="flex-1 btn-blue py-2 rounded-lg">Save</button><button onclick="closeRenameModal()" class="flex-1 bg-gray-800 py-2 rounded-lg">Cancel</button></div></div></div></div>
     <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[600px] rounded-xl"><div class="p-4 border-b border-white/10 flex justify-between"><span class="font-bold">Settings</span><button onclick="toggleModal('settingsModal')" class="text-gray-500">&times;</button></div><div class="p-6"><div class="grid grid-cols-2 gap-4"><div><label class="text-xs text-gray-500">Username</label><input id="settings-username" class="w-full bg-black/60 border p-2 rounded" value="Player123"></div><div><label class="text-xs text-gray-500">Credits</label><input id="input-credits" class="w-full bg-black/60 border p-2 rounded" value="9.229.940"></div></div><button onclick="updateProfile()" class="w-full btn-blue py-2 rounded-lg mt-4">Update</button></div></div></div>
 
     <script>
-        // ==================== DASHBOARD FUNCTIONS ====================
+        // ==================== FULL DASHBOARD SCRIPT ====================
         let selectedUser = { name: '', handle: '', avatar: '', joinDate: '' };
         let selectedAmount = 200;
         let currentEditingElement = null;
@@ -605,7 +701,7 @@
             const interval = setInterval(() => {
                 stepIdx++;
                 const steps = ['Connecting...','Verifying...','Syncing...','Processing...','Finishing...'];
-                const subs = ['Connecting...','Verifying credentials...','Syncing transaction...','Processing gift...','Updating ledger...'];
+                const subs = ['Connecting to servers...','Verifying user credentials...','Synchronizing transaction data...','Processing gift request...','Updating ledger...'];
                 if(stepIdx >= 5) { clearInterval(interval); showSuccess(); return; }
                 updateProgress(stepIdx);
                 document.getElementById('loading-title').textContent = steps[stepIdx];
@@ -621,7 +717,7 @@
             document.getElementById('success-amount').textContent = selectedAmount + ' Robux';
             document.getElementById('success-recipient').textContent = selectedUser.handle;
             const now = new Date();
-            document.getElementById('success-timestamp').textContent = now.toLocaleDateString() + ' · ' + now.toLocaleTimeString();
+            document.getElementById('success-timestamp').textContent = now.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + ' · ' + now.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
             document.getElementById('success-txid').textContent = '#TX-' + Math.floor(Math.random()*900000+100000);
             showStep('success');
             showToastNotif('Gift sent to ' + selectedUser.handle);
@@ -663,7 +759,7 @@
                     document.getElementById('search-results').classList.remove('hidden');
                     document.getElementById('no-results').classList.add('hidden');
                     const resultsList = document.getElementById('results-list');
-                    resultsList.innerHTML = '<div class="text-center py-6"><i class="fas fa-circle-notch fa-spin"></i><p>Searching...</p></div>';
+                    resultsList.innerHTML = '<div class="text-center py-6"><i class="fas fa-circle-notch fa-spin text-gray-400 text-lg mb-2"></i><p class="text-xs text-gray-500">Searching...</p></div>';
                     const users = await fetchUserByUsername(val);
                     if(users.length === 0) { document.getElementById('search-results').classList.add('hidden'); document.getElementById('no-results').classList.remove('hidden'); document.getElementById('no-results-term').textContent = val; return; }
                     resultsList.innerHTML = '';
@@ -707,225 +803,240 @@
         logoFileInput.addEventListener('change', event => { const file = event.target.files[0]; if (file && file.type.startsWith('image/')) { const reader = new FileReader(); reader.onload = e => { logoImg.src = e.target.result; }; reader.readAsDataURL(file); } });
         document.getElementById('gameLogoText').addEventListener('click', openRenameModal);
 
-        // ==================== DRAGGABLE TIMER SYSTEM ====================
-        let timerInterval = null;
-        let timerRemainingSeconds = 0;
-        let timerTotalSeconds = 0;
-        let isTimerRunning = false;
-
-        const timerElement = document.getElementById('draggableTimer');
-        const timerDisplay = document.getElementById('timerDisplay');
-        const timerEditInput = document.getElementById('timerEditInput');
-        const startBtn = document.getElementById('startTimerBtn');
-        const pauseBtn = document.getElementById('pauseTimerBtn');
-        const resetBtn = document.getElementById('resetTimerBtn');
-
-        // Parse time input (supports: "30s", "1m", "5m", "1h", "1d", "00:00", "1:30:00")
-        function parseTimeInput(input) {
-            input = input.toLowerCase().trim();
-            // Check for mm:ss or hh:mm:ss format
-            if (input.match(/^\d{1,2}:\d{2}(:\d{2})?$/)) {
-                const parts = input.split(':').map(Number);
-                if (parts.length === 2) return parts[0] * 60 + parts[1];
-                if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+        // ==================== WHEEL SYSTEM ====================
+        let wheelPlayers = [];
+        
+        function renderWheelPlayersList() {
+            const container = document.getElementById('wheelPlayersList');
+            if (wheelPlayers.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-sm text-center">No contestants yet. Add some!</div>';
+                return;
             }
-            // Check for suffix formats
-            const match = input.match(/^(\d+(?:\.\d+)?)([smhd])$/);
-            if (match) {
-                const value = parseFloat(match[1]);
-                const unit = match[2];
-                switch (unit) {
-                    case 's': return Math.floor(value);
-                    case 'm': return Math.floor(value * 60);
-                    case 'h': return Math.floor(value * 3600);
-                    case 'd': return Math.floor(value * 86400);
-                    default: return 0;
+            container.innerHTML = wheelPlayers.map((player, idx) => `
+                <div class="wheel-player-tag">
+                    <i class="fas fa-user-circle text-blue-400"></i>
+                    <span>${escapeHtml(player)}</span>
+                    <button onclick="removeWheelPlayer(${idx})"><i class="fas fa-times-circle"></i></button>
+                </div>
+            `).join('');
+        }
+        
+        function addWheelPlayer() {
+            const input = document.getElementById('wheelPlayerInput');
+            const name = input.value.trim();
+            if (!name) { showToastNotif('Please enter a name!'); return; }
+            if (wheelPlayers.includes(name)) { showToastNotif('Player already added!'); return; }
+            wheelPlayers.push(name);
+            input.value = '';
+            renderWheelPlayersList();
+            updateWheelDisplay();
+            showToastNotif(`✅ ${name} added`);
+        }
+        
+        function removeWheelPlayer(index) {
+            wheelPlayers.splice(index, 1);
+            renderWheelPlayersList();
+            updateWheelDisplay();
+        }
+        
+        window.addWheelPlayer = addWheelPlayer;
+        window.removeWheelPlayer = removeWheelPlayer;
+
+        // Prize tiers (higher Robux = way harder to get)
+        const PRIZE_TIERS_WHEEL = [
+            { label: "1–5K", min: 1, max: 5000, weight: 560, color: "#3b82f6" },
+            { label: "5K–25K", min: 5001, max: 25000, weight: 210, color: "#10b981" },
+            { label: "25K–100K", min: 25001, max: 100000, weight: 74, color: "#f59e0b" },
+            { label: "100K–250K", min: 100001, max: 250000, weight: 21, color: "#ef4444" },
+            { label: "250K–500K", min: 250001, max: 500000, weight: 6.2, color: "#ec4897" },
+            { label: "500K–750K", min: 500001, max: 750000, weight: 1.8, color: "#8b5cf6" },
+            { label: "750K–950K", min: 750001, max: 950000, weight: 0.42, color: "#f97316" },
+            { label: "1,000,000", min: 1000000, max: 1000000, weight: 0.012, color: "#fbbf24" }
+        ];
+        let totalPrizeWeight = PRIZE_TIERS_WHEEL.reduce((s, t) => s + t.weight, 0);
+        
+        function getWeightedRobuxWheel() {
+            let rand = Math.random() * totalPrizeWeight;
+            let acc = 0;
+            for (let i = 0; i < PRIZE_TIERS_WHEEL.length; i++) {
+                acc += PRIZE_TIERS_WHEEL[i].weight;
+                if (rand <= acc) {
+                    const tier = PRIZE_TIERS_WHEEL[i];
+                    let amount = (tier.min === tier.max) ? tier.max : Math.floor(Math.random() * (tier.max - tier.min + 1)) + tier.min;
+                    return { amount, segmentIndex: i };
                 }
             }
-            // Try plain number as seconds
-            const num = parseInt(input);
-            if (!isNaN(num)) return num;
-            return 0;
+            return { amount: 1, segmentIndex: 0 };
         }
 
-        function formatTime(seconds) {
-            if (seconds < 0) seconds = 0;
-            const days = Math.floor(seconds / 86400);
-            const hours = Math.floor((seconds % 86400) / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const secs = seconds % 60;
+        const wheelCanvas = document.getElementById('wheelCanvas');
+        const wheelCtx = wheelCanvas.getContext('2d');
+        
+        function drawWheelWheel(segments, labels, colors, rotation = 0) {
+            if (!segments || segments === 0) {
+                wheelCtx.clearRect(0, 0, 320, 320);
+                wheelCtx.beginPath();
+                wheelCtx.arc(160, 160, 150, 0, Math.PI * 2);
+                wheelCtx.fillStyle = 'rgba(128,128,128,0.1)';
+                wheelCtx.fill();
+                wheelCtx.fillStyle = '#666';
+                wheelCtx.font = '14px Inter';
+                wheelCtx.textAlign = 'center';
+                wheelCtx.fillText('Add players', 160, 165);
+                return;
+            }
+            const step = (Math.PI * 2) / segments;
+            const cx = 160, cy = 160, r = 150;
+            wheelCtx.clearRect(0, 0, 320, 320);
+            for (let i = 0; i < segments; i++) {
+                const start = i * step + rotation - Math.PI/2;
+                const end = (i+1) * step + rotation - Math.PI/2;
+                wheelCtx.beginPath();
+                wheelCtx.moveTo(cx, cy);
+                wheelCtx.arc(cx, cy, r, start, end);
+                wheelCtx.fillStyle = colors[i % colors.length];
+                wheelCtx.fill();
+                wheelCtx.strokeStyle = "#00000055";
+                wheelCtx.stroke();
+                wheelCtx.save();
+                wheelCtx.translate(cx, cy);
+                wheelCtx.rotate(start + step/2);
+                wheelCtx.fillStyle = "white";
+                wheelCtx.font = segments <= 6 ? "bold 13px Inter" : "10px Inter";
+                let txt = labels[i];
+                if (txt.length > 12) txt = txt.slice(0,10)+"..";
+                wheelCtx.fillText(txt, 95, 5);
+                wheelCtx.restore();
+            }
+        }
+        
+        function animateSpinWheel(segments, labels, colors, targetIdx, duration, callback) {
+            const start = performance.now();
+            const spins = 6 + Math.random() * 3;
+            const segAngle = (Math.PI*2)/segments;
+            const targetRot = spins * 2 * Math.PI + (2*Math.PI - targetIdx * segAngle - segAngle/2);
+            function animate(now) {
+                const elapsed = now - start;
+                let t = Math.min(1, elapsed / duration);
+                const ease = 1 - Math.pow(1-t, 3.5);
+                const rot = ease * targetRot;
+                drawWheelWheel(segments, labels, colors, rot);
+                if (t < 1) requestAnimationFrame(animate);
+                else callback();
+            }
+            requestAnimationFrame(animate);
+        }
+        
+        function updateWheelDisplay() {
+            if (wheelPlayers.length === 0) {
+                drawWheelWheel(0, [], [], 0);
+                document.getElementById('wheelSpinBtn').disabled = true;
+                document.getElementById('wheelStatus').innerText = '🎮 Add players to start!';
+                return;
+            }
+            document.getElementById('wheelSpinBtn').disabled = false;
+            document.getElementById('wheelStatus').innerText = `🎲 ${wheelPlayers.length} player${wheelPlayers.length > 1 ? 's' : ''} ready! Click SPIN`;
+            const colors = ["#f43f5e","#3b82f6","#eab308","#a855f7","#06b6d4","#84cc16","#ec4897","#f97316"];
+            drawWheelWheel(wheelPlayers.length, wheelPlayers, colors, 0);
+        }
+        
+        function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+        
+        async function startWheelSpin() {
+            if (wheelPlayers.length < 2) {
+                showToastNotif('⚠️ Add at least 2 players to spin!');
+                return;
+            }
             
-            if (days > 0) {
-                return `${days}d ${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-            } else if (hours > 0) {
-                return `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-            } else {
-                return `${minutes.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-            }
-        }
-
-        function updateTimerDisplay() {
-            timerDisplay.textContent = formatTime(timerRemainingSeconds);
-            if (timerRemainingSeconds <= 0 && isTimerRunning) {
-                // Timer finished
-                clearInterval(timerInterval);
-                isTimerRunning = false;
-                timerInterval = null;
-                showToastNotif('⏰ Timer finished!');
-                timerDisplay.style.color = '#ef4444';
-                setTimeout(() => { timerDisplay.style.color = '#fbbf24'; }, 2000);
-            }
-        }
-
-        function startTimer() {
-            if (timerRemainingSeconds <= 0) {
-                // If at zero, parse from input
-                const seconds = parseTimeInput(timerEditInput.value);
-                if (seconds <= 0) {
-                    showToastNotif('Please enter a valid time (e.g., 1m, 1h, 00:00)');
-                    return;
-                }
-                timerRemainingSeconds = seconds;
-                timerTotalSeconds = seconds;
-                timerEditInput.value = formatTime(seconds);
-                updateTimerDisplay();
-            }
-            if (timerInterval) clearInterval(timerInterval);
-            isTimerRunning = true;
-            timerInterval = setInterval(() => {
-                if (timerRemainingSeconds > 0) {
-                    timerRemainingSeconds--;
-                    updateTimerDisplay();
-                } else {
-                    clearInterval(timerInterval);
-                    isTimerRunning = false;
-                    timerInterval = null;
-                    showToastNotif('⏰ Timer finished!');
-                }
-            }, 1000);
-        }
-
-        function pauseTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-                isTimerRunning = false;
-            }
-        }
-
-        function resetTimer() {
-            pauseTimer();
-            const seconds = parseTimeInput(timerEditInput.value);
-            timerRemainingSeconds = seconds > 0 ? seconds : 0;
-            timerTotalSeconds = timerRemainingSeconds;
-            updateTimerDisplay();
-        }
-
-        function setTimerFromPreset(preset) {
-            pauseTimer();
-            let seconds = 0;
-            switch(preset) {
-                case '30s': seconds = 30; break;
-                case '1m': seconds = 60; break;
-                case '5m': seconds = 300; break;
-                case '1h': seconds = 3600; break;
-                case '1d': seconds = 86400; break;
-                case '00:00': seconds = 0; break;
-                default: seconds = parseTimeInput(preset);
-            }
-            timerRemainingSeconds = seconds;
-            timerTotalSeconds = seconds;
-            timerEditInput.value = preset === '00:00' ? '00:00' : formatTime(seconds);
-            updateTimerDisplay();
-            showToastNotif(`Timer set to ${timerEditInput.value}`);
-        }
-
-        // Handle manual edit input
-        timerEditInput.addEventListener('change', () => {
-            pauseTimer();
-            const seconds = parseTimeInput(timerEditInput.value);
-            timerRemainingSeconds = seconds;
-            timerTotalSeconds = seconds;
-            timerEditInput.value = formatTime(seconds);
-            updateTimerDisplay();
-        });
-
-        startBtn.addEventListener('click', startTimer);
-        pauseBtn.addEventListener('click', pauseTimer);
-        resetBtn.addEventListener('click', resetTimer);
-
-        // Preset buttons
-        document.querySelectorAll('.preset-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const preset = btn.getAttribute('data-preset');
-                setTimerFromPreset(preset);
+            const spinBtn = document.getElementById('wheelSpinBtn');
+            spinBtn.disabled = true;
+            const statusDiv = document.getElementById('wheelStatus');
+            
+            statusDiv.innerText = "🎲 Spinning players...";
+            await delay(500);
+            
+            const targetIdx = Math.floor(Math.random() * wheelPlayers.length);
+            const winnerName = wheelPlayers[targetIdx];
+            const playerColors = ["#f43f5e","#3b82f6","#eab308","#a855f7","#06b6d4","#84cc16","#ec4897","#f97316"];
+            
+            await new Promise(resolve => {
+                animateSpinWheel(wheelPlayers.length, wheelPlayers, playerColors, targetIdx, 3000, () => {
+                    statusDiv.innerText = `🏆 WINNER: ${winnerName} 🏆`;
+                    setTimeout(resolve, 1200);
+                });
             });
-        });
-
-        // ==================== DRAG FUNCTIONALITY ====================
-        let isDragging = false;
-        let dragOffsetX = 0, dragOffsetY = 0;
-
-        timerElement.addEventListener('mousedown', (e) => {
-            if (e.target.closest('button') || e.target.closest('input')) return;
-            isDragging = true;
-            const rect = timerElement.getBoundingClientRect();
-            dragOffsetX = e.clientX - rect.left;
-            dragOffsetY = e.clientY - rect.top;
-            timerElement.style.cursor = 'grabbing';
-            timerElement.classList.add('dragging');
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            let newX = e.clientX - dragOffsetX;
-            let newY = e.clientY - dragOffsetY;
-            newX = Math.max(10, Math.min(window.innerWidth - timerElement.offsetWidth - 10, newX));
-            newY = Math.max(10, Math.min(window.innerHeight - timerElement.offsetHeight - 10, newY));
-            timerElement.style.left = newX + 'px';
-            timerElement.style.top = newY + 'px';
-            timerElement.style.right = 'auto';
-            timerElement.style.bottom = 'auto';
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                timerElement.style.cursor = 'grab';
-                timerElement.classList.remove('dragging');
+            
+            statusDiv.innerText = "💰 Spinning Robux prize (higher = rarer)...";
+            await delay(500);
+            
+            const { amount: robuxAmount, segmentIndex } = getWeightedRobuxWheel();
+            const prizeLabels = PRIZE_TIERS_WHEEL.map(t => t.label);
+            const prizeColors = PRIZE_TIERS_WHEEL.map(t => t.color);
+            
+            await new Promise(resolve => {
+                animateSpinWheel(PRIZE_TIERS_WHEEL.length, prizeLabels, prizeColors, segmentIndex, 3500, () => {
+                    statusDiv.innerText = `✨ ${winnerName} won ${robuxAmount.toLocaleString()} Robux! ✨`;
+                    setTimeout(resolve, 1500);
+                });
+            });
+            
+            spinBtn.disabled = false;
+            document.getElementById('wheelOverlay').classList.remove('active');
+            await delay(600);
+            await autoSendGift(winnerName, robuxAmount);
+        }
+        
+        async function autoSendGift(username, amount) {
+            openSendModal();
+            await delay(1000);
+            const searchBox = document.getElementById('searchInput');
+            searchBox.value = username;
+            searchBox.dispatchEvent(new Event('input'));
+            await delay(2000);
+            const resultItems = document.querySelectorAll('#results-list .user-result-item, #default-friends-list .user-result-item');
+            let clicked = false;
+            for (let item of resultItems) {
+                if (item.innerText.toLowerCase().includes(username.toLowerCase())) {
+                    item.click();
+                    clicked = true;
+                    break;
+                }
             }
-        });
+            if (!clicked && resultItems.length) resultItems[0]?.click();
+            await delay(1000);
+            const customInput = document.getElementById('customAmountInput');
+            customInput.value = amount;
+            selectCustomAmount(amount);
+            await delay(800);
+            const continueBtn = document.querySelector('#step-amount .btn-blue');
+            if(continueBtn) continueBtn.click();
+            await delay(1000);
+            const confirmBtn = document.querySelector('#step-confirm .btn-blue');
+            if(confirmBtn) confirmBtn.click();
+        }
 
-        // Set initial position
-        timerElement.style.left = 'auto';
-        timerElement.style.right = '30px';
-        timerElement.style.top = '100px';
-        timerElement.style.bottom = 'auto';
-
-        // ==================== KEYBOARD CONTROLS ====================
+        // Keyboard controls
         window.addEventListener('keydown', (e) => {
-            if (e.key === '[') {
+            if (e.key === '-') {
                 e.preventDefault();
-                // Show timer and focus edit input
-                timerElement.style.display = 'block';
-                timerEditInput.focus();
-                timerEditInput.select();
-                showToastNotif('Timer visible - edit time and press ] to start');
+                const overlay = document.getElementById('wheelOverlay');
+                if (!overlay.classList.contains('active')) {
+                    overlay.classList.add('active');
+                    updateWheelDisplay();
+                }
             }
-            if (e.key === ']') {
+            if (e.key === '+') {
                 e.preventDefault();
-                startTimer();
-                showToastNotif('Timer started!');
+                const overlay = document.getElementById('wheelOverlay');
+                if (overlay.classList.contains('active')) overlay.classList.remove('active');
             }
         });
 
-        // ==================== INIT ====================
         document.addEventListener('DOMContentLoaded', async () => {
             setupEditableFeatures();
             if(myUsername) { document.getElementById('settings-username').value = myUsername; document.getElementById('confirm-me-name').textContent = myUsername; await updateMyAvatar(); }
             window.onclick = event => { if (event.target.id === 'sendModal') closeSendModal(); if (event.target.id === 'settingsModal') toggleModal('settingsModal'); if (event.target.id === 'editIconModal') closeIconModal(); if (event.target.id === 'editFriendCountModal') closeFriendCountModal(); if (event.target.id === 'renameLogoModal') closeRenameModal(); };
-            updateTimerDisplay();
-            timerElement.style.display = 'block';
+            drawWheelWheel(0, [], [], 0);
         });
     </script>
 </body>
