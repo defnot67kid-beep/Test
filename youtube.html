@@ -2,51 +2,101 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>YouTube Live Chat Embedder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat Embedder</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .controls { margin-bottom: 20px; }
-        input { width: 300px; padding: 8px; }
-        button { padding: 8px 15px; cursor: pointer; }
-        #chat-container { width: 400px; height: 600px; border: 1px solid #ccc; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #cc0000;
+        }
+        #chat-wrapper {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body>
 
-    <h2>Live Chat Embedder</h2>
+<div class="container">
+    <h2>YouTube Live Chat</h2>
     <div class="controls">
-        <input type="text" id="videoUrl" placeholder="Paste YouTube URL or ID here...">
-        <button onclick="loadChat()">Load Chat</button>
+        <input type="text" id="videoUrl" placeholder="Paste YouTube Live URL here...">
+        <button onclick="loadChat()">Load</button>
     </div>
 
-    <div id="chat-container">
-        <iframe id="chatFrame" width="100%" height="100%" frameborder="0"></iframe>
+    <div id="chat-wrapper">
+        <iframe id="chatFrame" src="" frameborder="0"></iframe>
     </div>
+</div>
 
-    <script>
-        function loadChat() {
-            const input = document.getElementById('videoUrl').value;
-            const iframe = document.getElementById('chatFrame');
+<script>
+    function loadChat() {
+        const input = document.getElementById('videoUrl').value;
+        const iframe = document.getElementById('chatFrame');
+        const videoId = extractVideoID(input);
+        
+        if (videoId) {
+            // Get current domain dynamically (works for GitHub Pages or Localhost)
+            const domain = window.location.hostname || "localhost";
             
-            // Extract Video ID from URL (handles full URLs and raw IDs)
-            const videoId = extractVideoID(input);
+            // Construct the YouTube live_chat URL
+            const embedUrl = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${domain}`;
             
-            if (videoId) {
-                // IMPORTANT: 'embed_domain' must match the domain where this page is hosted.
-                // For local testing, use 'localhost'.
-                const embedUrl = `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=localhost`;
-                iframe.src = embedUrl;
-            } else {
-                alert("Please enter a valid YouTube URL or Video ID.");
-            }
+            iframe.src = embedUrl;
+        } else {
+            alert("Please enter a valid YouTube URL.");
         }
+    }
 
-        function extractVideoID(url) {
-            // Regex to find video ID from common YouTube URL formats
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : url;
-        }
-    </script>
+    function extractVideoID(url) {
+        // Handles standard URLs, short links (youtu.be), and raw IDs
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    }
+</script>
+
 </body>
 </html>
