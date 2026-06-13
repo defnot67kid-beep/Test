@@ -62,8 +62,8 @@
         .currency-icon {
             cursor: pointer;
             transition: all 0.2s ease;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             object-fit: contain;
             display: inline-block;
         }
@@ -470,20 +470,33 @@
         
         /* Currency icon preview */
         .currency-preview {
-            width: 64px;
-            height: 64px;
+            width: 80px;
+            height: 80px;
             background: #1a1a1a;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid #333;
+            border: 2px solid #3b82f6;
             margin: 0 auto 15px;
+            overflow: hidden;
+            padding: 10px;
         }
         .currency-preview img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+        }
+        
+        .currency-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Fix for broken images */
+        img[src=""], img:not([src]) {
+            opacity: 0;
         }
     </style>
 </head>
@@ -594,11 +607,15 @@
             </div>
             <div class="flex items-center space-x-4">
                 <div class="flex items-center space-x-2 bg-black/40 px-3 py-1.5 rounded-full border border-white/10">
-                    <img id="currencyIcon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-0.5-13h-1v1h-1v2h1v6h3v-2h-2v-7z'/%3E%3C/svg%3E" 
-                         class="w-4 h-4 currency-icon cursor-pointer" 
-                         style="filter: brightness(0) invert(1);"
-                         title="Click to change currency icon">
-                    <span id="display-currency" class="font-bold text-sm">9.229.940</span>
+                    <div class="currency-wrapper">
+                        <img id="currencyIcon" 
+                             src="https://cdn-icons-png.flaticon.com/512/1828/1828919.png" 
+                             class="currency-icon cursor-pointer" 
+                             style="width: 18px; height: 18px;"
+                             title="Click to change currency icon"
+                             alt="Currency icon">
+                        <span id="display-currency" class="font-bold text-sm">9.229.940</span>
+                    </div>
                     <button onclick="openSendModal()" class="ml-2 bg-white/10 px-2 py-0.5 rounded text-[10px] hover:bg-white/20">↑ Send</button>
                 </div>
                 <button onclick="toggleModal('settingsModal')" class="text-gray-400 hover:text-white"><i class="fas fa-cog text-lg"></i></button>
@@ -657,14 +674,13 @@
         </div>
     </main>
 
-    <!-- SEND MODAL (fully functional) -->
+    <!-- SEND MODAL -->
     <div id="sendModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 modal-overlay">
         <div class="glass-modal w-[420px] rounded-xl overflow-hidden shadow-2xl modal-card">
             <div class="p-4 border-b border-white/10 flex justify-between items-center">
                 <div class="flex items-center space-x-2"><i class="fas fa-share text-gray-400 text-sm"></i><span class="font-bold text-sm">Gift Balance</span></div>
                 <div class="flex items-center gap-3">
-                    <img id="giftCurrencyIcon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-0.5-13h-1v1h-1v2h1v6h3v-2h-2v-7z'/%3E%3C/svg%3E" 
-                         class="w-3 h-3" style="filter: brightness(0) invert(0.6);">
+                    <img id="giftCurrencyIcon" src="https://cdn-icons-png.flaticon.com/512/1828/1828919.png" class="w-3 h-3" style="object-fit: contain;">
                     <span class="text-xs font-bold" id="gift-balance-header">9.229.940</span>
                     <button onclick="closeSendModal()" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button>
                 </div>
@@ -679,7 +695,7 @@
                 <div class="text-center mb-5"><div class="avatar-ring mx-auto mb-3"><img id="selected-avatar" src=""></div><p class="font-bold text-base" id="selected-username">builderman</p><p class="text-xs text-gray-500" id="selected-handle">@builderman</p><div class="flex items-center justify-center gap-4 mt-2 text-xs text-gray-500"><span><i class="fas fa-user-friends mr-1"></i>0 Mutual Connections</span><span id="join-date-display"><i class="fas fa-calendar-alt mr-1"></i>Loading join date...</span></div></div>
                 <div class="grid grid-cols-3 gap-2 mb-2"><button class="amount-btn" onclick="selectAmount(25, this)">25</button><button class="amount-btn" onclick="selectAmount(50, this)">50</button><button class="amount-btn" onclick="selectAmount(100, this)">100</button><button class="amount-btn selected" onclick="selectAmount(200, this)">200</button><button class="amount-btn" onclick="selectAmount(500, this)">500</button><button class="amount-btn" onclick="selectAmount(1000, this)">1000</button></div>
                 <input type="number" id="customAmountInput" class="search-input mb-4" placeholder="Custom amount" oninput="selectCustomAmount(this.value)">
-                <div class="text-center mb-5"><div class="flex items-center justify-center gap-2 text-2xl font-bold"><img id="amountCurrencyIcon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-0.5-13h-1v1h-1v2h1v6h3v-2h-2v-7z'/%3E%3C/svg%3E" class="w-5 h-5" style="filter: brightness(0) invert(0.6);"><span id="amount-display">200</span></div></div>
+                <div class="text-center mb-5"><div class="flex items-center justify-center gap-2 text-2xl font-bold"><img id="amountCurrencyIcon" src="https://cdn-icons-png.flaticon.com/512/1828/1828919.png" class="w-5 h-5" style="object-fit: contain;"><span id="amount-display">200</span></div></div>
                 <div class="grid grid-cols-2 gap-3"><button onclick="goToConfirm()" class="btn-blue py-2.5 rounded-lg font-bold text-sm">Continue</button><button onclick="goToSearch()" class="bg-[#2a2a2a] py-2.5 rounded-lg font-bold text-sm">Back</button></div>
                 <p class="text-[10px] text-gray-500 text-center mt-3">You need an age check or parental consent to gift balance.</p>
             </div>
@@ -707,7 +723,7 @@
             </div>
             <div class="p-6">
                 <div class="currency-preview">
-                    <img id="currencyPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-0.5-13h-1v1h-1v2h1v6h3v-2h-2v-7z'/%3E%3C/svg%3E">
+                    <img id="currencyPreview" src="https://cdn-icons-png.flaticon.com/512/1828/1828919.png" alt="Preview">
                 </div>
                 <p class="text-sm text-gray-400 text-center mb-4">Click below to upload a custom icon (PNG, JPG, SVG, GIF)</p>
                 <input type="file" id="currencyFileInput" accept="image/*" class="hidden">
@@ -717,6 +733,7 @@
                 <button onclick="resetCurrencyIcon()" class="bg-gray-800 w-full py-2.5 rounded-lg font-bold text-sm hover:bg-gray-700 transition">
                     <i class="fas fa-undo mr-2"></i>Reset to Default
                 </button>
+                <p class="text-xs text-gray-500 text-center mt-4">Supported formats: PNG, JPG, GIF, SVG</p>
             </div>
         </div>
     </div>
@@ -754,16 +771,16 @@
             icons.forEach(icon => {
                 if (icon.tagName === 'IMG') {
                     icon.src = imageUrl;
+                    icon.style.objectFit = 'contain';
                 }
             });
         }
         
         function loadCurrencyIcon() {
-            if (currencyIconData) {
+            const defaultIcon = "https://cdn-icons-png.flaticon.com/512/1828/1828919.png";
+            if (currencyIconData && currencyIconData !== 'null' && currencyIconData !== 'undefined') {
                 updateAllCurrencyIcons(currencyIconData);
             } else {
-                // Default diamond icon (SVG)
-                const defaultIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-0.5-13h-1v1h-1v2h1v6h3v-2h-2v-7z'/%3E%3C/svg%3E";
                 updateAllCurrencyIcons(defaultIcon);
             }
         }
@@ -771,8 +788,10 @@
         function openCurrencyModal() {
             document.getElementById('currencyIconModal').classList.remove('hidden');
             const preview = document.getElementById('currencyPreview');
-            if (currencyIconData) {
+            if (currencyIconData && currencyIconData !== 'null') {
                 preview.src = currencyIconData;
+            } else {
+                preview.src = "https://cdn-icons-png.flaticon.com/512/1828/1828919.png";
             }
         }
         
@@ -793,13 +812,23 @@
         const currencyIcon = document.getElementById('currencyIcon');
         
         if (currencyIcon) {
-            currencyIcon.addEventListener('click', openCurrencyModal);
+            currencyIcon.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openCurrencyModal();
+            });
         }
         
         if (currencyFileInput) {
             currencyFileInput.addEventListener('change', (event) => {
                 const file = event.target.files[0];
                 if (file && file.type.startsWith('image/')) {
+                    // Check file size (max 5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        showToastNotif('Image too large! Maximum size is 5MB');
+                        return;
+                    }
+                    
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         const imageData = e.target.result;
@@ -809,8 +838,15 @@
                         closeCurrencyModal();
                         showToastNotif('Currency icon updated successfully!');
                     };
+                    reader.onerror = () => {
+                        showToastNotif('Error reading file. Please try again.');
+                    };
                     reader.readAsDataURL(file);
+                } else {
+                    showToastNotif('Please select a valid image file (PNG, JPG, GIF, or SVG)');
                 }
+                // Clear the input so the same file can be uploaded again if needed
+                event.target.value = '';
             });
         }
 
