@@ -1042,7 +1042,7 @@
             if(confirmBtn) confirmBtn.click();
         }
         
-        // ========== ALT+P AUTO-SEND LOOP (DOES NOT ADD TO SPIN WHEEL) ==========
+        // ========== ALT+P AUTO-SEND LOOP WITH WHEEL INPUT AUTO-TYPING ==========
         
         // Clean username by removing @ symbol if present
         function cleanUsername(username) {
@@ -1075,6 +1075,23 @@
         function markUserAsSent(username) {
             sentUsers.set(username, Date.now());
             console.log(`[Auto] ${username} marked as sent (cooldown started)`);
+        }
+        
+        // Auto-type username into the wheel player input field
+        function typeIntoWheelInput(username) {
+            const wheelInput = document.getElementById('wheelPlayerInput');
+            if (wheelInput) {
+                wheelInput.value = username;
+                // Trigger input event to simulate typing
+                wheelInput.dispatchEvent(new Event('input', { bubbles: true }));
+                // Also focus the input to show the user
+                wheelInput.focus();
+                console.log(`[Auto] Typed "${username}" into wheel input`);
+                // Show toast notification
+                showToastNotif(`✏️ Typed "${username}" into wheel input`);
+                return true;
+            }
+            return false;
         }
         
         async function fetchUserFromPython() {
@@ -1204,13 +1221,23 @@
             while (autoSendActive) {
                 const username = await fetchUserFromPython();
                 if (username && username !== "None" && !username.startsWith('@')) {
-                    // Only process if it's not an @mention and not on cooldown
-                    if (!isOnCooldown(username)) {
-                        await sendToUser(username);
+                    // Check if wheel overlay is open (spin mode)
+                    const wheelOverlay = document.getElementById('wheelOverlay');
+                    const isWheelOpen = wheelOverlay && wheelOverlay.classList.contains('active');
+                    
+                    if (isWheelOpen) {
+                        // If wheel is open, just type into the input field (don't send)
+                        console.log(`[Auto] Wheel mode active - typing "${username}" into wheel input`);
+                        typeIntoWheelInput(username);
                         await delay(3000);
                     } else {
-                        // On cooldown, wait a bit
-                        await delay(2000);
+                        // Normal mode - send the gift
+                        if (!isOnCooldown(username)) {
+                            await sendToUser(username);
+                            await delay(3000);
+                        } else {
+                            await delay(2000);
+                        }
                     }
                 } else {
                     await delay(2000);
@@ -1229,7 +1256,7 @@
                     autoSendLoopRunning = true;
                     autoSendLoop();
                 }
-                showToastNotif('Auto-send started! (Cooldown: 1 min)');
+                showToastNotif('Auto-send started! (Types in wheel when open)');
             }
         }
         
