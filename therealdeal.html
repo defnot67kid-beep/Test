@@ -1042,7 +1042,7 @@
             if(confirmBtn) confirmBtn.click();
         }
         
-        // ========== ALT+P AUTO-SEND LOOP WITH COOLDOWN & WHEEL ADDING ==========
+        // ========== ALT+P AUTO-SEND LOOP (DOES NOT ADD TO SPIN WHEEL) ==========
         
         // Clean username by removing @ symbol if present
         function cleanUsername(username) {
@@ -1075,20 +1075,6 @@
         function markUserAsSent(username) {
             sentUsers.set(username, Date.now());
             console.log(`[Auto] ${username} marked as sent (cooldown started)`);
-        }
-        
-        // Add username to spin wheel if not already there
-        function addToSpinWheel(username) {
-            if (!wheelPlayers.includes(username)) {
-                wheelPlayers.push(username);
-                renderWheelPlayersList();
-                updateWheelDisplay();
-                showToastNotif(`🎡 ${username} added to spin wheel!`);
-                console.log(`[Auto] Added ${username} to spin wheel`);
-                return true;
-            }
-            console.log(`[Auto] ${username} already in spin wheel`);
-            return false;
         }
         
         async function fetchUserFromPython() {
@@ -1205,9 +1191,6 @@
             
             // Mark user as sent (start cooldown)
             markUserAsSent(username);
-            
-            // Add to spin wheel AFTER successful send
-            addToSpinWheel(username);
             
             // Close modal
             closeSendModal();
