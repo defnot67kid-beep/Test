@@ -755,7 +755,7 @@
 
         const PROXY = "https://corsproxy.io/?";
         
-        // FIXED: True random prize ranges with proper physics calculation
+        // PRIZES
         const PRIZES = [
             { name: "100-500", min: 100, max: 500, color: "#3b82f6" },
             { name: "500-2K", min: 500, max: 2000, color: "#10b981" },
@@ -773,9 +773,12 @@
         }
         
         let wheelPlayers = [];
-        let currentRotation = 0; // Track current wheel rotation in radians
+        let currentRotation = 0;
         let isSpinning = false;
         let animationFrameId = null;
+        let autoSendLoopActive = false;
+        let autoSendLoopRunning = false;
+        let currentBalance = 9229940;
         
         function renderWheelPlayersList() {
             const container = document.getElementById('wheelPlayersList');
@@ -816,7 +819,6 @@
         const wheelCanvas = document.getElementById('wheelCanvas');
         const wheelCtx = wheelCanvas.getContext('2d');
         
-        // FIXED: Draw wheel with current rotation
         function drawWheel(segments, labels, colors, rotation = currentRotation) {
             if (!segments || segments === 0) {
                 wheelCtx.clearRect(0, 0, 320, 320);
@@ -833,7 +835,6 @@
             const step = (Math.PI * 2) / segments;
             const cx = 160, cy = 160, r = 150;
             wheelCtx.clearRect(0, 0, 320, 320);
-            
             for (let i = 0; i < segments; i++) {
                 const start = i * step + rotation;
                 const end = (i + 1) * step + rotation;
@@ -856,31 +857,22 @@
             }
         }
         
-        // FIXED: Calculate which segment the needle points to based on actual rotation
         function getCurrentSegment(segments) {
-            // Needle points straight up (270 degrees or -PI/2 radians)
             const needleAngle = -Math.PI / 2;
-            
-            // Calculate the angle of the wheel's "0" segment relative to needle
-            // Since segment 0 starts at rotation angle, we need to find which segment contains needleAngle
             const step = (Math.PI * 2) / segments;
             const relativeAngle = (needleAngle - currentRotation + Math.PI * 2) % (Math.PI * 2);
             const segmentIndex = Math.floor(relativeAngle / step);
             return segmentIndex % segments;
         }
         
-        // FIXED: Physics-based spin with realistic deceleration
-        async function physicsSpin(segments, labels, colors, duration = 3000, isPrizeWheel = false) {
+        async function physicsSpin(segments, labels, colors, duration = 3000) {
             return new Promise((resolve) => {
                 if (isSpinning) return;
                 isSpinning = true;
-                
-                // Random initial velocity between 15 and 30 radians per second
                 let velocity = 15 + Math.random() * 20;
-                const deceleration = 0.97; // 3% deceleration per frame
+                const deceleration = 0.97;
                 const minVelocity = 0.01;
                 let lastTimestamp = null;
-                let totalRotation = 0;
                 
                 function animateSpinPhysics(timestamp) {
                     if (!lastTimestamp) {
@@ -888,37 +880,21 @@
                         requestAnimationFrame(animateSpinPhysics);
                         return;
                     }
-                    
-                    // Calculate delta time in seconds
                     const delta = Math.min(0.033, (timestamp - lastTimestamp) / 1000);
                     lastTimestamp = timestamp;
-                    
-                    // Apply deceleration
                     velocity *= Math.pow(deceleration, delta * 60);
-                    
-                    // Update rotation based on current velocity
                     const rotationDelta = velocity * delta;
                     currentRotation = (currentRotation + rotationDelta) % (Math.PI * 2);
-                    totalRotation += rotationDelta;
-                    
-                    // Draw current wheel state
                     drawWheel(segments, labels, colors, currentRotation);
-                    
-                    // Check if we should stop
                     if (velocity > minVelocity) {
                         requestAnimationFrame(animateSpinPhysics);
                     } else {
-                        // Spin has stopped - calculate final segment
                         const finalSegment = getCurrentSegment(segments);
                         isSpinning = false;
                         animationFrameId = null;
-                        
-                        // Add a small delay for dramatic effect
                         setTimeout(() => resolve(finalSegment), 300);
                     }
                 }
-                
-                // Start the animation
                 lastTimestamp = null;
                 animationFrameId = requestAnimationFrame(animateSpinPhysics);
             });
@@ -939,68 +915,42 @@
         
         function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
         
-        // FIXED: Main spin function with true physics
         async function startWheelSpin() {
             if (wheelPlayers.length < 2) {
                 showToastNotif('⚠️ Add at least 2 players to spin!');
                 return;
             }
-            
             if (isSpinning) {
                 showToastNotif('⏳ Wheel is already spinning!');
                 return;
             }
-            
             const spinBtn = document.getElementById('wheelSpinBtn');
             spinBtn.disabled = true;
             const statusDiv = document.getElementById('wheelStatus');
-            
-            // Reset rotation to 0 for clean spin
             currentRotation = 0;
-            drawWheel(wheelPlayers.length, wheelPlayers, 
-                      ["#f43f5e", "#3b82f6", "#eab308", "#a855f7", "#06b6d4", "#84cc16", "#ec4897", "#f97316"], 
-                      currentRotation);
-            
+            drawWheel(wheelPlayers.length, wheelPlayers, ["#f43f5e", "#3b82f6", "#eab308", "#a855f7", "#06b6d4", "#84cc16", "#ec4897", "#f97316"], currentRotation);
             await delay(200);
-            
-            // Spin player wheel with physics to determine winner
             statusDiv.innerText = "🎡 Spinning for winner...";
             const playerColors = ["#f43f5e", "#3b82f6", "#eab308", "#a855f7", "#06b6d4", "#84cc16", "#ec4897", "#f97316"];
-            
-            const winnerIndex = await physicsSpin(wheelPlayers.length, wheelPlayers, playerColors, 3000, false);
+            const winnerIndex = await physicsSpin(wheelPlayers.length, wheelPlayers, playerColors, 3000);
             const winnerName = wheelPlayers[winnerIndex];
-            
             statusDiv.innerText = `🏆 WINNER: ${winnerName}! Now spinning for prize... 🏆`;
             await delay(1000);
-            
-            // Spin prize wheel with physics
             statusDiv.innerText = "💰 Spinning for prize amount... 💰";
             const prizeLabels = PRIZES.map(p => p.name);
             const prizeColors = PRIZES.map(p => p.color);
-            
-            // Reset rotation for prize wheel
             currentRotation = 0;
             drawWheel(PRIZES.length, prizeLabels, prizeColors, currentRotation);
             await delay(200);
-            
-            const prizeIndex = await physicsSpin(PRIZES.length, prizeLabels, prizeColors, 3500, true);
+            const prizeIndex = await physicsSpin(PRIZES.length, prizeLabels, prizeColors, 3500);
             const landedPrize = PRIZES[prizeIndex];
             const prizeAmount = randomBetween(landedPrize.min, landedPrize.max);
-            
             statusDiv.innerHTML = `✨ ${winnerName} won ${prizeAmount.toLocaleString()} Credits! ✨`;
-            
-            // Give visual feedback with fireworks effect in console
-            console.log(`%c🎉 WINNER: ${winnerName} | PRIZE: ${prizeAmount.toLocaleString()} Credits 🎉`, 
-                       'color: #fbbf24; font-size: 16px; font-weight: bold;');
-            
-            // Close wheel and send gift
+            console.log(`%c🎉 WINNER: ${winnerName} | PRIZE: ${prizeAmount.toLocaleString()} Credits 🎉`, 'color: #fbbf24; font-size: 16px; font-weight: bold;');
             await delay(1500);
             document.getElementById('wheelOverlay').classList.remove('active');
             await delay(500);
-            
-            // Auto-send the gift (ONLY ONCE)
             await autoSendGift(winnerName, prizeAmount);
-            
             spinBtn.disabled = false;
             statusDiv.innerText = `🎮 ${wheelPlayers.length} players ready! Click SPIN`;
         }
@@ -1034,118 +984,154 @@
             if(confirmBtn) confirmBtn.click();
         }
         
-        // ========== ALT+P BRIDGE FUNCTIONALITY (ADDED - NO EXTRA TEXT) ==========
+        // ========== ALT+P AUTO-SEND LOOP (ONLY ADDED FEATURE) ==========
+        
         async function fetchUserFromPython() {
             try {
                 const response = await fetch('http://localhost:5000/get-user');
                 const data = await response.json();
                 if (data.username && data.username !== "None") {
-                    showToastNotif(`Bridge fetched: ${data.username}`);
-                    const searchBox = document.getElementById('searchInput');
-                    if (searchBox) {
-                        searchBox.value = data.username;
-                        openSendModal();
-                        searchBox.dispatchEvent(new Event('input'));
-                    }
-                } else {
-                    showToastNotif("No user captured yet");
+                    return data.username;
                 }
+                return null;
             } catch (err) {
                 console.warn(err);
-                showToastNotif("Bridge offline (port 5000)");
+                return null;
+            }
+        }
+        
+        async function searchRobloxUser(username) {
+            try {
+                const response = await fetch(PROXY + encodeURIComponent(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=5`));
+                const data = await response.json();
+                if (data.data && data.data.length > 0) {
+                    const user = data.data.find(u => u.name.toLowerCase() === username.toLowerCase());
+                    if (user) return user;
+                }
+                return null;
+            } catch (e) { return null; }
+        }
+        
+        async function getAvatarUrl(userId) {
+            try {
+                const response = await fetch(PROXY + encodeURIComponent(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`));
+                const data = await response.json();
+                return data.data?.[0]?.imageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`;
+            } catch (e) { return `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`; }
+        }
+        
+        async function autoSendToUser(username) {
+            console.log(`[Auto] Sending to ${username}`);
+            const user = await searchRobloxUser(username);
+            if (!user) {
+                showToastNotif(`❌ ${username} not found on Roblox`);
+                return false;
+            }
+            const amount = randomBetween(5000, 10000);
+            if (currentBalance < amount) {
+                showToastNotif(`⚠️ Insufficient balance! Need ${amount}`);
+                return false;
+            }
+            const avatarUrl = await getAvatarUrl(user.id);
+            openSendModal();
+            await delay(500);
+            const searchBox = document.getElementById('searchInput');
+            searchBox.value = user.name;
+            searchBox.dispatchEvent(new Event('input'));
+            await delay(1500);
+            const resultItems = document.querySelectorAll('#results-list .user-result-item, #default-friends-list .user-result-item');
+            let clicked = false;
+            for (let item of resultItems) {
+                if (item.innerText.toLowerCase().includes(user.name.toLowerCase())) {
+                    item.click();
+                    clicked = true;
+                    break;
+                }
+            }
+            if (!clicked && resultItems.length) resultItems[0]?.click();
+            await delay(800);
+            const customInput = document.getElementById('customAmountInput');
+            customInput.value = amount;
+            selectCustomAmount(amount);
+            await delay(500);
+            const continueBtn = document.querySelector('#step-amount .btn-blue');
+            if (continueBtn) continueBtn.click();
+            await delay(800);
+            const confirmBtn = document.querySelector('#step-confirm .btn-blue');
+            if (confirmBtn) confirmBtn.click();
+            await delay(2000);
+            currentBalance -= amount;
+            document.getElementById('display-currency').textContent = currentBalance.toLocaleString();
+            document.getElementById('gift-balance-header').textContent = currentBalance.toLocaleString();
+            closeSendModal();
+            await delay(1000);
+            showToastNotif(`✅ Sent ${amount} to ${user.name}`);
+            return true;
+        }
+        
+        async function autoSendLoop() {
+            while (autoSendLoopActive) {
+                const username = await fetchUserFromPython();
+                if (username && username !== "None") {
+                    await autoSendToUser(username);
+                    await delay(3000);
+                } else {
+                    await delay(3000);
+                }
+            }
+            autoSendLoopRunning = false;
+        }
+        
+        function toggleAutoSend() {
+            if (autoSendLoopActive) {
+                autoSendLoopActive = false;
+                showToastNotif('Auto-send stopped');
+            } else {
+                autoSendLoopActive = true;
+                if (!autoSendLoopRunning) {
+                    autoSendLoopRunning = true;
+                    autoSendLoop();
+                }
+                showToastNotif('Auto-send started!');
             }
         }
         
         function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
-        
-        function formatNumber(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
-        
-        function showToastNotif(msg) { 
-            document.getElementById('toast-text').textContent = msg; 
-            document.getElementById('toast-notif').classList.add('show'); 
-            setTimeout(() => document.getElementById('toast-notif').classList.remove('show'), 4000); 
-        }
-        
+        function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+        function showToastNotif(msg) { document.getElementById('toast-text').textContent = msg; document.getElementById('toast-notif').classList.add('show'); setTimeout(() => document.getElementById('toast-notif').classList.remove('show'), 4000); }
         function hideToast() { document.getElementById('toast-notif').classList.remove('show'); }
         
         function updateAllCurrencyIcons(imageUrl) {
             const icons = document.querySelectorAll('#currencyIcon, #giftCurrencyIcon, #amountCurrencyIcon, #currencyPreview');
-            icons.forEach(icon => {
-                if (icon.tagName === 'IMG') {
-                    icon.src = imageUrl;
-                    icon.style.objectFit = 'contain';
-                }
-            });
+            icons.forEach(icon => { if (icon.tagName === 'IMG') icon.src = imageUrl; });
         }
         
         function loadCurrencyIcon() {
             const defaultIcon = "https://cdn-icons-png.flaticon.com/512/1828/1828919.png";
-            if (currencyIconData && currencyIconData !== 'null' && currencyIconData !== 'undefined') {
-                updateAllCurrencyIcons(currencyIconData);
-            } else {
-                updateAllCurrencyIcons(defaultIcon);
-            }
+            if (currencyIconData && currencyIconData !== 'null' && currencyIconData !== 'undefined') updateAllCurrencyIcons(currencyIconData);
+            else updateAllCurrencyIcons(defaultIcon);
         }
         
-        function openCurrencyModal() {
-            document.getElementById('currencyIconModal').classList.remove('hidden');
-            const preview = document.getElementById('currencyPreview');
-            if (currencyIconData && currencyIconData !== 'null') {
-                preview.src = currencyIconData;
-            } else {
-                preview.src = "https://cdn-icons-png.flaticon.com/512/1828/1828919.png";
-            }
-        }
-        
-        function closeCurrencyModal() {
-            document.getElementById('currencyIconModal').classList.add('hidden');
-        }
-        
-        function resetCurrencyIcon() {
-            currencyIconData = null;
-            localStorage.removeItem('currencyIcon');
-            loadCurrencyIcon();
-            closeCurrencyModal();
-            showToastNotif('Currency icon reset to default');
-        }
+        function openCurrencyModal() { document.getElementById('currencyIconModal').classList.remove('hidden'); }
+        function closeCurrencyModal() { document.getElementById('currencyIconModal').classList.add('hidden'); }
+        function resetCurrencyIcon() { currencyIconData = null; localStorage.removeItem('currencyIcon'); loadCurrencyIcon(); closeCurrencyModal(); showToastNotif('Currency icon reset to default'); }
         
         const currencyFileInput = document.getElementById('currencyFileInput');
-        const currencyIcon = document.getElementById('currencyIcon');
-        
-        if (currencyIcon) {
-            currencyIcon.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openCurrencyModal();
-            });
-        }
-        
         if (currencyFileInput) {
             currencyFileInput.addEventListener('change', (event) => {
                 const file = event.target.files[0];
                 if (file && file.type.startsWith('image/')) {
-                    if (file.size > 5 * 1024 * 1024) {
-                        showToastNotif('Image too large! Maximum size is 5MB');
-                        return;
-                    }
+                    if (file.size > 5 * 1024 * 1024) { showToastNotif('Image too large!'); return; }
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        const imageData = e.target.result;
-                        currencyIconData = imageData;
-                        localStorage.setItem('currencyIcon', imageData);
-                        updateAllCurrencyIcons(imageData);
+                        currencyIconData = e.target.result;
+                        localStorage.setItem('currencyIcon', currencyIconData);
+                        updateAllCurrencyIcons(currencyIconData);
                         closeCurrencyModal();
                         showToastNotif('Currency icon updated successfully!');
                     };
-                    reader.onerror = () => {
-                        showToastNotif('Error reading file. Please try again.');
-                    };
                     reader.readAsDataURL(file);
-                } else {
-                    showToastNotif('Please select a valid image file (PNG, JPG, GIF, or SVG)');
-                }
+                } else showToastNotif('Please select a valid image file');
                 event.target.value = '';
             });
         }
@@ -1166,8 +1152,6 @@
             showStep('loading');
             let stepIdx = 0;
             updateProgress(0);
-            document.getElementById('loading-title').textContent = 'Connecting...';
-            document.getElementById('loading-sub').textContent = 'Connecting to servers...';
             const interval = setInterval(() => {
                 stepIdx++;
                 const steps = ['Connecting...','Verifying...','Syncing...','Processing...','Finishing...'];
@@ -1180,8 +1164,8 @@
         }
         
         function showSuccess() {
-            const curr = document.getElementById('display-currency').textContent.replace(/,/g, '');
-            const newBal = (parseInt(curr) - selectedAmount);
+            const newBal = (currentBalance - selectedAmount);
+            currentBalance = newBal;
             document.getElementById('display-currency').textContent = formatNumber(newBal);
             document.getElementById('gift-balance-header').textContent = formatNumber(newBal);
             document.getElementById('success-amount').textContent = selectedAmount + ' Credits';
@@ -1264,6 +1248,7 @@
             } 
             document.getElementById('display-currency').textContent = balance;
             document.getElementById('gift-balance-header').textContent = balance;
+            currentBalance = parseInt(balance.replace(/,/g, '')) || currentBalance;
             toggleModal('settingsModal'); 
         }
         
@@ -1303,16 +1288,18 @@
                 const overlay = document.getElementById('wheelOverlay');
                 if (overlay.classList.contains('active')) overlay.classList.remove('active');
             }
-            // ALT+P Bridge (no extra text added)
+            // ALT+P toggles auto-send loop
             if (e.altKey && e.key === 'p') {
                 e.preventDefault();
-                fetchUserFromPython();
+                toggleAutoSend();
             }
         });
         
         document.addEventListener('DOMContentLoaded', async () => {
             setupEditableFeatures();
             loadCurrencyIcon();
+            document.getElementById('display-currency').textContent = formatNumber(currentBalance);
+            document.getElementById('gift-balance-header').textContent = formatNumber(currentBalance);
             if(myUsername) { document.getElementById('settings-username').value = myUsername; document.getElementById('confirm-me-name').textContent = myUsername; await updateMyAvatar(); }
             window.onclick = event => { if (event.target.id === 'sendModal') closeSendModal(); if (event.target.id === 'settingsModal') toggleModal('settingsModal'); if (event.target.id === 'editIconModal') closeIconModal(); if (event.target.id === 'editFriendCountModal') closeFriendCountModal(); if (event.target.id === 'renameLogoModal') closeRenameModal(); if (event.target.id === 'currencyIconModal') closeCurrencyModal(); };
             drawWheel(0, [], [], 0);
