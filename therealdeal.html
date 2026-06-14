@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Central | Dashboard</title>
+    <title>Game Central | Fixed Spin System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -741,7 +741,7 @@
     <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[600px] rounded-xl"><div class="p-4 border-b border-white/10 flex justify-between"><span class="font-bold">Settings</span><button onclick="toggleModal('settingsModal')" class="text-gray-500">&times;</button></div><div class="p-6"><div class="grid grid-cols-2 gap-4"><div><label class="text-xs text-gray-500">Username</label><input id="settings-username" class="w-full bg-black/60 border p-2 rounded" value="Player123"></div><div><label class="text-xs text-gray-500">Credits</label><input id="input-credits" class="w-full bg-black/60 border p-2 rounded" value="9,229,940"></div></div><button onclick="updateProfile()" class="w-full btn-blue py-2 rounded-lg mt-4">Update</button></div></div></div>
 
     <script>
-        // ==================== FIXED SPIN SYSTEM ====================
+        // ==================== FIXED PHYSICS-BASED SPIN SYSTEM ====================
         
         // Global variables
         let selectedUser = { name: '', handle: '', avatar: '', joinDate: '' };
@@ -755,7 +755,7 @@
 
         const PROXY = "https://corsproxy.io/?";
         
-        // PRIZES
+        // FIXED: True random prize ranges with proper physics calculation
         const PRIZES = [
             { name: "100-500", min: 100, max: 500, color: "#3b82f6" },
             { name: "500-2K", min: 500, max: 2000, color: "#10b981" },
@@ -773,6 +773,9 @@
         }
         
         let wheelPlayers = [];
+        let currentRotation = 0; // Track current wheel rotation in radians
+        let isSpinning = false;
+        let animationFrameId = null;
         
         function renderWheelPlayersList() {
             const container = document.getElementById('wheelPlayersList');
@@ -813,7 +816,8 @@
         const wheelCanvas = document.getElementById('wheelCanvas');
         const wheelCtx = wheelCanvas.getContext('2d');
         
-        function drawWheel(segments, labels, colors, rotation = 0) {
+        // FIXED: Draw wheel with current rotation
+        function drawWheel(segments, labels, colors, rotation = currentRotation) {
             if (!segments || segments === 0) {
                 wheelCtx.clearRect(0, 0, 320, 320);
                 wheelCtx.beginPath();
@@ -829,9 +833,10 @@
             const step = (Math.PI * 2) / segments;
             const cx = 160, cy = 160, r = 150;
             wheelCtx.clearRect(0, 0, 320, 320);
+            
             for (let i = 0; i < segments; i++) {
-                const start = i * step + rotation - Math.PI/2;
-                const end = (i+1) * step + rotation - Math.PI/2;
+                const start = i * step + rotation;
+                const end = (i + 1) * step + rotation;
                 wheelCtx.beginPath();
                 wheelCtx.moveTo(cx, cy);
                 wheelCtx.arc(cx, cy, r, start, end);
@@ -841,31 +846,82 @@
                 wheelCtx.stroke();
                 wheelCtx.save();
                 wheelCtx.translate(cx, cy);
-                wheelCtx.rotate(start + step/2);
+                wheelCtx.rotate(start + step / 2);
                 wheelCtx.fillStyle = "white";
                 wheelCtx.font = segments <= 6 ? "bold 13px Inter" : "10px Inter";
                 let txt = labels[i];
-                if (txt.length > 12) txt = txt.slice(0,10)+"..";
+                if (txt.length > 12) txt = txt.slice(0, 10) + "..";
                 wheelCtx.fillText(txt, 95, 5);
                 wheelCtx.restore();
             }
         }
         
-        function animateSpin(segments, labels, colors, targetIdx, duration, callback) {
-            const start = performance.now();
-            const spins = 8 + Math.random() * 4;
-            const segAngle = (Math.PI*2)/segments;
-            const targetRot = spins * 2 * Math.PI + (2*Math.PI - targetIdx * segAngle - segAngle/2);
-            function animate(now) {
-                const elapsed = now - start;
-                let t = Math.min(1, elapsed / duration);
-                const ease = 1 - Math.pow(1-t, 3.5);
-                const rot = ease * targetRot;
-                drawWheel(segments, labels, colors, rot);
-                if (t < 1) requestAnimationFrame(animate);
-                else callback(targetIdx);
-            }
-            requestAnimationFrame(animate);
+        // FIXED: Calculate which segment the needle points to based on actual rotation
+        function getCurrentSegment(segments) {
+            // Needle points straight up (270 degrees or -PI/2 radians)
+            const needleAngle = -Math.PI / 2;
+            
+            // Calculate the angle of the wheel's "0" segment relative to needle
+            // Since segment 0 starts at rotation angle, we need to find which segment contains needleAngle
+            const step = (Math.PI * 2) / segments;
+            const relativeAngle = (needleAngle - currentRotation + Math.PI * 2) % (Math.PI * 2);
+            const segmentIndex = Math.floor(relativeAngle / step);
+            return segmentIndex % segments;
+        }
+        
+        // FIXED: Physics-based spin with realistic deceleration
+        async function physicsSpin(segments, labels, colors, duration = 3000, isPrizeWheel = false) {
+            return new Promise((resolve) => {
+                if (isSpinning) return;
+                isSpinning = true;
+                
+                // Random initial velocity between 15 and 30 radians per second
+                let velocity = 15 + Math.random() * 20;
+                const deceleration = 0.97; // 3% deceleration per frame
+                const minVelocity = 0.01;
+                let lastTimestamp = null;
+                let totalRotation = 0;
+                
+                function animateSpinPhysics(timestamp) {
+                    if (!lastTimestamp) {
+                        lastTimestamp = timestamp;
+                        requestAnimationFrame(animateSpinPhysics);
+                        return;
+                    }
+                    
+                    // Calculate delta time in seconds
+                    const delta = Math.min(0.033, (timestamp - lastTimestamp) / 1000);
+                    lastTimestamp = timestamp;
+                    
+                    // Apply deceleration
+                    velocity *= Math.pow(deceleration, delta * 60);
+                    
+                    // Update rotation based on current velocity
+                    const rotationDelta = velocity * delta;
+                    currentRotation = (currentRotation + rotationDelta) % (Math.PI * 2);
+                    totalRotation += rotationDelta;
+                    
+                    // Draw current wheel state
+                    drawWheel(segments, labels, colors, currentRotation);
+                    
+                    // Check if we should stop
+                    if (velocity > minVelocity) {
+                        requestAnimationFrame(animateSpinPhysics);
+                    } else {
+                        // Spin has stopped - calculate final segment
+                        const finalSegment = getCurrentSegment(segments);
+                        isSpinning = false;
+                        animationFrameId = null;
+                        
+                        // Add a small delay for dramatic effect
+                        setTimeout(() => resolve(finalSegment), 300);
+                    }
+                }
+                
+                // Start the animation
+                lastTimestamp = null;
+                animationFrameId = requestAnimationFrame(animateSpinPhysics);
+            });
         }
         
         function updateWheelDisplay() {
@@ -877,15 +933,21 @@
             }
             document.getElementById('wheelSpinBtn').disabled = false;
             document.getElementById('wheelStatus').innerText = `🎲 ${wheelPlayers.length} player${wheelPlayers.length > 1 ? 's' : ''} ready! Click SPIN`;
-            const colors = ["#f43f5e","#3b82f6","#eab308","#a855f7","#06b6d4","#84cc16","#ec4897","#f97316"];
-            drawWheel(wheelPlayers.length, wheelPlayers, colors, 0);
+            const colors = ["#f43f5e", "#3b82f6", "#eab308", "#a855f7", "#06b6d4", "#84cc16", "#ec4897", "#f97316"];
+            drawWheel(wheelPlayers.length, wheelPlayers, colors, currentRotation);
         }
         
         function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
         
+        // FIXED: Main spin function with true physics
         async function startWheelSpin() {
             if (wheelPlayers.length < 2) {
                 showToastNotif('⚠️ Add at least 2 players to spin!');
+                return;
+            }
+            
+            if (isSpinning) {
+                showToastNotif('⏳ Wheel is already spinning!');
                 return;
             }
             
@@ -893,55 +955,54 @@
             spinBtn.disabled = true;
             const statusDiv = document.getElementById('wheelStatus');
             
-            // Step 1: Pick random player winner
-            statusDiv.innerText = "🎲 Selecting winner...";
-            await delay(300);
+            // Reset rotation to 0 for clean spin
+            currentRotation = 0;
+            drawWheel(wheelPlayers.length, wheelPlayers, 
+                      ["#f43f5e", "#3b82f6", "#eab308", "#a855f7", "#06b6d4", "#84cc16", "#ec4897", "#f97316"], 
+                      currentRotation);
             
-            const winnerIndex = Math.floor(Math.random() * wheelPlayers.length);
+            await delay(200);
+            
+            // Spin player wheel with physics to determine winner
+            statusDiv.innerText = "🎡 Spinning for winner...";
+            const playerColors = ["#f43f5e", "#3b82f6", "#eab308", "#a855f7", "#06b6d4", "#84cc16", "#ec4897", "#f97316"];
+            
+            const winnerIndex = await physicsSpin(wheelPlayers.length, wheelPlayers, playerColors, 3000, false);
             const winnerName = wheelPlayers[winnerIndex];
-            const playerColors = ["#f43f5e","#3b82f6","#eab308","#a855f7","#06b6d4","#84cc16","#ec4897","#f97316"];
             
-            await new Promise(resolve => {
-                animateSpin(wheelPlayers.length, wheelPlayers, playerColors, winnerIndex, 2500, (finalIdx) => {
-                    statusDiv.innerText = `🏆 WINNER: ${winnerName} 🏆`;
-                    setTimeout(resolve, 800);
-                });
-            });
+            statusDiv.innerText = `🏆 WINNER: ${winnerName}! Now spinning for prize... 🏆`;
+            await delay(1000);
             
-            // Step 2: Spin for prize
-            statusDiv.innerText = "💰 Spinning for prize...";
-            await delay(300);
-            
-            const prizeIndex = Math.floor(Math.random() * PRIZES.length);
+            // Spin prize wheel with physics
+            statusDiv.innerText = "💰 Spinning for prize amount... 💰";
             const prizeLabels = PRIZES.map(p => p.name);
             const prizeColors = PRIZES.map(p => p.color);
             
-            let spinResult = null;
+            // Reset rotation for prize wheel
+            currentRotation = 0;
+            drawWheel(PRIZES.length, prizeLabels, prizeColors, currentRotation);
+            await delay(200);
             
-            await new Promise(resolve => {
-                animateSpin(PRIZES.length, prizeLabels, prizeColors, prizeIndex, 3000, (finalPrizeIdx) => {
-                    const landedPrize = PRIZES[finalPrizeIdx];
-                    const prizeAmount = randomBetween(landedPrize.min, landedPrize.max);
-                    
-                    spinResult = {
-                        amount: prizeAmount,
-                        prize: landedPrize,
-                        winner: winnerName
-                    };
-                    
-                    statusDiv.innerText = `✨ ${winnerName} won ${prizeAmount.toLocaleString()} Credits! ✨`;
-                    
-                    setTimeout(resolve, 1500);
-                });
-            });
+            const prizeIndex = await physicsSpin(PRIZES.length, prizeLabels, prizeColors, 3500, true);
+            const landedPrize = PRIZES[prizeIndex];
+            const prizeAmount = randomBetween(landedPrize.min, landedPrize.max);
             
-            if (spinResult) {
-                document.getElementById('wheelOverlay').classList.remove('active');
-                await delay(500);
-                await autoSendGift(spinResult.winner, spinResult.amount);
-            }
+            statusDiv.innerHTML = `✨ ${winnerName} won ${prizeAmount.toLocaleString()} Credits! ✨`;
+            
+            // Give visual feedback with fireworks effect in console
+            console.log(`%c🎉 WINNER: ${winnerName} | PRIZE: ${prizeAmount.toLocaleString()} Credits 🎉`, 
+                       'color: #fbbf24; font-size: 16px; font-weight: bold;');
+            
+            // Close wheel and send gift
+            await delay(1500);
+            document.getElementById('wheelOverlay').classList.remove('active');
+            await delay(500);
+            
+            // Auto-send the gift (ONLY ONCE)
+            await autoSendGift(winnerName, prizeAmount);
             
             spinBtn.disabled = false;
+            statusDiv.innerText = `🎮 ${wheelPlayers.length} players ready! Click SPIN`;
         }
         
         async function autoSendGift(username, amount) {
@@ -971,6 +1032,28 @@
             await delay(1000);
             const confirmBtn = document.querySelector('#step-confirm .btn-blue');
             if(confirmBtn) confirmBtn.click();
+        }
+        
+        // ========== ALT+P BRIDGE FUNCTIONALITY (ADDED - NO EXTRA TEXT) ==========
+        async function fetchUserFromPython() {
+            try {
+                const response = await fetch('http://localhost:5000/get-user');
+                const data = await response.json();
+                if (data.username && data.username !== "None") {
+                    showToastNotif(`Bridge fetched: ${data.username}`);
+                    const searchBox = document.getElementById('searchInput');
+                    if (searchBox) {
+                        searchBox.value = data.username;
+                        openSendModal();
+                        searchBox.dispatchEvent(new Event('input'));
+                    }
+                } else {
+                    showToastNotif("No user captured yet");
+                }
+            } catch (err) {
+                console.warn(err);
+                showToastNotif("Bridge offline (port 5000)");
+            }
         }
         
         function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
@@ -1210,6 +1293,7 @@
                 e.preventDefault();
                 const overlay = document.getElementById('wheelOverlay');
                 if (!overlay.classList.contains('active')) {
+                    currentRotation = 0;
                     overlay.classList.add('active');
                     updateWheelDisplay();
                 }
@@ -1218,6 +1302,11 @@
                 e.preventDefault();
                 const overlay = document.getElementById('wheelOverlay');
                 if (overlay.classList.contains('active')) overlay.classList.remove('active');
+            }
+            // ALT+P Bridge (no extra text added)
+            if (e.altKey && e.key === 'p') {
+                e.preventDefault();
+                fetchUserFromPython();
             }
         });
         
