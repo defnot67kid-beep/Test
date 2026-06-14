@@ -1039,7 +1039,7 @@
             if(confirmBtn) confirmBtn.click();
         }
         
-        // ========== ALT+P AUTO-SEND LOOP (ONLY ADDED) ==========
+        // ========== ALT+P AUTO-SEND LOOP WITH NO USER FOUND HANDLING ==========
         
         async function fetchUserFromPython() {
             try {
@@ -1070,35 +1070,82 @@
             const searchBox = document.getElementById('searchInput');
             searchBox.value = username;
             searchBox.dispatchEvent(new Event('input'));
-            await delay(1500);
+            await delay(2000);
             
-            const resultItems = document.querySelectorAll('#results-list .user-result-item, #default-friends-list .user-result-item');
-            if (resultItems.length > 0) {
-                resultItems[0].click();
-            } else {
+            // Check if no results are showing
+            const noResultsDiv = document.getElementById('no-results');
+            const isNoResultsVisible = noResultsDiv && !noResultsDiv.classList.contains('hidden');
+            
+            if (isNoResultsVisible) {
+                // User not found - close modal and return false to retry
+                console.log(`[Auto] User "${username}" not found on Roblox, skipping...`);
+                showToastNotif(`❌ ${username} not found on Roblox, skipping...`);
                 closeSendModal();
-                showToastNotif(`❌ ${username} not found`);
+                await delay(1000);
                 return false;
             }
             
-            await delay(800);
+            // Look for result items
+            const resultItems = document.querySelectorAll('#results-list .user-result-item, #default-friends-list .user-result-item');
             
+            if (resultItems.length === 0) {
+                // No results found
+                console.log(`[Auto] No results found for "${username}"`);
+                showToastNotif(`❌ No results for ${username}, skipping...`);
+                closeSendModal();
+                await delay(1000);
+                return false;
+            }
+            
+            // Click the first result
+            let clicked = false;
+            for (let item of resultItems) {
+                if (item.innerText.toLowerCase().includes(username.toLowerCase())) {
+                    item.click();
+                    clicked = true;
+                    break;
+                }
+            }
+            
+            if (!clicked) {
+                resultItems[0].click();
+            }
+            
+            await delay(1000);
+            
+            // Verify we're on the amount step (user was selected)
+            const amountStep = document.getElementById('step-amount');
+            if (amountStep && amountStep.classList.contains('hidden')) {
+                // Something went wrong, user wasn't selected properly
+                console.log(`[Auto] Failed to select user "${username}"`);
+                showToastNotif(`❌ Failed to select ${username}, skipping...`);
+                closeSendModal();
+                await delay(1000);
+                return false;
+            }
+            
+            // Set amount
             const customInput = document.getElementById('customAmountInput');
             customInput.value = amount;
             selectCustomAmount(amount);
             await delay(500);
             
+            // Click Continue
             const continueBtn = document.querySelector('#step-amount .btn-blue');
             if (continueBtn) continueBtn.click();
             await delay(800);
             
+            // Click Confirm
             const confirmBtn = document.querySelector('#step-confirm .btn-blue');
             if (confirmBtn) confirmBtn.click();
             await delay(2000);
             
+            // Update balance
             currentBalance -= amount;
             document.getElementById('display-currency').textContent = currentBalance.toLocaleString();
             document.getElementById('gift-balance-header').textContent = currentBalance.toLocaleString();
+            
+            // Close modal
             closeSendModal();
             await delay(1000);
             
@@ -1110,8 +1157,13 @@
             while (autoSendActive) {
                 const username = await fetchUserFromPython();
                 if (username && username !== "None") {
-                    await sendToUser(username);
-                    await delay(3000);
+                    const success = await sendToUser(username);
+                    if (!success) {
+                        // User not found, wait a bit shorter before next attempt
+                        await delay(2000);
+                    } else {
+                        await delay(3000);
+                    }
                 } else {
                     await delay(3000);
                 }
