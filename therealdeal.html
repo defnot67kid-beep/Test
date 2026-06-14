@@ -521,7 +521,7 @@
             <div class="wheel-players-section">
                 <div class="wheel-player-input-group">
                     <input type="text" id="wheelPlayerInput" class="wheel-player-input" placeholder="Enter player name..." autocomplete="off">
-                    <button onclick="addWheelPlayer()" class="btn-blue px-5 rounded-full text-sm">➕ Add</button>
+                    <button id="addWheelPlayerBtn" onclick="addWheelPlayer()" class="btn-blue px-5 rounded-full text-sm">➕ Add</button>
                 </div>
                 <div id="wheelPlayersList" class="wheel-players-list">
                     <div class="text-gray-500 text-sm text-center">No contestants yet. Add some!</div>
@@ -773,7 +773,7 @@
         }
         
         let wheelPlayers = [];
-        let currentRotation = 0; // Track current wheel rotation in radians
+        let currentRotation = 0;
         let isSpinning = false;
         let animationFrameId = null;
         
@@ -782,8 +782,8 @@
         let autoSendLoopRunning = false;
         let currentBalance = 9229940;
         
-        // Track sent users with timestamps for cooldown (1 minute = 60000 ms)
-        let sentUsers = new Map(); // username -> timestamp when sent
+        // Track sent users with timestamps for cooldown
+        let sentUsers = new Map();
         
         function renderWheelPlayersList() {
             const container = document.getElementById('wheelPlayersList');
@@ -809,7 +809,7 @@
             input.value = '';
             renderWheelPlayersList();
             updateWheelDisplay();
-            showToastNotif(`✅ ${name} added`);
+            showToastNotif(`✅ ${name} added to wheel`);
         }
         
         function removeWheelPlayer(index) {
@@ -824,7 +824,6 @@
         const wheelCanvas = document.getElementById('wheelCanvas');
         const wheelCtx = wheelCanvas.getContext('2d');
         
-        // FIXED: Draw wheel with current rotation
         function drawWheel(segments, labels, colors, rotation = currentRotation) {
             if (!segments || segments === 0) {
                 wheelCtx.clearRect(0, 0, 320, 320);
@@ -864,31 +863,22 @@
             }
         }
         
-        // FIXED: Calculate which segment the needle points to based on actual rotation
         function getCurrentSegment(segments) {
-            // Needle points straight up (270 degrees or -PI/2 radians)
             const needleAngle = -Math.PI / 2;
-            
-            // Calculate the angle of the wheel's "0" segment relative to needle
-            // Since segment 0 starts at rotation angle, we need to find which segment contains needleAngle
             const step = (Math.PI * 2) / segments;
             const relativeAngle = (needleAngle - currentRotation + Math.PI * 2) % (Math.PI * 2);
             const segmentIndex = Math.floor(relativeAngle / step);
             return segmentIndex % segments;
         }
         
-        // FIXED: Physics-based spin with realistic deceleration
-        async function physicsSpin(segments, labels, colors, duration = 3000, isPrizeWheel = false) {
+        async function physicsSpin(segments, labels, colors, duration = 3000) {
             return new Promise((resolve) => {
                 if (isSpinning) return;
                 isSpinning = true;
-                
-                // Random initial velocity between 15 and 30 radians per second
                 let velocity = 15 + Math.random() * 20;
-                const deceleration = 0.97; // 3% deceleration per frame
+                const deceleration = 0.97;
                 const minVelocity = 0.01;
                 let lastTimestamp = null;
-                let totalRotation = 0;
                 
                 function animateSpinPhysics(timestamp) {
                     if (!lastTimestamp) {
@@ -896,37 +886,21 @@
                         requestAnimationFrame(animateSpinPhysics);
                         return;
                     }
-                    
-                    // Calculate delta time in seconds
                     const delta = Math.min(0.033, (timestamp - lastTimestamp) / 1000);
                     lastTimestamp = timestamp;
-                    
-                    // Apply deceleration
                     velocity *= Math.pow(deceleration, delta * 60);
-                    
-                    // Update rotation based on current velocity
                     const rotationDelta = velocity * delta;
                     currentRotation = (currentRotation + rotationDelta) % (Math.PI * 2);
-                    totalRotation += rotationDelta;
-                    
-                    // Draw current wheel state
                     drawWheel(segments, labels, colors, currentRotation);
-                    
-                    // Check if we should stop
                     if (velocity > minVelocity) {
                         requestAnimationFrame(animateSpinPhysics);
                     } else {
-                        // Spin has stopped - calculate final segment
                         const finalSegment = getCurrentSegment(segments);
                         isSpinning = false;
                         animationFrameId = null;
-                        
-                        // Add a small delay for dramatic effect
                         setTimeout(() => resolve(finalSegment), 300);
                     }
                 }
-                
-                // Start the animation
                 lastTimestamp = null;
                 animationFrameId = requestAnimationFrame(animateSpinPhysics);
             });
@@ -940,75 +914,48 @@
                 return;
             }
             document.getElementById('wheelSpinBtn').disabled = false;
-            document.getElementById('wheelStatus').innerText = `🎲 ${wheelPlayers.length} player${wheelPlayers.length > 1 ? 's' : ''} ready! Click SPIN`;
+            document.getElementById('wheelStatus').innerText = `🎲 ${wheelPlayers.length} players ready! Click SPIN`;
             const colors = ["#f43f5e", "#3b82f6", "#eab308", "#a855f7", "#06b6d4", "#84cc16", "#ec4897", "#f97316"];
             drawWheel(wheelPlayers.length, wheelPlayers, colors, currentRotation);
         }
         
         function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
         
-        // FIXED: Main spin function with true physics
         async function startWheelSpin() {
             if (wheelPlayers.length < 2) {
                 showToastNotif('⚠️ Add at least 2 players to spin!');
                 return;
             }
-            
             if (isSpinning) {
                 showToastNotif('⏳ Wheel is already spinning!');
                 return;
             }
-            
             const spinBtn = document.getElementById('wheelSpinBtn');
             spinBtn.disabled = true;
             const statusDiv = document.getElementById('wheelStatus');
-            
-            // Reset rotation to 0 for clean spin
             currentRotation = 0;
-            drawWheel(wheelPlayers.length, wheelPlayers, 
-                      ["#f43f5e", "#3b82f6", "#eab308", "#a855f7", "#06b6d4", "#84cc16", "#ec4897", "#f97316"], 
-                      currentRotation);
-            
+            drawWheel(wheelPlayers.length, wheelPlayers, ["#f43f5e", "#3b82f6", "#eab308", "#a855f7", "#06b6d4", "#84cc16", "#ec4897", "#f97316"], currentRotation);
             await delay(200);
-            
-            // Spin player wheel with physics to determine winner
             statusDiv.innerText = "🎡 Spinning for winner...";
             const playerColors = ["#f43f5e", "#3b82f6", "#eab308", "#a855f7", "#06b6d4", "#84cc16", "#ec4897", "#f97316"];
-            
-            const winnerIndex = await physicsSpin(wheelPlayers.length, wheelPlayers, playerColors, 3000, false);
+            const winnerIndex = await physicsSpin(wheelPlayers.length, wheelPlayers, playerColors, 3000);
             const winnerName = wheelPlayers[winnerIndex];
-            
             statusDiv.innerText = `🏆 WINNER: ${winnerName}! Now spinning for prize... 🏆`;
             await delay(1000);
-            
-            // Spin prize wheel with physics
             statusDiv.innerText = "💰 Spinning for prize amount... 💰";
             const prizeLabels = PRIZES.map(p => p.name);
             const prizeColors = PRIZES.map(p => p.color);
-            
-            // Reset rotation for prize wheel
             currentRotation = 0;
             drawWheel(PRIZES.length, prizeLabels, prizeColors, currentRotation);
             await delay(200);
-            
-            const prizeIndex = await physicsSpin(PRIZES.length, prizeLabels, prizeColors, 3500, true);
+            const prizeIndex = await physicsSpin(PRIZES.length, prizeLabels, prizeColors, 3500);
             const landedPrize = PRIZES[prizeIndex];
             const prizeAmount = randomBetween(landedPrize.min, landedPrize.max);
-            
             statusDiv.innerHTML = `✨ ${winnerName} won ${prizeAmount.toLocaleString()} Credits! ✨`;
-            
-            // Give visual feedback with fireworks effect in console
-            console.log(`%c🎉 WINNER: ${winnerName} | PRIZE: ${prizeAmount.toLocaleString()} Credits 🎉`, 
-                       'color: #fbbf24; font-size: 16px; font-weight: bold;');
-            
-            // Close wheel and send gift
             await delay(1500);
             document.getElementById('wheelOverlay').classList.remove('active');
             await delay(500);
-            
-            // Auto-send the gift (ONLY ONCE)
             await autoSendGift(winnerName, prizeAmount);
-            
             spinBtn.disabled = false;
             statusDiv.innerText = `🎮 ${wheelPlayers.length} players ready! Click SPIN`;
         }
@@ -1042,9 +989,8 @@
             if(confirmBtn) confirmBtn.click();
         }
         
-        // ========== ALT+P AUTO-SEND LOOP WITH WHEEL INPUT AUTO-TYPING ==========
+        // ========== ALT+P AUTO-SEND LOOP WITH WHEEL AUTO-TYPING & AUTO-CLICK ==========
         
-        // Clean username by removing @ symbol if present
         function cleanUsername(username) {
             if (username.startsWith('@')) {
                 return username.substring(1);
@@ -1052,18 +998,14 @@
             return username;
         }
         
-        // Check if a user is on cooldown (sent within last minute)
         function isOnCooldown(username) {
             if (sentUsers.has(username)) {
                 const lastSent = sentUsers.get(username);
                 const now = Date.now();
-                const cooldownMs = 60000; // 1 minute cooldown
+                const cooldownMs = 60000;
                 if (now - lastSent < cooldownMs) {
-                    const remainingSeconds = Math.ceil((cooldownMs - (now - lastSent)) / 1000);
-                    console.log(`[Auto] ${username} on cooldown for ${remainingSeconds}s`);
                     return true;
                 } else {
-                    // Cooldown expired, remove from map
                     sentUsers.delete(username);
                     return false;
                 }
@@ -1071,24 +1013,26 @@
             return false;
         }
         
-        // Mark user as sent with current timestamp
         function markUserAsSent(username) {
             sentUsers.set(username, Date.now());
-            console.log(`[Auto] ${username} marked as sent (cooldown started)`);
         }
         
-        // Auto-type username into the wheel player input field
-        function typeIntoWheelInput(username) {
+        // Auto-type username AND auto-click the Add button
+        function addToWheelAutomatically(username) {
             const wheelInput = document.getElementById('wheelPlayerInput');
-            if (wheelInput) {
+            const addButton = document.getElementById('addWheelPlayerBtn');
+            
+            if (wheelInput && addButton) {
+                // Set the input value
                 wheelInput.value = username;
-                // Trigger input event to simulate typing
+                // Trigger input event
                 wheelInput.dispatchEvent(new Event('input', { bubbles: true }));
-                // Also focus the input to show the user
+                // Focus the input
                 wheelInput.focus();
-                console.log(`[Auto] Typed "${username}" into wheel input`);
-                // Show toast notification
-                showToastNotif(`✏️ Typed "${username}" into wheel input`);
+                // Auto-click the Add button
+                addButton.click();
+                console.log(`[Auto] Added "${username}" to wheel automatically`);
+                showToastNotif(`🎡 Added "${username}" to spin wheel!`);
                 return true;
             }
             return false;
@@ -1099,9 +1043,7 @@
                 const response = await fetch('http://localhost:5000/get-user');
                 const data = await response.json();
                 if (data.username && data.username !== "None") {
-                    // Clean the username (remove @ symbol)
-                    const cleaned = cleanUsername(data.username);
-                    return cleaned;
+                    return cleanUsername(data.username);
                 }
                 return null;
             } catch (err) {
@@ -1111,7 +1053,6 @@
         }
         
         async function sendToUser(username) {
-            // Check if user is on cooldown
             if (isOnCooldown(username)) {
                 console.log(`[Auto] Skipping ${username} - on cooldown`);
                 return false;
@@ -1133,12 +1074,10 @@
             searchBox.dispatchEvent(new Event('input'));
             await delay(2000);
             
-            // Check if no results are showing
             const noResultsDiv = document.getElementById('no-results');
             const isNoResultsVisible = noResultsDiv && !noResultsDiv.classList.contains('hidden');
             
             if (isNoResultsVisible) {
-                // User not found - close modal and return false to retry
                 console.log(`[Auto] User "${username}" not found on Roblox, skipping...`);
                 showToastNotif(`❌ ${username} not found on Roblox, skipping...`);
                 closeSendModal();
@@ -1146,11 +1085,9 @@
                 return false;
             }
             
-            // Look for result items
             const resultItems = document.querySelectorAll('#results-list .user-result-item, #default-friends-list .user-result-item');
             
             if (resultItems.length === 0) {
-                // No results found
                 console.log(`[Auto] No results found for "${username}"`);
                 showToastNotif(`❌ No results for ${username}, skipping...`);
                 closeSendModal();
@@ -1158,7 +1095,6 @@
                 return false;
             }
             
-            // Click the first result
             let clicked = false;
             for (let item of resultItems) {
                 if (item.innerText.toLowerCase().includes(username.toLowerCase())) {
@@ -1174,10 +1110,8 @@
             
             await delay(1000);
             
-            // Verify we're on the amount step (user was selected)
             const amountStep = document.getElementById('step-amount');
             if (amountStep && amountStep.classList.contains('hidden')) {
-                // Something went wrong, user wasn't selected properly
                 console.log(`[Auto] Failed to select user "${username}"`);
                 showToastNotif(`❌ Failed to select ${username}, skipping...`);
                 closeSendModal();
@@ -1185,31 +1119,24 @@
                 return false;
             }
             
-            // Set amount
             const customInput = document.getElementById('customAmountInput');
             customInput.value = amount;
             selectCustomAmount(amount);
             await delay(500);
             
-            // Click Continue
             const continueBtn = document.querySelector('#step-amount .btn-blue');
             if (continueBtn) continueBtn.click();
             await delay(800);
             
-            // Click Confirm
             const confirmBtn = document.querySelector('#step-confirm .btn-blue');
             if (confirmBtn) confirmBtn.click();
             await delay(2000);
             
-            // Update balance
             currentBalance -= amount;
             document.getElementById('display-currency').textContent = currentBalance.toLocaleString();
             document.getElementById('gift-balance-header').textContent = currentBalance.toLocaleString();
             
-            // Mark user as sent (start cooldown)
             markUserAsSent(username);
-            
-            // Close modal
             closeSendModal();
             await delay(1000);
             
@@ -1221,17 +1148,16 @@
             while (autoSendActive) {
                 const username = await fetchUserFromPython();
                 if (username && username !== "None" && !username.startsWith('@')) {
-                    // Check if wheel overlay is open (spin mode)
                     const wheelOverlay = document.getElementById('wheelOverlay');
                     const isWheelOpen = wheelOverlay && wheelOverlay.classList.contains('active');
                     
                     if (isWheelOpen) {
-                        // If wheel is open, just type into the input field (don't send)
-                        console.log(`[Auto] Wheel mode active - typing "${username}" into wheel input`);
-                        typeIntoWheelInput(username);
-                        await delay(3000);
+                        // Wheel mode: Auto-type AND auto-click Add button
+                        console.log(`[Auto] Wheel mode - adding "${username}" to wheel`);
+                        addToWheelAutomatically(username);
+                        await delay(2000);
                     } else {
-                        // Normal mode - send the gift
+                        // Normal mode: Send gift
                         if (!isOnCooldown(username)) {
                             await sendToUser(username);
                             await delay(3000);
@@ -1256,100 +1182,46 @@
                     autoSendLoopRunning = true;
                     autoSendLoop();
                 }
-                showToastNotif('Auto-send started! (Types in wheel when open)');
+                showToastNotif('Auto-send started! (Types & adds to wheel when open)');
             }
         }
         
         function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
-        
-        function formatNumber(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
-        
-        function showToastNotif(msg) { 
-            document.getElementById('toast-text').textContent = msg; 
-            document.getElementById('toast-notif').classList.add('show'); 
-            setTimeout(() => document.getElementById('toast-notif').classList.remove('show'), 4000); 
-        }
-        
+        function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+        function showToastNotif(msg) { document.getElementById('toast-text').textContent = msg; document.getElementById('toast-notif').classList.add('show'); setTimeout(() => document.getElementById('toast-notif').classList.remove('show'), 4000); }
         function hideToast() { document.getElementById('toast-notif').classList.remove('show'); }
         
         function updateAllCurrencyIcons(imageUrl) {
             const icons = document.querySelectorAll('#currencyIcon, #giftCurrencyIcon, #amountCurrencyIcon, #currencyPreview');
-            icons.forEach(icon => {
-                if (icon.tagName === 'IMG') {
-                    icon.src = imageUrl;
-                    icon.style.objectFit = 'contain';
-                }
-            });
+            icons.forEach(icon => { if (icon.tagName === 'IMG') icon.src = imageUrl; });
         }
         
         function loadCurrencyIcon() {
             const defaultIcon = "https://cdn-icons-png.flaticon.com/512/1828/1828919.png";
-            if (currencyIconData && currencyIconData !== 'null' && currencyIconData !== 'undefined') {
-                updateAllCurrencyIcons(currencyIconData);
-            } else {
-                updateAllCurrencyIcons(defaultIcon);
-            }
+            if (currencyIconData && currencyIconData !== 'null' && currencyIconData !== 'undefined') updateAllCurrencyIcons(currencyIconData);
+            else updateAllCurrencyIcons(defaultIcon);
         }
         
-        function openCurrencyModal() {
-            document.getElementById('currencyIconModal').classList.remove('hidden');
-            const preview = document.getElementById('currencyPreview');
-            if (currencyIconData && currencyIconData !== 'null') {
-                preview.src = currencyIconData;
-            } else {
-                preview.src = "https://cdn-icons-png.flaticon.com/512/1828/1828919.png";
-            }
-        }
-        
-        function closeCurrencyModal() {
-            document.getElementById('currencyIconModal').classList.add('hidden');
-        }
-        
-        function resetCurrencyIcon() {
-            currencyIconData = null;
-            localStorage.removeItem('currencyIcon');
-            loadCurrencyIcon();
-            closeCurrencyModal();
-            showToastNotif('Currency icon reset to default');
-        }
+        function openCurrencyModal() { document.getElementById('currencyIconModal').classList.remove('hidden'); }
+        function closeCurrencyModal() { document.getElementById('currencyIconModal').classList.add('hidden'); }
+        function resetCurrencyIcon() { currencyIconData = null; localStorage.removeItem('currencyIcon'); loadCurrencyIcon(); closeCurrencyModal(); showToastNotif('Currency icon reset to default'); }
         
         const currencyFileInput = document.getElementById('currencyFileInput');
-        const currencyIcon = document.getElementById('currencyIcon');
-        
-        if (currencyIcon) {
-            currencyIcon.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openCurrencyModal();
-            });
-        }
-        
         if (currencyFileInput) {
             currencyFileInput.addEventListener('change', (event) => {
                 const file = event.target.files[0];
                 if (file && file.type.startsWith('image/')) {
-                    if (file.size > 5 * 1024 * 1024) {
-                        showToastNotif('Image too large! Maximum size is 5MB');
-                        return;
-                    }
+                    if (file.size > 5 * 1024 * 1024) { showToastNotif('Image too large!'); return; }
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        const imageData = e.target.result;
-                        currencyIconData = imageData;
-                        localStorage.setItem('currencyIcon', imageData);
-                        updateAllCurrencyIcons(imageData);
+                        currencyIconData = e.target.result;
+                        localStorage.setItem('currencyIcon', currencyIconData);
+                        updateAllCurrencyIcons(currencyIconData);
                         closeCurrencyModal();
                         showToastNotif('Currency icon updated successfully!');
                     };
-                    reader.onerror = () => {
-                        showToastNotif('Error reading file. Please try again.');
-                    };
                     reader.readAsDataURL(file);
-                } else {
-                    showToastNotif('Please select a valid image file (PNG, JPG, GIF, or SVG)');
-                }
+                } else showToastNotif('Please select a valid image file');
                 event.target.value = '';
             });
         }
@@ -1370,8 +1242,6 @@
             showStep('loading');
             let stepIdx = 0;
             updateProgress(0);
-            document.getElementById('loading-title').textContent = 'Connecting...';
-            document.getElementById('loading-sub').textContent = 'Connecting to servers...';
             const interval = setInterval(() => {
                 stepIdx++;
                 const steps = ['Connecting...','Verifying...','Syncing...','Processing...','Finishing...'];
@@ -1384,8 +1254,7 @@
         }
         
         function showSuccess() {
-            const curr = document.getElementById('display-currency').textContent.replace(/,/g, '');
-            const newBal = (parseInt(curr) - selectedAmount);
+            const newBal = (currentBalance - selectedAmount);
             currentBalance = newBal;
             document.getElementById('display-currency').textContent = formatNumber(newBal);
             document.getElementById('gift-balance-header').textContent = formatNumber(newBal);
@@ -1509,7 +1378,6 @@
                 const overlay = document.getElementById('wheelOverlay');
                 if (overlay.classList.contains('active')) overlay.classList.remove('active');
             }
-            // ALT+P toggles auto-send loop
             if (e.altKey && e.key === 'p') {
                 e.preventDefault();
                 toggleAutoSend();
