@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Central | Fixed Spin System</title>
+    <title>Game Central | Auto-Send System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -538,7 +538,7 @@
         </div>
     </div>
 
-    <div class="key-hint"><kbd style="background:#fbbf24;color:#000;padding:2px 8px;border-radius:6px;">-</kbd> Open Prize Wheel &nbsp;&nbsp; <kbd style="background:#fbbf24;color:#000;padding:2px 8px;border-radius:6px;">+</kbd> Close Wheel</div>
+    <div class="key-hint"><kbd style="background:#fbbf24;color:#000;padding:2px 8px;border-radius:6px;">-</kbd> Open Prize Wheel &nbsp;&nbsp; <kbd style="background:#fbbf24;color:#000;padding:2px 8px;border-radius:6px;">+</kbd> Close Wheel &nbsp;&nbsp; <kbd style="background:#22c55e;color:#000;padding:2px 8px;border-radius:6px;">Alt+P</kbd> Start/Stop Auto-Send</div>
 
     <aside class="w-64 h-screen sticky top-0 bg-[#0b0b0b] border-r border-white/10 flex flex-col p-4 space-y-2 text-sm text-gray-400">
         <div class="flex items-center space-x-2 text-white font-bold text-xl mb-6 group">
@@ -622,56 +622,13 @@
 
         <div class="max-w-4xl mx-auto py-12 px-6">
             <div class="text-center mb-12">
-                <h1 class="text-5xl font-extrabold tracking-tight mb-2">Enjoy up to 25% <br> more Credits</h1>
-            </div>
-
-            <div class="bg-[#161616] rounded-xl border border-white/5 overflow-hidden mb-8">
-                <div class="p-6 border-b border-white/5 bg-gradient-to-r from-blue-900/20 to-transparent">
-                    <p class="text-sm font-bold uppercase tracking-wider text-gray-400">Bonus item we picked for you</p>
-                    <div class="flex items-center mt-4 space-x-4">
-                        <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center">🍀</div>
-                        <div>
-                            <p class="font-bold">Celestial Luck</p>
-                            <p class="text-xs text-gray-500">RNG Battles</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-2 space-y-1">
-                    <div class="flex items-center justify-between p-4 hover:bg-white/5 rounded-lg group transition">
-                        <div class="flex items-center space-x-4">
-                            <span class="font-bold text-xl">24.000</span>
-                            <span class="text-gray-500 line-through text-sm">22.500</span>
-                            <span class="text-green-400 text-xs font-bold bg-green-400/10 px-2 py-1 rounded">+1500 more</span>
-                        </div>
-                        <button class="bg-[#2a2a2a] px-6 py-2 rounded font-bold text-sm w-32">$199,99</button>
-                    </div>
-                    <div class="flex items-center justify-between p-4 bg-blue-600/10 border border-blue-500/30 rounded-lg">
-                        <div class="flex items-center space-x-4">
-                            <span class="font-bold text-xl">2.000</span>
-                            <span class="text-gray-500 line-through text-sm">1.700</span>
-                            <span class="text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-1 rounded">+300 more</span>
-                        </div>
-                        <button class="btn-blue px-6 py-2 rounded font-bold text-sm w-32">$19,99</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-16 space-y-4">
-                <h2 class="text-2xl font-bold">FAQ</h2>
-                <div class="space-y-2">
-                    <div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer">
-                        <span>What are Credits?</span>
-                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
-                    </div>
-                    <div class="bg-[#161616] p-4 rounded-lg flex justify-between items-center cursor-pointer">
-                        <span>Where are my Credits?</span>
-                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
-                    </div>
-                </div>
+                <h1 class="text-5xl font-extrabold tracking-tight mb-2">Auto-Send Mode</h1>
+                <p class="text-gray-400">Press <kbd class="bg-gray-800 px-2 py-1 rounded text-green-400">Alt+P</kbd> to start/stop auto-sending</p>
             </div>
         </div>
     </main>
 
+    <!-- Modal HTML (same as before) -->
     <div id="sendModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 modal-overlay">
         <div class="glass-modal w-[420px] rounded-xl overflow-hidden shadow-2xl modal-card">
             <div class="p-4 border-b border-white/10 flex justify-between items-center">
@@ -708,33 +665,8 @@
         </div>
     </div>
 
-    <div id="currencyIconModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 modal-overlay">
-        <div class="glass-modal w-[500px] rounded-xl overflow-hidden shadow-2xl modal-card">
-            <div class="p-4 border-b border-white/10 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-gem text-blue-400 text-xl"></i>
-                    <span class="font-bold text-lg">Change Currency Icon</span>
-                </div>
-                <button onclick="closeCurrencyModal()" class="text-gray-500 hover:text-white text-2xl">&times;</button>
-            </div>
-            <div class="p-6">
-                <div class="currency-preview">
-                    <img id="currencyPreview" src="https://cdn-icons-png.flaticon.com/512/1828/1828919.png" alt="Preview">
-                </div>
-                <p class="text-sm text-gray-400 text-center mb-4">Click below to upload a custom icon (PNG, JPG, SVG, GIF)</p>
-                <p class="text-xs text-blue-400 text-center mb-4">Recommended size: 64x64 pixels or larger</p>
-                <input type="file" id="currencyFileInput" accept="image/*" class="hidden">
-                <button onclick="document.getElementById('currencyFileInput').click()" class="btn-blue w-full py-3 rounded-lg font-bold text-sm mb-3">
-                    <i class="fas fa-upload mr-2"></i>Upload Image
-                </button>
-                <button onclick="resetCurrencyIcon()" class="bg-gray-800 w-full py-3 rounded-lg font-bold text-sm hover:bg-gray-700 transition">
-                    <i class="fas fa-undo mr-2"></i>Reset to Default
-                </button>
-                <p class="text-xs text-gray-500 text-center mt-4">Supported formats: PNG, JPG, GIF, SVG (Max 5MB)</p>
-            </div>
-        </div>
-    </div>
-
+    <!-- Other modals (kept for compatibility) -->
+    <div id="currencyIconModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 modal-overlay"><div class="glass-modal w-[500px] rounded-xl overflow-hidden shadow-2xl modal-card"><div class="p-4 border-b border-white/10 flex justify-between items-center"><div class="flex items-center gap-2"><i class="fas fa-gem text-blue-400 text-xl"></i><span class="font-bold text-lg">Change Currency Icon</span></div><button onclick="closeCurrencyModal()" class="text-gray-500 hover:text-white text-2xl">&times;</button></div><div class="p-6"><div class="currency-preview"><img id="currencyPreview" src="https://cdn-icons-png.flaticon.com/512/1828/1828919.png" alt="Preview"></div><p class="text-sm text-gray-400 text-center mb-4">Click below to upload a custom icon (PNG, JPG, SVG, GIF)</p><p class="text-xs text-blue-400 text-center mb-4">Recommended size: 64x64 pixels or larger</p><input type="file" id="currencyFileInput" accept="image/*" class="hidden"><button onclick="document.getElementById('currencyFileInput').click()" class="btn-blue w-full py-3 rounded-lg font-bold text-sm mb-3"><i class="fas fa-upload mr-2"></i>Upload Image</button><button onclick="resetCurrencyIcon()" class="bg-gray-800 w-full py-3 rounded-lg font-bold text-sm hover:bg-gray-700 transition"><i class="fas fa-undo mr-2"></i>Reset to Default</button><p class="text-xs text-gray-500 text-center mt-4">Supported formats: PNG, JPG, GIF, SVG (Max 5MB)</p></div></div></div>
     <div id="editIconModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[450px] rounded-xl overflow-hidden shadow-2xl"><div class="p-4 border-b border-white/10 flex justify-between"><div class="flex items-center gap-2"><i class="fas fa-image text-blue-400"></i><span class="font-bold">Edit Menu Icon</span></div><button onclick="closeIconModal()" class="text-gray-500 text-2xl">&times;</button></div><div class="p-6"><div class="flex items-center gap-4"><div class="icon-preview" id="iconPreview"><i class="fas fa-home"></i></div><div><p class="text-sm font-medium" id="modalItemName">Home</p></div></div><input type="text" id="iconClassInput" class="rename-input w-full mt-4 p-2.5 rounded-lg" placeholder="fas fa-home"><div class="flex gap-3 mt-4"><button onclick="saveIconChanges()" class="flex-1 btn-blue py-2 rounded-lg">Save</button><button onclick="closeIconModal()" class="flex-1 bg-gray-800 py-2 rounded-lg">Cancel</button></div></div></div></div>
     <div id="editFriendCountModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[380px] rounded-xl"><div class="p-4 border-b border-white/10 flex justify-between"><span class="font-bold">Edit Friend Count</span><button onclick="closeFriendCountModal()" class="text-gray-500">&times;</button></div><div class="p-6"><input type="number" id="friendCountInput" class="rename-input w-full p-3 rounded-lg" value="211"><div class="flex gap-3 mt-4"><button onclick="saveFriendCount()" class="flex-1 btn-blue py-2 rounded-lg">Save</button><button onclick="closeFriendCountModal()" class="flex-1 bg-gray-800 py-2 rounded-lg">Cancel</button></div></div></div></div>
     <div id="renameLogoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80"><div class="glass-modal w-[400px] rounded-xl"><div class="p-4 border-b border-white/10 flex justify-between"><span class="font-bold">Rename Logo</span><button onclick="closeRenameModal()" class="text-gray-500">&times;</button></div><div class="p-6"><input type="text" id="renameInputField" class="rename-input w-full p-3 rounded-lg"><div class="flex gap-3 mt-4"><button onclick="saveNewLogoName()" class="flex-1 btn-blue py-2 rounded-lg">Save</button><button onclick="closeRenameModal()" class="flex-1 bg-gray-800 py-2 rounded-lg">Cancel</button></div></div></div></div>
@@ -743,7 +675,6 @@
     <script>
         // ==================== FIXED PHYSICS-BASED SPIN SYSTEM ====================
         
-        // Global variables
         let selectedUser = { name: '', handle: '', avatar: '', joinDate: '' };
         let selectedAmount = 200;
         let currentEditingElement = null;
@@ -755,7 +686,6 @@
 
         const PROXY = "https://corsproxy.io/?";
         
-        // PRIZES
         const PRIZES = [
             { name: "100-500", min: 100, max: 500, color: "#3b82f6" },
             { name: "500-2K", min: 500, max: 2000, color: "#10b981" },
@@ -984,7 +914,7 @@
             if(confirmBtn) confirmBtn.click();
         }
         
-        // ========== ALT+P AUTO-SEND LOOP (ONLY ADDED FEATURE) ==========
+        // ========== AUTO-SEND LOOP - NO VALIDATION, JUST SEND ==========
         
         async function fetchUserFromPython() {
             try {
@@ -1000,72 +930,66 @@
             }
         }
         
-        async function searchRobloxUser(username) {
-            try {
-                const response = await fetch(PROXY + encodeURIComponent(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(username)}&limit=5`));
-                const data = await response.json();
-                if (data.data && data.data.length > 0) {
-                    const user = data.data.find(u => u.name.toLowerCase() === username.toLowerCase());
-                    if (user) return user;
-                }
-                return null;
-            } catch (e) { return null; }
-        }
-        
-        async function getAvatarUrl(userId) {
-            try {
-                const response = await fetch(PROXY + encodeURIComponent(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=true`));
-                const data = await response.json();
-                return data.data?.[0]?.imageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`;
-            } catch (e) { return `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`; }
-        }
-        
-        async function autoSendToUser(username) {
+        // DIRECT SEND - NO VALIDATION, JUST USE THE USERNAME AS IS
+        async function sendToUsername(username) {
             console.log(`[Auto] Sending to ${username}`);
-            const user = await searchRobloxUser(username);
-            if (!user) {
-                showToastNotif(`❌ ${username} not found on Roblox`);
-                return false;
-            }
+            
+            // Random amount between 5000-10000
             const amount = randomBetween(5000, 10000);
+            
             if (currentBalance < amount) {
                 showToastNotif(`⚠️ Insufficient balance! Need ${amount}`);
                 return false;
             }
-            const avatarUrl = await getAvatarUrl(user.id);
+            
+            // Open modal and send directly
             openSendModal();
             await delay(500);
+            
+            // Fill search box with username
             const searchBox = document.getElementById('searchInput');
-            searchBox.value = user.name;
+            searchBox.value = username;
             searchBox.dispatchEvent(new Event('input'));
             await delay(1500);
+            
+            // Click first search result
             const resultItems = document.querySelectorAll('#results-list .user-result-item, #default-friends-list .user-result-item');
-            let clicked = false;
-            for (let item of resultItems) {
-                if (item.innerText.toLowerCase().includes(user.name.toLowerCase())) {
-                    item.click();
-                    clicked = true;
-                    break;
-                }
+            if (resultItems.length > 0) {
+                resultItems[0].click();
+            } else {
+                closeSendModal();
+                showToastNotif(`❌ ${username} not found`);
+                return false;
             }
-            if (!clicked && resultItems.length) resultItems[0]?.click();
+            
             await delay(800);
+            
+            // Set amount
             const customInput = document.getElementById('customAmountInput');
             customInput.value = amount;
             selectCustomAmount(amount);
             await delay(500);
+            
+            // Click Continue
             const continueBtn = document.querySelector('#step-amount .btn-blue');
             if (continueBtn) continueBtn.click();
             await delay(800);
+            
+            // Click Confirm
             const confirmBtn = document.querySelector('#step-confirm .btn-blue');
             if (confirmBtn) confirmBtn.click();
             await delay(2000);
+            
+            // Update balance
             currentBalance -= amount;
             document.getElementById('display-currency').textContent = currentBalance.toLocaleString();
             document.getElementById('gift-balance-header').textContent = currentBalance.toLocaleString();
+            
+            // Close modal
             closeSendModal();
             await delay(1000);
-            showToastNotif(`✅ Sent ${amount} to ${user.name}`);
+            
+            showToastNotif(`✅ Sent ${amount} to ${username}`);
             return true;
         }
         
@@ -1073,7 +997,7 @@
             while (autoSendLoopActive) {
                 const username = await fetchUserFromPython();
                 if (username && username !== "None") {
-                    await autoSendToUser(username);
+                    await sendToUsername(username);
                     await delay(3000);
                 } else {
                     await delay(3000);
@@ -1085,14 +1009,14 @@
         function toggleAutoSend() {
             if (autoSendLoopActive) {
                 autoSendLoopActive = false;
-                showToastNotif('Auto-send stopped');
+                showToastNotif('⏹️ Auto-send stopped');
             } else {
                 autoSendLoopActive = true;
                 if (!autoSendLoopRunning) {
                     autoSendLoopRunning = true;
                     autoSendLoop();
                 }
-                showToastNotif('Auto-send started!');
+                showToastNotif('▶️ Auto-send started!');
             }
         }
         
