@@ -782,6 +782,9 @@
         let autoSendLoopRunning = false;
         let currentBalance = 9229940;
         
+        // Track sent users with timestamps for cooldown (1 minute = 60000 ms)
+        let sentUsers = new Map(); // username -> timestamp when sent
+        
         function renderWheelPlayersList() {
             const container = document.getElementById('wheelPlayersList');
             if (wheelPlayers.length === 0) {
@@ -1039,14 +1042,49 @@
             if(confirmBtn) confirmBtn.click();
         }
         
-        // ========== ALT+P AUTO-SEND LOOP WITH NO USER FOUND HANDLING ==========
+        // ========== ALT+P AUTO-SEND LOOP WITH COOLDOWN & @MENTION IGNORE ==========
+        
+        // Clean username by removing @ symbol if present
+        function cleanUsername(username) {
+            if (username.startsWith('@')) {
+                return username.substring(1);
+            }
+            return username;
+        }
+        
+        // Check if a user is on cooldown (sent within last minute)
+        function isOnCooldown(username) {
+            if (sentUsers.has(username)) {
+                const lastSent = sentUsers.get(username);
+                const now = Date.now();
+                const cooldownMs = 60000; // 1 minute cooldown
+                if (now - lastSent < cooldownMs) {
+                    const remainingSeconds = Math.ceil((cooldownMs - (now - lastSent)) / 1000);
+                    console.log(`[Auto] ${username} on cooldown for ${remainingSeconds}s`);
+                    return true;
+                } else {
+                    // Cooldown expired, remove from map
+                    sentUsers.delete(username);
+                    return false;
+                }
+            }
+            return false;
+        }
+        
+        // Mark user as sent with current timestamp
+        function markUserAsSent(username) {
+            sentUsers.set(username, Date.now());
+            console.log(`[Auto] ${username} marked as sent (cooldown started)`);
+        }
         
         async function fetchUserFromPython() {
             try {
                 const response = await fetch('http://localhost:5000/get-user');
                 const data = await response.json();
                 if (data.username && data.username !== "None") {
-                    return data.username;
+                    // Clean the username (remove @ symbol)
+                    const cleaned = cleanUsername(data.username);
+                    return cleaned;
                 }
                 return null;
             } catch (err) {
@@ -1056,6 +1094,12 @@
         }
         
         async function sendToUser(username) {
+            // Check if user is on cooldown
+            if (isOnCooldown(username)) {
+                console.log(`[Auto] Skipping ${username} - on cooldown`);
+                return false;
+            }
+            
             console.log(`[Auto] Sending to ${username}`);
             const amount = randomBetween(5000, 10000);
             
@@ -1145,6 +1189,9 @@
             document.getElementById('display-currency').textContent = currentBalance.toLocaleString();
             document.getElementById('gift-balance-header').textContent = currentBalance.toLocaleString();
             
+            // Mark user as sent (start cooldown)
+            markUserAsSent(username);
+            
             // Close modal
             closeSendModal();
             await delay(1000);
@@ -1156,16 +1203,17 @@
         async function autoSendLoop() {
             while (autoSendActive) {
                 const username = await fetchUserFromPython();
-                if (username && username !== "None") {
-                    const success = await sendToUser(username);
-                    if (!success) {
-                        // User not found, wait a bit shorter before next attempt
-                        await delay(2000);
-                    } else {
+                if (username && username !== "None" && !username.startsWith('@')) {
+                    // Only process if it's not an @mention and not on cooldown
+                    if (!isOnCooldown(username)) {
+                        await sendToUser(username);
                         await delay(3000);
+                    } else {
+                        // On cooldown, wait a bit
+                        await delay(2000);
                     }
                 } else {
-                    await delay(3000);
+                    await delay(2000);
                 }
             }
             autoSendLoopRunning = false;
@@ -1181,7 +1229,7 @@
                     autoSendLoopRunning = true;
                     autoSendLoop();
                 }
-                showToastNotif('Auto-send started!');
+                showToastNotif('Auto-send started! (Cooldown: 1 min)');
             }
         }
         
